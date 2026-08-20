@@ -34,6 +34,8 @@
     "readme:stats": "node scripts/sync-readme-stats.mjs",
     "typecheck": "tsc -p tsconfig.client.json --noEmit",
     "check": "npm run typecheck && npm run build",
+    "verify:release": "node scripts/verify-release.mjs",
+    "prepublishOnly": "npm run verify:release",
     "prepack": "npm run build"
   },
   "dependencies": {},
