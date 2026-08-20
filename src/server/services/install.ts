@@ -12,6 +12,7 @@
  */
 import { spawn } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
+import { cleanLine, estimateProgress } from './progress.ts'
 
 /** Grammar of an accepted `github:<owner>/<repo>` install target. */
 const REPO_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/
@@ -33,7 +34,11 @@ export interface InstallResult {
 
 export interface InstallTask {
   id: number
-  status: 'running' | 'done' | 'failed'
+  /** 操作目标：`github:<owner>/<repo>`（安装）或 npm 包名（卸载），冲突/恢复时需要展示给用户 */
+  target: string
+  action: 'add' | 'remove'
+  /** 队列语义：pending 排队中 / running 执行中 / done / failed / cancelled（用户取消） */
+  status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'
   timedOut: boolean
   exitCode: number | null
   /** 0-100 估算进度：解析 pnpm 的 `Progress: resolved…` 输出，阶段行兜底 */
@@ -52,6 +57,10 @@ interface Invocation {
 /** In-memory task registry, keyed by task id. */
 const tasks = new Map<number, InstallTask>()
 let nextTaskId = 1
+/** Pending tasks awaiting their turn (FIFO). The queue worker runs at most one mutation at a time. */
+const queue: QueueItem[] = []
+/** Child processes of currently running tasks (for cancel). */
+const runningChildren = new Map<number, ReturnType<typeof spawn>>()
 
 /** Snapshot of a task (keeps the live object untouched by consumers). */
 export function getTask(id: number): InstallTask | undefined {
@@ -60,7 +69,33 @@ export function getTask(id: number): InstallTask | undefined {
   return { ...task, lines: task.lines.slice(0, MAX_TASK_LINES) }
 }
 
-/** True while any mutation is still running (mutex for the install routes). */
+export interface ActiveTaskInfo {
+  id: number
+  target: string
+  action: 'add' | 'remove'
+  status: 'pending' | 'running'
+  progress: number
+  lines: string[]
+}
+
+/** All non-terminal tasks in queue order (running first, then pending). Lets the client resume a queue after a page reload. */
+export function activeTask(): ActiveTaskInfo[] {
+  const found: ActiveTaskInfo[] = []
+  for (const item of queue) {
+    const task = item.task
+    if (task.status === 'pending') {
+      found.push({ id: task.id, target: task.target, action: task.action, status: 'pending', progress: task.progress, lines: task.lines.slice(0, MAX_TASK_LINES) })
+    }
+  }
+  tasks.forEach((task) => {
+    if (task.status === 'running') {
+      found.unshift({ id: task.id, target: task.target, action: task.action, status: 'running', progress: task.progress, lines: task.lines.slice(0, MAX_TASK_LINES) })
+    }
+  })
+  return found
+}
+
+/** True while any mutation is still running (the queue worker holds the single concurrent slot). */
 export function hasRunningTask(): boolean {
   let running = false
   tasks.forEach((task) => {
@@ -69,35 +104,43 @@ export function hasRunningTask(): boolean {
   return running
 }
 
-function pushLine(task: InstallTask, line: string): void {
-  task.lines.unshift(line)
-  if (task.lines.length > MAX_TASK_LINES) task.lines.length = MAX_TASK_LINES
-  task.progress = Math.max(task.progress, estimateProgress(line))
+/**
+ * Cancel a queued or running task.
+ * - pending: removed from the queue immediately (never spawned).
+ * - running: kills the child process; the queue worker then picks the next one.
+ * Returns false when the task is unknown or already finished.
+ */
+export function cancelTask(id: number): boolean {
+  const task = tasks.get(id)
+  if (!task) return false
+  if (task.status === 'pending') {
+    const index = queue.findIndex((it) => it.task === task)
+    if (index >= 0) queue.splice(index, 1)
+    task.status = 'cancelled'
+    pushLine(task, '[cancelled]')
+    return true
+  }
+  if (task.status === 'running') {
+    task.status = 'cancelled'
+    pushLine(task, '[cancelled]')
+    const child = runningChildren.get(id)
+    if (child) stopChild(child)
+    return true
+  }
+  return false
 }
 
-/**
- * Estimate 0-100 progress from one CLI output line. pnpm emits
- * `Progress: resolved N, reused X, downloaded Y, added Z` during the fetch
- * phase; resolution/install phase lines bump the estimate towards done.
- */
-function estimateProgress(line: string): number {
-  const progress = line.match(/Progress:\s*(.+)/)
-  if (progress) {
-    let total = 0
-    let done = 0
-    for (const part of progress[1].split(',')) {
-      const [raw, label] = part.trim().split(/\s+/)
-      const value = Number(raw)
-      if (label === 'resolved') total = value
-      else if (label === 'reused' || label === 'downloaded' || label === 'added' || label === 'imported') {
-        done += value
-      }
-    }
-    if (total > 0) return Math.min(90, Math.round((done / total) * 100))
+function pushLine(task: InstallTask, line: string): void {
+  const text = cleanLine(line)
+  task.lines.unshift(text)
+  if (task.lines.length > MAX_TASK_LINES) task.lines.length = MAX_TASK_LINES
+  const estimate = estimateProgress(text)
+  if (estimate > 0) {
+    task.progress = Math.max(task.progress, estimate)
+  } else if (task.status === 'running' && task.progress < 85) {
+    // 兜底：行无解析格式也随输出量推进，保证进度条始终在动（不会卡在 0）
+    task.progress = Math.max(task.progress, 6 + Math.min(79, task.lines.length * 2))
   }
-  if (/^dependencies:|^Packages:/.test(line)) return 92
-  if (/^Done in\b/.test(line)) return 96
-  return 0
 }
 
 /** Build a safe `github:<owner>/<repo>` target, or null when the repo is unsafe. */
@@ -141,9 +184,16 @@ function stopChild(child: ReturnType<typeof spawn>): void {
   child.kill('SIGKILL')
 }
 
+/** Queued mutation awaiting its turn (FIFO), with the spawn options needed to run it. */
+interface QueueItem {
+  task: InstallTask
+  options: { action: 'add' | 'remove'; profile: string; target: string; timeoutMs?: number; env?: NodeJS.ProcessEnv }
+}
+
 /**
- * Kick off a background mutation and return its task handle. The CLI runs
- * asynchronously; progress is visible through `getTask(id)` until done.
+ * Enqueue a plugin mutation and return its task. Tasks run strictly serially:
+ * the queue worker starts the next one only after the previous finishes.
+ * Progress is visible through `getTask(id)` / `activeTask()` until done.
  */
 export function startPluginMutation(options: {
   action: 'add' | 'remove'
@@ -152,20 +202,34 @@ export function startPluginMutation(options: {
   timeoutMs?: number
   env?: NodeJS.ProcessEnv
 }): InstallTask {
-  const task: InstallTask = { id: nextTaskId, status: 'running', timedOut: false, exitCode: null, progress: 0, lines: [] }
+  const task: InstallTask = { id: nextTaskId, target: options.target, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [] }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
   tasks.set(task.id, task)
   if (tasks.size > MAX_TASKS) {
     let removed = false
     tasks.forEach((candidate, id) => {
-      if (!removed && candidate.status !== 'running') {
+      if (!removed && candidate.status !== 'running' && candidate.status !== 'pending') {
         tasks.delete(id)
         removed = true
       }
     })
   }
-  void runPluginMutation({ ...options, task })
+  queue.push({ task, options: { ...options } })
+  pumpQueue()
   return task
+}
+
+/** Queue worker: at most one mutation runs at a time; pick the next pending task when the slot frees up. */
+function pumpQueue(): void {
+  if (hasRunningTask()) return
+  const item = queue.find((it) => it.task.status === 'pending')
+  if (!item) return
+  const { task, options } = item
+  task.status = 'running'
+  void runPluginMutation({ ...options, task }).finally(() => {
+    runningChildren.delete(task.id)
+    pumpQueue()
+  })
 }
 
 /**
@@ -211,16 +275,22 @@ export function runPluginMutation(options: {
       })
       return
     }
+    if (task) runningChildren.set(task.id, child)
     const timer = setTimeout(() => {
       timedOut = true
       stopChild(child)
     }, timeoutMs)
+    // 时间兜底：即使 CLI 静默不吐进度行，进度条也单调推进，不会卡在 0
+    const progressTimer = setInterval(() => {
+      if (task && task.status === 'running' && task.progress < 85) task.progress += 1
+    }, 500)
     const collect = (kind: 'stdout' | 'stderr', chunk: Buffer): void => {
       const text = chunk.toString()
       if (kind === 'stdout') stdout = (stdout + text).slice(-CAPTURE_LIMIT_BYTES)
       else stderr = (stderr + text).slice(-CAPTURE_LIMIT_BYTES)
       if (task) {
-        for (const line of text.split(/\r?\n/)) {
+        // pnpm 的 `Progress:` 行用 \r 原地刷新，需同时按 \r 与 \n 分块
+        for (const line of text.split(/\r?\n|\r/)) {
           if (line.trim() !== '') pushLine(task, `${kind === 'stderr' ? '[err] ' : ''}${line.trimEnd()}`)
         }
       }
@@ -229,7 +299,9 @@ export function runPluginMutation(options: {
     child.stderr?.on('data', (chunk: Buffer) => collect('stderr', chunk))
     child.once('error', (error) => {
       clearTimeout(timer)
-      if (task) {
+      clearInterval(progressTimer)
+      if (task) runningChildren.delete(task.id)
+      if (task && task.status !== 'cancelled') {
         task.status = 'failed'
         task.exitCode = null
         pushLine(task, `[error] ${error.message}`)
@@ -238,12 +310,16 @@ export function runPluginMutation(options: {
     })
     child.once('close', (code) => {
       clearTimeout(timer)
+      clearInterval(progressTimer)
+      if (task) runningChildren.delete(task.id)
       if (task) {
         task.exitCode = code
         task.timedOut = timedOut
-        task.status = timedOut || code !== 0 ? 'failed' : 'done'
-        if (task.status === 'done') task.progress = 100
-        pushLine(task, timedOut ? '[timed out]' : `[exit ${code ?? '?'}]`)
+        if (task.status !== 'cancelled') {
+          task.status = timedOut || code !== 0 ? 'failed' : 'done'
+          if (task.status === 'done') task.progress = 100
+          pushLine(task, timedOut ? '[timed out]' : `[exit ${code ?? '?'}]`)
+        }
       }
       resolvePromise({ exitCode: code, timedOut, error: null, stdout, stderr })
     })

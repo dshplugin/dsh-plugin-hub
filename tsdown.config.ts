@@ -11,9 +11,13 @@
  * starts with the exact `window.__ModuleLoader__.load({ id: "…` prefix.
  */
 import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { basename, dirname, resolve as resolvePath } from 'node:path'
 import { defineConfig } from 'tsdown'
 import { transform } from 'lightningcss'
+
+// 配置加载器是 ESM，JSON 只能经 require 读取（Node 原生支持）
+const pkg = createRequire(import.meta.url)('./package.json') as { version: string }
 
 const id = 'dsh-plugin'
 
@@ -39,6 +43,8 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify('production'),
     'import.meta.env.MODE': JSON.stringify('production'),
     'import.meta.env': JSON.stringify({ MODE: 'production' }),
+    // 头部标题展示的插件版本号：构建时从 package.json 注入，避免客户端重复维护版本
+    __PLUGIN_VERSION__: JSON.stringify(pkg.version),
   },
   plugins: [{
     name: 'dsh-css-modules-inline',

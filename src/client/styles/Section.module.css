@@ -1,0 +1,1605 @@
+/* DSH-Plugin Hub section styles. Colors resolve through the host's
+ * --dsw-alias-* design tokens with the original light-mode literal as
+ * fallback, so the section follows the active theme. */
+.root {
+  /* 宿主把 --dsw-alias-brand-primary 映射为中性主色（亮色近黑、暗色近白），而非品牌蓝。
+     插件在此局部覆写为宿主的真实品牌蓝令牌 --dsw-alias-state-business-primary（DeepSeek 蓝），
+     让区内其余「品牌蓝」样式（分类徽标、进度条、链接、卡片悬浮边框等）真正呈现蓝色；
+     未定义该令牌的宿主则回退到品牌蓝 #4f6ef7。 */
+  --dsw-alias-brand-primary: var(--dsw-alias-state-business-primary, #4f6ef7);
+  height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--dsw-alias-label-primary, #1f2328);
+}
+
+/* —— header —— */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 2px 2px 0;
+}
+
+/* 头部整体即官网链接：点击任意位置跳官网，悬浮变手型即可点；标题/描述保持各自默认色不变蓝 */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 标题里的版本号：非标题主内容，颜色弱化为次级灰 */
+.version {
+  color: var(--dsw-alias-label-secondary, #6b7280);
+}
+
+/* 品牌 logo 图标：与标题文字垂直居中对齐 */
+.logoIcon {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* 复制图标：跟随父元素 currentColor 变色 */
+.copyIcon {
+  flex-shrink: 0;
+}
+
+.tagline {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 列表头部筛选结果数：位于排序下拉之前，弱化灰字提示「筛选出 N 条插件」，字号与相邻按钮一致 */
+.filterResults {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  white-space: nowrap;
+}
+
+/* 结果数里的数字：等宽数字 + 固定 5 位宽度；数字在预留位中始终居中，两侧位置都固定不跳动 */
+.resultCount {
+  font-variant-numeric: tabular-nums;
+  min-width: 5ch;
+  text-align: center;
+}
+
+/* —— ad banner —— */
+
+/* 广告条：固定蓝紫渐变 + 白字，不随主题变量漂移，两种主题下都醒目。
+   与 toast 相同思路：固定颜色保证可读性。 */
+.adBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid rgba(139, 92, 246, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.28);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.adBanner:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.42);
+}
+
+.adBadge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+.adText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 18px;
+  color: #ffffff;
+}
+
+.adArrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.searchRow {
+  display: flex;
+  padding: 0 2px;
+}
+
+.search {
+  width: 100%;
+  font-size: 12px;
+  line-height: 18px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  padding: 4px 9px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.search::placeholder {
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+}
+
+.search:focus {
+  border-color: var(--dsw-alias-brand-primary, #4f6ef7);
+}
+
+/* —— install-state filter —— */
+
+/* 已安装 / 未安装：两个独立按钮，外观尺寸与「安装失败记录」按钮一致（高 24px）；
+   各自点击筛选对应安装状态，再点一次恢复全部。公共规则统一 1px 边框，
+   避免激活态回落到浏览器默认 2px 边框导致点击时按钮变粗跳动。 */
+.installedBtn,
+.installedBtnActive,
+.installedBtnDisabled {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.installedBtn {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.08));
+}
+
+/* 悬浮：明显加重底色，保证「看得见、点得准」。 */
+.installedBtn:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.18));
+}
+
+/* 置灰：当前分类下无对应安装状态的插件时不可点；尺寸保持 24px 不塌陷，
+   文字/描边弱化，配合 disabled 属性天然屏蔽 hover/点击。 */
+.installedBtnDisabled,
+.installedBtnDisabled:hover {
+  color: var(--dsw-alias-label-disabled, #aab1bd);
+  background: var(--dsw-alias-bg-layer-1, rgba(128, 128, 128, 0.03));
+  border-color: var(--dsw-alias-border-l1, #eceef1);
+  cursor: not-allowed;
+}
+
+.installedBtnDisabled .segCount {
+  color: var(--dsw-alias-label-disabled, #aab1bd);
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.installedBtnActive {
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  border-color: var(--dsw-alias-button-primary-fill, #1f2328);
+}
+
+.segCount,
+.segCountActive {
+  font-size: 10px;
+  line-height: 14px;
+  border-radius: 999px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.segCount {
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.1));
+}
+
+.installedBtnActive .segCountActive {
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: rgba(128, 128, 128, 0.22);
+}
+
+/* —— category chips —— */
+
+.tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 2px 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1, #eceef1);
+}
+
+.tab,
+.tabActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.tab {
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: transparent;
+  border-color: var(--dsw-alias-border-l2, #e5e7eb);
+}
+
+.tab:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
+  border-color: var(--dsw-alias-border-l1, #eceef1);
+}
+
+.tabActive {
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  border-color: var(--dsw-alias-button-primary-fill, #1f2328);
+}
+
+/* 「全部」标签上的总数徽标：浅灰胶囊，选中态转深色底白字胶囊 */
+.tabCount {
+  font-size: 10px;
+  line-height: 14px;
+  border-radius: 999px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.1));
+}
+
+.tabActive .tabCount {
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: rgba(128, 128, 128, 0.22);
+}
+
+/* —— body / list —— */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 4px 4px 2px;
+}
+
+.card {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: var(--dsw-alias-bg-layer-1, rgba(128, 128, 128, 0.06));
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.card:hover {
+  border-color: var(--dsw-alias-brand-primary, #4f6ef7);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.1));
+}
+
+.cardMain {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoryBadge,
+.verified {
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 16px;
+  border-radius: 4px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+}
+
+.categoryBadge {
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  border-color: var(--dsw-alias-button-ghost-active-border, rgba(79, 110, 247, 0.25));
+}
+
+.verified {
+  color: var(--dsw-alias-state-success-primary, #1a7f37);
+  border-color: var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.3));
+}
+
+.desc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.topics {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.topic {
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.1));
+  border-radius: 4px;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
+.cardSide {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.star {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-state-warn-primary, #b8860b);
+  white-space: nowrap;
+}
+
+.fork {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  white-space: nowrap;
+}
+
+.date {
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  white-space: nowrap;
+}
+
+.installBtn,
+.installBtnCopied,
+.installBtnInstalled,
+.uninstallBtn,
+.detailBtn {
+  font-size: 11px;
+  line-height: 18px;
+  border-radius: 6px;
+  padding: 2px 10px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+/* 已安装态：绿色禁用按钮，明确表达"已安装"，不可再次点击安装 */
+.installBtnInstalled {
+  color: var(--dsw-alias-state-success-primary, #1a7f37);
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.35));
+  cursor: default;
+  user-select: none;
+}
+
+/* 卸载：危险色描边按钮，与安装主按钮区分 */
+.uninstallBtn {
+  color: var(--dsw-alias-state-danger-primary, #d1242f);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-state-danger-secondary, rgba(209, 36, 47, 0.4));
+  user-select: none;
+}
+
+.uninstallBtn:hover {
+  background: rgba(209, 36, 47, 0.08);
+  border-color: var(--dsw-alias-state-danger-primary, #d1242f);
+}
+
+.installBtn {
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  border: 1px solid transparent;
+  font-weight: 500;
+  user-select: none;
+}
+
+.installBtn:hover {
+  background: var(--dsw-alias-button-primary-hover, #43454a);
+}
+
+/* 查看详情：次级描边按钮（安装为主 CTA，详情为辅助入口） */
+.detailBtn {
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+.detailBtn:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
+  border-color: var(--dsw-alias-button-ghost-active-border, #d0d4da);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 复制成功态：成功绿描边 + 绿字 + 淡绿底，避免亮色下黑色实心块、暗色下白色实心块
+   的强对比，两种主题下都清晰醒目，且明确表达"已复制"语义。 */
+.installBtnCopied {
+  color: var(--dsw-alias-state-success-primary, #1a7f37);
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.4));
+  user-select: none;
+}
+
+/* 复制成功提示条：窗口正中央浮出，无遮罩无图标。采用反色浮层——亮色模式
+   黑底白字、暗色模式白底深字（复用主按钮 token：primary-fill 与
+   label-primary-foreground 在两种主题下正好互换），与页面背景相反，始终醒目。
+   base 上直接写死居中 transform，动画结束（fill-mode 默认 none）后
+   transform 会回落到 base 值，保证动画前后位置一致、不跳动。 */
+.toast {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  border: 1px solid transparent;
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  animation: toastIn 220ms ease-out;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -44%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* 安装失败 Toast：固定红色底白字，两种主题下都醒目，与成功/复制反色态区分。 */
+.toastFail {
+  background: #d1242f;
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+/* —— 信任确认弹窗 —— */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.38);
+  animation: overlayIn 160ms ease-out;
+  user-select: none;
+}
+
+.modal {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1, #ffffff);
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.24);
+  animation: modalIn 180ms ease-out;
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.modalTitle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary, #1f2328);
+}
+
+.modalClose {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.modalClose:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.1));
+}
+
+/* 关闭按钮图标：内联 SVG，stroke 继承 currentColor，随按钮禁用态一起变淡 */
+.modalCloseIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.modalDesc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+}
+
+/* 信任警示（社区第三方代码）：红色醒目，强调风险 */
+.trustHint {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--dsw-alias-danger, #e5484d);
+  background: rgba(229, 72, 77, 0.08);
+  border: 1px solid rgba(229, 72, 77, 0.28);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.modalRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 18px;
+  min-width: 0;
+}
+
+.modalLabel {
+  flex-shrink: 0;
+  min-width: 64px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+}
+
+.modalValue {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--dsw-alias-label-primary, #1f2328);
+}
+
+/* 来源仓库：蓝色可点击链接 + 链节图标，跳转官网收录详情页（新窗口），hover 加下划线提示可点 */
+.modalLink {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease;
+}
+
+.modalLink:hover {
+  color: #3b5bdb;
+  text-decoration: underline;
+}
+
+/* 来源链接图标：与文字垂直居中对齐，不参与省略号计算 */
+.linkIcon {
+  flex-shrink: 0;
+}
+
+/* 手动安装命令条：整条可点击复制（flex 布局，命令文本 + 右侧小复制按钮） */
+.modalCmd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.08));
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  padding: 6px 6px 6px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.modalCmd:hover {
+  border-color: var(--dsw-alias-button-ghost-active-border, #d0d4da);
+  background: rgba(128, 128, 128, 0.1);
+}
+
+.modalCmdText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 命令条右侧的小复制按钮：蓝色文字 + 图标，提示可复制 */
+.modalCmdCopy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 4px;
+  padding: 1px 7px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.modalCmdCopy:hover {
+  color: #3b5bdb;
+  border-color: var(--dsw-alias-button-ghost-active-border, #d0d4da);
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.modalActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* 卸载弹窗确认/进行中内容区：与弹窗一致的纵向间距 */
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* —— 进行中任务状态条（队列：进行中 + 排队，可展开查看/取消） —— */
+
+/* 状态条容器：纵向排列 —— 第一行「插件操作进行中…」摘要按钮，下方每行一个插件明细 */
+.progressStrip {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid rgba(79, 110, 247, 0.35);
+  border-radius: 6px;
+  background: rgba(79, 110, 247, 0.06);
+  overflow: hidden;
+}
+
+/* 主按钮：点按展开/收起队列明细，样式延续原状态条 */
+.progressStripMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.progressStripMain:hover {
+  background: rgba(79, 110, 247, 0.08);
+  color: #3b5bdb;
+}
+
+/* 脉冲小圆点：提示任务仍在运行 */
+.progressStripDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dsw-alias-brand-primary, #4f6ef7);
+  animation: progressPulse 1.1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.progressStripText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: left;
+}
+
+.progressStripToggle {
+  flex-shrink: 0;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+}
+
+/* 折叠卡展开区：每行一项任务（状态 / 目标 / 进度 / 取消），行间分隔、hover 高亮 */
+.queueList {
+  padding: 2px 0;
+  border-top: 1px solid rgba(79, 110, 247, 0.18);
+}
+
+.queueRow {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 10px 7px;
+  font-size: 12px;
+  line-height: 18px;
+  border-bottom: 1px solid rgba(79, 110, 247, 0.12);
+  transition: background 120ms ease;
+}
+
+.queueRow:last-child {
+  border-bottom: none;
+}
+
+.queueRow:hover {
+  background: rgba(79, 110, 247, 0.05);
+}
+
+/* 插件名一行：名称占满剩余宽度，取消按钮固定在右侧 */
+.queueRowHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.queueRowTarget {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-primary, #1f2328);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* 状态 + 蓝色进度条 + 百分比一行：与插件名分开展示 */
+.queueRowBody {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.queueRowStatus {
+  flex-shrink: 0;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  font-weight: 500;
+}
+
+/* 进度条轨道占满剩余宽度（蓝条样式复用 progressTrack/progressFill） */
+.queueRowTrack {
+  flex: 1;
+  min-width: 0;
+}
+
+.queueRowPct {
+  flex-shrink: 0;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 取消单个任务：危险语义（红），hover 明显 */
+.stripCancel {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 2px 10px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.stripCancel:hover {
+  background: rgba(229, 72, 77, 0.08);
+  border-color: rgba(229, 72, 77, 0.4);
+  color: #e5484d;
+}
+
+/* 排队提示：任务已入队等待前序完成时，弹窗内显示 */
+.queuedHint {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  background: rgba(79, 110, 247, 0.06);
+  border: 1px solid rgba(79, 110, 247, 0.22);
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
+/* —— 操作失败弹窗 —— */
+
+/* 失败标题：红色强调，明确「操作失败」语义 */
+.errorTitle {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: #e5484d;
+}
+
+/* 错误信息正文：等宽字体 + 可滚动 + 保留换行，完整展示服务端报错 */
+.errorBox {
+  margin: 0;
+  max-height: 240px;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid rgba(229, 72, 77, 0.35);
+  border-radius: 6px;
+  background: rgba(229, 72, 77, 0.05);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 17px;
+  color: var(--dsw-alias-label-primary, #1f2328);
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* 报错信息不让鼠标选择复制：只能点上面的复制按钮，避免误选带走全部日志 */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 出错的插件身份（owner/repo）：醒目定位，等宽字体便于识别 */
+.errorPlugin {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary, #1f2328);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 错误弹窗顶部的隐蔽复制按钮：浅灰小字、无边框，不抢视线，仍可一键复制日志 */
+.errorCopySoft {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.errorCopySoft:hover {
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: rgba(128, 128, 128, 0.08);
+}
+
+/* 归因说明：中性提示错误来自插件方安装程序，与插件中心无关 */
+.errorHint {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+}
+
+/* 去插件仓库反馈：与次级按钮一致的外观，链接样式（新窗口打开 issues） */
+.reportBtn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  padding: 5px 14px;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.reportBtn:hover {
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
+  border-color: var(--dsw-alias-button-ghost-active-border, #d0d4da);
+}
+
+.modalCancel,
+.modalCopy {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.modalCancel:hover,
+.modalCopy:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
+}
+
+.modalConfirm,
+.modalInstall {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.modalConfirm:hover,
+.modalInstall:hover {
+  background: var(--dsw-alias-button-primary-hover, #43454a);
+}
+
+/* 安装进行中：禁用全部弹窗操作 */
+.modalCopy:disabled,
+.modalInstall:disabled,
+.modalCancel:disabled,
+.modalClose:disabled,
+.uninstallConfirm:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 卸载确认：危险色实底，与安装主按钮区分 */
+.uninstallConfirm {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: #ffffff;
+  background: var(--dsw-alias-state-danger-primary, #d1242f);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.uninstallConfirm:hover {
+  background: var(--dsw-alias-state-danger-hover, #b91c1c);
+}
+
+/* —— 卸载完成结果视图 —— */
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 0 2px;
+  text-align: center;
+}
+
+.resultCheck {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.14);
+  color: var(--dsw-alias-state-success-primary, #1a7f37);
+  margin-bottom: 3px;
+}
+
+.resultCheckIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.resultTitle {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary, #1f2328);
+}
+
+.resultDesc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+}
+
+.resultRestarting {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  padding: 12px 0 6px;
+}
+
+/* 重启选择按钮对：稍后（次要描边）+ 立即重启（主按钮） */
+.restartLater {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.restartLater:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
+}
+
+.restartNow {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--dsw-alias-label-primary-foreground, #fff);
+  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.restartNow:hover {
+  background: var(--dsw-alias-button-primary-hover, #43454a);
+}
+
+.restartNow:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* —— 安装/卸载实时进度 —— */
+
+.progress {
+  margin: 10px 0 2px;
+}
+
+.progressHead {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 3px;
+}
+
+.progressText {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+}
+
+/* 进度条轨道 + 真实百分比填充（宽度由任务估算值驱动） */
+.progressTrack {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--dsw-alias-border-l2, #e5e7eb);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--dsw-alias-brand-primary, #4f6ef7);
+  transition: width 320ms ease;
+}
+
+.progressFillFail {
+  background: var(--dsw-alias-state-danger-primary, #d1242f);
+}
+
+/* 最近输出行：终端窗口（深色底、等宽字体、行级关键词高亮），日/夜间模式均清晰可读 */
+.progressLog {
+  margin: 8px 0 0;
+  border-radius: 8px;
+  background: #0d1117;
+  border: 1px solid rgba(127, 139, 163, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.progressLogBar {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(127, 139, 163, 0.2);
+}
+
+.progressLogTitle {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #8b949e;
+}
+
+.progressLogLines {
+  margin: 0;
+  padding: 8px 10px;
+  max-height: 112px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* 终端输出同样放开文本选择：方便直接拖选命令/报错行 */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.logLine {
+  display: block;
+}
+
+/* 行级着色：默认浅灰 / 成功与进度绿 / 错误红 / 移除黄 / 命令青 */
+.logLinePlain { color: #9da7b3; }
+.logLineOk { color: #3fb950; }
+.logLineErr { color: #f85149; }
+.logLineWarn { color: #d29922; }
+.logLineInfo { color: #58a6ff; }
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* —— 安装失败记录 —— */
+
+/* 失败记录入口：紧跟「未安装」分段之后，红色实心主按钮，一眼可辨、点击直达 */
+.failBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  color: #ffffff;
+  background: var(--dsw-alias-state-danger-primary, #d1242f);
+  border: 1px solid var(--dsw-alias-state-danger-primary, #d1242f);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.failBtn:hover {
+  background: #b0202a;
+  border-color: #b0202a;
+}
+
+/* 计数徽标：白底红字，在红色实心按钮上对比最强，数字一眼可见 */
+.failBadge {
+  flex-shrink: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  color: var(--dsw-alias-state-danger-primary, #d1242f);
+  background: #ffffff;
+}
+
+/* 失败记录列表：纵向滚动，每条一条记录 */
+.failList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.failRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.05));
+}
+
+.failHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 操作类型徽标：安装失败红 / 卸载失败黄 */
+.failKind {
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+}
+
+.failKindInstall {
+  color: #e5484d;
+  border-color: rgba(229, 72, 77, 0.35);
+  background: rgba(229, 72, 77, 0.08);
+}
+
+.failKindUninstall {
+  color: #b8860b;
+  border-color: rgba(184, 134, 11, 0.35);
+  background: rgba(184, 134, 11, 0.08);
+}
+
+/* 仓库地址：等宽字体，点击直达 GitHub 仓库 */
+.failRepo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.failRepo:hover {
+  text-decoration: underline;
+}
+
+.failTime {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 记录内的复制按钮：纯灰文字、无边框，低调隐蔽，点击即可复制该条错误日志 */
+.failCopy {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.failCopy:hover {
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: rgba(128, 128, 128, 0.08);
+}
+
+.failEmpty {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+}
+
+/* 清空记录：危险语义描边按钮 */
+.failClear {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-state-danger-primary, #d1242f);
+  background: transparent;
+  border: 1px solid var(--dsw-alias-state-danger-secondary, rgba(209, 36, 47, 0.4));
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.failClear:hover {
+  background: rgba(209, 36, 47, 0.08);
+  border-color: var(--dsw-alias-state-danger-primary, #d1242f);
+}
+
+/* 每条记录的一键提交按钮：红色 CTA 撑满整行，一条失败对应一个提交入口。
+   默认用鲜亮浅红（比宿主 danger 主色更鲜、更浅一档），悬浮加深到宿主 danger 主色；紧凑高度避免抢眼 */
+.failBigIssue {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+  padding: 3px 16px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+  background: #e5484d;
+  border: 1px solid #e5484d;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.failBigIssue:hover {
+  background: var(--dsw-alias-state-danger-primary, #d1242f);
+  border-color: var(--dsw-alias-state-danger-primary, #d1242f);
+  box-shadow: 0 3px 10px rgba(209, 36, 47, 0.35);
+}
+
+/* —— states —— */
+
+.state {
+  flex: 1;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+}
+
+.stateTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary, #1f2328);
+}
+
+.stateDesc {
+  max-width: 420px;
+}
+
+.retryBtn {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 6px;
+  padding: 4px 12px;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+}
+
+.retryBtn:hover {
+  color: var(--dsw-alias-label-primary, #1f2328);
+  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
+  border-color: var(--dsw-alias-button-ghost-active-border, #d0d4da);
+}
+
+/* —— footer —— */
+
+.footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 6px 4px 0;
+  border-top: 1px solid var(--dsw-alias-border-l1, #eceef1);
+}
+
+.footLink {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-brand-primary, #4f6ef7);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.footLink:hover {
+  text-decoration: underline;
+}

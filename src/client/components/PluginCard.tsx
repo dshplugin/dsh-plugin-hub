@@ -1,0 +1,87 @@
+/**
+ * One plugin card in the catalog list: name/category/verified badge,
+ * description + topics, star/fork/date stats, and the detail/install/
+ * uninstall actions.
+ */
+import { createElement as h } from 'react'
+import styles from '../styles/Section.module.css'
+import type { HubPlugin, LocaleId, Translate } from '../types.ts'
+import { CATEGORY_LABELS, categoryLabel, pluginDetailUrl } from '../lib/catalog.ts'
+import { fmtStars, relTime } from '../lib/format.ts'
+
+export function PluginCard({ plugin: p, copied, installedName, t, langKey, langPath, onInstall, onUninstall }: {
+  plugin: HubPlugin
+  copied: string | null
+  installedName: (p: HubPlugin) => string | null
+  t: Translate
+  langKey: LocaleId
+  langPath: string
+  onInstall: (p: HubPlugin) => void
+  onUninstall: (p: HubPlugin) => void
+}) {
+  const repo = p.source?.repo ?? ''
+  const isCopied = copied === repo
+  const pkg = installedName(p)
+  const isInstalled = pkg !== null
+
+  return h('div', { className: styles.card },
+    h('div', { className: styles.cardMain },
+      h('div', { className: styles.cardHead },
+        h('div', { className: styles.cardTitle, title: p.description ?? '' }, p.displayName ?? p.slug),
+        p.category ? h('span', { className: styles.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null,
+        p.compatibility?.status === 'verified'
+          ? h('span', { className: styles.verified }, t('verified'))
+          : null,
+      ),
+      // 英文模式下隐藏仍为中文的描述：站点英文数据缺翻译时 description 会回退成中文，
+      // 不显示可保证界面语言一致，不残留中文字符。
+      p.description && (langKey === 'zh' || !/[\u4e00-\u9fff]/.test(p.description))
+        ? h('p', { className: styles.desc }, p.description)
+        : null,
+      (p.topics?.length ?? 0) > 0
+        ? h('div', { className: styles.topics },
+          p.topics!.slice(0, 3).map((topic) => h('span', { key: topic, className: styles.topic }, topic)),
+        )
+        : null,
+    ),
+    h('div', { className: styles.cardSide },
+      h('div', { className: styles.stats },
+        h('span', { className: styles.star }, '\u2605 ', fmtStars(p.stats?.stargazers_count)),
+        h('span', { className: styles.fork }, t('fork'), ' ', fmtStars(p.stats?.forks_count)),
+        h('span', { className: styles.date }, relTime(p.dates?.repoUpdatedAt, t)),
+      ),
+      repo
+        ? h('div', { className: styles.actions },
+          // 查看详情：未安装/已安装都始终显示，跳转官网详情页
+          h('a', {
+            className: styles.detailBtn,
+            // 两级路径：/plugins/{ownerSlug}/{slug}；旧数据缺 ownerSlug 时从 repo 推导
+            href: pluginDetailUrl(p, langPath),
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            title: p.slug,
+          }, t('detail')),
+          isInstalled
+            ? h('button', {
+              className: styles.installBtnInstalled,
+              disabled: true,
+              title: t('installed'),
+            }, t('installed'))
+            : h('button', {
+              className: isCopied ? styles.installBtnCopied : styles.installBtn,
+              // 文字恒定避免按钮宽度变化导致卡片跳动；点击先弹信任确认，
+              // 弹窗内可选择复制命令或直接安装
+              onClick: () => onInstall(p),
+            }, t('install')),
+          isInstalled
+            // 已安装：卸载按钮（危险色），保留明确状态语义
+            ? h('button', {
+              className: styles.uninstallBtn,
+              onClick: () => onUninstall(p),
+            }, t('uninstall'))
+            : null,
+        )
+        : null,
+    ),
+  )
+}

@@ -1,4 +1,4 @@
-import { type WebServerService } from './routes.ts';
+import { type WebServerService } from './http/routes.ts';
 export declare const name = "dsh-plugin";
 export interface Config {
     /** DSH profile that owns plugin mutations. Defaults to the booted profile. */
