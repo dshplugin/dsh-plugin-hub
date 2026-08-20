@@ -67,7 +67,7 @@ Install from GitHub:
 dsh plugin --profile web add github:dshplugin/dsh-plugin-hub
 ```
 
-> **Note**: when installing from GitHub, if pnpm ≥ 10 skips the build script, add `dsh-plugin-hub` to `pnpm.onlyBuiltDependencies` (or use `--allow-build` temporarily) so the browser bundle gets built.
+> **Note**: the browser bundle ships with the package, so installing from GitHub needs no build step or authorization — just restart `dsh web` and open Settings → Plugin Hub.
 
 ## Getting Started: browse & install in DeepSeek Harness
 

@@ -67,7 +67,7 @@ dsh plugin --profile web add dsh-plugin-hub
 dsh plugin --profile web add github:dshplugin/dsh-plugin-hub
 ```
 
-> **提示**：从 GitHub 安装时，若 pnpm ≥ 10 提示 build script 未执行，请将 `dsh-plugin-hub` 加入 `pnpm.onlyBuiltDependencies`（或临时使用 `--allow-build`），否则浏览器端 bundle 不会构建。
+> **提示**：插件已内置浏览器端 bundle，从 GitHub 安装无需任何构建与授权；装完重启 `dsh web`，在「设置 → 插件中心」即可使用。
 
 ## 快速开始：在 DeepSeek Harness 中使用
 
