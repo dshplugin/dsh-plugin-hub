@@ -1,5 +1,5 @@
 /**
- * Browser client bundle for the dsh-plugin-hub plugin, mirroring the
+ * Browser client bundle for the dsh-plugin package, mirroring the
  * DeepSeek Harness client preset for an external package: a
  * closure-factory artifact that calls window.__ModuleLoader__.load({ id,
  * factory }) and resolves externals through the injected require (loader

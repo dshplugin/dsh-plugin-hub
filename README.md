@@ -55,11 +55,13 @@ DSH-Plugin 插件中心收录 **4,261** 个 DeepSeek Harness Plugin（DSH）插�
 
 ## 安装 DSH-Plugin Hub
 
-本地安装：
+从 npm 安装（推荐）：
 
 ```bash
 dsh plugin --profile web add dsh-plugin
 ```
+
+插件已发布到 npm registry（包名 `dsh-plugin`），一条命令即可安装使用，无需任何构建。
 
 从 GitHub 安装：
 

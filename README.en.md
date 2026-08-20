@@ -55,11 +55,13 @@ Every DSH plugin links back to its GitHub source repository with stars, forks an
 
 ## Install DSH-Plugin Hub
 
-Local install:
+Install from npm (recommended):
 
 ```bash
 dsh plugin --profile web add dsh-plugin
 ```
+
+The plugin is published to the npm registry as `dsh-plugin` — one command installs and it just works, no build step required.
 
 Install from GitHub:
 
