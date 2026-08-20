@@ -150,10 +150,12 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('sortStars')
   const [copied, setCopied] = useState<string | null>(null)
-  /** 全局复制成功 Toast：{id} 用于重复点击时重新触发入场动画 */
-  const [toast, setToast] = useState<{ id: number } | null>(null)
+  /** 全局反馈 Toast：{id} 用于重复触发时重新走入场动画，kind 决定文案与配色 */
+  const [toast, setToast] = useState<{ id: number; kind: 'copied' | 'done' | 'fail' } | null>(null)
   /** 信任确认弹窗：记录待安装的插件，确认后才执行复制 */
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
+  /** 直接安装进行中（服务端 spawn 官方 CLI），期间禁用弹窗操作 */
+  const [installing, setInstalling] = useState(false)
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
   const listRef = useRef<HTMLDivElement | null>(null)
 
@@ -172,6 +174,13 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [confirmPlugin])
+
+  // Toast 统一自动消失
+  useEffect(() => {
+    if (!toast) return
+    const timer = window.setTimeout(() => setToast(null), 2400)
+    return () => window.clearTimeout(timer)
+  }, [toast])
 
   useEffect(() => {
     let cancelled = false
@@ -264,19 +273,43 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
   }
 
-  /** 信任弹窗确认后：复制安装命令并提示去终端粘贴执行。 */
-  const confirmInstall = async (p: HubPlugin) => {
+  /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行。 */
+  const copyCommand = async (p: HubPlugin) => {
     const repo = p.source?.repo ?? ''
     const ok = await doCopy(`dsh plugin add ${repo}`)
     if (ok) {
       setCopied(repo)
-      setToast({ id: Date.now() })
+      setToast({ id: Date.now(), kind: 'copied' })
       window.setTimeout(() => setCopied((cur) => (cur === repo ? null : cur)), 1600)
-      window.setTimeout(() => setToast(null), 1800)
-    } else {
-      setCopied(null)
     }
     setConfirmPlugin(null)
+  }
+
+  /** 弹窗动作二：直接安装。请求宿主本地路由，由服务端 spawn 官方 CLI 真实安装。 */
+  const installNow = async (p: HubPlugin) => {
+    const repo = p.source?.repo ?? ''
+    if (!repo || installing) return
+    setInstalling(true)
+    try {
+      const res = await fetch('/dsh-plugin-hub/install', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ repo }),
+      })
+      let ok = false
+      try {
+        const data = await res.json() as { ok?: boolean }
+        ok = Boolean(data.ok)
+      } catch {
+        ok = false
+      }
+      setToast({ id: Date.now(), kind: ok ? 'done' : 'fail' })
+    } catch {
+      setToast({ id: Date.now(), kind: 'fail' })
+    } finally {
+      setInstalling(false)
+      setConfirmPlugin(null)
+    }
   }
 
   const total = plugins?.length ?? 0
@@ -469,13 +502,24 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         ) : null,
         h('div', { className: styles.modalCmd }, `dsh plugin add ${confirmPlugin.source?.repo ?? ''}`),
         h('div', { className: styles.modalActions },
-          h('button', { className: styles.modalCancel, onClick: () => setConfirmPlugin(null) }, t('confirmCancel')),
-          h('button', { className: styles.modalConfirm, onClick: () => confirmInstall(confirmPlugin) }, t('confirmInstall')),
+          h('button', {
+            className: styles.modalCopy,
+            disabled: installing,
+            onClick: () => copyCommand(confirmPlugin),
+          }, t('copyCommand')),
+          h('button', {
+            className: styles.modalInstall,
+            disabled: installing,
+            onClick: () => installNow(confirmPlugin),
+          }, installing ? t('installing') : t('installNow')),
         ),
       ),
     ),
-    // 复制成功提示条：右下角纯黑色文字条，1800ms 后自动消失
-    toast && h('div', { key: toast.id, className: styles.toast }, t('toastCopied')),
+    // 全局反馈 Toast：复制成功（反色）/ 安装完成（反色）/ 安装失败（红色）
+    toast && h('div', {
+      key: toast.id,
+      className: toast.kind === 'fail' ? `${styles.toast} ${styles.toastFail}` : styles.toast,
+    }, toast.kind === 'copied' ? t('toastCopied') : toast.kind === 'done' ? t('installDone') : t('installFail')),
   )
 }
 

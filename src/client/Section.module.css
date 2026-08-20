@@ -511,6 +511,13 @@
   }
 }
 
+/* 安装失败 Toast：固定红色底白字，两种主题下都醒目，与成功/复制反色态区分。 */
+.toastFail {
+  background: #d1242f;
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
 /* —— 信任确认弹窗 —— */
 
 .overlay {
@@ -627,7 +634,8 @@
   margin-top: 2px;
 }
 
-.modalCancel {
+.modalCancel,
+.modalCopy {
   font-size: 12px;
   line-height: 18px;
   color: var(--dsw-alias-label-secondary, #6b7280);
@@ -637,14 +645,17 @@
   padding: 5px 14px;
   cursor: pointer;
   user-select: none;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 
-.modalCancel:hover {
+.modalCancel:hover,
+.modalCopy:hover {
   color: var(--dsw-alias-label-primary, #1f2328);
   background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.08));
 }
 
-.modalConfirm {
+.modalConfirm,
+.modalInstall {
   font-size: 12px;
   font-weight: 600;
   line-height: 18px;
@@ -658,8 +669,17 @@
   transition: background 120ms ease;
 }
 
-.modalConfirm:hover {
+.modalConfirm:hover,
+.modalInstall:hover {
   background: var(--dsw-alias-button-primary-hover, #43454a);
+}
+
+/* 安装进行中：禁用全部弹窗操作 */
+.modalCopy:disabled,
+.modalInstall:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 @keyframes overlayIn {

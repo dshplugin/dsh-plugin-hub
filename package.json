@@ -29,10 +29,13 @@
     "open-source"
   ],
   "scripts": {
-    "build": "npm run build:client",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "tsc -p tsconfig.server.json",
     "build:client": "tsdown && node scripts/normalize-client-banner.mjs",
     "readme:stats": "node scripts/sync-readme-stats.mjs",
-    "typecheck": "tsc -p tsconfig.client.json --noEmit",
+    "typecheck": "npm run typecheck:client && npm run typecheck:server",
+    "typecheck:client": "tsc -p tsconfig.client.json --noEmit",
+    "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
     "check": "npm run typecheck && npm run build",
     "verify:release": "node scripts/verify-release.mjs",
     "prepublishOnly": "npm run verify:release",
