@@ -15,7 +15,7 @@ import { basename, dirname, resolve as resolvePath } from 'node:path'
 import { defineConfig } from 'tsdown'
 import { transform } from 'lightningcss'
 
-const id = 'dsh-plugin-hub'
+const id = 'dsh-plugin'
 
 /** Externals resolved from the loader module table at runtime. */
 const CLIENT_EXTERNALS = ['react', 'react/jsx-runtime']

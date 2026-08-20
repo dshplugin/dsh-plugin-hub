@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-hub",
+  "name": "dsh-plugin",
   "version": "0.1.0",
   "description": "A community plugin marketplace for DeepSeek Harness, built to the official plugin spec — browse, search and install 4000+ human-curated community plugins without leaving the app. · DeepSeek Harness 社区插件市场（遵循官方开发规范）：4000+ 人工精选社区插件，每日更新。",
   "type": "module",

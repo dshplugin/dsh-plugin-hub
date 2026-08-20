@@ -58,7 +58,7 @@ Every DSH plugin links back to its GitHub source repository with stars, forks an
 Local install:
 
 ```bash
-dsh plugin --profile web add dsh-plugin-hub
+dsh plugin --profile web add dsh-plugin
 ```
 
 Install from GitHub:

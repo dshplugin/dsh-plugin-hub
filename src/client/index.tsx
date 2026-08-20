@@ -1,9 +1,9 @@
 /**
- * dsh-plugin-hub client: a native "Plugin Hub" settings section that renders
+ * dsh-plugin client: a native "Plugin Hub" settings section that renders
  * the community marketplace (dsh-plugin.org) as a first-class catalog —
  * category tabs (11 categories + All), search, sorting and one-click
- * install-command copy. Plugin data is served same-origin by the node half
- * at /dsh-plugin-hub/data.{zh,en}.json, so the browser bundle stays small.
+ * install-command copy. Plugin data is fetched live from dsh-plugin.org,
+ * so the browser bundle stays small and always in sync with the site.
  *
  * Built by tsdown into the __ModuleLoader__ factory bundle at client/client.js.
  */
@@ -11,7 +11,7 @@ import { createElement as h, useEffect, useMemo, useRef, useState } from 'react'
 import styles from './Section.module.css'
 import { en, zh } from './locales.ts'
 
-const NS = 'dsh-plugin-hub'
+const NS = 'dsh-plugin'
 const SITE_URL = 'https://dsh-plugin.org/'
 
 type LocaleId = 'zh' | 'en'
@@ -429,7 +429,7 @@ export const name = NS
 export const inject = ['slots', 'locale']
 
 export function apply(ctx: HubClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-plugin-hub: dictionaries')
+  ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-plugin: dictionaries')
   const t = ctx.locale.bind(NS)
   ctx.slots.inject('settings.section', () => ctx.slots.register({
     name: 'settings.section',

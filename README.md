@@ -58,7 +58,7 @@ DSH-Plugin 插件中心收录 **4,261** 个 DeepSeek Harness Plugin（DSH）插�
 本地安装：
 
 ```bash
-dsh plugin --profile web add dsh-plugin-hub
+dsh plugin --profile web add dsh-plugin
 ```
 
 从 GitHub 安装：
