@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" aria-label="DSH-Plugin Hub">
+  <defs>
+    <linearGradient id="dshLogoBrand" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c084fc"/>
+      <stop offset="0.5" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="dshLogoAccent" x1="14" y1="14" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#0891b2"/>
+    </linearGradient>
+  </defs>
+  <rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2.5" fill="url(#dshLogoBrand)"/>
+  <rect x="13" y="2.5" width="8.5" height="8.5" rx="2.5" fill="url(#dshLogoBrand)" opacity="0.8"/>
+  <rect x="2.5" y="13" width="8.5" height="8.5" rx="2.5" fill="url(#dshLogoBrand)" opacity="0.62"/>
+  <rect x="13" y="13" width="8.5" height="8.5" rx="2.5" fill="url(#dshLogoAccent)"/>
+</svg>

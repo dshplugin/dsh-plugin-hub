@@ -1,0 +1,4 @@
+# dsh bundle patch: inserts the DSH-Plugin Hub section into a profile's layer stack.
+- insert:
+    - id: dsh-plugin-hub
+      name: 'dsh-plugin-hub'

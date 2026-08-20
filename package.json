@@ -1,0 +1,87 @@
+{
+  "name": "dsh-plugin-hub",
+  "version": "0.1.0",
+  "description": "A community plugin marketplace for DeepSeek Harness, built to the official plugin spec — browse, search and install 4000+ human-curated community plugins without leaving the app. · DeepSeek Harness 社区插件市场（遵循官方开发规范）：4000+ 人工精选社区插件，每日更新。",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dshplugin/dsh-plugin-hub.git"
+  },
+  "homepage": "https://dsh-plugin.org",
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "harness",
+    "dsh",
+    "dsh-plugin",
+    "plugin-marketplace",
+    "plugin-hub",
+    "community-plugins",
+    "plugins",
+    "marketplace",
+    "ai",
+    "agent",
+    "cli",
+    "typescript",
+    "open-source"
+  ],
+  "scripts": {
+    "build": "npm run build:client",
+    "build:client": "tsdown && node scripts/normalize-client-banner.mjs",
+    "sync:data": "node scripts/sync-data.mjs && npm run readme:stats",
+    "readme:stats": "node scripts/sync-readme-stats.mjs",
+    "typecheck": "tsc -p tsconfig.client.json --noEmit",
+    "check": "npm run typecheck && npm run build",
+    "prepack": "npm run build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots"
+      ],
+      "platform": "web"
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": "./client/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "client",
+    "data",
+    "cordis.patch.yml",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "18.3.31",
+    "lightningcss": "1.33.0",
+    "react": "18.3.1",
+    "tsdown": "0.22.14",
+    "typescript": "7.0.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    }
+  }
+}
