@@ -11,6 +11,8 @@ import { dirname, resolve } from 'node:path'
 
 /** Grammar of an accepted `github:<owner>/<repo>` install target. */
 const REPO_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/
+/** Grammar of an npm package name (used for uninstall targets). */
+const PACKAGE_RE = /^(?:@[a-z0-9._-]+\/)?[A-Za-z0-9._-]+$/
 const CAPTURE_LIMIT_BYTES = 64 * 1024
 
 export interface InstallResult {
@@ -32,6 +34,11 @@ interface Invocation {
 export function githubTarget(repo: string): string | null {
   if (typeof repo !== 'string' || !REPO_RE.test(repo)) return null
   return `github:${repo}`
+}
+
+/** Validate an npm package name (uninstall target grammar). */
+export function validPackageName(name: string): boolean {
+  return typeof name === 'string' && PACKAGE_RE.test(name)
 }
 
 /** Resolve the active profile from the booted CLI args, falling back to `web`. */
@@ -65,18 +72,19 @@ function stopChild(child: ReturnType<typeof spawn>): void {
 }
 
 /**
- * Run `dsh plugin --profile <profile> add <target>` and resolve with the
+ * Run `dsh plugin --profile <profile> <action> <target>` and resolve with the
  * captured output. Never rejects; failures surface through the result.
  */
-export function runPluginInstall(options: {
+export function runPluginMutation(options: {
+  action: 'add' | 'remove'
   profile: string
   target: string
   timeoutMs?: number
   env?: NodeJS.ProcessEnv
 }): Promise<InstallResult> {
-  const { profile, target, timeoutMs = 5 * 60 * 1000, env } = options
+  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env } = options
   const invocation = cliInvocation()
-  const args = [...invocation.prefixArgs, 'plugin', '--profile', profile, 'add', target]
+  const args = [...invocation.prefixArgs, 'plugin', '--profile', profile, action, target]
   return new Promise((resolvePromise) => {
     let stdout = ''
     let stderr = ''

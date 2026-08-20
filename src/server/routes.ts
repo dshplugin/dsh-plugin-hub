@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { githubTarget, readProfileArg, runPluginInstall } from './install.ts'
+import { githubTarget, readProfileArg, runPluginMutation, validPackageName } from './install.ts'
 
 export interface WebRoute {
   kind: 'exact'
@@ -120,9 +120,55 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           }
           mutating = true
           try {
-            const result = await runPluginInstall({
+            const result = await runPluginMutation({
+              action: 'add',
               profile,
               target,
+              timeoutMs: COMMAND_TIMEOUT_MS,
+              env: { ...process.env, CI: 'true' },
+            })
+            const ok = result.exitCode === 0 && !result.timedOut
+            sendJson(response, ok ? 200 : 502, {
+              ok,
+              ...result,
+              installed: readInstalled(profile),
+            })
+          } finally {
+            mutating = false
+          }
+        } catch (error) {
+          sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/uninstall',
+      handler: async (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        if (mutating) {
+          sendJson(response, 409, { error: 'another plugin operation is already running' })
+          return
+        }
+        try {
+          const body = await readJsonBody(request)
+          const name = typeof body === 'object' && body !== null && typeof (body as { name?: unknown }).name === 'string'
+            ? (body as { name: string }).name
+            : ''
+          if (!validPackageName(name) || name === 'dsh-plugin') {
+            sendJson(response, 400, { error: 'plugin cannot be uninstalled here' })
+            return
+          }
+          if (readInstalled(profile)[name] === undefined) {
+            sendJson(response, 400, { error: 'plugin is not installed' })
+            return
+          }
+          mutating = true
+          try {
+            const result = await runPluginMutation({
+              action: 'remove',
+              profile,
+              target: name,
               timeoutMs: COMMAND_TIMEOUT_MS,
               env: { ...process.env, CI: 'true' },
             })

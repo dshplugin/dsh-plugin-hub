@@ -151,11 +151,17 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [sort, setSort] = useState<SortKey>('sortStars')
   const [copied, setCopied] = useState<string | null>(null)
   /** 全局反馈 Toast：{id} 用于重复触发时重新走入场动画，kind 决定文案与配色 */
-  const [toast, setToast] = useState<{ id: number; kind: 'copied' | 'done' | 'fail' } | null>(null)
+  const [toast, setToast] = useState<{ id: number; kind: 'copied' | 'done' | 'fail' | 'removed' | 'removeFail' } | null>(null)
   /** 信任确认弹窗：记录待安装的插件，确认后才执行复制 */
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
+  /** 卸载确认弹窗：记录待卸载的插件 */
+  const [uninstallPlugin, setUninstallPlugin] = useState<HubPlugin | null>(null)
   /** 直接安装进行中（服务端 spawn 官方 CLI），期间禁用弹窗操作 */
   const [installing, setInstalling] = useState(false)
+  /** 卸载进行中 */
+  const [uninstalling, setUninstalling] = useState(false)
+  /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
+  const [installed, setInstalled] = useState<Record<string, string>>({})
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
   const listRef = useRef<HTMLDivElement | null>(null)
 
@@ -165,15 +171,18 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
 
   useEffect(() => locale.subscribe(() => setLang(locale.getSnapshot().active)), [locale])
 
-  // 信任弹窗打开时按 Esc 关闭
+  // 信任/卸载弹窗打开时按 Esc 关闭
   useEffect(() => {
-    if (!confirmPlugin) return
+    if (!confirmPlugin && !uninstallPlugin) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setConfirmPlugin(null)
+      if (e.key === 'Escape') {
+        setConfirmPlugin(null)
+        setUninstallPlugin(null)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [confirmPlugin])
+  }, [confirmPlugin, uninstallPlugin])
 
   // Toast 统一自动消失
   useEffect(() => {
@@ -273,6 +282,32 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
   }
 
+  /** 刷新当前 profile 已安装插件表；宿主未挂本地路由时静默降级为空表。 */
+  const refreshInstalled = async () => {
+    try {
+      const res = await fetch('/dsh-plugin-hub/installed', { cache: 'no-store' })
+      if (!res.ok) return
+      const data = await res.json() as { installed?: Record<string, string> }
+      setInstalled(data.installed ?? {})
+    } catch {
+      // host without the plugin's server routes — keep the empty table
+    }
+  }
+
+  // 首次进入拉取已安装表（依赖宿主 webServer 服务）
+  useEffect(() => { refreshInstalled() }, [])
+
+  /** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`；命中返回 npm 包名。 */
+  const installedName = (p: HubPlugin): string | null => {
+    const repo = p.source?.repo
+    if (!repo) return null
+    const needle = `github:${repo.toLowerCase()}`
+    for (const [name, spec] of Object.entries(installed)) {
+      if (spec.toLowerCase().includes(needle)) return name
+    }
+    return null
+  }
+
   /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行。 */
   const copyCommand = async (p: HubPlugin) => {
     const repo = p.source?.repo ?? ''
@@ -309,6 +344,35 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     } finally {
       setInstalling(false)
       setConfirmPlugin(null)
+      refreshInstalled()
+    }
+  }
+
+  /** 卸载：请求宿主本地路由移除已安装插件。 */
+  const uninstallNow = async (p: HubPlugin) => {
+    const name = installedName(p)
+    if (!name || uninstalling) return
+    setUninstalling(true)
+    try {
+      const res = await fetch('/dsh-plugin-hub/uninstall', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      let ok = false
+      try {
+        const data = await res.json() as { ok?: boolean }
+        ok = Boolean(data.ok)
+      } catch {
+        ok = false
+      }
+      setToast({ id: Date.now(), kind: ok ? 'removed' : 'removeFail' })
+    } catch {
+      setToast({ id: Date.now(), kind: 'removeFail' })
+    } finally {
+      setUninstalling(false)
+      setUninstallPlugin(null)
+      refreshInstalled()
     }
   }
 
@@ -411,6 +475,8 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         plugins !== null && !failed && visible.map((p) => {
           const repo = p.source?.repo ?? ''
           const isCopied = copied === repo
+          const pkg = installedName(p)
+          const isInstalled = pkg !== null
           return h('div', {
             // 唯一 key：数据重构后同一 slug 可能对应多个作者仓库，仅用 slug 会撞 key，
             // 导致切换分类时 React 复用旧 DOM、列表不刷新。
@@ -444,20 +510,32 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               ),
               repo
                 ? h('div', { className: styles.actions },
-                  h('a', {
-                    className: styles.detailBtn,
-                    // 两级路径：/plugins/{ownerSlug}/{slug}；旧数据缺 ownerSlug 时从 repo 推导
-                    href: `${SITE_URL}${langPath}plugins/${p.ownerSlug ?? repo.split('/')[0]?.toLowerCase() ?? ''}/${p.slug}`,
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                    title: p.slug,
-                  }, t('detail')),
-                  h('button', {
-                    className: isCopied ? styles.installBtnCopied : styles.installBtn,
-                    // 文字恒定避免按钮宽度变化导致卡片跳动；点击先弹信任确认，
-                    // 确认后才复制命令，成功反馈 = 蓝底高亮 + 右下角 Toast
-                    onClick: () => setConfirmPlugin(p),
-                  }, t('copy')),
+                  isInstalled
+                    // 已安装：卸载按钮（危险色）+ 「已安装」禁用态，保留明确状态语义
+                    ? h('button', {
+                      className: styles.uninstallBtn,
+                      onClick: () => setUninstallPlugin(p),
+                    }, t('uninstall'))
+                    : h('a', {
+                      className: styles.detailBtn,
+                      // 两级路径：/plugins/{ownerSlug}/{slug}；旧数据缺 ownerSlug 时从 repo 推导
+                      href: `${SITE_URL}${langPath}plugins/${p.ownerSlug ?? repo.split('/')[0]?.toLowerCase() ?? ''}/${p.slug}`,
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      title: p.slug,
+                    }, t('detail')),
+                  isInstalled
+                    ? h('button', {
+                      className: styles.installBtnInstalled,
+                      disabled: true,
+                      title: t('installed'),
+                    }, t('installed'))
+                    : h('button', {
+                      className: isCopied ? styles.installBtnCopied : styles.installBtn,
+                      // 文字恒定避免按钮宽度变化导致卡片跳动；点击先弹信任确认，
+                      // 弹窗内可选择复制命令或直接安装
+                      onClick: () => setConfirmPlugin(p),
+                    }, t('install')),
                 )
                 : null,
             ),
@@ -515,11 +593,52 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         ),
       ),
     ),
-    // 全局反馈 Toast：复制成功（反色）/ 安装完成（反色）/ 安装失败（红色）
+    // 卸载确认弹窗：点卡片「卸载」后浮出，确认后由服务端 spawn 官方 CLI 移除
+    uninstallPlugin && h('div', {
+      className: styles.overlay,
+      onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.target === e.currentTarget) setUninstallPlugin(null)
+      },
+    },
+      h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
+        h('div', { className: styles.modalHead },
+          h('div', { className: styles.modalTitle }, t('uninstallTitle')),
+          h('button', {
+            className: styles.modalClose,
+            'aria-label': t('confirmCancel'),
+            onClick: () => setUninstallPlugin(null),
+          }, '\u00d7'),
+        ),
+        h('div', { className: styles.modalDesc }, t('uninstallDesc')),
+        h('div', { className: styles.modalRow },
+          h('span', { className: styles.modalLabel }, t('confirmPlugin')),
+          h('span', { className: styles.modalValue, title: uninstallPlugin.displayName ?? uninstallPlugin.slug },
+            uninstallPlugin.displayName ?? uninstallPlugin.slug),
+        ),
+        h('div', { className: styles.modalActions },
+          h('button', {
+            className: styles.modalCancel,
+            disabled: uninstalling,
+            onClick: () => setUninstallPlugin(null),
+          }, t('confirmCancel')),
+          h('button', {
+            className: styles.uninstallConfirm,
+            disabled: uninstalling,
+            onClick: () => uninstallNow(uninstallPlugin),
+          }, uninstalling ? t('uninstalling') : t('uninstall')),
+        ),
+      ),
+    ),
+    // 全局反馈 Toast：复制成功（反色）/ 安装完成（反色）/ 安装失败（红色）/ 卸载结果
     toast && h('div', {
       key: toast.id,
-      className: toast.kind === 'fail' ? `${styles.toast} ${styles.toastFail}` : styles.toast,
-    }, toast.kind === 'copied' ? t('toastCopied') : toast.kind === 'done' ? t('installDone') : t('installFail')),
+      className: toast.kind === 'fail' || toast.kind === 'removeFail' ? `${styles.toast} ${styles.toastFail}` : styles.toast,
+    },
+      toast.kind === 'copied' ? t('toastCopied')
+        : toast.kind === 'done' ? t('installDone')
+          : toast.kind === 'fail' ? t('installFail')
+            : toast.kind === 'removed' ? t('uninstallDone')
+              : t('uninstallFail')),
   )
 }
 
