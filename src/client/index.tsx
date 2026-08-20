@@ -152,6 +152,8 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [copied, setCopied] = useState<string | null>(null)
   /** 全局复制成功 Toast：{id} 用于重复点击时重新触发入场动画 */
   const [toast, setToast] = useState<{ id: number } | null>(null)
+  /** 信任确认弹窗：记录待安装的插件，确认后才执行复制 */
+  const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
   const listRef = useRef<HTMLDivElement | null>(null)
 
@@ -160,6 +162,16 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   }, [category])
 
   useEffect(() => locale.subscribe(() => setLang(locale.getSnapshot().active)), [locale])
+
+  // 信任弹窗打开时按 Esc 关闭
+  useEffect(() => {
+    if (!confirmPlugin) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setConfirmPlugin(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [confirmPlugin])
 
   useEffect(() => {
     let cancelled = false
@@ -227,12 +239,11 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const catLabel = (map: Record<string, { zh: string; en: string }>, key: string): string =>
     map[key]?.[langKey] ?? key
 
-  const copyInstall = async (repo: string) => {
-    const text = `dsh plugin add ${repo}`
-    let ok = false
+  /** 复制文本到剪贴板，返回是否成功（Clipboard API + 隐藏 textarea 兜底）。 */
+  const doCopy = async (text: string): Promise<boolean> => {
     try {
       await navigator.clipboard.writeText(text)
-      ok = true
+      return true
     } catch {
       // Clipboard API unavailable (permissions/iframe) — fall back to the
       // legacy hidden-textarea trick, which works in any context.
@@ -242,13 +253,21 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       ta.style.opacity = '0'
       document.body.appendChild(ta)
       ta.select()
+      let ok = false
       try {
         ok = document.execCommand('copy')
       } catch {
         ok = false
       }
       document.body.removeChild(ta)
+      return ok
     }
+  }
+
+  /** 信任弹窗确认后：复制安装命令并提示去终端粘贴执行。 */
+  const confirmInstall = async (p: HubPlugin) => {
+    const repo = p.source?.repo ?? ''
+    const ok = await doCopy(`dsh plugin add ${repo}`)
     if (ok) {
       setCopied(repo)
       setToast({ id: Date.now() })
@@ -257,6 +276,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     } else {
       setCopied(null)
     }
+    setConfirmPlugin(null)
   }
 
   const total = plugins?.length ?? 0
@@ -401,8 +421,9 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
                   }, t('detail')),
                   h('button', {
                     className: isCopied ? styles.installBtnCopied : styles.installBtn,
-                    // 文字恒定避免按钮宽度变化导致卡片跳动；成功反馈 = 蓝底高亮 + 右下角 Toast
-                    onClick: () => copyInstall(repo),
+                    // 文字恒定避免按钮宽度变化导致卡片跳动；点击先弹信任确认，
+                    // 确认后才复制命令，成功反馈 = 蓝底高亮 + 右下角 Toast
+                    onClick: () => setConfirmPlugin(p),
                   }, t('copy')),
                 )
                 : null,
@@ -418,6 +439,39 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
           target: '_blank',
           rel: 'noopener noreferrer',
         }, t('browseAll', { n: total })),
+      ),
+    ),
+    // 信任确认弹窗：点「复制安装命令」后浮出，确认后才复制命令引导去终端执行
+    confirmPlugin && h('div', {
+      className: styles.overlay,
+      onClick: (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.target === e.currentTarget) setConfirmPlugin(null)
+      },
+    },
+      h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
+        h('div', { className: styles.modalHead },
+          h('div', { className: styles.modalTitle }, t('confirmTitle')),
+          h('button', {
+            className: styles.modalClose,
+            'aria-label': t('confirmCancel'),
+            onClick: () => setConfirmPlugin(null),
+          }, '\u00d7'),
+        ),
+        h('div', { className: styles.modalDesc }, t('confirmDesc')),
+        h('div', { className: styles.modalRow },
+          h('span', { className: styles.modalLabel }, t('confirmPlugin')),
+          h('span', { className: styles.modalValue, title: confirmPlugin.displayName ?? confirmPlugin.slug },
+            confirmPlugin.displayName ?? confirmPlugin.slug),
+        ),
+        confirmPlugin.source?.repo ? h('div', { className: styles.modalRow },
+          h('span', { className: styles.modalLabel }, t('confirmSource')),
+          h('span', { className: styles.modalValue, title: confirmPlugin.source.repo }, confirmPlugin.source.repo),
+        ) : null,
+        h('div', { className: styles.modalCmd }, `dsh plugin add ${confirmPlugin.source?.repo ?? ''}`),
+        h('div', { className: styles.modalActions },
+          h('button', { className: styles.modalCancel, onClick: () => setConfirmPlugin(null) }, t('confirmCancel')),
+          h('button', { className: styles.modalConfirm, onClick: () => confirmInstall(confirmPlugin) }, t('confirmInstall')),
+        ),
       ),
     ),
     // 复制成功提示条：右下角纯黑色文字条，1800ms 后自动消失
