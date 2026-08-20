@@ -162,6 +162,10 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [uninstalling, setUninstalling] = useState(false)
   /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
   const [installed, setInstalled] = useState<Record<string, string>>({})
+  /** 后台安装/卸载任务：服务端 spawn CLI 后返回 task id，轮询 /status 拿实时输出 */
+  const [task, setTask] = useState<{ id: number; status: 'running' | 'done' | 'failed'; lines: string[] } | null>(null)
+  /** 轮询定时器句柄（卸载/关闭时清理） */
+  const pollRef = useRef<number | null>(null)
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
   const listRef = useRef<HTMLDivElement | null>(null)
 
@@ -171,9 +175,10 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
 
   useEffect(() => locale.subscribe(() => setLang(locale.getSnapshot().active)), [locale])
 
-  // 信任/卸载弹窗打开时按 Esc 关闭
+  // 信任/卸载弹窗打开时按 Esc 关闭（安装/卸载进行中锁定，不可关闭）
   useEffect(() => {
     if (!confirmPlugin && !uninstallPlugin) return
+    if (installing || uninstalling) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
@@ -182,7 +187,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [confirmPlugin, uninstallPlugin])
+  }, [confirmPlugin, uninstallPlugin, installing, uninstalling])
 
   // Toast 统一自动消失
   useEffect(() => {
@@ -320,7 +325,52 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     setConfirmPlugin(null)
   }
 
-  /** 弹窗动作二：直接安装。请求宿主本地路由，由服务端 spawn 官方 CLI 真实安装。 */
+  /** 停止后台任务轮询（任务结束或组件卸载时清理）。 */
+  const stopPoll = () => {
+    if (pollRef.current !== null) {
+      window.clearInterval(pollRef.current)
+      pollRef.current = null
+    }
+  }
+
+  // 组件卸载时兜底清理轮询定时器
+  useEffect(() => stopPoll, [])
+
+  /** 后台任务结束：toast + 解锁/关闭弹窗 + 刷新已安装表。 */
+  const finishTask = (ok: boolean, kind: 'install' | 'uninstall') => {
+    stopPoll()
+    setToast({
+      id: Date.now(),
+      kind: ok ? (kind === 'install' ? 'done' : 'removed') : (kind === 'install' ? 'fail' : 'removeFail'),
+    })
+    setInstalling(false)
+    setUninstalling(false)
+    setTask(null)
+    setConfirmPlugin(null)
+    setUninstallPlugin(null)
+    refreshInstalled()
+  }
+
+  /** 轮询后台任务直到结束：每 600ms 拉取状态与实时输出行。 */
+  const pollTask = (taskId: number, kind: 'install' | 'uninstall') => {
+    stopPoll()
+    pollRef.current = window.setInterval(async () => {
+      try {
+        const res = await fetch(`/dsh-plugin-hub/status?task=${taskId}`, { cache: 'no-store' })
+        if (!res.ok) throw new Error(`status ${res.status}`)
+        const data = await res.json() as { task?: { id: number; status: string; lines?: string[] } }
+        const t = data.task
+        if (!t) throw new Error('no task')
+        if (t.status === 'done') finishTask(true, kind)
+        else if (t.status === 'failed') finishTask(false, kind)
+        else setTask({ id: t.id, status: 'running', lines: t.lines ?? [] })
+      } catch {
+        finishTask(false, kind)
+      }
+    }, 600)
+  }
+
+  /** 弹窗动作二：直接安装。请求宿主本地路由，服务端后台 spawn 官方 CLI，弹窗内实时显示进度。 */
   const installNow = async (p: HubPlugin) => {
     const repo = p.source?.repo ?? ''
     if (!repo || installing) return
@@ -331,24 +381,16 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ repo }),
       })
-      let ok = false
-      try {
-        const data = await res.json() as { ok?: boolean }
-        ok = Boolean(data.ok)
-      } catch {
-        ok = false
-      }
-      setToast({ id: Date.now(), kind: ok ? 'done' : 'fail' })
+      const data = await res.json() as { ok?: boolean; task?: number }
+      if (!data.ok || typeof data.task !== 'number') throw new Error('start failed')
+      setTask({ id: data.task, status: 'running', lines: [] })
+      pollTask(data.task, 'install')
     } catch {
-      setToast({ id: Date.now(), kind: 'fail' })
-    } finally {
-      setInstalling(false)
-      setConfirmPlugin(null)
-      refreshInstalled()
+      finishTask(false, 'install')
     }
   }
 
-  /** 卸载：请求宿主本地路由移除已安装插件。 */
+  /** 卸载：请求宿主本地路由，服务端后台移除，弹窗内实时显示进度。 */
   const uninstallNow = async (p: HubPlugin) => {
     const name = installedName(p)
     if (!name || uninstalling) return
@@ -359,20 +401,12 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name }),
       })
-      let ok = false
-      try {
-        const data = await res.json() as { ok?: boolean }
-        ok = Boolean(data.ok)
-      } catch {
-        ok = false
-      }
-      setToast({ id: Date.now(), kind: ok ? 'removed' : 'removeFail' })
+      const data = await res.json() as { ok?: boolean; task?: number }
+      if (!data.ok || typeof data.task !== 'number') throw new Error('start failed')
+      setTask({ id: data.task, status: 'running', lines: [] })
+      pollTask(data.task, 'uninstall')
     } catch {
-      setToast({ id: Date.now(), kind: 'removeFail' })
-    } finally {
-      setUninstalling(false)
-      setUninstallPlugin(null)
-      refreshInstalled()
+      finishTask(false, 'uninstall')
     }
   }
 
@@ -391,6 +425,18 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
     return counts
   }, [plugins, total])
+
+  // 安装/卸载进行中的实时进度区：不确定进度条（动画光带）+ 最近输出行
+  const progressView = task
+    ? h('div', { className: styles.progress },
+      h('div', {
+        className: task.status === 'failed' ? `${styles.progressBar} ${styles.progressBarFail}` : styles.progressBar,
+      }),
+      task.lines.length > 0
+        ? h('pre', { className: styles.progressLog }, task.lines.slice(0, 6).reverse().join('\n'))
+        : null,
+    )
+    : null
 
   return h('div', { className: styles.root },
     h('div', { className: styles.header },
@@ -552,19 +598,20 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         }, t('browseAll', { n: total })),
       ),
     ),
-    // 信任确认弹窗：点「复制安装命令」后浮出，确认后才复制命令引导去终端执行
+    // 信任确认弹窗：点「安装」后浮出；安装进行中锁定（不可关闭），实时显示进度
     confirmPlugin && h('div', {
       className: styles.overlay,
       onClick: (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) setConfirmPlugin(null)
+        if (e.target === e.currentTarget && !installing) setConfirmPlugin(null)
       },
     },
       h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
         h('div', { className: styles.modalHead },
-          h('div', { className: styles.modalTitle }, t('confirmTitle')),
+          h('div', { className: styles.modalTitle }, installing ? t('installing') : t('confirmTitle')),
           h('button', {
             className: styles.modalClose,
             'aria-label': t('confirmCancel'),
+            disabled: installing,
             onClick: () => setConfirmPlugin(null),
           }, '\u00d7'),
         ),
@@ -579,6 +626,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
           h('span', { className: styles.modalValue, title: confirmPlugin.source.repo }, confirmPlugin.source.repo),
         ) : null,
         h('div', { className: styles.modalCmd }, `dsh plugin add ${confirmPlugin.source?.repo ?? ''}`),
+        progressView,
         h('div', { className: styles.modalActions },
           h('button', {
             className: styles.modalCopy,
@@ -593,19 +641,20 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         ),
       ),
     ),
-    // 卸载确认弹窗：点卡片「卸载」后浮出，确认后由服务端 spawn 官方 CLI 移除
+    // 卸载确认弹窗：点卡片「卸载」后浮出；卸载进行中锁定，实时显示进度
     uninstallPlugin && h('div', {
       className: styles.overlay,
       onClick: (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) setUninstallPlugin(null)
+        if (e.target === e.currentTarget && !uninstalling) setUninstallPlugin(null)
       },
     },
       h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
         h('div', { className: styles.modalHead },
-          h('div', { className: styles.modalTitle }, t('uninstallTitle')),
+          h('div', { className: styles.modalTitle }, uninstalling ? t('uninstalling') : t('uninstallTitle')),
           h('button', {
             className: styles.modalClose,
             'aria-label': t('confirmCancel'),
+            disabled: uninstalling,
             onClick: () => setUninstallPlugin(null),
           }, '\u00d7'),
         ),
@@ -615,6 +664,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
           h('span', { className: styles.modalValue, title: uninstallPlugin.displayName ?? uninstallPlugin.slug },
             uninstallPlugin.displayName ?? uninstallPlugin.slug),
         ),
+        progressView,
         h('div', { className: styles.modalActions },
           h('button', {
             className: styles.modalCancel,

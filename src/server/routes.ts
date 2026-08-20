@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { githubTarget, readProfileArg, runPluginMutation, validPackageName } from './install.ts'
+import { getTask, githubTarget, hasRunningTask, readProfileArg, startPluginMutation, validPackageName } from './install.ts'
 
 export interface WebRoute {
   kind: 'exact'
@@ -98,14 +98,13 @@ async function readJsonBody(request: IncomingMessage): Promise<unknown> {
  */
 export function mountPluginHubRoutes(webServer: WebServerService, profile: string): () => void {
   if (!PROFILE_RE.test(profile)) throw new Error(`invalid profile name: ${profile}`)
-  let mutating = false
   const disposers = [
     webServer.register({
       kind: 'exact',
       path: '/dsh-plugin-hub/install',
       handler: async (request, response) => {
         if (!requireTrustedPost(request, response)) return
-        if (mutating) {
+        if (hasRunningTask()) {
           sendJson(response, 409, { error: 'another plugin operation is already running' })
           return
         }
@@ -118,24 +117,15 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             sendJson(response, 400, { error: 'unsupported install target' })
             return
           }
-          mutating = true
-          try {
-            const result = await runPluginMutation({
-              action: 'add',
-              profile,
-              target,
-              timeoutMs: COMMAND_TIMEOUT_MS,
-              env: { ...process.env, CI: 'true' },
-            })
-            const ok = result.exitCode === 0 && !result.timedOut
-            sendJson(response, ok ? 200 : 502, {
-              ok,
-              ...result,
-              installed: readInstalled(profile),
-            })
-          } finally {
-            mutating = false
-          }
+          // Kick off the CLI in the background; the client polls /status for progress
+          const task = startPluginMutation({
+            action: 'add',
+            profile,
+            target,
+            timeoutMs: COMMAND_TIMEOUT_MS,
+            env: { ...process.env, CI: 'true' },
+          })
+          sendJson(response, 200, { ok: true, task: task.id })
         } catch (error) {
           sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
         }
@@ -146,7 +136,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       path: '/dsh-plugin-hub/uninstall',
       handler: async (request, response) => {
         if (!requireTrustedPost(request, response)) return
-        if (mutating) {
+        if (hasRunningTask()) {
           sendJson(response, 409, { error: 'another plugin operation is already running' })
           return
         }
@@ -163,27 +153,32 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             sendJson(response, 400, { error: 'plugin is not installed' })
             return
           }
-          mutating = true
-          try {
-            const result = await runPluginMutation({
-              action: 'remove',
-              profile,
-              target: name,
-              timeoutMs: COMMAND_TIMEOUT_MS,
-              env: { ...process.env, CI: 'true' },
-            })
-            const ok = result.exitCode === 0 && !result.timedOut
-            sendJson(response, ok ? 200 : 502, {
-              ok,
-              ...result,
-              installed: readInstalled(profile),
-            })
-          } finally {
-            mutating = false
-          }
+          const task = startPluginMutation({
+            action: 'remove',
+            profile,
+            target: name,
+            timeoutMs: COMMAND_TIMEOUT_MS,
+            env: { ...process.env, CI: 'true' },
+          })
+          sendJson(response, 200, { ok: true, task: task.id })
         } catch (error) {
           sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
         }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/status',
+      handler: (request, response) => {
+        if (!requireMethod(request, response, 'GET')) return
+        const url = new URL(request.url ?? '/', 'http://localhost')
+        const id = Number(url.searchParams.get('task'))
+        const task = Number.isInteger(id) ? getTask(id) : undefined
+        if (!task) {
+          sendJson(response, 404, { error: 'task not found' })
+          return
+        }
+        sendJson(response, 200, { task })
       },
     }),
     webServer.register({

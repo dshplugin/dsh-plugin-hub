@@ -33,6 +33,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "build:client": "tsdown && node scripts/normalize-client-banner.mjs",
     "readme:stats": "node scripts/sync-readme-stats.mjs",
+    "reload": "bash scripts/reload-dsh.sh",
     "typecheck": "npm run typecheck:client && npm run typecheck:server",
     "typecheck:client": "tsc -p tsconfig.client.json --noEmit",
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
