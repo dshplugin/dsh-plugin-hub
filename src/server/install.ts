@@ -36,6 +36,8 @@ export interface InstallTask {
   status: 'running' | 'done' | 'failed'
   timedOut: boolean
   exitCode: number | null
+  /** 0-100 估算进度：解析 pnpm 的 `Progress: resolved…` 输出，阶段行兜底 */
+  progress: number
   /** Newest output lines first (consumer shows the tail). */
   lines: string[]
 }
@@ -60,15 +62,42 @@ export function getTask(id: number): InstallTask | undefined {
 
 /** True while any mutation is still running (mutex for the install routes). */
 export function hasRunningTask(): boolean {
-  for (const task of tasks.values()) {
-    if (task.status === 'running') return true
-  }
-  return false
+  let running = false
+  tasks.forEach((task) => {
+    if (task.status === 'running') running = true
+  })
+  return running
 }
 
 function pushLine(task: InstallTask, line: string): void {
   task.lines.unshift(line)
   if (task.lines.length > MAX_TASK_LINES) task.lines.length = MAX_TASK_LINES
+  task.progress = Math.max(task.progress, estimateProgress(line))
+}
+
+/**
+ * Estimate 0-100 progress from one CLI output line. pnpm emits
+ * `Progress: resolved N, reused X, downloaded Y, added Z` during the fetch
+ * phase; resolution/install phase lines bump the estimate towards done.
+ */
+function estimateProgress(line: string): number {
+  const progress = line.match(/Progress:\s*(.+)/)
+  if (progress) {
+    let total = 0
+    let done = 0
+    for (const part of progress[1].split(',')) {
+      const [raw, label] = part.trim().split(/\s+/)
+      const value = Number(raw)
+      if (label === 'resolved') total = value
+      else if (label === 'reused' || label === 'downloaded' || label === 'added' || label === 'imported') {
+        done += value
+      }
+    }
+    if (total > 0) return Math.min(90, Math.round((done / total) * 100))
+  }
+  if (/^dependencies:|^Packages:/.test(line)) return 92
+  if (/^Done in\b/.test(line)) return 96
+  return 0
 }
 
 /** Build a safe `github:<owner>/<repo>` target, or null when the repo is unsafe. */
@@ -123,16 +152,17 @@ export function startPluginMutation(options: {
   timeoutMs?: number
   env?: NodeJS.ProcessEnv
 }): InstallTask {
-  const task: InstallTask = { id: nextTaskId, status: 'running', timedOut: false, exitCode: null, lines: [] }
+  const task: InstallTask = { id: nextTaskId, status: 'running', timedOut: false, exitCode: null, progress: 0, lines: [] }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
   tasks.set(task.id, task)
   if (tasks.size > MAX_TASKS) {
-    for (const id of tasks.keys()) {
-      if (tasks.get(id)?.status !== 'running') {
+    let removed = false
+    tasks.forEach((candidate, id) => {
+      if (!removed && candidate.status !== 'running') {
         tasks.delete(id)
-        break
+        removed = true
       }
-    }
+    })
   }
   void runPluginMutation({ ...options, task })
   return task
@@ -212,6 +242,7 @@ export function runPluginMutation(options: {
         task.exitCode = code
         task.timedOut = timedOut
         task.status = timedOut || code !== 0 ? 'failed' : 'done'
+        if (task.status === 'done') task.progress = 100
         pushLine(task, timedOut ? '[timed out]' : `[exit ${code ?? '?'}]`)
       }
       resolvePromise({ exitCode: code, timedOut, error: null, stdout, stderr })

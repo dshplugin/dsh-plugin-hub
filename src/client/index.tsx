@@ -162,8 +162,8 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [uninstalling, setUninstalling] = useState(false)
   /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
   const [installed, setInstalled] = useState<Record<string, string>>({})
-  /** 后台安装/卸载任务：服务端 spawn CLI 后返回 task id，轮询 /status 拿实时输出 */
-  const [task, setTask] = useState<{ id: number; status: 'running' | 'done' | 'failed'; lines: string[] } | null>(null)
+  /** 后台安装/卸载任务：服务端 spawn CLI 后返回 task id，轮询 /status 拿实时输出与百分比进度 */
+  const [task, setTask] = useState<{ id: number; status: 'running' | 'done' | 'failed'; progress: number; lines: string[] } | null>(null)
   /** 轮询定时器句柄（卸载/关闭时清理） */
   const pollRef = useRef<number | null>(null)
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
@@ -358,12 +358,12 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       try {
         const res = await fetch(`/dsh-plugin-hub/status?task=${taskId}`, { cache: 'no-store' })
         if (!res.ok) throw new Error(`status ${res.status}`)
-        const data = await res.json() as { task?: { id: number; status: string; lines?: string[] } }
+        const data = await res.json() as { task?: { id: number; status: string; progress?: number; lines?: string[] } }
         const t = data.task
         if (!t) throw new Error('no task')
         if (t.status === 'done') finishTask(true, kind)
         else if (t.status === 'failed') finishTask(false, kind)
-        else setTask({ id: t.id, status: 'running', lines: t.lines ?? [] })
+        else setTask({ id: t.id, status: 'running', progress: t.progress ?? 0, lines: t.lines ?? [] })
       } catch {
         finishTask(false, kind)
       }
@@ -383,7 +383,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       })
       const data = await res.json() as { ok?: boolean; task?: number }
       if (!data.ok || typeof data.task !== 'number') throw new Error('start failed')
-      setTask({ id: data.task, status: 'running', lines: [] })
+      setTask({ id: data.task, status: 'running', progress: 0, lines: [] })
       pollTask(data.task, 'install')
     } catch {
       finishTask(false, 'install')
@@ -403,7 +403,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       })
       const data = await res.json() as { ok?: boolean; task?: number }
       if (!data.ok || typeof data.task !== 'number') throw new Error('start failed')
-      setTask({ id: data.task, status: 'running', lines: [] })
+      setTask({ id: data.task, status: 'running', progress: 0, lines: [] })
       pollTask(data.task, 'uninstall')
     } catch {
       finishTask(false, 'uninstall')
@@ -426,12 +426,18 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     return counts
   }, [plugins, total])
 
-  // 安装/卸载进行中的实时进度区：不确定进度条（动画光带）+ 最近输出行
+  // 安装/卸载进行中的实时进度区：真实百分比进度条 + 最近输出行
   const progressView = task
     ? h('div', { className: styles.progress },
-      h('div', {
-        className: task.status === 'failed' ? `${styles.progressBar} ${styles.progressBarFail}` : styles.progressBar,
-      }),
+      h('div', { className: styles.progressHead },
+        h('span', { className: styles.progressText }, `${Math.round(task.progress)}%`),
+      ),
+      h('div', { className: styles.progressTrack },
+        h('div', {
+          className: task.status === 'failed' ? `${styles.progressFill} ${styles.progressFillFail}` : styles.progressFill,
+          style: { width: `${task.progress}%` },
+        }),
+      ),
       task.lines.length > 0
         ? h('pre', { className: styles.progressLog }, task.lines.slice(0, 6).reverse().join('\n'))
         : null,

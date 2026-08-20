@@ -734,34 +734,37 @@
   margin: 10px 0 2px;
 }
 
-/* 不确定进度条：光带左右滑动，模拟 CLI 正在执行 */
-.progressBar {
+.progressHead {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 3px;
+}
+
+.progressText {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+}
+
+/* 进度条轨道 + 真实百分比填充（宽度由任务估算值驱动） */
+.progressTrack {
   height: 4px;
   border-radius: 2px;
   background: var(--dsw-alias-border-l2, #e5e7eb);
   overflow: hidden;
-  position: relative;
 }
 
-.progressBar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 40%;
+.progressFill {
   height: 100%;
   border-radius: 2px;
   background: var(--dsw-alias-brand-primary, #4f6ef7);
-  animation: progressSlide 1.1s ease-in-out infinite;
+  transition: width 320ms ease;
 }
 
-.progressBarFail::before {
+.progressFillFail {
   background: var(--dsw-alias-state-danger-primary, #d1242f);
-}
-
-@keyframes progressSlide {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(260%); }
 }
 
 /* 最近输出行：终端风格，随进度实时滚动 */

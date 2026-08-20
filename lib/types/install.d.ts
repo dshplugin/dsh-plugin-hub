@@ -10,6 +10,8 @@ export interface InstallTask {
     status: 'running' | 'done' | 'failed';
     timedOut: boolean;
     exitCode: number | null;
+    /** 0-100 估算进度：解析 pnpm 的 `Progress: resolved…` 输出，阶段行兜底 */
+    progress: number;
     /** Newest output lines first (consumer shows the tail). */
     lines: string[];
 }
