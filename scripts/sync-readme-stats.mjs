@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * 将 README 中的插件数量从写死的约数自动更新为数据快照的真实值。
+ * 将 README 中的插件数量从写死的约数自动更新为官网的真实值。
  *
- * 用法：npm run readme:stats   （sync:data 同步数据后会自动调用）
+ * 用法：npm run readme:stats
  * 数字口径：total = 收录总数；verified = 人工精选验证数（compatibility.status === 'verified'）。
+ * 数据源：dsh-plugin.org 在线 API（每日更新），无需本地快照。
  * 仅替换匹配关键词的行，避免误伤 README 中的其他数字。
  */
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -12,11 +13,17 @@ import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
-// 以中文快照为准（zh/en 收录同一批插件）
-const raw = JSON.parse(readFileSync(join(root, 'data/plugins.zh.json'), 'utf8'))
+// 以中文在线 API 为准（zh/en 收录同一批插件）；兼容官网短 key 结构（v = verified）与长字段结构
+const res = await fetch('https://dsh-plugin.org/api/plugins.zh.json')
+if (!res.ok) {
+  console.error(`readme:stats — 在线 API 拉取失败（HTTP ${res.status}），中止`)
+  process.exit(1)
+}
+const raw = await res.json()
 const list = Array.isArray(raw) ? raw : (raw.plugins ?? [])
+const isShort = list.length > 0 && typeof list[0]?.s === 'string'
 const total = list.length
-const verified = list.filter((p) => p.compatibility?.status === 'verified').length
+const verified = list.filter((p) => (isShort ? p.v === 'verified' : p.compatibility?.status === 'verified')).length
 
 const fmt = (n) => n.toLocaleString('en-US')
 const totalStr = fmt(total)

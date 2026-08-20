@@ -16,56 +16,56 @@ window.__ModuleLoader__.load({ id: "dsh-plugin-hub", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Section_module_css_default = {
-			"stats": "XlLbKa_stats",
-			"toast": "XlLbKa_toast",
-			"tabActive": "XlLbKa_tabActive",
-			"controls": "XlLbKa_controls",
-			"cardHead": "XlLbKa_cardHead",
+			"sort": "XlLbKa_sort",
+			"card": "XlLbKa_card",
+			"desc": "XlLbKa_desc",
+			"star": "XlLbKa_star",
+			"installBtnCopied": "XlLbKa_installBtnCopied",
+			"categoryBadge": "XlLbKa_categoryBadge",
+			"brandText": "XlLbKa_brandText",
 			"brand": "XlLbKa_brand",
+			"retryBtn": "XlLbKa_retryBtn",
+			"root": "XlLbKa_root",
+			"controls": "XlLbKa_controls",
 			"openBtn": "XlLbKa_openBtn",
+			"openArrow": "XlLbKa_openArrow",
 			"tabCount": "XlLbKa_tabCount",
+			"stats": "XlLbKa_stats",
+			"actions": "XlLbKa_actions",
+			"stateTitle": "XlLbKa_stateTitle",
+			"toast": "XlLbKa_toast",
+			"state": "XlLbKa_state",
+			"header": "XlLbKa_header",
+			"tabs": "XlLbKa_tabs",
+			"verified": "XlLbKa_verified",
 			"adText": "XlLbKa_adText",
+			"detailBtn": "XlLbKa_detailBtn",
+			"footer": "XlLbKa_footer",
+			"footText": "XlLbKa_footText",
+			"footLink": "XlLbKa_footLink",
 			"body": "XlLbKa_body",
 			"tagline": "XlLbKa_tagline",
-			"openArrow": "XlLbKa_openArrow",
-			"brandText": "XlLbKa_brandText",
-			"list": "XlLbKa_list",
-			"title": "XlLbKa_title",
-			"cardTitle": "XlLbKa_cardTitle",
-			"categoryBadge": "XlLbKa_categoryBadge",
-			"topics": "XlLbKa_topics",
-			"cardSide": "XlLbKa_cardSide",
-			"header": "XlLbKa_header",
-			"date": "XlLbKa_date",
-			"tabs": "XlLbKa_tabs",
-			"installBtn": "XlLbKa_installBtn",
-			"installBtnCopied": "XlLbKa_installBtnCopied",
-			"stateTitle": "XlLbKa_stateTitle",
-			"stateDesc": "XlLbKa_stateDesc",
-			"retryBtn": "XlLbKa_retryBtn",
-			"footer": "XlLbKa_footer",
-			"footLink": "XlLbKa_footLink",
-			"adBadge": "XlLbKa_adBadge",
-			"verified": "XlLbKa_verified",
-			"desc": "XlLbKa_desc",
-			"detailBtn": "XlLbKa_detailBtn",
-			"topic": "XlLbKa_topic",
-			"langBtn": "XlLbKa_langBtn",
-			"actions": "XlLbKa_actions",
-			"root": "XlLbKa_root",
-			"footText": "XlLbKa_footText",
-			"search": "XlLbKa_search",
-			"tabCountActive": "XlLbKa_tabCountActive",
-			"card": "XlLbKa_card",
-			"fork": "XlLbKa_fork",
-			"state": "XlLbKa_state",
-			"sort": "XlLbKa_sort",
-			"adBanner": "XlLbKa_adBanner",
 			"tab": "XlLbKa_tab",
-			"toastIn": "XlLbKa_toastIn",
-			"star": "XlLbKa_star",
+			"adBadge": "XlLbKa_adBadge",
+			"search": "XlLbKa_search",
+			"tabActive": "XlLbKa_tabActive",
+			"tabCountActive": "XlLbKa_tabCountActive",
+			"list": "XlLbKa_list",
+			"langBtn": "XlLbKa_langBtn",
 			"cardMain": "XlLbKa_cardMain",
-			"adArrow": "XlLbKa_adArrow"
+			"fork": "XlLbKa_fork",
+			"date": "XlLbKa_date",
+			"topic": "XlLbKa_topic",
+			"cardSide": "XlLbKa_cardSide",
+			"stateDesc": "XlLbKa_stateDesc",
+			"cardTitle": "XlLbKa_cardTitle",
+			"installBtn": "XlLbKa_installBtn",
+			"cardHead": "XlLbKa_cardHead",
+			"adBanner": "XlLbKa_adBanner",
+			"adArrow": "XlLbKa_adArrow",
+			"topics": "XlLbKa_topics",
+			"toastIn": "XlLbKa_toastIn",
+			"title": "XlLbKa_title"
 		};
 		//#endregion
 		//#region src/client/locales.ts
@@ -171,10 +171,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin-hub", factory: (require) => {
 			"fun"
 		];
 		/**
-		* 兼容两种数据源结构：
-		*  - 在线 API（dsh-plugin.org/api/plugins.{lang}.json）：已过滤 verified，且字段为短 key（s/o/n/c/t/f/d/r/v/u/a/sg/fk）；
-		*  - 内置快照（/dsh-plugin-hub/data.{lang}.json）：站点原始长字段。
-		* 统一归一化为 HubPlugin，保证渲染逻辑只认一种结构。
+		* 归一化在线 API（dsh-plugin.org/api/plugins.{lang}.json）返回的短 key 结构
+		* （s/o/n/c/t/f/d/r/v/u/a/sg/fk），统一为 HubPlugin，保证渲染逻辑只认一种结构。
 		*/
 		function normalize(raw) {
 			if (typeof raw.s === "string") return {
@@ -312,7 +310,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin-hub", factory: (require) => {
 		function PluginHubSection({ t: _hostT, locale }) {
 			const [lang, setLang] = (0, react.useState)(locale.getSnapshot().active);
 			const [plugins, setPlugins] = (0, react.useState)(null);
-			/** 收录/精选统计（官网 /api/stats.json 实时拉取，失败时由本地快照兜底计算） */
+			/** 收录/精选统计（官网 /api/stats.json 实时拉取） */
 			const [stats, setStats] = (0, react.useState)(null);
 			const [failed, setFailed] = (0, react.useState)(false);
 			const [reloadKey, setReloadKey] = (0, react.useState)(0);
@@ -345,17 +343,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin-hub", factory: (require) => {
 					if (!res.ok) throw new Error(String(res.status));
 					return res.json();
 				});
-				fetchData(`https://dsh-plugin.org/api/plugins.${lang}.json`).then(apply).catch(() => fetchData(`/dsh-plugin-hub/data.${lang}.json`).then(apply).catch(fail));
+				fetchData(`https://dsh-plugin.org/api/plugins.${lang}.json`).then(apply).catch(fail);
 				const applyStats = (s) => {
 					if (!cancelled && s && typeof s.total === "number" && typeof s.verified === "number") setStats(s);
 				};
-				fetchData("https://dsh-plugin.org/api/stats.json").then((s) => applyStats(s)).catch(() => fetchData(`/dsh-plugin-hub/data.${lang}.json`).then((data) => {
-					const list = (Array.isArray(data) ? data : []).map((item) => normalize(item));
-					applyStats({
-						total: list.length,
-						verified: list.filter((p) => p.compatibility?.status === "verified").length
-					});
-				}).catch(() => {}));
+				fetchData("https://dsh-plugin.org/api/stats.json").then((s) => applyStats(s)).catch(() => {});
 				return () => {
 					cancelled = true;
 				};
@@ -415,6 +407,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin-hub", factory: (require) => {
 			};
 			const total = plugins?.length ?? 0;
 			const count = visible.length;
+			const statsTotal = stats?.total ?? total;
+			const statsVerified = stats?.verified ?? 0;
 			const categoryCounts = (0, react.useMemo)(() => {
 				const counts = { all: total };
 				for (const p of plugins ?? []) if (p.category) counts[p.category] = (counts[p.category] ?? 0) + 1;

@@ -83,7 +83,7 @@ Publish your plugin to GitHub and add the `dsh-plugin` topic — it will be disc
 npm install
 npm run check        # typecheck + build
 npm run build        # build client/client.js (committed artifact)
-npm run sync:data    # sync the data snapshot from the website
+npm run readme:stats # refresh README plugin counts from the live website API
 ```
 
 Structure:
@@ -93,8 +93,7 @@ src/client/       browser-side plugin (registers the settings.section slot)
 lib/index.js      host loader entry (placeholder)
 client/client.js  tsdown build artifact (committed & published)
 cordis.patch.yml  dsh bundle patch (injects the plugin line into profiles)
-data/             bundled data snapshot (synced via sync:data)
-scripts/          tooling scripts (data sync, etc.)
+scripts/          tooling scripts
 ```
 
 ## Contributing

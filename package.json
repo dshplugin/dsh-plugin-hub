@@ -31,7 +31,6 @@
   "scripts": {
     "build": "npm run build:client",
     "build:client": "tsdown && node scripts/normalize-client-banner.mjs",
-    "sync:data": "node scripts/sync-data.mjs && npm run readme:stats",
     "readme:stats": "node scripts/sync-readme-stats.mjs",
     "typecheck": "tsc -p tsconfig.client.json --noEmit",
     "check": "npm run typecheck && npm run build",
@@ -67,7 +66,6 @@
     "lib",
     "src",
     "client",
-    "data",
     "cordis.patch.yml",
     "LICENSE"
   ],

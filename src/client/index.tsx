@@ -64,10 +64,8 @@ const CATEGORY_ORDER = [
 ]
 
 /**
- * 兼容两种数据源结构：
- *  - 在线 API（dsh-plugin.org/api/plugins.{lang}.json）：已过滤 verified，且字段为短 key（s/o/n/c/t/f/d/r/v/u/a/sg/fk）；
- *  - 内置快照（/dsh-plugin-hub/data.{lang}.json）：站点原始长字段。
- * 统一归一化为 HubPlugin，保证渲染逻辑只认一种结构。
+ * 归一化在线 API（dsh-plugin.org/api/plugins.{lang}.json）返回的短 key 结构
+ * （s/o/n/c/t/f/d/r/v/u/a/sg/fk），统一为 HubPlugin，保证渲染逻辑只认一种结构。
  */
 function normalize(raw: Record<string, unknown>): HubPlugin {
   if (typeof raw.s === 'string') {
@@ -144,7 +142,7 @@ function relTime(iso: string | undefined, t: SectionProps['t']): string {
 function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [lang, setLang] = useState<LocaleId>(locale.getSnapshot().active)
   const [plugins, setPlugins] = useState<HubPlugin[] | null>(null)
-  /** 收录/精选统计（官网 /api/stats.json 实时拉取，失败时由本地快照兜底计算） */
+  /** 收录/精选统计（官网 /api/stats.json 实时拉取） */
   const [stats, setStats] = useState<{ total: number; verified: number } | null>(null)
   const [failed, setFailed] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
@@ -170,7 +168,7 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     setFailed(false)
     const apply = (data: unknown) => {
       if (cancelled) return
-      // 在线 API 已只返回 verified；快照兜底时再过滤一次，保证只展示人工验证通过的插件。
+      // 在线 API 已只返回 verified；再过滤一次，保证只展示人工验证通过的插件。
       const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
       setPlugins(list.filter((p) => p.compatibility?.status === 'verified'))
     }
@@ -182,23 +180,16 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         if (!res.ok) throw new Error(String(res.status))
         return res.json()
       })
-    // 优先在线拉取最新数据（dsh-plugin.org，走 CDN 缓存），插件不发布也能拿到每日更新；
-    // 拉取失败时回退到插件内置快照，保证离线也能浏览。
+    // 在线拉取最新数据（dsh-plugin.org，走 CDN 缓存），插件不发布也能拿到每日更新。
     const remote = `https://dsh-plugin.org/api/plugins.${lang}.json`
-    fetchData(remote).then(apply).catch(() => fetchData(`/dsh-plugin-hub/data.${lang}.json`).then(apply).catch(fail))
-    // 收录/精选统计：在线 /api/stats.json 优先；失败时从内置完整快照本地计算，保证数字真实不写死。
+    fetchData(remote).then(apply).catch(fail)
+    // 收录/精选统计：实时拉取官网 /api/stats.json。
     const applyStats = (s: { total: number; verified: number }) => {
       if (!cancelled && s && typeof s.total === 'number' && typeof s.verified === 'number') setStats(s)
     }
     fetchData('https://dsh-plugin.org/api/stats.json')
       .then((s) => applyStats(s as { total: number; verified: number }))
-      .catch(() => fetchData(`/dsh-plugin-hub/data.${lang}.json`).then((data) => {
-        const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
-        applyStats({
-          total: list.length,
-          verified: list.filter((p) => p.compatibility?.status === 'verified').length,
-        })
-      }).catch(() => {}))
+      .catch(() => {})
     return () => { cancelled = true }
   }, [lang, reloadKey])
 
@@ -270,6 +261,10 @@ function PluginHubSection({ t: _hostT, locale }: SectionProps) {
 
   const total = plugins?.length ?? 0
   const count = visible.length
+
+  // 统计数字：官网 /api/stats.json 优先；拉取失败时用已加载列表兜底，避免展示 undefined。
+  const statsTotal = stats?.total ?? total
+  const statsVerified = stats?.verified ?? 0
 
   // Per-category plugin counts shown on the category chips.
   const categoryCounts = useMemo(() => {

@@ -83,7 +83,7 @@ dsh plugin --profile web add github:dshplugin/dsh-plugin-hub
 npm install
 npm run check        # typecheck + build
 npm run build        # 构建 client/client.js（提交产物）
-npm run sync:data    # 同步官网数据快照
+npm run readme:stats # 从官网在线 API 刷新 README 插件数量
 ```
 
 结构：
@@ -93,8 +93,7 @@ src/client/       浏览器端插件（注册 settings.section 插槽，嵌入 i
 lib/index.js      宿主加载器入口（占位，无宿主行为）
 client/client.js  tsdown 构建产物（提交并发布）
 cordis.patch.yml  dsh bundle patch（向 profile 注入插件行）
-data/             内置数据快照（由 sync:data 同步）
-scripts/          数据同步等工具脚本
+scripts/          工具脚本
 ```
 
 ## 贡献
