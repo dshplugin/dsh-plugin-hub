@@ -9,8 +9,8 @@
 #     The running server stays up; just refresh the page to see the change.
 #
 # Usage:
-#   ./scripts/dev-dsh.sh                 # smart sync (build + decide)
-#   ./scripts/dev-dsh.sh --port=8080 --profile=dev
+#   ./scripts/run/dev-dsh.sh                 # smart sync (build + decide)
+#   ./scripts/run/dev-dsh.sh --port=8080 --profile=dev
 set -u
 
 PORT=7923
@@ -35,7 +35,7 @@ echo "[dev] building plugin (server + client)…"
 # No plugin copy yet — fall back to a normal full reload.
 [[ -d "$TARGET" ]] || {
   echo "[dev] plugin copy missing — doing a full reload instead."
-  exec bash "$REPO_DIR/scripts/reload-dsh.sh" --port="$PORT" --profile="$PROFILE"
+  exec bash "$REPO_DIR/scripts/run/reload-dsh.sh" --port="$PORT" --profile="$PROFILE"
 }
 
 if diff -rq "$REPO_DIR/lib" "$TARGET/lib" >/dev/null 2>&1; then
@@ -45,5 +45,5 @@ if diff -rq "$REPO_DIR/lib" "$TARGET/lib" >/dev/null 2>&1; then
   echo "[dev] client synced. Refresh http://localhost:$PORT — server NOT restarted."
 else
   echo "[dev] server bundle changed — full reload (build already done)."
-  exec bash "$REPO_DIR/scripts/reload-dsh.sh" --skip-build --port="$PORT" --profile="$PROFILE"
+  exec bash "$REPO_DIR/scripts/run/reload-dsh.sh" --skip-build --port="$PORT" --profile="$PROFILE"
 fi

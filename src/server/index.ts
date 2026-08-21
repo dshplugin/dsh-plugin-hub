@@ -3,7 +3,7 @@
  * web server service is available. The browser bundle (src/client) talks to
  * these same-origin routes to perform real installs from inside the app.
  */
-import { readProfileArg } from './services/install.ts'
+import { readProfileArg, type LoaderHandle } from './services/install.ts'
 import { mountPluginHubRoutes, type WebServerService } from './http/routes.ts'
 
 export const name = 'dsh-plugin'
@@ -16,6 +16,8 @@ export interface Config {
 /** The subset of the cordis host context this plugin touches. */
 interface HostContext {
   webServer: WebServerService
+  /** 运行中 loader：卸载成功后主动移除条目、立即生效（宿主未提供时卸载仍需重启） */
+  loader?: LoaderHandle
   inject(services: string[], callback: (host: HostContext) => void): void
   effect(callback: () => void, label?: string): void
 }
@@ -28,6 +30,6 @@ interface HostContext {
 export function apply(ctx: HostContext, config: Config = {}): void {
   const profile = config.profile ?? readProfileArg('web')
   ctx.inject(['webServer'], (host) => {
-    host.effect(() => mountPluginHubRoutes(host.webServer, profile), 'dsh-plugin: http routes')
+    host.effect(() => mountPluginHubRoutes(host.webServer, profile, host.loader), 'dsh-plugin: http routes')
   })
 }

@@ -1,7 +1,7 @@
 <div align="center">
 
 <p>
-  <img src="docs/logo.svg" alt="DSH-Plugin Hub" width="96" height="96" />
+  <img src="docs/assets/logo.svg" alt="DSH-Plugin Hub" width="96" height="96" />
 </p>
 
 # DSH-Plugin Hub for DeepSeek Harness
@@ -9,6 +9,9 @@
 **DeepSeek Harness 社区插件市场：收录 4,261 个 DSH plugin，人工精选验证 2,487**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
+[![CI](https://github.com/dshplugin/dsh-plugin-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/dshplugin/dsh-plugin-hub/actions)
+[![Listed on DSH-Plugin Hub](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/dshplugin/dsh-plugin-hub)
 [![GitHub stars](https://img.shields.io/github/stars/dshplugin/dsh-plugin-hub.svg?style=flat-square)](https://github.com/dshplugin/dsh-plugin-hub)
 [![Website](https://img.shields.io/badge/website-dsh--plugin.org-blue.svg?style=flat-square)](https://dsh-plugin.org)
 [![Topic](https://img.shields.io/badge/topic-dsh--plugin-0e7490.svg?style=flat-square)](https://github.com/topics/dsh-plugin)
@@ -26,7 +29,7 @@
 DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方插件开发规范构建的开源插件，安装进「设置 → 插件中心」后，无需离开应用即可浏览、搜索并一键安装社区插件。本项目为独立社区项目，与 DeepSeek Harness 官方无隶属关系。
 
 <p align="center">
-  <img src="docs/screenshot-plugin-hub-en.png" alt="DSH-Plugin Hub in DeepSeek Harness" width="840">
+  <img src="docs/assets/screenshot-plugin-hub-en.png" alt="DSH-Plugin Hub in DeepSeek Harness" width="840">
 </p>
 
 ## 插件中心特性
@@ -95,7 +98,8 @@ src/client/       浏览器端插件（注册 settings.section 插槽，嵌入 i
 lib/index.js      宿主加载器入口（占位，无宿主行为）
 client/client.js  tsdown 构建产物（提交并发布）
 cordis.patch.yml  dsh bundle patch（向 profile 注入插件行）
-scripts/          工具脚本
+scripts/run/    启动/重载脚本（dev、reload）
+scripts/tools/  构建与发布工具（banner 检查、统计同步、发布校验）
 ```
 
 ## 贡献

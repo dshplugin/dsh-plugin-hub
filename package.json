@@ -11,6 +11,17 @@
     "url": "git+https://github.com/dshplugin/dsh-plugin-hub.git"
   },
   "homepage": "https://dsh-plugin.org",
+  "bugs": {
+    "url": "https://github.com/dshplugin/dsh-plugin-hub/issues"
+  },
+  "author": "DSH-Plugin Hub contributors",
+  "funding": {
+    "type": "custom",
+    "url": "https://dsh-plugin.org"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
   "keywords": [
     "deepseek",
     "deepseek-harness",
@@ -31,10 +42,10 @@
   "scripts": {
     "build": "npm run build:server && npm run build:client",
     "build:server": "rm -rf lib && tsc -p tsconfig.server.json",
-    "build:client": "tsdown && node scripts/normalize-client-banner.mjs",
-    "readme:stats": "node scripts/sync-readme-stats.mjs",
-    "reload": "bash scripts/reload-dsh.sh",
-    "dev": "bash scripts/dev-dsh.sh",
+    "build:client": "tsdown && node scripts/tools/normalize-client-banner.mjs",
+    "readme:stats": "node scripts/tools/sync-readme-stats.mjs",
+    "reload": "bash scripts/run/reload-dsh.sh",
+    "dev": "bash scripts/run/dev-dsh.sh",
     "test": "node --test",
     "test:watch": "node --test --watch",
     "typecheck": "npm run typecheck:client && npm run typecheck:server && npm run typecheck:test",
@@ -42,7 +53,7 @@
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
     "check": "npm run typecheck && npm run test && npm run build",
-    "verify:release": "node scripts/verify-release.mjs",
+    "verify:release": "node scripts/tools/verify-release.mjs",
     "prepublishOnly": "npm run verify:release",
     "prepack": "npm run build"
   },

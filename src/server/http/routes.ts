@@ -6,10 +6,11 @@
  */
 import { readFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { homedir, release } from 'node:os'
+import { dirname, join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
-import { activeTask, cancelTask, getTask, githubTarget, readProfileArg, startPluginMutation, validPackageName } from '../services/install.ts'
+import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubTarget, hasQueuedTarget, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install.ts'
+import { recordInstalledVersion, readInstalledVersions, removeInstalledVersion } from '../services/installed-versions.ts'
 
 export interface WebRoute {
   kind: 'exact'
@@ -41,6 +42,41 @@ export function readInstalled(profile: string): Record<string, string> {
     )
   } catch {
     return {}
+  }
+}
+
+/** 宿主 dsh CLI 版本：从入口（process.argv[1]）向上找最近的 dsh/harness 相关 package.json；找不到返回 null。 */
+function hostDshVersion(): string | null {
+  const entry = process.argv[1]
+  if (entry === undefined) return null
+  let dir = dirname(resolve(entry))
+  for (let depth = 0; depth < 4; depth++) {
+    try {
+      const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as { name?: string; version?: string }
+      const name = manifest.name ?? ''
+      if (typeof manifest.version === 'string' && (name === 'dsh' || name.includes('dsh') || name.includes('harness'))) {
+        return manifest.version
+      }
+    } catch {
+      /* not a package root — keep walking up */
+    }
+    const parent = dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  return null
+}
+
+/** 宿主环境快照：提交 bug 时随 issue 附上，便于作者复现（前端 /env 端点返回）。 */
+function hostEnv(profile: string): Record<string, string | null> {
+  return {
+    dshVersion: hostDshVersion(),
+    nodeVersion: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    release: release(),
+    profile,
+    dshHome: process.env.DSH_HOME ?? join(homedir(), '.dsh'),
   }
 }
 
@@ -105,10 +141,21 @@ async function readJsonBody(request: IncomingMessage): Promise<unknown> {
  * Register the Plugin Hub API on the host web server and return a disposer.
  * @param webServer - DSH web server service.
  * @param profile - profile that owns plugin mutations.
+ * @param loader - running loader (optional): lets uninstall remove the entry
+ *   immediately so the page survives a refresh without a host restart.
  */
-export function mountPluginHubRoutes(webServer: WebServerService, profile: string): () => void {
+export function mountPluginHubRoutes(webServer: WebServerService, profile: string, loader?: LoaderHandle): () => void {
   if (!PROFILE_RE.test(profile)) throw new Error(`invalid profile name: ${profile}`)
+  console.log(`[hub] routes mounted (profile=${profile}, loader=${loader === undefined ? 'undefined' : 'provided'})`)
   const disposers = [
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/debug/loader-entries',
+      handler: (request, response) => {
+        if (!requireMethod(request, response, 'GET')) return
+        sendJson(response, 200, { entries: dumpLoaderEntries(loader) })
+      },
+    }),
     webServer.register({
       kind: 'exact',
       path: '/dsh-plugin-hub/install',
@@ -129,6 +176,11 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           const already = installedByRepo(readInstalled(profile), target)
           if (already !== null) {
             sendJson(response, 409, { error: `already installed: ${already}` })
+            return
+          }
+          // 队列级去重：同一目标已在排队/执行中时拒绝，避免客户端防重竞态导致重复入队
+          if (hasQueuedTarget(target)) {
+            sendJson(response, 409, { error: `already queued: ${target}` })
             return
           }
           // Kick off the CLI in the background; the client polls /status for progress
@@ -156,6 +208,10 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           const name = typeof body === 'object' && body !== null && typeof (body as { name?: unknown }).name === 'string'
             ? (body as { name: string }).name
             : ''
+          // 展示用的 owner/repo：卸载命令只需要 npm 包名，但待重启行要与安装行一致地显示仓库名
+          const repo = typeof body === 'object' && body !== null && typeof (body as { repo?: unknown }).repo === 'string'
+            ? (body as { repo: string }).repo
+            : ''
           if (!validPackageName(name) || name === 'dsh-plugin') {
             sendJson(response, 400, { error: 'plugin cannot be uninstalled here' })
             return
@@ -164,10 +220,19 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             sendJson(response, 400, { error: 'plugin is not installed' })
             return
           }
+          // 队列级去重：同一包已在排队/执行中卸载时拒绝
+          if (hasQueuedTarget(name)) {
+            sendJson(response, 409, { error: `already queued: ${name}` })
+            return
+          }
           const task = startPluginMutation({
             action: 'remove',
             profile,
             target: name,
+            // 卸载的 mutation 目标是 npm 包名；待重启行要显示 owner/repo（与安装行一致），非法/缺失时回退包名
+            displayTarget: githubTarget(repo) ?? undefined,
+            // 运行中 loader：卸载成功后主动移除条目，立即生效、无需重启
+            uninstallLoader: loader,
             timeoutMs: COMMAND_TIMEOUT_MS,
             env: { ...process.env, CI: 'true' },
           })
@@ -197,8 +262,18 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       path: '/dsh-plugin-hub/active',
       handler: (request, response) => {
         if (!requireMethod(request, response, 'GET')) return
-        // 整个任务队列（running 在前、pending 在后）：客户端刷新后据此恢复进行中/排队任务
-        sendJson(response, 200, { tasks: activeTask() })
+        // 整个任务队列（running 在前、pending 在后）+ 待重启列表：客户端刷新后据此恢复
+        // 进行中/排队任务与「装完没重启」的持久提醒
+        sendJson(response, 200, { tasks: activeTask(), pendingRestarts: listPendingRestarts() })
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/env',
+      handler: (request, response) => {
+        if (!requireMethod(request, response, 'GET')) return
+        // 宿主机器环境快照：提交 bug 的 issue 正文会带上，便于作者复现
+        sendJson(response, 200, hostEnv(profile))
       },
     }),
     webServer.register({
@@ -242,10 +317,45 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
     }),
     webServer.register({
       kind: 'exact',
+      path: '/dsh-plugin-hub/installed-version',
+      handler: async (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        try {
+          const body = await readJsonBody(request)
+          const repo = typeof body === 'object' && body !== null && typeof (body as { repo?: unknown }).repo === 'string'
+            ? (body as { repo: string }).repo
+            : ''
+          if (githubTarget(repo) === null) {
+            sendJson(response, 400, { error: 'invalid install target' })
+            return
+          }
+          // version 为空 = 卸载清理记录；否则记录安装时的目录信号（最新版本 + 仓库更新时间），
+          // 供「有更新」比对：有版本比版本，无版本比更新时间
+          const version = body !== null && typeof (body as { version?: unknown }).version === 'string'
+            ? (body as { version: string }).version
+            : null
+          if (version === null) {
+            removeInstalledVersion(profile, repo)
+          } else {
+            const updatedAt = body !== null && typeof (body as { updatedAt?: unknown }).updatedAt === 'string'
+              ? (body as { updatedAt: string }).updatedAt
+              : ''
+            recordInstalledVersion(profile, repo, version, updatedAt)
+          }
+          sendJson(response, 200, { ok: true })
+        } catch (error) {
+          sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
       path: '/dsh-plugin-hub/installed',
       handler: (request, response) => {
         if (!requireMethod(request, response, 'GET')) return
-        sendJson(response, 200, { profile, installed: readInstalled(profile) })
+        // installed：依赖表（包名 → spec）；versions：安装时记录的目录版本（repo → 版本），
+        // 客户端合并两者判断「是否有更新」
+        sendJson(response, 200, { profile, installed: readInstalled(profile), versions: readInstalledVersions(profile) })
       },
     }),
   ]

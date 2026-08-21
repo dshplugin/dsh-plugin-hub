@@ -1,3 +1,9 @@
+/**
+ * dsh-plugin host entry: mounts the Plugin Hub HTTP routes once the host
+ * web server service is available. The browser bundle (src/client) talks to
+ * these same-origin routes to perform real installs from inside the app.
+ */
+import { type LoaderHandle } from './services/install.ts';
 import { type WebServerService } from './http/routes.ts';
 export declare const name = "dsh-plugin";
 export interface Config {
@@ -7,6 +13,8 @@ export interface Config {
 /** The subset of the cordis host context this plugin touches. */
 interface HostContext {
     webServer: WebServerService;
+    /** 运行中 loader：卸载成功后主动移除条目、立即生效（宿主未提供时卸载仍需重启） */
+    loader?: LoaderHandle;
     inject(services: string[], callback: (host: HostContext) => void): void;
     effect(callback: () => void, label?: string): void;
 }

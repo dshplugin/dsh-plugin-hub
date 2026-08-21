@@ -3,6 +3,10 @@
 Thanks for taking the time to contribute to DSH-Plugin Hub. This document
 keeps the bar high so the marketplace stays safe and pleasant for everyone.
 
+Please note that this project is released with a
+[Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating you agree
+to abide by its terms.
+
 ## Development setup
 
 ```sh
@@ -12,7 +16,7 @@ npm run check        # typecheck + test + build, run this before opening a PR
 
 - Node.js >= 22.6 (type stripping) is required for `npm test`.
 - The harness must be restarted to pick up client changes:
-  `npm run reload` (or `bash scripts/reload-dsh.sh`).
+  `npm run reload` (or `bash scripts/run/reload-dsh.sh`).
 
 ## How the project is organised
 
@@ -41,3 +45,6 @@ Open an issue with:
 - the harness version and the profile used,
 - the exact steps that trigger the problem,
 - a screenshot of the dialog if the issue is visual.
+
+For **security** issues, do not open a public issue — report them privately via
+the repository's Security tab. See [SECURITY.md](SECURITY.md).

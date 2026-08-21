@@ -7,7 +7,7 @@
  * importing `x.module.css` yields the hashed class map and the css text
  * auto-injects a <style data-plugin> tag at factory execution.
  *
- * scripts/normalize-client-banner.mjs asserts the emitted client/client.js
+ * scripts/tools/normalize-client-banner.mjs asserts the emitted client/client.js
  * starts with the exact `window.__ModuleLoader__.load({ id: "…` prefix.
  */
 import { readFile } from 'node:fs/promises'

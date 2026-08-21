@@ -29,8 +29,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			toastCopied: "安装命令已复制，去 dsh 终端粘贴即可安装",
 			installed: "已安装",
 			notInstalled: "未安装",
-			filterInstalledHint: "点击「已安装」筛选已装插件，再点一次恢复全部",
-			filterNotInstalledHint: "点击「未安装」筛选未装插件，再点一次恢复全部",
+			filterAllHint: "显示全部插件",
+			filterInstalledHint: "筛选当前分类下的已安装插件",
+			filterNotInstalledHint: "筛选当前分类下的未安装插件",
 			filterInstalledNone: "当前分类下没有已安装插件",
 			filterNotInstalledNone: "当前分类下没有未安装插件",
 			uninstall: "卸载",
@@ -56,16 +57,31 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			installResultDesc: "插件已安装。",
 			installFail: "安装失败，可复制命令手动安装",
 			confirmCancel: "取消",
+			doneBtn: "完成",
+			restartNow: "立即重启",
+			restartLater: "稍后重启",
+			restarting: "正在重启…",
+			restartHint: "部分插件（如插件市场、顶层 bundle）需重启后才会生效。",
 			runningTask: "插件操作进行中…",
+			activeTasksTitle: "有任务正在进行中",
+			taskQueueTitle: "任务队列",
+			taskQueueEmpty: "当前没有排队中的任务",
+			restartPendingTitle: "有待重启的任务",
+			restartPendingStrip: "{n} 个插件待重启",
+			restartPendingHint: "安装成功，重启后生效",
+			restartPendingHintUninstall: "卸载成功，重启后移除",
+			sectionPendingRestart: "待重启",
+			sectionInProgress: "进行中",
 			runningInstall: "插件安装进行中…",
 			runningUninstall: "插件卸载进行中…",
 			progressShow: "查看进度",
-			progressHide: "收起",
-			queuedTitle: "等待安装…",
-			queuedHint: "已加入队列，前序任务完成后自动开始，可关闭本窗口继续浏览。",
+			queuedTitle: "已加入安装排队",
+			queuedUninstallTitle: "已加入卸载排队",
+			queuedHint: "已加入排队，前序任务完成后将自动开始，可关闭本窗口继续浏览。",
 			queueMore: "另有 {n} 项排队",
 			queueWaiting: "队列中有 {n} 项任务等待执行",
 			cancelTask: "取消任务",
+			cancelling: "正在取消…",
 			errorTitle: "操作失败",
 			errorTitleInstall: "安装失败",
 			errorTitleUninstall: "卸载失败",
@@ -78,9 +94,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			failuresDesc: "失败会自动记录在这里，即使错过错误弹窗也能随时回来查看。",
 			failuresEmpty: "暂无失败记录",
 			failuresClear: "清空记录",
-			failCopy: "复制错误日志",
+			failCopy: "复制完整错误信息",
 			failIssueHint: "带着错误日志去作者仓库一键提交 Issue（正文含官网收录链接）",
 			failIssueBig: "一键提交 BUG 到 GitHub Issue 为开源作贡献",
+			failAllowBuild: "这是 pnpm 构建脚本白名单拦截，不是插件仓库的问题。请将报错中 allowBuilds 的 key 加入当前 profile 的 pnpm-workspace.yaml（形如 owner@https://codeload.github.com/...），然后重新安装。",
+			failPrepareHint: "该插件安装时的构建脚本执行失败（git 分发常缺失子模块或构建产物），属插件打包分发问题。建议向作者仓库反馈；若作者提供 npm 版本，亦可改装 npm 版。",
+			failIgnoredBuild: "该插件依赖了需要编译的原生模块（如 node-pty），pnpm 默认拦截这类构建脚本导致安装失败 —— 其他插件不受影响，属该插件的依赖/打包问题。建议向作者仓库一键反馈，请作者改用预编译版本（如 node-pty-prebuilt-multiarch）。",
 			errorHint: "该错误来自插件作者提供的安装程序，与插件中心无关。可复制错误信息，或一键前往插件仓库提交 Issue。",
 			reportIssue: "去插件仓库提交 Issue",
 			detail: "打开详情",
@@ -95,6 +114,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			more: "还有 {n} 个插件，去网站查看全部",
 			browseAll: "浏览全部 {n} 个插件",
 			verified: "已验证",
+			version: "版本",
+			update: "可更新",
+			updateAvailable: "有更新",
+			updateAvailableHint: "检测到更新：有版本号的仓库比对版本号，无版本号的仓库比对仓库最近更新时间",
 			empty: "该分类暂无插件",
 			dataFrom: "数据源 dsh-plugin.org · 每日人工更新"
 		};
@@ -111,6 +134,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			sortUpdated: "Recently updated",
 			sortNewest: "Newest added",
 			openHint: "Open dsh-plugin.org",
+			githubHint: "View source on GitHub",
 			fork: "Fork",
 			loading: "Loading plugin data…",
 			failed: "Failed to load plugin data",
@@ -120,8 +144,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			toastCopied: "Install command copied — paste it in your dsh terminal",
 			installed: "Installed",
 			notInstalled: "Not installed",
-			filterInstalledHint: "Click \"Installed\" to filter to installed plugins, click again to show all",
-			filterNotInstalledHint: "Click \"Not installed\" to filter to uninstalled plugins, click again to show all",
+			filterAllHint: "Show all plugins",
+			filterInstalledHint: "Filter to installed plugins in this category",
+			filterNotInstalledHint: "Filter to uninstalled plugins in this category",
 			filterInstalledNone: "No installed plugins in this category",
 			filterNotInstalledNone: "No uninstalled plugins in this category",
 			uninstall: "Uninstall",
@@ -148,16 +173,30 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			installFail: "Install failed — copy the command instead",
 			confirmCancel: "Cancel",
 			doneBtn: "Done",
+			restartNow: "Restart now",
+			restartLater: "Later",
+			restarting: "Restarting…",
+			restartHint: "Some plugins (such as plugin markets / top-level bundles) only take effect after a restart.",
 			runningTask: "Plugin operation in progress…",
+			activeTasksTitle: "Tasks in progress",
+			taskQueueTitle: "Task queue",
+			taskQueueEmpty: "No tasks in the queue",
+			restartPendingTitle: "Restart pending",
+			restartPendingStrip: "{n} plugin(s) awaiting restart",
+			restartPendingHint: "Installed — takes effect after restart",
+			restartPendingHintUninstall: "Removed — cleaned up after restart",
+			sectionPendingRestart: "Pending restart",
+			sectionInProgress: "In progress",
 			runningInstall: "Plugin install in progress…",
 			runningUninstall: "Plugin removal in progress…",
 			progressShow: "View progress",
-			progressHide: "Hide",
 			queuedTitle: "Queued…",
+			queuedUninstallTitle: "Queued for removal…",
 			queuedHint: "Queued — starts automatically after earlier tasks finish. You may close this window.",
 			queueMore: "{n} more queued",
 			queueWaiting: "{n} tasks waiting in queue",
 			cancelTask: "Cancel task",
+			cancelling: "Cancelling…",
 			errorTitle: "Operation failed",
 			errorTitleInstall: "Install failed",
 			errorTitleUninstall: "Removal failed",
@@ -170,9 +209,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			failuresDesc: "Failures are logged here automatically, even if you missed the error dialog.",
 			failuresEmpty: "No failure records yet",
 			failuresClear: "Clear records",
-			failCopy: "Copy error log",
+			failCopy: "Copy full log",
 			failIssueHint: "Open a pre-filled issue on the author repo with this error log (includes catalog links)",
 			failIssueBig: "Report this bug to GitHub — contribute to open source",
+			failAllowBuild: "This is a pnpm build-script allowlist block, not a plugin issue. Add the allowBuilds key shown in the error to your profile's pnpm-workspace.yaml (e.g. owner@https://codeload.github.com/...), then reinstall.",
+			failPrepareHint: "This plugin failed while running its build scripts during install (git tarballs often miss submodules or build output). This is a packaging issue of the plugin itself — please report it to the author repository; if an npm version is available, install that instead.",
+			failIgnoredBuild: "This plugin depends on a native module (e.g. node-pty) whose build script pnpm blocks by default, so the install fails — other plugins are unaffected. This is a dependency/packaging issue of the plugin itself. Please report it to the author repository and ask the author to switch to a prebuilt variant (e.g. node-pty-prebuilt-multiarch).",
 			errorHint: "This error comes from the plugin author's installer, not the Plugin Hub. Copy it or report it to the plugin repository.",
 			reportIssue: "Report an Issue to the plugin repo",
 			detail: "Open details",
@@ -187,12 +229,16 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			more: "{n} more on the website",
 			browseAll: "Browse all {n} plugins",
 			verified: "Verified",
+			version: "Version",
+			update: "Update",
+			updateAvailable: "Update available",
+			updateAvailableHint: "An update was detected: repos with a release are compared by tag, repos without one by last push time",
 			empty: "No plugins in this category yet",
 			dataFrom: "Data from dsh-plugin.org · curated daily"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Section.module.css.mjs
-		const css$1 = ".p2YUJW_root{--dsw-alias-brand-primary:var(--dsw-alias-state-business-primary,#4f6ef7);min-width:0;height:100%;color:var(--dsw-alias-label-primary,#1f2328);flex-direction:column;gap:8px;display:flex}.p2YUJW_header{flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:2px 2px 0;display:flex}.p2YUJW_brand{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.p2YUJW_brandText{flex-direction:column;gap:1px;min-width:0;display:flex}.p2YUJW_titleRow{align-items:center;gap:8px;min-width:0;display:flex}.p2YUJW_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.p2YUJW_version{color:var(--dsw-alias-label-secondary,#6b7280)}.p2YUJW_logoIcon{flex-shrink:0;display:block}.p2YUJW_copyIcon{flex-shrink:0}.p2YUJW_tagline{color:var(--dsw-alias-label-tertiary,#8b93a1);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.p2YUJW_controls{flex-shrink:0;align-items:center;gap:8px;display:flex}.p2YUJW_filterResults{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.p2YUJW_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.p2YUJW_adBanner{color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;background:linear-gradient(90deg,#4f46e5 0%,#7c3aed 100%);border:1px solid #8b5cf68c;border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex;box-shadow:0 2px 10px #4f46e547}.p2YUJW_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px #7c3aed6b}.p2YUJW_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.p2YUJW_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.p2YUJW_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.p2YUJW_searchRow{padding:0 2px;display:flex}.p2YUJW_search{width:100%;color:inherit;border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.p2YUJW_search::placeholder{color:var(--dsw-alias-label-tertiary,#8b93a1)}.p2YUJW_search:focus{border-color:var(--dsw-alias-brand-primary,#4f6ef7)}.p2YUJW_installedBtn,.p2YUJW_installedBtnActive,.p2YUJW_installedBtnDisabled{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.p2YUJW_installedBtn{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014)}.p2YUJW_installedBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#8080802e)}.p2YUJW_installedBtnDisabled,.p2YUJW_installedBtnDisabled:hover{color:var(--dsw-alias-label-disabled,#aab1bd);background:var(--dsw-alias-bg-layer-1,#80808008);border-color:var(--dsw-alias-border-l1,#eceef1);cursor:not-allowed}.p2YUJW_installedBtnDisabled .p2YUJW_segCount{color:var(--dsw-alias-label-disabled,#aab1bd);background:#8080800f}.p2YUJW_installedBtnActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);border-color:var(--dsw-alias-button-primary-fill,#1f2328)}.p2YUJW_segCount,.p2YUJW_segCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 5px;font-size:10px;line-height:14px}.p2YUJW_segCount{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a)}.p2YUJW_installedBtnActive .p2YUJW_segCountActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}.p2YUJW_tabs{border-bottom:1px solid var(--dsw-alias-border-l1,#eceef1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.p2YUJW_tab,.p2YUJW_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.p2YUJW_tab{color:var(--dsw-alias-label-secondary,#6b7280);border-color:var(--dsw-alias-border-l2,#e5e7eb);background:0 0}.p2YUJW_tab:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-border-l1,#eceef1)}.p2YUJW_tabActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);border-color:var(--dsw-alias-button-primary-fill,#1f2328)}.p2YUJW_tabCount{text-align:center;min-width:16px;color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.p2YUJW_tabActive .p2YUJW_tabCount{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}.p2YUJW_body{flex-direction:column;flex:1;min-height:0;display:flex}.p2YUJW_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}.p2YUJW_card{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-1,#8080800f);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}.p2YUJW_card:hover{border-color:var(--dsw-alias-brand-primary,#4f6ef7);background:var(--dsw-alias-bg-layer-2,#8080801a)}.p2YUJW_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}.p2YUJW_cardHead{align-items:center;gap:6px;min-width:0;display:flex}.p2YUJW_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}.p2YUJW_categoryBadge,.p2YUJW_verified{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}.p2YUJW_categoryBadge{color:var(--dsw-alias-brand-primary,#4f6ef7);border-color:var(--dsw-alias-button-ghost-active-border,#4f6ef740)}.p2YUJW_verified{color:var(--dsw-alias-state-success-primary,#1a7f37);border-color:var(--dsw-alias-state-success-secondary,#1a7f374d)}.p2YUJW_desc{color:var(--dsw-alias-label-secondary,#6b7280);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.p2YUJW_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}.p2YUJW_topic{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}.p2YUJW_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}.p2YUJW_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}.p2YUJW_star{color:var(--dsw-alias-state-warn-primary,#b8860b);white-space:nowrap;font-size:11px;line-height:16px}.p2YUJW_fork{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;font-size:11px;line-height:16px}.p2YUJW_date{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;font-size:10px;line-height:14px}.p2YUJW_installBtn,.p2YUJW_installBtnCopied,.p2YUJW_installBtnInstalled,.p2YUJW_uninstallBtn,.p2YUJW_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_installBtnInstalled{color:var(--dsw-alias-state-success-primary,#1a7f37);border:1px solid var(--dsw-alias-state-success-secondary,#1a7f3759);cursor:default;-webkit-user-select:none;user-select:none;background:#22c55e1f}.p2YUJW_uninstallBtn{color:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-secondary,#d1242f66);-webkit-user-select:none;user-select:none;background:0 0}.p2YUJW_uninstallBtn:hover{border-color:var(--dsw-alias-state-danger-primary,#d1242f);background:#d1242f14}.p2YUJW_installBtn{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);-webkit-user-select:none;user-select:none;border:1px solid #0000;font-weight:500}.p2YUJW_installBtn:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_detailBtn{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);-webkit-user-select:none;user-select:none;background:0 0;align-items:center;text-decoration:none;display:inline-flex}.p2YUJW_detailBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_actions{align-items:center;gap:6px;display:flex}.p2YUJW_installBtnCopied{color:var(--dsw-alias-state-success-primary,#1a7f37);border:1px solid var(--dsw-alias-state-success-secondary,#1a7f3766);-webkit-user-select:none;user-select:none;background:#22c55e24}.p2YUJW_toast{z-index:1000;background:var(--dsw-alias-button-primary-fill,#1f2328);color:var(--dsw-alias-label-primary-foreground,#fff);pointer-events:none;white-space:nowrap;border:1px solid #0000;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out p2YUJW_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes p2YUJW_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.p2YUJW_toastFail{color:#fff;background:#d1242f;border-color:#ffffff3d}.p2YUJW_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out p2YUJW_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.p2YUJW_modal{background:var(--dsw-alias-bg-layer-1,#fff);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);padding:14px 16px;animation:.18s ease-out p2YUJW_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.p2YUJW_modalHead{justify-content:space-between;align-items:center;gap:8px;display:flex}.p2YUJW_modalTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:14px;font-weight:600;line-height:20px}.p2YUJW_modalClose{width:24px;height:24px;color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.p2YUJW_modalClose:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.p2YUJW_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.p2YUJW_modalDesc{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:18px}.p2YUJW_trustHint{color:var(--dsw-alias-danger,#e5484d);background:#e5484d14;border:1px solid #e5484d47;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.p2YUJW_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.p2YUJW_modalLabel{min-width:64px;color:var(--dsw-alias-label-tertiary,#8b93a1);flex-shrink:0}.p2YUJW_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-label-primary,#1f2328);font-weight:500;overflow:hidden}.p2YUJW_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.p2YUJW_modalLink:hover{color:#3b5bdb;text-decoration:underline}.p2YUJW_linkIcon{flex-shrink:0}.p2YUJW_modalCmd{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.p2YUJW_modalCmd:hover{border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da);background:#8080801a}.p2YUJW_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.p2YUJW_modalCmdCopy{color:var(--dsw-alias-brand-primary,#4f6ef7);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,border-color .12s,background .12s;display:inline-flex}.p2YUJW_modalCmdCopy:hover{color:#3b5bdb;border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da);background:#8080800f}.p2YUJW_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.p2YUJW_modalBody{flex-direction:column;gap:10px;display:flex}.p2YUJW_progressStrip{background:#4f6ef70f;border:1px solid #4f6ef759;border-radius:6px;flex-direction:column;align-items:stretch;display:flex;overflow:hidden}.p2YUJW_progressStripMain{min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;flex:1;align-items:center;gap:8px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,color .12s;display:flex}.p2YUJW_progressStripMain:hover{color:#3b5bdb;background:#4f6ef714}.p2YUJW_progressStripDot{background:var(--dsw-alias-brand-primary,#4f6ef7);border-radius:50%;flex-shrink:0;width:8px;height:8px;animation:1.1s ease-in-out infinite p2YUJW_progressPulse}@keyframes p2YUJW_progressPulse{0%,to{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}.p2YUJW_progressStripText{text-overflow:ellipsis;white-space:nowrap;text-align:left;flex:1;min-width:0;overflow:hidden}.p2YUJW_progressStripToggle{color:var(--dsw-alias-brand-primary,#4f6ef7);flex-shrink:0}.p2YUJW_queueList{border-top:1px solid #4f6ef72e;padding:2px 0}.p2YUJW_queueRow{border-bottom:1px solid #4f6ef71f;flex-direction:column;gap:5px;padding:6px 10px 7px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.p2YUJW_queueRow:last-child{border-bottom:none}.p2YUJW_queueRow:hover{background:#4f6ef70d}.p2YUJW_queueRowHead{align-items:center;gap:10px;display:flex}.p2YUJW_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-label-primary,#1f2328);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.p2YUJW_queueRowBody{align-items:center;gap:8px;display:flex}.p2YUJW_queueRowStatus{color:var(--dsw-alias-brand-primary,#4f6ef7);flex-shrink:0;font-weight:500}.p2YUJW_queueRowTrack{flex:1;min-width:0}.p2YUJW_queueRowPct{color:var(--dsw-alias-label-tertiary,#8b93a1);font-variant-numeric:tabular-nums;flex-shrink:0}.p2YUJW_stripCancel{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,border-color .12s,color .12s}.p2YUJW_stripCancel:hover{color:#e5484d;background:#e5484d14;border-color:#e5484d66}.p2YUJW_queuedHint{color:var(--dsw-alias-brand-primary,#4f6ef7);background:#4f6ef70f;border:1px solid #4f6ef738;border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.p2YUJW_errorTitle{color:#e5484d;font-size:14px;font-weight:600;line-height:20px}.p2YUJW_errorBox{max-height:240px;color:var(--dsw-alias-label-primary,#1f2328);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;background:#e5484d0d;border:1px solid #e5484d59;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.p2YUJW_errorPlugin{color:var(--dsw-alias-label-primary,#1f2328);text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;line-height:18px;overflow:hidden}.p2YUJW_errorCopySoft{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.p2YUJW_errorCopySoft:hover{color:var(--dsw-alias-label-secondary,#6b7280);background:#80808014}.p2YUJW_errorHint{color:var(--dsw-alias-label-tertiary,#8b93a1);font-size:12px;line-height:18px}.p2YUJW_reportBtn{color:var(--dsw-alias-brand-primary,#4f6ef7);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;align-items:center;padding:5px 14px;font-size:12px;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s;display:inline-flex}.p2YUJW_reportBtn:hover{background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_modalCancel,.p2YUJW_modalCopy{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_modalCancel:hover,.p2YUJW_modalCopy:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014)}.p2YUJW_modalConfirm,.p2YUJW_modalInstall{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_modalConfirm:hover,.p2YUJW_modalInstall:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_modalCopy:disabled,.p2YUJW_modalInstall:disabled,.p2YUJW_modalCancel:disabled,.p2YUJW_modalClose:disabled,.p2YUJW_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.p2YUJW_uninstallConfirm{color:#fff;background:var(--dsw-alias-state-danger-primary,#d1242f);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_uninstallConfirm:hover{background:var(--dsw-alias-state-danger-hover,#b91c1c)}.p2YUJW_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.p2YUJW_resultCheck{width:40px;height:40px;color:var(--dsw-alias-state-success-primary,#1a7f37);background:#22c55e24;border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.p2YUJW_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.p2YUJW_resultTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;font-weight:600;line-height:20px}.p2YUJW_resultDesc{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:18px}.p2YUJW_resultRestarting{color:var(--dsw-alias-label-tertiary,#8b93a1);padding:12px 0 6px;font-size:12px;line-height:18px}.p2YUJW_restartLater{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_restartLater:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014)}.p2YUJW_restartNow{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_restartNow:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.p2YUJW_progress{margin:10px 0 2px}.p2YUJW_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.p2YUJW_progressText{color:var(--dsw-alias-label-secondary,#6b7280);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.p2YUJW_progressTrack{background:var(--dsw-alias-border-l2,#e5e7eb);border-radius:2px;height:4px;overflow:hidden}.p2YUJW_progressFill{background:var(--dsw-alias-brand-primary,#4f6ef7);border-radius:2px;height:100%;transition:width .32s}.p2YUJW_progressFillFail{background:var(--dsw-alias-state-danger-primary,#d1242f)}.p2YUJW_progressLog{background:#0d1117;border:1px solid #7f8ba34d;border-radius:8px;margin:8px 0 0;overflow:hidden;box-shadow:inset 0 1px #ffffff0d}.p2YUJW_progressLogBar{background:#ffffff0d;border-bottom:1px solid #7f8ba333;align-items:center;padding:6px 10px;display:flex}.p2YUJW_progressLogTitle{letter-spacing:.5px;color:#8b949e;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px}.p2YUJW_progressLogLines{white-space:pre-wrap;word-break:break-word;-webkit-user-select:text;user-select:text;max-height:112px;margin:0;padding:8px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.6;overflow:auto}.p2YUJW_logLine{display:block}.p2YUJW_logLinePlain{color:#9da7b3}.p2YUJW_logLineOk{color:#3fb950}.p2YUJW_logLineErr{color:#f85149}.p2YUJW_logLineWarn{color:#d29922}.p2YUJW_logLineInfo{color:#58a6ff}@keyframes p2YUJW_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes p2YUJW_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.p2YUJW_failBtn{color:#fff;background:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-primary,#d1242f);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:background .12s,border-color .12s;display:inline-flex}.p2YUJW_failBtn:hover{background:#b0202a;border-color:#b0202a}.p2YUJW_failBadge{text-align:center;min-width:16px;height:16px;color:var(--dsw-alias-state-danger-primary,#d1242f);background:#fff;border-radius:999px;flex-shrink:0;padding:0 5px;font-size:10px;line-height:16px}.p2YUJW_failList{flex-direction:column;gap:8px;max-height:300px;padding-right:2px;display:flex;overflow-y:auto}.p2YUJW_failRow{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-2,#8080800d);border-radius:8px;flex-direction:column;gap:6px;padding:8px 10px;display:flex}.p2YUJW_failHead{align-items:center;gap:8px;min-width:0;display:flex}.p2YUJW_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.p2YUJW_failKindInstall{color:#e5484d;background:#e5484d14;border-color:#e5484d59}.p2YUJW_failKindUninstall{color:#b8860b;background:#b8860b14;border-color:#b8860b59}.p2YUJW_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.p2YUJW_failRepo:hover{text-decoration:underline}.p2YUJW_failTime{color:var(--dsw-alias-label-tertiary,#8b93a1);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.p2YUJW_failCopy{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.p2YUJW_failCopy:hover{color:var(--dsw-alias-label-secondary,#6b7280);background:#80808014}.p2YUJW_failEmpty{text-align:center;color:var(--dsw-alias-label-tertiary,#8b93a1);padding:24px 0;font-size:12px;line-height:18px}.p2YUJW_failClear{color:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-secondary,#d1242f66);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:background .12s,border-color .12s}.p2YUJW_failClear:hover{border-color:var(--dsw-alias-state-danger-primary,#d1242f);background:#d1242f14}.p2YUJW_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;background:#e5484d;border:1px solid #e5484d;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.p2YUJW_failBigIssue:hover{background:var(--dsw-alias-state-danger-primary,#d1242f);border-color:var(--dsw-alias-state-danger-primary,#d1242f);box-shadow:0 3px 10px #d1242f59}.p2YUJW_state{text-align:center;min-height:160px;color:var(--dsw-alias-label-tertiary,#8b93a1);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}.p2YUJW_stateTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;font-weight:600}.p2YUJW_stateDesc{max-width:420px}.p2YUJW_retryBtn{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;margin-top:4px;padding:4px 12px;font-size:12px;line-height:18px}.p2YUJW_retryBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_footer{border-top:1px solid var(--dsw-alias-border-l1,#eceef1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}.p2YUJW_footLink{color:var(--dsw-alias-brand-primary,#4f6ef7);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}.p2YUJW_footLink:hover{text-decoration:underline}";
+		const css$1 = ".p2YUJW_root{--dsw-alias-brand-primary:var(--dsw-alias-state-business-primary,#4f6ef7);min-width:0;height:100%;color:var(--dsw-alias-label-primary,#1f2328);flex-direction:column;gap:8px;display:flex}.p2YUJW_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.p2YUJW_githubLink{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.p2YUJW_githubLink:hover{color:#4f46e5;background-color:#4f46e514}.p2YUJW_githubIcon{flex-shrink:0;display:block}.p2YUJW_headerTitleRow{justify-content:space-between;align-items:center;gap:8px;min-width:0;display:flex}.p2YUJW_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.p2YUJW_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.p2YUJW_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.p2YUJW_version{color:var(--dsw-alias-label-secondary,#6b7280)}.p2YUJW_logoIcon{flex-shrink:0;display:block}.p2YUJW_copyIcon{flex-shrink:0}.p2YUJW_tagline{color:var(--dsw-alias-label-tertiary,#8b93a1);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.p2YUJW_controls{flex-shrink:0;align-items:center;gap:8px;display:flex}.p2YUJW_filterResults{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.p2YUJW_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.p2YUJW_adBanner{color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;background:linear-gradient(90deg,#4f46e5 0%,#7c3aed 100%);border:1px solid #8b5cf68c;border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex;box-shadow:0 2px 10px #4f46e547}.p2YUJW_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px #7c3aed6b}.p2YUJW_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.p2YUJW_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.p2YUJW_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.p2YUJW_searchRow{padding:0 2px;display:flex}.p2YUJW_search{width:100%;color:inherit;border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.p2YUJW_search::placeholder{color:var(--dsw-alias-label-tertiary,#8b93a1)}.p2YUJW_search:focus{border-color:var(--dsw-alias-brand-primary,#4f6ef7)}.p2YUJW_installedBtn,.p2YUJW_installedBtnActive,.p2YUJW_installedBtnDisabled{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.p2YUJW_installedBtn{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014)}.p2YUJW_installedBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#8080802e)}.p2YUJW_installedBtnDisabled,.p2YUJW_installedBtnDisabled:hover{color:var(--dsw-alias-label-disabled,#aab1bd);background:var(--dsw-alias-bg-layer-1,#80808008);border-color:var(--dsw-alias-border-l1,#eceef1);cursor:not-allowed}.p2YUJW_installedBtnDisabled .p2YUJW_segCount{color:var(--dsw-alias-label-disabled,#aab1bd);background:#8080800f}.p2YUJW_installedBtnActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);border-color:var(--dsw-alias-button-primary-fill,#1f2328)}.p2YUJW_segCount,.p2YUJW_segCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 5px;font-size:10px;line-height:14px}.p2YUJW_segCount{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a)}.p2YUJW_installedBtnActive .p2YUJW_segCountActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}.p2YUJW_tabs{border-bottom:1px solid var(--dsw-alias-border-l1,#eceef1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.p2YUJW_tab,.p2YUJW_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.p2YUJW_tab{color:var(--dsw-alias-label-secondary,#6b7280);border-color:var(--dsw-alias-border-l2,#e5e7eb);background:0 0}.p2YUJW_tab:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-border-l1,#eceef1)}.p2YUJW_tabActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);border-color:var(--dsw-alias-button-primary-fill,#1f2328)}.p2YUJW_tabCount{text-align:center;min-width:16px;color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.p2YUJW_tabActive .p2YUJW_tabCount{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}.p2YUJW_body{flex-direction:column;flex:1;min-height:0;display:flex}.p2YUJW_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}.p2YUJW_card{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-1,#8080800f);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}.p2YUJW_card:hover{border-color:var(--dsw-alias-brand-primary,#4f6ef7);background:var(--dsw-alias-bg-layer-2,#8080801a)}.p2YUJW_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}.p2YUJW_cardHead{align-items:center;gap:6px;min-width:0;display:flex}.p2YUJW_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}.p2YUJW_categoryBadge,.p2YUJW_verified,.p2YUJW_versionBadge,.p2YUJW_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}.p2YUJW_categoryBadge{color:var(--dsw-alias-brand-primary,#4f6ef7);border-color:var(--dsw-alias-button-ghost-active-border,#4f6ef740)}.p2YUJW_verified{color:var(--dsw-alias-state-success-primary,#1a7f37);border-color:var(--dsw-alias-state-success-secondary,#1a7f374d)}.p2YUJW_versionBadge{color:var(--dsw-alias-label-secondary,#6b7280);border-color:var(--dsw-alias-input-border,#6b728040)}.p2YUJW_updateBadge{color:var(--dsw-alias-state-warn-primary,#b8860b);border-color:var(--dsw-alias-state-warn-secondary,#b8860b59);background:var(--dsw-alias-state-warn-secondary,#b8860b14)}.p2YUJW_desc{color:var(--dsw-alias-label-secondary,#6b7280);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.p2YUJW_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}.p2YUJW_topic{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}.p2YUJW_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}.p2YUJW_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}.p2YUJW_star{color:var(--dsw-alias-state-warn-primary,#b8860b);white-space:nowrap;font-size:11px;line-height:16px}.p2YUJW_fork{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;font-size:11px;line-height:16px}.p2YUJW_date{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;font-size:10px;line-height:14px}.p2YUJW_installBtn,.p2YUJW_installBtnCopied,.p2YUJW_installBtnInstalled,.p2YUJW_installBtnUpdate,.p2YUJW_uninstallBtn,.p2YUJW_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_installBtnInstalled{color:var(--dsw-alias-state-success-primary,#1a7f37);border:1px solid var(--dsw-alias-state-success-secondary,#1a7f3759);cursor:default;-webkit-user-select:none;user-select:none;background:#22c55e1f}.p2YUJW_installBtnUpdate{color:#fff;background:var(--dsw-alias-state-warn-primary,#b8860b);-webkit-user-select:none;user-select:none;border:1px solid #0000;font-weight:500}.p2YUJW_installBtnUpdate:hover{background:var(--dsw-alias-state-warn-secondary,#b8860bd9)}.p2YUJW_uninstallBtn{color:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-secondary,#d1242f66);-webkit-user-select:none;user-select:none;background:0 0}.p2YUJW_uninstallBtn:hover{border-color:var(--dsw-alias-state-danger-primary,#d1242f);background:#d1242f14}.p2YUJW_installBtn{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);-webkit-user-select:none;user-select:none;border:1px solid #0000;font-weight:500}.p2YUJW_installBtn:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_detailBtn{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);-webkit-user-select:none;user-select:none;background:0 0;align-items:center;text-decoration:none;display:inline-flex}.p2YUJW_detailBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_actions{align-items:center;gap:6px;display:flex}.p2YUJW_installBtnCopied{color:var(--dsw-alias-state-success-primary,#1a7f37);border:1px solid var(--dsw-alias-state-success-secondary,#1a7f3766);-webkit-user-select:none;user-select:none;background:#22c55e24}.p2YUJW_toast{z-index:1000;background:var(--dsw-alias-button-primary-fill,#1f2328);color:var(--dsw-alias-label-primary-foreground,#fff);pointer-events:none;white-space:nowrap;border:1px solid #0000;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out p2YUJW_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes p2YUJW_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.p2YUJW_toastFail{color:#fff;background:#d1242f;border-color:#ffffff3d}.p2YUJW_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out p2YUJW_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.p2YUJW_modal,.p2YUJW_errorModal{background:var(--dsw-alias-bg-layer-1,#fff);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out p2YUJW_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.p2YUJW_errorModal{width:640px;max-width:calc(100vw - 48px)}.p2YUJW_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.p2YUJW_modalTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:14px;font-weight:600;line-height:20px}.p2YUJW_modalTitleBusy{color:var(--dsw-alias-state-business-primary,#4f6ef7)}.p2YUJW_modalTitleQueued{color:var(--dsw-alias-state-warning-primary,#b45309)}.p2YUJW_modalClose{width:24px;height:24px;color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.p2YUJW_modalClose:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.p2YUJW_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.p2YUJW_modalDesc{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:18px}.p2YUJW_trustHint{color:var(--dsw-alias-danger,#e5484d);background:#e5484d14;border:1px solid #e5484d47;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.p2YUJW_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.p2YUJW_modalLabel{min-width:64px;color:var(--dsw-alias-label-tertiary,#8b93a1);flex-shrink:0}.p2YUJW_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-label-primary,#1f2328);font-weight:500;overflow:hidden}.p2YUJW_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.p2YUJW_modalLink:hover{color:#3b5bdb;text-decoration:underline}.p2YUJW_linkIcon{flex-shrink:0}.p2YUJW_modalCmd{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.p2YUJW_modalCmd:hover{border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da);background:#8080801a}.p2YUJW_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.p2YUJW_modalCmdCopy{color:var(--dsw-alias-brand-primary,#4f6ef7);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,border-color .12s,background .12s;display:inline-flex}.p2YUJW_modalCmdCopy:hover{color:#3b5bdb;border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da);background:#8080800f}.p2YUJW_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.p2YUJW_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.p2YUJW_progressStrip{background:#4f6ef70f;border:1px solid #4f6ef759;border-radius:6px;flex-direction:column;align-items:stretch;display:flex;overflow:hidden}.p2YUJW_progressStripMain{min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;flex:1;align-items:center;gap:8px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,color .12s;display:flex}.p2YUJW_progressStripMain:hover{color:#3b5bdb;background:#4f6ef714}.p2YUJW_progressStripDot{background:var(--dsw-alias-brand-primary,#4f6ef7);border-radius:50%;flex-shrink:0;width:8px;height:8px;animation:1.1s ease-in-out infinite p2YUJW_progressPulse}@keyframes p2YUJW_progressPulse{0%,to{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}.p2YUJW_progressStripText{text-overflow:ellipsis;white-space:nowrap;text-align:left;flex:1;min-width:0;overflow:hidden}.p2YUJW_progressStripToggle{color:var(--dsw-alias-brand-primary,#4f6ef7);flex-shrink:0}.p2YUJW_queueModalList,.p2YUJW_queueSection{flex-direction:column;gap:6px;display:flex}.p2YUJW_queueSectionTitle{color:var(--dsw-alias-label-secondary,#6b7280);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.p2YUJW_pendingRowStatus{color:var(--dsw-alias-state-warn-primary,#b8860b);flex-shrink:0;font-weight:500}.p2YUJW_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.p2YUJW_queueRow{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-2,#8080800d);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.p2YUJW_queueRow:hover{background:#4f6ef70d}.p2YUJW_queueRowHead{align-items:center;gap:10px;display:flex}.p2YUJW_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-label-primary,#1f2328);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.p2YUJW_queueRowDesc{color:var(--dsw-alias-label-tertiary,#8b93a1);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.p2YUJW_queueRowBody{align-items:center;gap:8px;display:flex}.p2YUJW_queueRowStatus{color:var(--dsw-alias-brand-primary,#4f6ef7);flex-shrink:0;font-weight:500}.p2YUJW_queueRowTrack{flex:1;min-width:0}.p2YUJW_queueRowPct{color:var(--dsw-alias-label-tertiary,#8b93a1);font-variant-numeric:tabular-nums;flex-shrink:0}.p2YUJW_stripCancel{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,border-color .12s,color .12s}.p2YUJW_stripCancel:hover{color:#e5484d;background:#e5484d14;border-color:#e5484d66}.p2YUJW_stripCancel:disabled{opacity:.45;cursor:default}.p2YUJW_queuedHint{color:var(--dsw-alias-brand-primary,#4f6ef7);background:#4f6ef70f;border:1px solid #4f6ef738;border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.p2YUJW_errorTitle{color:#e5484d;font-size:14px;font-weight:600;line-height:20px}.p2YUJW_errorBox{max-height:240px;color:var(--dsw-alias-label-primary,#1f2328);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;background:#e5484d0d;border:1px solid #e5484d59;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.p2YUJW_errorPlugin{color:var(--dsw-alias-label-primary,#1f2328);text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;line-height:18px;overflow:hidden}.p2YUJW_errorCopySoft{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.p2YUJW_errorCopySoft:hover{color:var(--dsw-alias-label-secondary,#6b7280);background:#80808014}.p2YUJW_errorHint{color:var(--dsw-alias-label-tertiary,#8b93a1);font-size:12px;line-height:18px}.p2YUJW_reportBtn{color:var(--dsw-alias-brand-primary,#4f6ef7);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;align-items:center;padding:5px 14px;font-size:12px;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s;display:inline-flex}.p2YUJW_reportBtn:hover{background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_modalCancel,.p2YUJW_modalCopy{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_modalCancel:hover,.p2YUJW_modalCopy:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014)}.p2YUJW_modalConfirm,.p2YUJW_modalInstall{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_modalConfirm:hover,.p2YUJW_modalInstall:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_modalCopy:disabled,.p2YUJW_modalInstall:disabled,.p2YUJW_modalCancel:disabled,.p2YUJW_modalClose:disabled,.p2YUJW_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.p2YUJW_uninstallConfirm{color:#fff;background:var(--dsw-alias-state-danger-primary,#d1242f);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_uninstallConfirm:hover{background:var(--dsw-alias-state-danger-hover,#b91c1c)}.p2YUJW_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.p2YUJW_resultCheck{width:40px;height:40px;color:var(--dsw-alias-state-success-primary,#1a7f37);background:#22c55e24;border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.p2YUJW_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.p2YUJW_resultTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;font-weight:600;line-height:20px}.p2YUJW_resultDesc{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:18px}.p2YUJW_resultRestarting{color:var(--dsw-alias-label-tertiary,#8b93a1);padding:12px 0 6px;font-size:12px;line-height:18px}.p2YUJW_restartLater{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_restartLater:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014)}.p2YUJW_restartNow{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_restartNow:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.p2YUJW_result .p2YUJW_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.p2YUJW_result .p2YUJW_modalActions .p2YUJW_restartLater,.p2YUJW_result .p2YUJW_modalActions .p2YUJW_restartNow{min-width:100px}.p2YUJW_progress{margin:10px 0 2px}.p2YUJW_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.p2YUJW_progressText{color:var(--dsw-alias-label-secondary,#6b7280);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.p2YUJW_progressTrack{background:var(--dsw-alias-border-l2,#e5e7eb);border-radius:2px;height:4px;overflow:hidden}.p2YUJW_progressFill{background:var(--dsw-alias-brand-primary,#4f6ef7);border-radius:2px;height:100%;transition:width .32s}.p2YUJW_progressFillFail{background:var(--dsw-alias-state-danger-primary,#d1242f)}@keyframes p2YUJW_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes p2YUJW_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.p2YUJW_failBtn{color:#fff;background:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-primary,#d1242f);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:background .12s,border-color .12s;display:inline-flex}.p2YUJW_failBtn:hover{background:#b0202a;border-color:#b0202a}.p2YUJW_failBadge{text-align:center;min-width:16px;height:16px;color:var(--dsw-alias-state-danger-primary,#d1242f);background:#fff;border-radius:999px;flex-shrink:0;padding:0 5px;font-size:10px;line-height:16px}.p2YUJW_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.p2YUJW_failRow{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-2,#8080800d);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.p2YUJW_failHead{align-items:center;gap:8px;min-width:0;display:flex}.p2YUJW_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.p2YUJW_failKindInstall{color:#e5484d;background:#e5484d14;border-color:#e5484d59}.p2YUJW_failKindUninstall{color:#b8860b;background:#b8860b14;border-color:#b8860b59}.p2YUJW_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.p2YUJW_failRepo:hover{text-decoration:underline}.p2YUJW_failTime{color:var(--dsw-alias-label-tertiary,#8b93a1);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.p2YUJW_failCopy{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.p2YUJW_failCopy:hover{color:var(--dsw-alias-label-secondary,#6b7280);background:#80808014}.p2YUJW_failEmpty{text-align:center;color:var(--dsw-alias-label-tertiary,#8b93a1);padding:24px 0;font-size:12px;line-height:18px}.p2YUJW_failMsg{max-height:96px;color:var(--dsw-alias-label-secondary,#6b7280);background:var(--dsw-alias-bg-layer-2,#8080800d);border:1px solid var(--dsw-alias-border-l1,#0000000f);white-space:pre-wrap;word-break:break-word;border-radius:6px;margin:0;padding:6px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;overflow-y:auto}.p2YUJW_failClear{color:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-secondary,#d1242f66);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:background .12s,border-color .12s}.p2YUJW_failClear:hover{border-color:var(--dsw-alias-state-danger-primary,#d1242f);background:#d1242f14}.p2YUJW_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;background:#e5484d;border:1px solid #e5484d;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.p2YUJW_failBigIssue:hover{background:var(--dsw-alias-state-danger-primary,#d1242f);border-color:var(--dsw-alias-state-danger-primary,#d1242f);box-shadow:0 3px 10px #d1242f59}.p2YUJW_failAllowHint{color:var(--dsw-alias-state-warning-primary,#b45309);background:#b4530914;border:1px solid #b453094d;border-radius:6px;margin-top:4px;padding:8px 12px;font-size:12px;line-height:18px}.p2YUJW_failPrepareHint{color:var(--dsw-alias-state-warning-primary,#b45309);background:#b4530914;border:1px solid #b453094d;border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}.p2YUJW_state{text-align:center;min-height:160px;color:var(--dsw-alias-label-tertiary,#8b93a1);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}.p2YUJW_stateTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;font-weight:600}.p2YUJW_stateDesc{max-width:420px}.p2YUJW_retryBtn{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;margin-top:4px;padding:4px 12px;font-size:12px;line-height:18px}.p2YUJW_retryBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_footer{border-top:1px solid var(--dsw-alias-border-l1,#eceef1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}.p2YUJW_footLink{color:var(--dsw-alias-brand-primary,#4f6ef7);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}.p2YUJW_footLink:hover{text-decoration:underline}";
 		const tagId$1 = "dsh-plugin/Section.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
 			const tag = document.createElement("style");
@@ -202,155 +248,277 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Section_module_css_default = {
-			"adText": "p2YUJW_adText",
-			"resultCount": "p2YUJW_resultCount",
-			"modalLabel": "p2YUJW_modalLabel",
-			"toastFail": "p2YUJW_toastFail",
-			"overlay": "p2YUJW_overlay",
-			"uninstallBtn": "p2YUJW_uninstallBtn",
-			"topics": "p2YUJW_topics",
-			"fork": "p2YUJW_fork",
-			"version": "p2YUJW_version",
-			"installBtnInstalled": "p2YUJW_installBtnInstalled",
-			"logLineWarn": "p2YUJW_logLineWarn",
-			"installBtnCopied": "p2YUJW_installBtnCopied",
-			"progressStrip": "p2YUJW_progressStrip",
-			"filterResults": "p2YUJW_filterResults",
-			"verified": "p2YUJW_verified",
-			"copyIcon": "p2YUJW_copyIcon",
-			"controls": "p2YUJW_controls",
 			"modalHead": "p2YUJW_modalHead",
-			"modalDesc": "p2YUJW_modalDesc",
-			"result": "p2YUJW_result",
-			"progressStripMain": "p2YUJW_progressStripMain",
-			"modalLink": "p2YUJW_modalLink",
-			"progressStripDot": "p2YUJW_progressStripDot",
-			"failBadge": "p2YUJW_failBadge",
-			"adBanner": "p2YUJW_adBanner",
-			"modalClose": "p2YUJW_modalClose",
-			"installedBtnDisabled": "p2YUJW_installedBtnDisabled",
-			"modalTitle": "p2YUJW_modalTitle",
-			"progress": "p2YUJW_progress",
-			"retryBtn": "p2YUJW_retryBtn",
-			"date": "p2YUJW_date",
-			"tagline": "p2YUJW_tagline",
-			"stats": "p2YUJW_stats",
-			"progressLogBar": "p2YUJW_progressLogBar",
-			"header": "p2YUJW_header",
-			"installedBtnActive": "p2YUJW_installedBtnActive",
-			"topic": "p2YUJW_topic",
-			"card": "p2YUJW_card",
-			"tab": "p2YUJW_tab",
-			"queueRow": "p2YUJW_queueRow",
-			"queueRowStatus": "p2YUJW_queueRowStatus",
-			"titleRow": "p2YUJW_titleRow",
-			"cardSide": "p2YUJW_cardSide",
-			"queueRowBody": "p2YUJW_queueRowBody",
-			"logLineErr": "p2YUJW_logLineErr",
-			"modalBody": "p2YUJW_modalBody",
-			"failKind": "p2YUJW_failKind",
-			"errorTitle": "p2YUJW_errorTitle",
-			"errorHint": "p2YUJW_errorHint",
-			"search": "p2YUJW_search",
-			"modalCmdCopy": "p2YUJW_modalCmdCopy",
-			"progressStripToggle": "p2YUJW_progressStripToggle",
-			"resultDesc": "p2YUJW_resultDesc",
-			"progressHead": "p2YUJW_progressHead",
-			"modalIn": "p2YUJW_modalIn",
-			"modalRow": "p2YUJW_modalRow",
-			"failClear": "p2YUJW_failClear",
-			"queueList": "p2YUJW_queueList",
-			"cardMain": "p2YUJW_cardMain",
-			"logLineInfo": "p2YUJW_logLineInfo",
-			"modalConfirm": "p2YUJW_modalConfirm",
-			"footLink": "p2YUJW_footLink",
-			"progressStripText": "p2YUJW_progressStripText",
-			"adBadge": "p2YUJW_adBadge",
-			"modalCloseIcon": "p2YUJW_modalCloseIcon",
-			"modalActions": "p2YUJW_modalActions",
-			"stripCancel": "p2YUJW_stripCancel",
-			"failCopy": "p2YUJW_failCopy",
-			"uninstallConfirm": "p2YUJW_uninstallConfirm",
-			"tabActive": "p2YUJW_tabActive",
-			"categoryBadge": "p2YUJW_categoryBadge",
-			"queueRowTrack": "p2YUJW_queueRowTrack",
-			"modalCancel": "p2YUJW_modalCancel",
-			"progressText": "p2YUJW_progressText",
-			"failRow": "p2YUJW_failRow",
-			"installedBtn": "p2YUJW_installedBtn",
-			"failKindInstall": "p2YUJW_failKindInstall",
-			"root": "p2YUJW_root",
-			"logLine": "p2YUJW_logLine",
-			"modalCmdText": "p2YUJW_modalCmdText",
-			"queueRowHead": "p2YUJW_queueRowHead",
-			"overlayIn": "p2YUJW_overlayIn",
-			"reportBtn": "p2YUJW_reportBtn",
-			"segCountActive": "p2YUJW_segCountActive",
-			"queueRowTarget": "p2YUJW_queueRowTarget",
-			"failHead": "p2YUJW_failHead",
-			"body": "p2YUJW_body",
-			"resultCheck": "p2YUJW_resultCheck",
-			"title": "p2YUJW_title",
-			"detailBtn": "p2YUJW_detailBtn",
-			"searchRow": "p2YUJW_searchRow",
-			"resultRestarting": "p2YUJW_resultRestarting",
-			"progressTrack": "p2YUJW_progressTrack",
-			"modalCopy": "p2YUJW_modalCopy",
-			"modalCmd": "p2YUJW_modalCmd",
-			"progressPulse": "p2YUJW_progressPulse",
-			"progressFillFail": "p2YUJW_progressFillFail",
 			"trustHint": "p2YUJW_trustHint",
-			"segCount": "p2YUJW_segCount",
-			"list": "p2YUJW_list",
-			"tabCount": "p2YUJW_tabCount",
-			"state": "p2YUJW_state",
-			"toastIn": "p2YUJW_toastIn",
-			"logoIcon": "p2YUJW_logoIcon",
-			"queueRowPct": "p2YUJW_queueRowPct",
-			"modalInstall": "p2YUJW_modalInstall",
-			"resultTitle": "p2YUJW_resultTitle",
-			"cardTitle": "p2YUJW_cardTitle",
-			"errorBox": "p2YUJW_errorBox",
-			"toast": "p2YUJW_toast",
-			"footer": "p2YUJW_footer",
-			"logLineOk": "p2YUJW_logLineOk",
-			"restartNow": "p2YUJW_restartNow",
-			"progressLogTitle": "p2YUJW_progressLogTitle",
-			"cardHead": "p2YUJW_cardHead",
-			"desc": "p2YUJW_desc",
-			"resultCheckIcon": "p2YUJW_resultCheckIcon",
-			"progressFill": "p2YUJW_progressFill",
-			"failEmpty": "p2YUJW_failEmpty",
-			"restartLater": "p2YUJW_restartLater",
-			"failTime": "p2YUJW_failTime",
-			"failRepo": "p2YUJW_failRepo",
-			"brand": "p2YUJW_brand",
-			"logLinePlain": "p2YUJW_logLinePlain",
-			"brandText": "p2YUJW_brandText",
-			"modalValue": "p2YUJW_modalValue",
-			"failList": "p2YUJW_failList",
-			"adArrow": "p2YUJW_adArrow",
-			"star": "p2YUJW_star",
-			"actions": "p2YUJW_actions",
-			"linkIcon": "p2YUJW_linkIcon",
-			"failBtn": "p2YUJW_failBtn",
-			"failKindUninstall": "p2YUJW_failKindUninstall",
-			"failBigIssue": "p2YUJW_failBigIssue",
-			"stateTitle": "p2YUJW_stateTitle",
-			"progressLog": "p2YUJW_progressLog",
-			"errorPlugin": "p2YUJW_errorPlugin",
+			"installBtnCopied": "p2YUJW_installBtnCopied",
 			"queuedHint": "p2YUJW_queuedHint",
-			"progressLogLines": "p2YUJW_progressLogLines",
+			"pendingRowActions": "p2YUJW_pendingRowActions",
+			"title": "p2YUJW_title",
+			"modalCancel": "p2YUJW_modalCancel",
 			"tabs": "p2YUJW_tabs",
-			"errorCopySoft": "p2YUJW_errorCopySoft",
 			"installBtn": "p2YUJW_installBtn",
+			"cardHead": "p2YUJW_cardHead",
+			"root": "p2YUJW_root",
+			"body": "p2YUJW_body",
+			"headerTitleRow": "p2YUJW_headerTitleRow",
+			"failList": "p2YUJW_failList",
+			"modalRow": "p2YUJW_modalRow",
+			"failRepo": "p2YUJW_failRepo",
+			"taglineLink": "p2YUJW_taglineLink",
+			"tabActive": "p2YUJW_tabActive",
+			"queueRow": "p2YUJW_queueRow",
+			"topic": "p2YUJW_topic",
+			"tabCount": "p2YUJW_tabCount",
+			"failBigIssue": "p2YUJW_failBigIssue",
+			"failCopy": "p2YUJW_failCopy",
+			"queueSectionTitle": "p2YUJW_queueSectionTitle",
+			"installBtnUpdate": "p2YUJW_installBtnUpdate",
+			"resultCheckIcon": "p2YUJW_resultCheckIcon",
+			"search": "p2YUJW_search",
+			"overlayIn": "p2YUJW_overlayIn",
+			"overlay": "p2YUJW_overlay",
+			"footLink": "p2YUJW_footLink",
+			"footer": "p2YUJW_footer",
+			"errorCopySoft": "p2YUJW_errorCopySoft",
+			"githubLink": "p2YUJW_githubLink",
+			"resultRestarting": "p2YUJW_resultRestarting",
+			"progressStrip": "p2YUJW_progressStrip",
+			"restartLater": "p2YUJW_restartLater",
+			"modalClose": "p2YUJW_modalClose",
+			"queueSection": "p2YUJW_queueSection",
+			"adArrow": "p2YUJW_adArrow",
 			"stateDesc": "p2YUJW_stateDesc",
-			"modal": "p2YUJW_modal"
+			"modalDesc": "p2YUJW_modalDesc",
+			"resultCheck": "p2YUJW_resultCheck",
+			"card": "p2YUJW_card",
+			"cardMain": "p2YUJW_cardMain",
+			"verified": "p2YUJW_verified",
+			"modalConfirm": "p2YUJW_modalConfirm",
+			"toast": "p2YUJW_toast",
+			"detailBtn": "p2YUJW_detailBtn",
+			"modalLink": "p2YUJW_modalLink",
+			"resultTitle": "p2YUJW_resultTitle",
+			"progressFillFail": "p2YUJW_progressFillFail",
+			"failRow": "p2YUJW_failRow",
+			"resultCount": "p2YUJW_resultCount",
+			"installedBtnActive": "p2YUJW_installedBtnActive",
+			"queueModalList": "p2YUJW_queueModalList",
+			"uninstallBtn": "p2YUJW_uninstallBtn",
+			"queueRowDesc": "p2YUJW_queueRowDesc",
+			"segCount": "p2YUJW_segCount",
+			"failClear": "p2YUJW_failClear",
+			"adText": "p2YUJW_adText",
+			"toastFail": "p2YUJW_toastFail",
+			"modalCmdText": "p2YUJW_modalCmdText",
+			"progressHead": "p2YUJW_progressHead",
+			"retryBtn": "p2YUJW_retryBtn",
+			"modalInstall": "p2YUJW_modalInstall",
+			"failBadge": "p2YUJW_failBadge",
+			"progressStripDot": "p2YUJW_progressStripDot",
+			"errorHint": "p2YUJW_errorHint",
+			"desc": "p2YUJW_desc",
+			"header": "p2YUJW_header",
+			"progressTrack": "p2YUJW_progressTrack",
+			"progressStripMain": "p2YUJW_progressStripMain",
+			"modalCloseIcon": "p2YUJW_modalCloseIcon",
+			"reportBtn": "p2YUJW_reportBtn",
+			"queueRowTrack": "p2YUJW_queueRowTrack",
+			"result": "p2YUJW_result",
+			"queueRowPct": "p2YUJW_queueRowPct",
+			"modalBody": "p2YUJW_modalBody",
+			"progressPulse": "p2YUJW_progressPulse",
+			"versionBadge": "p2YUJW_versionBadge",
+			"modalValue": "p2YUJW_modalValue",
+			"tab": "p2YUJW_tab",
+			"resultDesc": "p2YUJW_resultDesc",
+			"failKindInstall": "p2YUJW_failKindInstall",
+			"toastIn": "p2YUJW_toastIn",
+			"modalCmdCopy": "p2YUJW_modalCmdCopy",
+			"failBtn": "p2YUJW_failBtn",
+			"errorModal": "p2YUJW_errorModal",
+			"modalLabel": "p2YUJW_modalLabel",
+			"restartNow": "p2YUJW_restartNow",
+			"errorTitle": "p2YUJW_errorTitle",
+			"modalIn": "p2YUJW_modalIn",
+			"githubIcon": "p2YUJW_githubIcon",
+			"queueRowStatus": "p2YUJW_queueRowStatus",
+			"stateTitle": "p2YUJW_stateTitle",
+			"installedBtn": "p2YUJW_installedBtn",
+			"modal": "p2YUJW_modal",
+			"modalTitle": "p2YUJW_modalTitle",
+			"progressStripToggle": "p2YUJW_progressStripToggle",
+			"errorBox": "p2YUJW_errorBox",
+			"errorPlugin": "p2YUJW_errorPlugin",
+			"failKind": "p2YUJW_failKind",
+			"failAllowHint": "p2YUJW_failAllowHint",
+			"filterResults": "p2YUJW_filterResults",
+			"stripCancel": "p2YUJW_stripCancel",
+			"failHead": "p2YUJW_failHead",
+			"categoryBadge": "p2YUJW_categoryBadge",
+			"failPrepareHint": "p2YUJW_failPrepareHint",
+			"modalTitleBusy": "p2YUJW_modalTitleBusy",
+			"brandTitle": "p2YUJW_brandTitle",
+			"installBtnInstalled": "p2YUJW_installBtnInstalled",
+			"actions": "p2YUJW_actions",
+			"state": "p2YUJW_state",
+			"modalTitleQueued": "p2YUJW_modalTitleQueued",
+			"copyIcon": "p2YUJW_copyIcon",
+			"failTime": "p2YUJW_failTime",
+			"pendingRowStatus": "p2YUJW_pendingRowStatus",
+			"adBadge": "p2YUJW_adBadge",
+			"cardSide": "p2YUJW_cardSide",
+			"modalActions": "p2YUJW_modalActions",
+			"failKindUninstall": "p2YUJW_failKindUninstall",
+			"adBanner": "p2YUJW_adBanner",
+			"star": "p2YUJW_star",
+			"queueRowBody": "p2YUJW_queueRowBody",
+			"queueRowHead": "p2YUJW_queueRowHead",
+			"uninstallConfirm": "p2YUJW_uninstallConfirm",
+			"failEmpty": "p2YUJW_failEmpty",
+			"failMsg": "p2YUJW_failMsg",
+			"progressFill": "p2YUJW_progressFill",
+			"segCountActive": "p2YUJW_segCountActive",
+			"installedBtnDisabled": "p2YUJW_installedBtnDisabled",
+			"fork": "p2YUJW_fork",
+			"queueRowTarget": "p2YUJW_queueRowTarget",
+			"stats": "p2YUJW_stats",
+			"searchRow": "p2YUJW_searchRow",
+			"date": "p2YUJW_date",
+			"progressText": "p2YUJW_progressText",
+			"modalCopy": "p2YUJW_modalCopy",
+			"version": "p2YUJW_version",
+			"tagline": "p2YUJW_tagline",
+			"progressStripText": "p2YUJW_progressStripText",
+			"logoIcon": "p2YUJW_logoIcon",
+			"controls": "p2YUJW_controls",
+			"updateBadge": "p2YUJW_updateBadge",
+			"list": "p2YUJW_list",
+			"progress": "p2YUJW_progress",
+			"cardTitle": "p2YUJW_cardTitle",
+			"topics": "p2YUJW_topics",
+			"linkIcon": "p2YUJW_linkIcon",
+			"modalCmd": "p2YUJW_modalCmd"
 		};
 		//#endregion
+		//#region src/client/lib/failures.ts
+		const KEY = "gro.ngilp-hsd.failure-records";
+		const MAX = 50;
+		/**
+		* 失败归类，四态：
+		* - pnpmAllowBuild：git 插件自身 prepare 脚本被 pnpm 白名单拦截（机制：git 依赖默认禁跑
+		*   prepare，宿主会解析 key 自动放行并重试）—— 所有 git 插件首次安装都会遇到，属宿主
+		*   配置问题 → 给修复指引，不提 Issue
+		* - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
+		*   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
+		*   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
+		* - pluginPrepare：白名单放行后，插件的 prepare/构建脚本实际执行失败（git tarball 常因
+		*   缺失子模块或构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
+		* - repo：其余失败，默认按插件仓库问题引导提 Issue
+		*/
+		function classifyFailure(message) {
+			if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return "pnpmIgnoredBuild";
+			if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return "pluginPrepare";
+			if (/ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED|allowBuilds|pnpm-workspace\.yaml/i.test(message)) return "pnpmAllowBuild";
+			return "repo";
+		}
+		/** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */
+		const CORE_LINE_RE = /ERR_[A-Z_]+|ELIFECYCLE|Command failed|prepare-guard|Failed to prepare|exit code|\bprepare\b|pnpm failed in profile|git-hosted plugins build|submodule|not found|cannot find|no such|unable to|fatal|missing|error/i;
+		/** 提交 issue 时正文里错误摘要的上限字符数。GitHub 请求行上限 8192 字节，
+		* 固定模板与 URL 编码开销约 1~2K，核心错误（以 ASCII 日志为主）可安全带到 ~5K；
+		* 仍超长时 pluginIssueUrl 会逐档缩小核心预算，最终 URL 不会超限。 */
+		const MAX_CORE_CHARS = 5e3;
+		/** 摘要里单行上限：允许构建 key 等长行也被截短。 */
+		const MAX_LINE_CHARS = 400;
+		/**
+		* 核心错误收集器：从完整安装输出里挑出真正说明问题的行（错误代码、构建脚本失败、
+		* 退出与宿主提示），去重后拼接，单行与总量都截断 —— 只把「重点 + 原因」带进 issue 正文，
+		* 避免完整日志塞进 URL 导致请求过长。无关键行时退化为「头部 + 尾部」快照。
+		* maxChars 可由调用方按最终 URL 长度收紧（pluginIssueUrl 超限时逐档缩小）。
+		*/
+		function summarizeError(message, maxChars = MAX_CORE_CHARS) {
+			const seen = /* @__PURE__ */ new Set();
+			const core = [];
+			for (const raw of message.split(/\r?\n/)) {
+				const line = raw.trim();
+				if (!line || !CORE_LINE_RE.test(line)) continue;
+				const short = line.length > MAX_LINE_CHARS ? `${line.slice(0, MAX_LINE_CHARS)}…` : line;
+				if (!seen.has(short)) {
+					seen.add(short);
+					core.push(short);
+				}
+			}
+			let out;
+			if (core.length === 0) {
+				const tail = message.trimEnd().slice(-1e3);
+				const sep = "\n…\n";
+				const headBudget = Math.max(maxChars - tail.length - 3, 0);
+				const head = message.slice(0, 500).trim();
+				out = `${head.length > headBudget ? head.slice(0, headBudget) : head}${sep}${tail}`;
+			} else out = core.join("\n");
+			return out.length > maxChars ? `${out.slice(0, maxChars)}\n… (truncated)` : out;
+		}
+		/** 提取首个错误代码（如 ERR_PNPM_PREPARE_PACKAGE），无则 null。 */
+		function coreErrorCode(message) {
+			const m = message.match(/\[?ERR_[A-Z_]+\]?/);
+			return m ? m[0].replace(/^\[|\]$/g, "") : null;
+		}
+		/** 运行时 localStorage 访问：类型上不依赖 DOM lib（Node 测试环境也能编译），浏览器里取 window。 */
+		const storage = () => globalThis.localStorage;
+		/** 读取本地失败记录（损坏/不可用时返回空列表，不抛错）。列表最新在前；同一仓库只保留最新一条，空 repo 无法定位插件，全部保留。 */
+		function loadFailures() {
+			try {
+				const raw = storage()?.getItem(KEY);
+				if (!raw) return [];
+				const list = JSON.parse(raw);
+				if (!Array.isArray(list)) return [];
+				const valid = list.filter((r) => !!r && typeof r === "object" && typeof r.message === "string");
+				const seen = /* @__PURE__ */ new Set();
+				const deduped = [];
+				for (const r of valid) {
+					if (r.repo && seen.has(r.repo)) continue;
+					if (r.repo) seen.add(r.repo);
+					deduped.push(r);
+				}
+				return deduped;
+			} catch {
+				return [];
+			}
+		}
+		function save(list) {
+			try {
+				storage()?.setItem(KEY, JSON.stringify(list));
+			} catch {}
+		}
+		/** 追加一条失败记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。同一仓库只保留最新一次失败。 */
+		function addFailure(record) {
+			const prev = loadFailures();
+			let id = Date.now();
+			while (prev.some((r) => r.id === id)) id += 1;
+			const rest = record.repo ? prev.filter((r) => r.repo !== record.repo) : prev;
+			const next = [{
+				...record,
+				id,
+				at: id
+			}, ...rest].slice(0, MAX);
+			save(next);
+			return next;
+		}
+		/** 清空全部失败记录，返回空列表。 */
+		function clearFailures() {
+			save([]);
+			return [];
+		}
+		//#endregion
 		//#region src/client/lib/catalog.ts
+		/** 插件中心官网地址。 */
 		const SITE_URL = "https://dsh-plugin.org/";
-		/** 插件当前版本号，供头部标题展示「DSH-Plugin Hub v0.1.1」。 */
+		/** 插件中心源码仓库：头部右上角 GitHub 图标的跳转地址 */
+		const GITHUB_URL = "https://github.com/dshplugin/dsh-plugin-hub";
+		/**
+		* 插件当前版本号，供头部标题展示「DSH-Plugin Hub v0.1.1」。
+		* tsdown 构建时用 define 把 __PLUGIN_VERSION__ 替换成 package.json 的版本号；
+		* node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
+		*/
 		const PLUGIN_VERSION = "0.1.1";
 		/** dsh-plugin.org 中文页挂在 /zh/ 前缀下，英文在根路径。 */
 		function langPathOf(lang) {
@@ -365,28 +533,70 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			return `${SITE_URL}${langPath}plugins/${plugin.ownerSlug ?? repo.split("/")[0]?.toLowerCase() ?? ""}/${plugin.slug}`;
 		}
 		/**
-		* 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，
-		* 正文附上收录来源与详情页链接 —— 用户在作者仓库提交的 issue 里就带着
-		* 我们网站的外链（错误弹窗、失败记录共用此逻辑）。
+		* 失败弹窗里仓库地址的跳转目标：官网详情页（含插件收录信息），
+		* 与 issue 正文的 Catalog 链接同一形式（单级 /plugins/{repo}）。
 		*/
-		function pluginIssueUrl(repo, message) {
+		function pluginSiteUrl(repo) {
+			return `${SITE_URL}plugins/${repo}`;
+		}
+		/**
+		* 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
+		* 核心信息 —— 原因判定 + 关键错误代码 + 宿主机器环境快照 + 错误核心摘要（完整日志
+		* 太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，故只收集重点）。
+		* 错误弹窗、失败记录共用此逻辑。
+		* env 取不到时为 null，链接照常生成、只是少环境段。
+		*/
+		function pluginIssueUrl(repo, message, env) {
 			const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`;
-			const body = [
-				"## Environment",
-				`- Plugin: \`${repo}\``,
-				"- Installed from: [dsh-plugin.org](https://dsh-plugin.org/) plugin catalog (in-app install via DSH-Plugin Hub)",
-				`- Catalog: [https://dsh-plugin.org/plugins/${repo}](https://dsh-plugin.org/plugins/${repo})`,
-				"",
-				"## Error",
-				"",
-				"```",
-				message,
-				"```",
-				"",
-				"---",
-				"This error was produced by the [dsh-plugin-hub](https://github.com/dshplugin/dsh-plugin-hub) installer bundled with DeepSeek Harness."
-			].join("\n");
-			return `https://github.com/${repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+			const kind = classifyFailure(message);
+			const reason = kind === "pnpmAllowBuild" ? "pnpm build-script allowlist block (host install mechanism, not the plugin)" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
+			const code = coreErrorCode(message);
+			const build = (coreChars) => {
+				const body = [
+					"## Summary",
+					`- Cause: ${reason}`,
+					...code ? [`- Key error: \`${code}\``] : [],
+					"",
+					`## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
+					`本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
+					`- 复现命令：\`dsh plugin add github:${repo}\``,
+					"",
+					"## Environment",
+					`- Plugin: \`${repo}\``,
+					...env ? [
+						`- DSH: ${env.dshVersion ? `v${env.dshVersion}` : "unknown"}`,
+						`- Plugin Hub: v${PLUGIN_VERSION}`,
+						`- Node: ${env.nodeVersion}`,
+						`- OS: ${env.platform} ${env.arch} (${env.release})`,
+						`- Profile: \`${env.profile}\``,
+						`- DSH Home: \`${env.dshHome}\``
+					] : [],
+					`- Catalog: [${pluginSiteUrl(repo)}](${pluginSiteUrl(repo)})`,
+					"",
+					"## Error (core)",
+					"",
+					"```",
+					summarizeError(message, coreChars),
+					"```",
+					"",
+					"---",
+					`This error was produced by the [dsh-plugin-hub](${GITHUB_URL}) installer bundled with DeepSeek Harness.`
+				].join("\n");
+				return `https://github.com/${repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+			};
+			const MAX_URL_CHARS = 7600;
+			let url = build(MAX_CORE_CHARS);
+			if (url.length > MAX_URL_CHARS) for (const budget of [
+				4e3,
+				2500,
+				1400,
+				800,
+				400
+			]) {
+				url = build(budget);
+				if (url.length <= MAX_URL_CHARS) break;
+			}
+			return url;
 		}
 		const CATEGORY_ORDER = [
 			"interface",
@@ -407,13 +617,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/**
 		* 归一化在线 API（dsh-plugin.org/api/plugins.{lang}.json）返回的短 key 结构
-		* （s/o/n/c/t/f/d/r/v/u/a/sg/fk），统一为 HubPlugin，保证渲染逻辑只认一种结构。
+		* （s/o/n/vr/c/t/f/d/r/v/u/a/sg/fk），统一为 HubPlugin，保证渲染逻辑只认一种结构。
 		*/
 		function normalize(raw) {
 			if (typeof raw.s === "string") return {
 				slug: raw.s,
 				ownerSlug: typeof raw.o === "string" ? raw.o : void 0,
 				displayName: typeof raw.n === "string" ? raw.n : void 0,
+				version: typeof raw.vr === "string" ? raw.vr : void 0,
 				category: typeof raw.c === "string" ? raw.c : void 0,
 				topics: Array.isArray(raw.t) ? raw.t : void 0,
 				features: Array.isArray(raw.f) ? raw.f : void 0,
@@ -531,6 +742,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			"sortNewest"
 		];
 		//#endregion
+		//#region src/client/lib/env.ts
+		let envPromise = null;
+		function getEnv() {
+			envPromise ??= fetch("/dsh-plugin-hub/env", { cache: "no-store" }).then((res) => res.ok ? res.json() : null).catch(() => null);
+			return envPromise;
+		}
+		//#endregion
 		//#region src/client/hooks/useCatalog.ts
 		/**
 		* Catalog data + view state for the Plugin Hub section.
@@ -555,12 +773,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [installedFilter, setInstalledFilter] = (0, react.useState)("all");
 			/** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
 			const [installed, setInstalled] = (0, react.useState)({});
+			/** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由） */
+			const [versions, setVersions] = (0, react.useState)({});
 			(0, react.useEffect)(() => {
 				let cancelled = false;
 				setPlugins(null);
 				setStats(null);
 				setFailed(false);
-				const fetchData = (url) => fetch(url).then((res) => {
+				const fetchData = (url) => fetch(url, { cache: "no-store" }).then((res) => {
 					if (!res.ok) throw new Error(String(res.status));
 					return res.json();
 				});
@@ -589,6 +809,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					if (!res.ok) return;
 					const data = await res.json();
 					setInstalled(data.installed ?? {});
+					setVersions(data.versions ?? {});
 				} catch {}
 			};
 			(0, react.useEffect)(() => {
@@ -601,6 +822,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				const needle = `github:${repo.toLowerCase()}`;
 				for (const [name, spec] of Object.entries(installed)) if (spec.toLowerCase().includes(needle)) return name;
 				return null;
+			};
+			/** 该插件安装时记录的目录版本（无记录/未安装 → null）。 */
+			const installedVersion = (p) => {
+				const repo = p.source?.repo;
+				if (!repo) return null;
+				return versions[repo.toLowerCase()]?.version ?? null;
+			};
+			/**
+			* 是否有更新：仅对已安装插件有意义。
+			* 双信号判定——有 release 版本的比版本；无版本（repo 不打 tag）的比仓库最近更新时间
+			* （repoUpdatedAt，ISO 字符串字典序 = 时间序），更新时间变新说明有新提交。
+			*/
+			const hasUpdate = (p) => {
+				if (installedName(p) === null) return false;
+				const repo = p.source?.repo;
+				if (!repo) return false;
+				const rec = versions[repo.toLowerCase()];
+				if (!rec) return false;
+				if (p.version) return p.version !== rec.version;
+				const current = p.dates?.repoUpdatedAt;
+				return Boolean(current && rec.updatedAt && current > rec.updatedAt);
 			};
 			/** 当前分类下的插件（「全部」时为整个目录）。 */
 			const categoryPlugins = (0, react.useMemo)(() => {
@@ -658,6 +900,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				reload: () => setReloadKey((k) => k + 1),
 				installed,
 				installedName,
+				installedVersion,
+				hasUpdate,
 				refreshInstalled,
 				category,
 				setCategory,
@@ -684,15 +928,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* uninstall, cancel) plus the modal task lookups used by the dialogs.
 		*/
 		function useTaskQueue(opts) {
-			const { t, refreshInstalled, onInstallDone, onUninstallDone, onError, installPlugin, uninstallPlugin, installedName } = opts;
+			const { t, refreshInstalled, onInstallDone, onUninstallDone, onError, installPlugin, uninstallPlugin, installedName, resolvePending } = opts;
 			const [queue, setQueue] = (0, react.useState)([]);
 			const queueRef = (0, react.useRef)([]);
+			/** 待重启列表（服务端内存态 + 本地展示信息补齐）；与 queue 一样以 ref 为唯一事实来源。 */
+			const [pendingRestarts, setPendingRestarts] = (0, react.useState)([]);
+			const pendingRef = (0, react.useRef)([]);
+			/** 本次会话内安装成功插件的展示信息（目标 → 简介/版本）：轮询合并待重启列表时补齐，刷新后由 resolvePending 兜底。 */
+			const pendingInfoRef = (0, react.useRef)(/* @__PURE__ */ new Map());
+			/** 保持最新的 resolvePending：轮询闭包捕获的是调用那一刻的目录状态，目录晚加载时也能补齐。 */
+			const resolvePendingRef = (0, react.useRef)(resolvePending);
+			resolvePendingRef.current = resolvePending;
 			/** 当前打开弹窗所对应的任务 id：该任务完成时弹窗切换为结果视图 */
 			const modalTaskRef = (0, react.useRef)(null);
 			/** 轮询定时器句柄（队列清空/组件卸载时清理） */
 			const pollRef = (0, react.useRef)(null);
-			/** 当前安装/卸载操作的插件仓库：失败时归档到错误弹窗（操作结束时弹窗已关，需提前捕获） */
-			const opRepoRef = (0, react.useRef)(null);
 			/** 进行中状态条是否展开（刷新后恢复的任务可点击展开查看实时输出） */
 			const [showProgress, setShowProgress] = (0, react.useState)(false);
 			/** 停止后台任务轮询（任务结束或组件卸载时清理）。 */
@@ -702,28 +952,91 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					pollRef.current = null;
 				}
 			};
+			/** 队列与待重启都清空才停轮询：待重启期间持续轮询，宿主一重启（内存列表清空）立刻感知并消失。 */
+			const maybeStopPoll = () => {
+				if (queueRef.current.length === 0 && pendingRef.current.length === 0) stopPoll();
+			};
 			(0, react.useEffect)(() => stopPoll, []);
-			/** 更新队列（同步镜像到 ref，供轮询/防重复入队读取当前值）。 */
+			/** 更新队列（同步镜像到 ref：queueRef 是唯一事实来源，state 只负责触发渲染，
+			*  避免依赖 React updater 的异步调度时序导致 gone/stopPoll/防重复入队读到旧值）。 */
 			const applyQueue = (updater) => {
-				setQueue((prev) => {
-					const next = updater(prev);
-					queueRef.current = next;
-					return next;
+				const next = updater(queueRef.current);
+				queueRef.current = next;
+				setQueue(next);
+			};
+			/** 解析服务端待重启列表（`github:` 前缀已去掉，与安装任务的 target 对齐）。 */
+			const parsePendingRestarts = (value) => {
+				if (!Array.isArray(value)) return [];
+				const out = [];
+				for (const x of value) {
+					if (typeof x !== "object" || x === null) continue;
+					const target = x.target;
+					if (typeof target !== "string" || target === "") continue;
+					const at = x.at;
+					out.push({
+						target: target.replace(/^github:/, ""),
+						kind: x.kind === "uninstall" ? "uninstall" : "install",
+						at: typeof at === "number" ? at : 0
+					});
+				}
+				return out;
+			};
+			/** 合并服务端待重启列表：保留已有展示信息，缺失时用会话内记录 / 目录解析补齐。 */
+			const applyPending = (raw) => {
+				const prev = pendingRef.current;
+				const next = raw.map((p) => {
+					const old = prev.find((q) => q.target === p.target);
+					if (old?.desc !== void 0) return {
+						...p,
+						desc: old.desc,
+						version: old.version
+					};
+					const info = pendingInfoRef.current.get(p.target) ?? resolvePendingRef.current?.(p.target) ?? null;
+					return info ? {
+						...p,
+						desc: info.desc,
+						version: info.version
+					} : p;
 				});
+				pendingRef.current = next;
+				setPendingRestarts(next);
+			};
+			/** 向宿主记录某插件的安装时目录信号（version + updatedAt）；version 为空时清除记录（卸载）。 */
+			const syncInstalledVersion = async (repo, version, updatedAt) => {
+				if (!repo) return;
+				try {
+					await fetch("/dsh-plugin-hub/installed-version", {
+						method: "POST",
+						headers: { "content-type": "application/json" },
+						body: JSON.stringify({
+							repo,
+							version: version ?? null,
+							updatedAt
+						})
+					});
+				} catch {}
 			};
 			/** 后台任务结束（active 中消失后查终态确认）：完成 → 刷新安装表 + 结果视图/toast；失败 → 完整错误弹窗 */
 			const finishQueueTask = (ok, q, lines) => {
 				applyQueue((prev) => prev.filter((x) => x.id !== q.id));
 				if (ok) {
 					refreshInstalled();
-					if (q.kind === "uninstall") onUninstallDone(modalTaskRef.current === q.id);
-					else onInstallDone(modalTaskRef.current === q.id);
+					if (q.kind === "uninstall") {
+						syncInstalledVersion(q.repo, void 0, void 0);
+						onUninstallDone(modalTaskRef.current === q.id);
+					} else {
+						syncInstalledVersion(q.repo, q.version, q.updatedAt);
+						pendingInfoRef.current.set(q.target, {
+							desc: q.desc,
+							version: q.version
+						});
+						onInstallDone(modalTaskRef.current === q.id);
+					}
 				} else {
 					const detail = lines.length > 0 ? [...lines].reverse().join("\n") : q.kind === "uninstall" ? t("uninstallFail") : t("installFail");
-					if (q.kind === "install" && q.target.includes("/")) opRepoRef.current = q.target;
-					onError(detail, opRepoRef.current, q.kind);
+					onError(detail, q.repo, q.kind);
 				}
-				if (queueRef.current.length === 0) stopPoll();
+				maybeStopPoll();
 			};
 			/** 任务在 /active 中消失 = 已结束：查 /status 拿终态并收尾（cancelled 静默移除）。 */
 			const settleTask = async (q) => {
@@ -739,7 +1052,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				} catch {}
 				if (status === "done") finishQueueTask(true, q, lines);
 				else if (status === "failed") finishQueueTask(false, q, lines);
-				else applyQueue((prev) => prev.filter((x) => x.id !== q.id));
+				else {
+					applyQueue((prev) => prev.filter((x) => x.id !== q.id));
+					maybeStopPoll();
+				}
 			};
 			/** 轮询整个队列：合并服务端 /active（running 在前、pending 在后），
 			*  消失的任务查终态收尾；队列清空即停止轮询。 */
@@ -749,17 +1065,25 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					try {
 						const res = await fetch("/dsh-plugin-hub/active", { cache: "no-store" });
 						if (!res.ok) throw new Error(`active ${res.status}`);
-						const active = ((await res.json()).tasks ?? []).filter((a) => typeof a.id === "number");
+						const data = await res.json();
+						const active = (data.tasks ?? []).filter((a) => typeof a.id === "number");
 						const byId = new Map(active.map((a) => [a.id, a]));
+						const prevQueue = queueRef.current;
+						applyPending(parsePendingRestarts(data.pendingRestarts));
 						applyQueue((prev) => {
 							const next = [];
 							for (const a of active) {
 								const id = a.id;
 								const prevTask = prev.find((q) => q.id === id);
+								const isRemove = a.action === "remove";
 								next.push({
 									id,
-									kind: a.action === "remove" ? "uninstall" : "install",
+									kind: isRemove ? "uninstall" : "install",
 									target: typeof a.target === "string" ? a.target.replace(/^github:/, "") : prevTask?.target ?? "",
+									desc: prevTask?.desc,
+									repo: prevTask?.repo ?? (isRemove ? null : typeof a.target === "string" ? a.target.replace(/^github:/, "") : null),
+									version: prevTask?.version,
+									updatedAt: prevTask?.updatedAt,
 									status: a.status === "running" ? "running" : "pending",
 									progress: typeof a.progress === "number" ? a.progress : prevTask?.progress ?? 0,
 									lines: Array.isArray(a.lines) ? a.lines : prevTask?.lines ?? []
@@ -767,7 +1091,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 							}
 							return next;
 						});
-						const gone = queueRef.current.filter((q) => !byId.has(q.id));
+						const gone = prevQueue.filter((q) => !byId.has(q.id) && q.status !== "cancelling");
 						for (const q of gone) await settleTask(q);
 					} catch {}
 				}, 600);
@@ -780,17 +1104,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						if (!res.ok) return;
 						const data = await res.json();
 						if (cancelled) return;
-						const items = (data.tasks ?? []).filter((a) => typeof a.id === "number").map((a) => ({
-							id: a.id,
-							kind: a.action === "remove" ? "uninstall" : "install",
-							target: typeof a.target === "string" ? a.target.replace(/^github:/, "") : "",
-							status: a.status === "running" ? "running" : "pending",
-							progress: typeof a.progress === "number" ? a.progress : 0,
-							lines: Array.isArray(a.lines) ? a.lines : []
-						}));
-						if (items.length > 0) {
+						applyPending(parsePendingRestarts(data.pendingRestarts));
+						const items = (data.tasks ?? []).filter((a) => typeof a.id === "number").map((a) => {
+							const isRemove = a.action === "remove";
+							return {
+								id: a.id,
+								kind: isRemove ? "uninstall" : "install",
+								target: typeof a.target === "string" ? a.target.replace(/^github:/, "") : "",
+								repo: isRemove ? null : typeof a.target === "string" ? a.target.replace(/^github:/, "") : null,
+								status: a.status === "running" ? "running" : "pending",
+								progress: typeof a.progress === "number" ? a.progress : 0,
+								lines: Array.isArray(a.lines) ? a.lines : []
+							};
+						});
+						if (items.length > 0 || pendingRef.current.length > 0) {
 							applyQueue((prev) => [...prev, ...items.filter((n) => !prev.some((p) => p.id === n.id))]);
-							setShowProgress(true);
 							pollQueue();
 						}
 					} catch {}
@@ -804,7 +1132,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const installNow = async (p) => {
 				const repo = p.source?.repo ?? "";
 				if (!repo) return;
-				opRepoRef.current = repo;
 				if (queueRef.current.some((q) => q.kind === "install" && q.target === repo)) return;
 				try {
 					const res = await fetch("/dsh-plugin-hub/install", {
@@ -814,7 +1141,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					});
 					const data = await res.json();
 					if (!data.ok || typeof data.task !== "number") {
-						onError(data.error ?? `HTTP ${res.status}`, opRepoRef.current, "install");
+						onError(data.error ?? `HTTP ${res.status}`, repo, "install");
 						return;
 					}
 					const taskId = data.task;
@@ -823,31 +1150,41 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						id: taskId,
 						kind: "install",
 						target: repo,
+						desc: p.description,
+						repo,
+						version: p.version,
+						updatedAt: p.dates?.repoUpdatedAt,
 						status: "pending",
 						progress: 0,
 						lines: []
 					}]);
-					setShowProgress(true);
+					pendingInfoRef.current.set(repo, {
+						desc: p.description,
+						version: p.version
+					});
 					pollQueue();
 				} catch {
-					onError(t("installFail"), opRepoRef.current, "install");
+					onError(t("installFail"), repo, "install");
 				}
 			};
 			/** 弹窗动作：直接卸载。与安装同一队列机制，弹窗内实时显示进度。 */
 			const uninstallNow = async (p) => {
 				const name = installedName(p);
 				if (!name) return;
-				opRepoRef.current = p.source?.repo ?? null;
+				const repo = p.source?.repo ?? null;
 				if (queueRef.current.some((q) => q.kind === "uninstall" && q.target === name)) return;
 				try {
 					const res = await fetch("/dsh-plugin-hub/uninstall", {
 						method: "POST",
 						headers: { "content-type": "application/json" },
-						body: JSON.stringify({ name })
+						body: JSON.stringify({
+							name,
+							repo: repo ?? void 0
+						})
 					});
 					const data = await res.json();
 					if (!data.ok || typeof data.task !== "number") {
-						onError(data.error ?? `HTTP ${res.status}`, opRepoRef.current, "uninstall");
+						onError(data.error ?? `HTTP ${res.status}`, repo, "uninstall");
 						return;
 					}
 					const taskId = data.task;
@@ -856,19 +1193,24 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						id: taskId,
 						kind: "uninstall",
 						target: name,
+						desc: p.description,
+						repo,
 						status: "pending",
 						progress: 0,
 						lines: []
 					}]);
-					setShowProgress(true);
 					pollQueue();
 				} catch {
-					onError(t("uninstallFail"), opRepoRef.current, "uninstall");
+					onError(t("uninstallFail"), repo, "uninstall");
 				}
 			};
-			/** 取消任务：排队中立即出队，执行中终止子进程。 */
+			/** 取消任务：排队中立即出队，执行中终止子进程；先标记「正在取消」短暂过渡后再移除。 */
 			const cancelTask = async (id) => {
 				if (modalTaskRef.current === id) modalTaskRef.current = null;
+				applyQueue((prev) => prev.map((q) => q.id === id ? {
+					...q,
+					status: "cancelling"
+				} : q));
 				try {
 					await fetch("/dsh-plugin-hub/cancel", {
 						method: "POST",
@@ -876,21 +1218,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						body: JSON.stringify({ id })
 					});
 				} catch {}
-				applyQueue((prev) => prev.filter((x) => x.id !== id));
+				window.setTimeout(() => {
+					applyQueue((prev) => prev.filter((x) => x.id !== id));
+					maybeStopPoll();
+				}, 700);
 			};
 			/** 打开新弹窗前清空任务匹配：避免旧任务 id 误匹配到新弹窗。 */
 			const clearModalTask = () => {
 				modalTaskRef.current = null;
 			};
-			const installModalTask = installPlugin ? queue.find((q) => q.id === modalTaskRef.current) ?? queue.find((q) => q.kind === "install" && q.target === (installPlugin.source?.repo ?? "")) ?? null : null;
-			const uninstallModalTask = uninstallPlugin ? queue.find((q) => q.id === modalTaskRef.current) ?? queue.find((q) => q.kind === "uninstall" && q.target === (installedName(uninstallPlugin) ?? "")) ?? null : null;
+			const installModalTask = installPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === (installPlugin.source?.repo ?? "") && q.status !== "cancelling") ?? null : null;
+			const uninstallModalTask = uninstallPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "uninstall" && q.target === (installedName(uninstallPlugin) ?? "") && q.status !== "cancelling") ?? null : null;
 			const running = queue.find((q) => q.status === "running");
-			const pendingCount = queue.filter((q) => q.status === "pending").length;
+			const queued = queue.filter((q) => q.status === "pending").length;
+			const pendingCount = pendingRestarts.length;
+			const runningText = running ? `${running.kind === "install" ? t("runningInstall") : t("runningUninstall")} ${running.progress}%${queued > 0 ? ` · ${t("queueMore", { n: queued })}` : ""}` : null;
 			return {
 				queue,
+				pendingRestarts,
 				running,
 				pendingCount,
-				stripSummary: running ? `${running.kind === "install" ? t("runningInstall") : t("runningUninstall")} ${running.progress}%${pendingCount > 0 ? ` · ${t("queueMore", { n: pendingCount })}` : ""}` : t("queueWaiting", { n: queue.length }),
+				stripSummary: pendingCount > 0 ? runningText ? `${t("restartPendingStrip", { n: pendingCount })} · ${runningText}` : t("restartPendingStrip", { n: pendingCount }) : runningText ?? t("queueWaiting", { n: queue.length }),
 				installModalTask,
 				uninstallModalTask,
 				showProgress,
@@ -1005,6 +1353,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				fill: "#ffffff"
 			}));
 		}
+		/** GitHub 图标：官方 GitHub Mark（octocat），fill 继承 currentColor，头部右上角源码链接用。 */
+		function GitHubIcon() {
+			return (0, react.createElement)("svg", {
+				className: Section_module_css_default.githubIcon,
+				viewBox: "0 0 24 24",
+				width: 18,
+				height: 18,
+				fill: "currentColor",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", { d: "M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" }));
+		}
 		/** 复制图标：双层矩形（stroke 继承 currentColor），手动命令旁的复制按钮用。 */
 		function CopyIcon() {
 			return (0, react.createElement)("svg", {
@@ -1030,35 +1389,18 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}));
 		}
 		//#endregion
-		//#region src/client/lib/markup.ts
-		/**
-		* Line-level syntax coloring for the terminal-style output window shown
-		* during install/remove. The server already strips source prefixes and ANSI
-		* escapes, so lines arrive clean.
-		*/
-		/** 命令行输出行着色：错误红 / 成功与进度绿 / 移除黄 / 其余浅灰，营造终端窗口高亮感。 */
-		function logLineClass(line) {
-			const base = Section_module_css_default.logLine;
-			if (/^\[(?:err|error)\]|\[error\]|\[timed out\]|failed|ERR_/i.test(line)) return `${base} ${Section_module_css_default.logLineErr}`;
-			if (/^\[exit 0\]|^Done in|^Progress:|^dependencies:|^Packages:/i.test(line)) return `${base} ${Section_module_css_default.logLineOk}`;
-			if (/^-\s+/.test(line)) return `${base} ${Section_module_css_default.logLineWarn}`;
-			return `${base} ${Section_module_css_default.logLinePlain}`;
-		}
-		//#endregion
 		//#region src/client/components/ProgressView.tsx
 		/**
 		* Inline progress block shared by the install and uninstall dialogs:
-		* a real percentage bar (server-estimated, client-polled) plus a
-		* terminal-style output window with line-level keyword highlighting.
+		* a real percentage bar (server-estimated, client-polled). No live terminal
+		* window — pnpm emits nothing during git clone/build, so a log pane would be
+		* empty for most of the run; failures surface their full output in ErrorModal.
 		*/
 		function ProgressView({ task }) {
 			return (0, react.createElement)("div", { className: Section_module_css_default.progress }, (0, react.createElement)("div", { className: Section_module_css_default.progressHead }, (0, react.createElement)("span", { className: Section_module_css_default.progressText }, `${Math.round(task.progress)}%`)), (0, react.createElement)("div", { className: Section_module_css_default.progressTrack }, (0, react.createElement)("div", {
 				className: task.status === "failed" ? `${Section_module_css_default.progressFill} ${Section_module_css_default.progressFillFail}` : Section_module_css_default.progressFill,
 				style: { width: `${task.progress}%` }
-			})), task.lines.length > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.progressLog }, (0, react.createElement)("div", { className: Section_module_css_default.progressLogBar }, (0, react.createElement)("span", { className: Section_module_css_default.progressLogTitle }, "dsh")), (0, react.createElement)("div", { className: Section_module_css_default.progressLogLines }, task.lines.slice(0, 6).reverse().map((line, i) => (0, react.createElement)("div", {
-				key: i,
-				className: logLineClass(line)
-			}, line)))) : null);
+			})));
 		}
 		//#endregion
 		//#region src/client/components/modals.tsx
@@ -1068,8 +1410,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* or restart is running, then switch to a result view offering an immediate
 		* restart or a "later" deferral.
 		*/
-		/** 完成结果视图：绿色对勾 + 标题/描述 + 「完成」关闭按钮（安装/卸载本身已生效，无需提示重启） */
-		function ResultView({ title, desc, t, onClose }) {
+		/** 完成结果视图：绿色对勾 + 标题/描述 + 「稍后重启 / 立即重启」按钮对（部分插件需重启后才会挂载） */
+		function ResultView({ title, desc, t, restarting, onRestart, onClose }) {
 			return (0, react.createElement)("div", { className: Section_module_css_default.result }, (0, react.createElement)("div", { className: Section_module_css_default.resultCheck }, (0, react.createElement)("svg", {
 				className: Section_module_css_default.resultCheckIcon,
 				viewBox: "0 0 16 16",
@@ -1083,19 +1425,26 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeWidth: 2,
 				strokeLinecap: "round",
 				strokeLinejoin: "round"
-			}))), (0, react.createElement)("div", { className: Section_module_css_default.resultTitle }, title), (0, react.createElement)("div", { className: Section_module_css_default.resultDesc }, desc), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
+			}))), (0, react.createElement)("div", { className: Section_module_css_default.resultTitle }, title), (0, react.createElement)("div", { className: Section_module_css_default.resultDesc }, desc), (0, react.createElement)("div", { className: Section_module_css_default.resultRestarting }, restarting ? t("restarting") : t("restartHint")), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Section_module_css_default.restartLater,
+				onClick: onClose,
+				disabled: restarting
+			}, t("restartLater")), (0, react.createElement)("button", {
 				className: Section_module_css_default.restartNow,
-				onClick: onClose
-			}, t("doneBtn"))));
+				onClick: onRestart,
+				disabled: restarting
+			}, restarting ? t("restarting") : t("restartNow"))));
 		}
 		/**
 		* 信任确认弹窗：安装进入后台队列后弹窗仍可关闭（任务继续），
 		* 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
 		*/
 		function InstallModal(props) {
-			const { plugin, done, task, t, langPath, onClose, onCopy, onInstall } = props;
+			const { plugin, done, task, t, langPath, restarting, onClose, onCopy, onInstall, onRestart } = props;
 			const busy = task !== null && (task.status === "pending" || task.status === "running");
-			const title = busy ? task.status === "pending" ? t("queuedTitle") : t("installing") : done ? t("installResultTitle") : t("confirmTitle");
+			const name = plugin.displayName ?? plugin.slug;
+			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
+			const title = busy ? task.status === "pending" ? busyTitle(t("queuedTitle")) : busyTitle(t("installing")) : done ? t("installResultTitle") : t("confirmTitle");
 			return (0, react.createElement)("div", {
 				className: Section_module_css_default.overlay,
 				onClick: (e) => {
@@ -1105,7 +1454,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: Section_module_css_default.modal,
 				role: "dialog",
 				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
+			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: busy ? `${Section_module_css_default.modalTitle} ${task.status === "pending" ? Section_module_css_default.modalTitleQueued : Section_module_css_default.modalTitleBusy}` : Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
 				className: Section_module_css_default.modalClose,
 				"aria-label": t("confirmCancel"),
 				onClick: () => onClose()
@@ -1113,6 +1462,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("installResultTitle"),
 				desc: t("installResultDesc"),
 				t,
+				restarting,
+				onRestart,
 				onClose
 			}) : (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.trustHint }, t("confirmDesc")), (0, react.createElement)("div", { className: Section_module_css_default.modalRow }, (0, react.createElement)("span", { className: Section_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
 				className: Section_module_css_default.modalValue,
@@ -1129,7 +1480,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("copyInstallCommand"),
 				role: "button",
 				tabIndex: 0
-			}, (0, react.createElement)("span", { className: Section_module_css_default.modalCmdText }, `dsh plugin add ${plugin.source?.repo ?? ""}`), (0, react.createElement)("span", { className: Section_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), task && task.status === "pending" ? (0, react.createElement)("div", { className: Section_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
+			}, (0, react.createElement)("span", { className: Section_module_css_default.modalCmdText }, `dsh plugin add github:${plugin.source?.repo ?? ""}`), (0, react.createElement)("span", { className: Section_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), task && task.status === "pending" ? (0, react.createElement)("div", { className: Section_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
 				className: Section_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopy
@@ -1141,9 +1492,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 		function UninstallModal(props) {
-			const { plugin, done, task, t, langPath, onClose, onCancel, onCopyCommand, onConfirm } = props;
+			const { plugin, done, task, t, langPath, restarting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props;
 			const busy = task !== null && (task.status === "pending" || task.status === "running");
-			const title = busy ? task.status === "pending" ? t("queuedTitle") : t("uninstalling") : done ? t("uninstallResultTitle") : t("uninstallTitle");
+			const name = plugin.displayName ?? plugin.slug;
+			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
+			const title = busy ? task.status === "pending" ? busyTitle(t("queuedUninstallTitle")) : busyTitle(t("uninstalling")) : done ? t("uninstallResultTitle") : t("uninstallTitle");
 			return (0, react.createElement)("div", {
 				className: Section_module_css_default.overlay,
 				onClick: (e) => {
@@ -1153,7 +1506,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: Section_module_css_default.modal,
 				role: "dialog",
 				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
+			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: busy ? `${Section_module_css_default.modalTitle} ${task.status === "pending" ? Section_module_css_default.modalTitleQueued : Section_module_css_default.modalTitleBusy}` : Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
 				className: Section_module_css_default.modalClose,
 				"aria-label": t("confirmCancel"),
 				onClick: () => onClose()
@@ -1161,6 +1514,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("uninstallResultTitle"),
 				desc: t("uninstallResultDesc"),
 				t,
+				restarting,
+				onRestart,
 				onClose
 			}) : (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.modalDesc }, t("uninstallDesc")), (0, react.createElement)("div", { className: Section_module_css_default.modalRow }, (0, react.createElement)("span", { className: Section_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
 				className: Section_module_css_default.modalValue,
@@ -1182,18 +1537,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: Section_module_css_default.uninstallConfirm,
 				disabled: busy,
 				onClick: onConfirm
-			}, busy ? task.status === "pending" ? t("queuedTitle") : t("uninstalling") : t("uninstall"))))));
+			}, busy ? task.status === "pending" ? t("queuedUninstallTitle") : t("uninstalling") : t("uninstall"))))));
 		}
 		/** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 		/** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
-		function ErrorModal({ message, repo, kind, t, onCopy, onClose }) {
+		function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }) {
+			const failureKind = classifyFailure(message);
 			return (0, react.createElement)("div", {
 				className: Section_module_css_default.overlay,
 				onClick: (e) => {
 					if (e.target === e.currentTarget) onClose();
 				}
 			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.modal,
+				className: Section_module_css_default.errorModal,
 				role: "dialog",
 				"aria-modal": "true"
 			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.errorTitle }, kind === "install" ? t("errorTitleInstall") : t("errorTitleUninstall")), (0, react.createElement)("button", {
@@ -1202,16 +1558,22 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onClick: onClose
 			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.failRow }, (0, react.createElement)("div", { className: Section_module_css_default.failHead }, (0, react.createElement)("span", { className: kind === "install" ? Section_module_css_default.failKindInstall : Section_module_css_default.failKindUninstall }, kind === "install" ? t("install") : t("uninstall")), repo ? (0, react.createElement)("a", {
 				className: Section_module_css_default.failRepo,
-				href: `https://github.com/${repo}`,
+				href: pluginSiteUrl(repo),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: repo
 			}, repo) : null, (0, react.createElement)("button", {
 				className: Section_module_css_default.errorCopySoft,
 				onClick: onCopy
-			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Section_module_css_default.errorBox }, message), repo ? (0, react.createElement)("a", {
+			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Section_module_css_default.errorBox }, message), failureKind === "pnpmAllowBuild" ? (0, react.createElement)("div", { className: Section_module_css_default.failAllowHint }, t("failAllowBuild")) : failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Section_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
 				className: Section_module_css_default.failBigIssue,
-				href: pluginIssueUrl(repo, message),
+				href: pluginIssueUrl(repo, message, env),
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: t("failIssueHint")
+			}, t("failIssueBig")) : null]) : repo ? (0, react.createElement)("a", {
+				className: Section_module_css_default.failBigIssue,
+				href: pluginIssueUrl(repo, message, env),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("failIssueHint")
@@ -1245,14 +1607,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const mmdd = `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 			return d.getFullYear() === (/* @__PURE__ */ new Date()).getFullYear() ? mmdd : `${d.getFullYear()}-${mmdd}`;
 		}
-		function FailuresModal({ records, t, onClose, onCopy, onClear }) {
+		function FailuresModal({ records, t, env, onClose, onCopy, onClear }) {
 			return (0, react.createElement)("div", {
 				className: Section_module_css_default.overlay,
 				onClick: (e) => {
 					if (e.target === e.currentTarget) onClose();
 				}
 			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.modal,
+				className: Section_module_css_default.errorModal,
 				role: "dialog",
 				"aria-modal": "true"
 			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.modalTitle }, t("failures")), (0, react.createElement)("button", {
@@ -1264,7 +1626,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: Section_module_css_default.failRow
 			}, (0, react.createElement)("div", { className: Section_module_css_default.failHead }, (0, react.createElement)("span", { className: `${Section_module_css_default.failKind} ${r.kind === "install" ? Section_module_css_default.failKindInstall : Section_module_css_default.failKindUninstall}` }, r.kind === "install" ? t("install") : t("uninstall")), r.repo ? (0, react.createElement)("a", {
 				className: Section_module_css_default.failRepo,
-				href: `https://github.com/${r.repo}`,
+				href: pluginSiteUrl(r.repo),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: r.repo
@@ -1274,13 +1636,24 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, fmtTime(r.at)), (0, react.createElement)("button", {
 				className: Section_module_css_default.failCopy,
 				onClick: () => onCopy(r.message)
-			}, t("failCopy"))), r.repo ? (0, react.createElement)("a", {
-				className: Section_module_css_default.failBigIssue,
-				href: pluginIssueUrl(r.repo, r.message),
-				target: "_blank",
-				rel: "noopener noreferrer",
-				title: t("failIssueHint")
-			}, t("failIssueBig")) : null))), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, records.length > 0 ? (0, react.createElement)("button", {
+			}, t("failCopy"))), (() => {
+				const kind = classifyFailure(r.message);
+				if (kind === "pnpmAllowBuild") return (0, react.createElement)("div", { className: Section_module_css_default.failAllowHint }, t("failAllowBuild"));
+				if (kind === "pluginPrepare" || kind === "pnpmIgnoredBuild") return (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Section_module_css_default.failPrepareHint }, kind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : t("failPrepareHint")), r.repo ? (0, react.createElement)("a", {
+					className: Section_module_css_default.failBigIssue,
+					href: pluginIssueUrl(r.repo, r.message, env),
+					target: "_blank",
+					rel: "noopener noreferrer",
+					title: t("failIssueHint")
+				}, t("failIssueBig")) : null]);
+				return r.repo ? (0, react.createElement)("a", {
+					className: Section_module_css_default.failBigIssue,
+					href: pluginIssueUrl(r.repo, r.message, env),
+					target: "_blank",
+					rel: "noopener noreferrer",
+					title: t("failIssueHint")
+				}, t("failIssueBig")) : null;
+			})()))), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, records.length > 0 ? (0, react.createElement)("button", {
 				className: Section_module_css_default.failClear,
 				onClick: onClear
 			}, t("failuresClear")) : null, (0, react.createElement)("button", {
@@ -1289,71 +1662,36 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("errorClose"))))));
 		}
 		//#endregion
-		//#region src/client/lib/failures.ts
-		const KEY = "dsh-plugin-hub.failure-records";
-		const MAX = 50;
-		/** 读取本地失败记录（损坏/不可用时返回空列表，不抛错）。列表最新在前；同一仓库只保留最新一条，空 repo 无法定位插件，全部保留。 */
-		function loadFailures() {
-			try {
-				const raw = window.localStorage.getItem(KEY);
-				if (!raw) return [];
-				const list = JSON.parse(raw);
-				if (!Array.isArray(list)) return [];
-				const valid = list.filter((r) => !!r && typeof r === "object" && typeof r.message === "string");
-				const seen = /* @__PURE__ */ new Set();
-				const deduped = [];
-				for (const r of valid) {
-					if (r.repo && seen.has(r.repo)) continue;
-					if (r.repo) seen.add(r.repo);
-					deduped.push(r);
-				}
-				return deduped;
-			} catch {
-				return [];
-			}
-		}
-		function save(list) {
-			try {
-				window.localStorage.setItem(KEY, JSON.stringify(list));
-			} catch {}
-		}
-		/** 追加一条失败记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。同一仓库只保留最新一次失败。 */
-		function addFailure(record) {
-			const prev = loadFailures();
-			let id = Date.now();
-			while (prev.some((r) => r.id === id)) id += 1;
-			const rest = record.repo ? prev.filter((r) => r.repo !== record.repo) : prev;
-			const next = [{
-				...record,
-				id,
-				at: id
-			}, ...rest].slice(0, MAX);
-			save(next);
-			return next;
-		}
-		/** 清空全部失败记录，返回空列表。 */
-		function clearFailures() {
-			save([]);
-			return [];
-		}
-		//#endregion
 		//#region src/client/components/CatalogHeader.tsx
 		/**
 		* Section header: brand title row (H1 + open-site button) + tagline, followed
 		* by the purple ad banner that promotes the catalog stats.
 		*/
 		function CatalogHeader({ t, langPath, statsTotal, statsVerified }) {
-			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Section_module_css_default.header }, (0, react.createElement)("a", {
-				className: Section_module_css_default.brand,
+			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Section_module_css_default.header }, (0, react.createElement)("div", { className: Section_module_css_default.headerTitleRow }, (0, react.createElement)("a", {
+				className: Section_module_css_default.brandTitle,
 				href: `${SITE_URL}${langPath}`,
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("openHint"),
 				"aria-label": t("openHint")
-			}, (0, react.createElement)("div", { className: Section_module_css_default.brandText }, (0, react.createElement)("div", { className: Section_module_css_default.titleRow }, (0, react.createElement)(LogoIcon), (0, react.createElement)("h1", { className: Section_module_css_default.title }, t("title"), (0, react.createElement)("span", { className: Section_module_css_default.version }, ` v${PLUGIN_VERSION}`))), (0, react.createElement)("div", { className: Section_module_css_default.tagline }, t("tagline", {
+			}, (0, react.createElement)(LogoIcon), (0, react.createElement)("h1", { className: Section_module_css_default.title }, t("title"), (0, react.createElement)("span", { className: Section_module_css_default.version }, ` v${PLUGIN_VERSION}`))), (0, react.createElement)("a", {
+				className: Section_module_css_default.githubLink,
+				href: GITHUB_URL,
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: t("githubHint"),
+				"aria-label": t("githubHint")
+			}, (0, react.createElement)(GitHubIcon))), (0, react.createElement)("a", {
+				className: Section_module_css_default.taglineLink,
+				href: `${SITE_URL}${langPath}`,
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: t("openHint")
+			}, (0, react.createElement)("div", { className: Section_module_css_default.tagline }, t("tagline", {
 				total: statsTotal,
 				verified: statsVerified
-			}))))), (0, react.createElement)("a", {
+			})))), (0, react.createElement)("a", {
 				className: Section_module_css_default.adBanner,
 				href: `${SITE_URL}${langPath}`,
 				target: "_blank",
@@ -1393,17 +1731,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Dropdown_module_css_default = {
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
 			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownItem": "B_Gxsq_dropdownItem",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
 			"dropdownArrow": "B_Gxsq_dropdownArrow",
 			"dropdown": "B_Gxsq_dropdown",
 			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive"
+			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive"
 		};
 		//#endregion
 		//#region src/client/components/Dropdown.tsx
@@ -1483,14 +1821,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				})),
 				onChange: setSort
 			}), (0, react.createElement)("button", {
+				className: installedFilter === "all" ? Section_module_css_default.installedBtnActive : Section_module_css_default.installedBtn,
+				onClick: () => setInstalledFilter("all"),
+				title: t("filterAllHint"),
+				"aria-pressed": installedFilter === "all"
+			}, t("all")), (0, react.createElement)("button", {
 				className: installedFilter === "installed" ? Section_module_css_default.installedBtnActive : installedCount === 0 ? Section_module_css_default.installedBtnDisabled : Section_module_css_default.installedBtn,
-				onClick: () => setInstalledFilter(installedFilter === "installed" ? "all" : "installed"),
+				onClick: () => setInstalledFilter("installed"),
 				disabled: installedCount === 0,
 				title: installedCount === 0 ? t("filterInstalledNone") : t("filterInstalledHint"),
 				"aria-pressed": installedFilter === "installed"
 			}, t("installed"), (0, react.createElement)("span", { className: installedFilter === "installed" ? Section_module_css_default.segCountActive : Section_module_css_default.segCount }, installedCount)), (0, react.createElement)("button", {
 				className: installedFilter === "notInstalled" ? Section_module_css_default.installedBtnActive : notInstalledCount === 0 ? Section_module_css_default.installedBtnDisabled : Section_module_css_default.installedBtn,
-				onClick: () => setInstalledFilter(installedFilter === "notInstalled" ? "all" : "notInstalled"),
+				onClick: () => setInstalledFilter("notInstalled"),
 				disabled: notInstalledCount === 0,
 				title: notInstalledCount === 0 ? t("filterNotInstalledNone") : t("filterNotInstalledHint"),
 				"aria-pressed": installedFilter === "notInstalled"
@@ -1504,28 +1847,71 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/ProgressStrip.tsx
 		/**
-		* Inline progress panel: a queue-summary strip (click to expand/collapse)
-		* showing each queued/running install-remove task with its progress and a
-		* cancel button. Only rendered while no dialog is open.
+		* Progress strip + task queue dialog.
+		*
+		* The strip is a summary bar shown while tasks run; clicking it opens a
+		* modal that lists every queued/running install-remove task with its
+		* progress and a cancel button. The modal reuses the error-dialog width
+		* (640px) and grows with its content. No live log pane — pnpm emits
+		* nothing during the git clone/build phase, so a log window would sit
+		* empty; failures surface their full output in the error dialog instead.
 		*/
-		function ProgressStrip({ queue, stripSummary, showProgress, setShowProgress, cancelTask, t }) {
+		function ProgressStrip({ queue, pendingRestarts, stripSummary, showProgress, setShowProgress, cancelTask, onRestart, restarting, t }) {
+			const title = pendingRestarts.length > 0 ? t("restartPendingTitle") : queue.length > 0 ? t("activeTasksTitle") : t("taskQueueTitle");
 			return (0, react.createElement)("div", { className: Section_module_css_default.progressStrip }, (0, react.createElement)("button", {
 				className: Section_module_css_default.progressStripMain,
-				onClick: () => setShowProgress(!showProgress),
+				onClick: () => setShowProgress(true),
 				title: t("runningTask")
-			}, (0, react.createElement)("span", { className: Section_module_css_default.progressStripDot }), (0, react.createElement)("span", { className: Section_module_css_default.progressStripText }, stripSummary), (0, react.createElement)("span", { className: Section_module_css_default.progressStripToggle }, showProgress ? t("progressHide") : t("progressShow"))), showProgress ? (0, react.createElement)("div", { className: Section_module_css_default.queueList }, queue.map((q) => (0, react.createElement)("div", {
+			}, (0, react.createElement)("span", { className: Section_module_css_default.progressStripDot }), (0, react.createElement)("span", { className: Section_module_css_default.progressStripText }, stripSummary), (0, react.createElement)("span", { className: Section_module_css_default.progressStripToggle }, t("progressShow"))), showProgress ? (0, react.createElement)("div", {
+				className: Section_module_css_default.overlay,
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setShowProgress(false);
+				}
+			}, (0, react.createElement)("div", {
+				className: Section_module_css_default.errorModal,
+				role: "dialog",
+				"aria-modal": "true"
+			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
+				className: Section_module_css_default.modalClose,
+				"aria-label": t("errorClose"),
+				onClick: () => setShowProgress(false)
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, queue.length === 0 && pendingRestarts.length === 0 ? (0, react.createElement)("div", { className: Section_module_css_default.failEmpty }, t("taskQueueEmpty")) : (0, react.createElement)("div", { className: Section_module_css_default.queueModalList }, pendingRestarts.length > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.queueSection }, (0, react.createElement)("div", { className: Section_module_css_default.queueSectionTitle }, t("sectionPendingRestart")), pendingRestarts.map((p) => (0, react.createElement)("div", {
+				key: `restart-${p.target}`,
+				className: Section_module_css_default.queueRow
+			}, (0, react.createElement)("div", { className: Section_module_css_default.queueRowHead }, (0, react.createElement)("span", { className: `${Section_module_css_default.failKind} ${p.kind === "uninstall" ? Section_module_css_default.failKindUninstall : Section_module_css_default.failKindInstall}` }, p.kind === "uninstall" ? t("uninstall") : t("install")), (0, react.createElement)("span", {
+				className: Section_module_css_default.queueRowTarget,
+				title: p.target
+			}, p.target)), p.desc ? (0, react.createElement)("div", {
+				className: Section_module_css_default.queueRowDesc,
+				title: p.desc
+			}, p.desc) : null, (0, react.createElement)("div", { className: Section_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Section_module_css_default.pendingRowStatus }, p.kind === "uninstall" ? t("restartPendingHintUninstall") : t("restartPendingHint")), (0, react.createElement)("span", { className: Section_module_css_default.pendingRowActions }, (0, react.createElement)("button", {
+				className: Section_module_css_default.restartLater,
+				disabled: restarting,
+				onClick: () => setShowProgress(false)
+			}, t("restartLater")), (0, react.createElement)("button", {
+				className: Section_module_css_default.restartNow,
+				disabled: restarting,
+				onClick: onRestart
+			}, restarting ? t("restarting") : t("restartNow"))))))) : null, queue.length > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.queueSection }, (0, react.createElement)("div", { className: Section_module_css_default.queueSectionTitle }, t("sectionInProgress")), queue.map((q) => (0, react.createElement)("div", {
 				key: q.id,
 				className: Section_module_css_default.queueRow
-			}, (0, react.createElement)("div", { className: Section_module_css_default.queueRowHead }, (0, react.createElement)("span", {
+			}, (0, react.createElement)("div", { className: Section_module_css_default.queueRowHead }, (0, react.createElement)("span", { className: `${Section_module_css_default.failKind} ${q.kind === "install" ? Section_module_css_default.failKindInstall : Section_module_css_default.failKindUninstall}` }, q.kind === "install" ? t("install") : t("uninstall")), (0, react.createElement)("span", {
 				className: Section_module_css_default.queueRowTarget,
 				title: q.target
 			}, q.target), (0, react.createElement)("button", {
 				className: Section_module_css_default.stripCancel,
-				onClick: () => cancelTask(q.id)
-			}, t("cancelTask"))), (0, react.createElement)("div", { className: Section_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Section_module_css_default.queueRowStatus }, q.status === "running" ? q.kind === "install" ? t("installing") : t("uninstalling") : t("queuedTitle")), (0, react.createElement)("div", { className: `${Section_module_css_default.progressTrack} ${Section_module_css_default.queueRowTrack}` }, (0, react.createElement)("div", {
+				disabled: q.status === "cancelling",
+				onClick: (e) => {
+					e.stopPropagation();
+					cancelTask(q.id);
+				}
+			}, t("cancelTask"))), q.desc ? (0, react.createElement)("div", {
+				className: Section_module_css_default.queueRowDesc,
+				title: q.desc
+			}, q.desc) : null, (0, react.createElement)("div", { className: Section_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Section_module_css_default.queueRowStatus }, q.status === "running" ? q.kind === "install" ? t("installing") : t("uninstalling") : q.status === "cancelling" ? t("cancelling") : q.kind === "install" ? t("queuedTitle") : t("queuedUninstallTitle")), (0, react.createElement)("div", { className: `${Section_module_css_default.progressTrack} ${Section_module_css_default.queueRowTrack}` }, (0, react.createElement)("div", {
 				className: Section_module_css_default.progressFill,
 				style: { width: `${q.progress}%` }
-			})), (0, react.createElement)("span", { className: Section_module_css_default.queueRowPct }, `${q.progress}%`))))) : null);
+			})), (0, react.createElement)("span", { className: Section_module_css_default.queueRowPct }, `${q.progress}%`))))) : null)))) : null);
 		}
 		//#endregion
 		//#region src/client/lib/format.ts
@@ -1552,14 +1938,22 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* description + topics, star/fork/date stats, and the detail/install/
 		* uninstall actions.
 		*/
-		function PluginCard({ plugin: p, copied, installedName, t, langKey, langPath, onInstall, onUninstall }) {
+		function PluginCard({ plugin: p, copied, installedName, installedVersion, hasUpdate, t, langKey, langPath, onInstall, onUninstall }) {
 			const repo = p.source?.repo ?? "";
 			const isCopied = copied === repo;
 			const isInstalled = installedName(p) !== null;
+			const update = hasUpdate(p);
+			const versionShown = isInstalled ? installedVersion(p) : p.version;
 			return (0, react.createElement)("div", { className: Section_module_css_default.card }, (0, react.createElement)("div", { className: Section_module_css_default.cardMain }, (0, react.createElement)("div", { className: Section_module_css_default.cardHead }, (0, react.createElement)("div", {
 				className: Section_module_css_default.cardTitle,
 				title: p.description ?? ""
-			}, p.displayName ?? p.slug), p.category ? (0, react.createElement)("span", { className: Section_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: Section_module_css_default.verified }, t("verified")) : null), p.description && (langKey === "zh" || !/[\u4e00-\u9fff]/.test(p.description)) ? (0, react.createElement)("p", { className: Section_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
+			}, p.displayName ?? p.slug), versionShown ? (0, react.createElement)("span", {
+				className: Section_module_css_default.versionBadge,
+				title: t("version")
+			}, versionShown) : null, update ? (0, react.createElement)("span", {
+				className: Section_module_css_default.updateBadge,
+				title: t("updateAvailableHint")
+			}, t("updateAvailable")) : null, p.category ? (0, react.createElement)("span", { className: Section_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: Section_module_css_default.verified }, t("verified")) : null), p.description && (langKey === "zh" || !/[\u4e00-\u9fff]/.test(p.description)) ? (0, react.createElement)("p", { className: Section_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
 				key: topic,
 				className: Section_module_css_default.topic
 			}, topic))) : null), (0, react.createElement)("div", { className: Section_module_css_default.cardSide }, (0, react.createElement)("div", { className: Section_module_css_default.stats }, (0, react.createElement)("span", { className: Section_module_css_default.star }, "★ ", fmtStars(p.stats?.stargazers_count)), (0, react.createElement)("span", { className: Section_module_css_default.fork }, t("fork"), " ", fmtStars(p.stats?.forks_count)), (0, react.createElement)("span", { className: Section_module_css_default.date }, relTime(p.dates?.repoUpdatedAt, t))), repo ? (0, react.createElement)("div", { className: Section_module_css_default.actions }, (0, react.createElement)("a", {
@@ -1568,7 +1962,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: p.slug
-			}, t("detail")), isInstalled ? (0, react.createElement)("button", {
+			}, t("detail")), isInstalled ? update ? (0, react.createElement)("button", {
+				className: Section_module_css_default.installBtnUpdate,
+				title: t("updateAvailableHint"),
+				onClick: () => onInstall(p)
+			}, t("update")) : (0, react.createElement)("button", {
 				className: Section_module_css_default.installBtnInstalled,
 				disabled: true,
 				title: t("installed")
@@ -1588,7 +1986,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* the category or install-status filter changes so the replaced content is
 		* not mistaken for a no-op update.
 		*/
-		function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, installedFilter, copied, installedName, langKey, onInstall, onUninstall }) {
+		function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, installedFilter, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall }) {
 			/** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
 			const listRef = (0, react.useRef)(null);
 			(0, react.useEffect)(() => {
@@ -1605,6 +2003,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				plugin: p,
 				copied,
 				installedName,
+				installedVersion,
+				hasUpdate,
 				t,
 				langKey,
 				langPath,
@@ -1647,11 +2047,24 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			/** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
 			const [installDone, setInstallDone] = (0, react.useState)(false);
 			const [uninstallDone, setUninstallDone] = (0, react.useState)(false);
+			/** 结果视图「立即重启」：请求宿主重启后进入等待，服务回来后整页刷新 */
+			const [restarting, setRestarting] = (0, react.useState)(false);
 			/** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」） */
 			const [errorMsg, setErrorMsg] = (0, react.useState)(null);
 			/** 安装/卸载失败记录：localStorage 持久化，失败即落盘，即使错过弹窗也能回来查看 */
 			const [failures, setFailures] = (0, react.useState)(() => loadFailures());
 			const [showFailures, setShowFailures] = (0, react.useState)(false);
+			/** 宿主机器环境快照：提交 bug 的 issue 正文附带；取不到为 null（链接少环境段，不阻塞） */
+			const [env, setEnv] = (0, react.useState)(null);
+			(0, react.useEffect)(() => {
+				let alive = true;
+				getEnv().then((info) => {
+					if (alive) setEnv(info);
+				});
+				return () => {
+					alive = false;
+				};
+			}, []);
 			const queue = useTaskQueue({
 				t,
 				refreshInstalled: catalog.refreshInstalled,
@@ -1677,7 +2090,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				},
 				installPlugin: confirmPlugin,
 				uninstallPlugin,
-				installedName: catalog.installedName
+				installedName: catalog.installedName,
+				resolvePending: (repo) => {
+					const p = catalog.plugins?.find((x) => x.source?.repo === repo);
+					return p ? {
+						desc: p.description,
+						version: p.version
+					} : null;
+				}
 			});
 			(0, react.useEffect)(() => {
 				if (!confirmPlugin && !uninstallPlugin && !showFailures) return;
@@ -1726,7 +2146,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			/** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行。 */
 			const copyCommand = async (p) => {
 				const repo = p.source?.repo ?? "";
-				if (await doCopy(`dsh plugin add ${repo}`)) {
+				if (await doCopy(`dsh plugin add github:${repo}`)) {
 					setCopied(repo);
 					setToast({
 						id: Date.now(),
@@ -1745,7 +2165,37 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					kind: "copied"
 				});
 			};
-			const { total, installedName } = catalog;
+			/** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。 */
+			const requestRestart = async () => {
+				if (restarting) return;
+				setRestarting(true);
+				try {
+					await fetch("/dsh-plugin-hub/restart", { method: "POST" });
+				} catch {}
+				let attempts = 0;
+				const poll = async () => {
+					attempts += 1;
+					try {
+						if ((await fetch("/dsh-plugin-hub/active", {
+							method: "GET",
+							cache: "no-store"
+						})).ok) {
+							window.location.reload();
+							return;
+						}
+					} catch {}
+					if (attempts < 60) window.setTimeout(poll, 1e3);
+					else {
+						setRestarting(false);
+						setToast({
+							id: Date.now(),
+							kind: "fail"
+						});
+					}
+				};
+				window.setTimeout(poll, 1200);
+			};
+			const { total, installedName, installedVersion, hasUpdate } = catalog;
 			const statsTotal = catalog.stats?.total ?? total;
 			const statsVerified = catalog.stats?.verified ?? 0;
 			const count = catalog.visible.length;
@@ -1773,12 +2223,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				resultText: catalog.plugins === null || catalog.failed ? null : catalog.category === "all" && count === total ? t("pluginsTotal", { n: count }) : t("filterResults", { n: count }),
 				failCount: failures.length,
 				onOpenFailures: () => setShowFailures(true)
-			}), queue.queue.length > 0 && !confirmPlugin && !uninstallPlugin ? (0, react.createElement)(ProgressStrip, {
+			}), (queue.queue.length > 0 || queue.pendingRestarts.length > 0) && !confirmPlugin && !uninstallPlugin ? (0, react.createElement)(ProgressStrip, {
 				queue: queue.queue,
+				pendingRestarts: queue.pendingRestarts,
 				stripSummary: queue.stripSummary,
 				showProgress: queue.showProgress,
 				setShowProgress: queue.setShowProgress,
 				cancelTask: queue.cancelTask,
+				onRestart: () => {
+					requestRestart();
+				},
+				restarting,
 				t
 			}) : null, (0, react.createElement)(CatalogList, {
 				plugins: catalog.plugins,
@@ -1792,9 +2247,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				installedFilter: catalog.installedFilter,
 				copied,
 				installedName,
+				installedVersion,
+				hasUpdate,
 				langKey,
 				onInstall: (p) => {
 					setInstallDone(false);
+					queue.clearModalTask();
 					setConfirmPlugin(p);
 				},
 				onUninstall: (p) => {
@@ -1808,22 +2266,30 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				task: queue.installModalTask,
 				t,
 				langPath,
+				restarting,
 				onClose: () => setConfirmPlugin(null),
 				onCopy: () => copyCommand(confirmPlugin),
-				onInstall: () => queue.installNow(confirmPlugin)
+				onInstall: () => queue.installNow(confirmPlugin),
+				onRestart: () => {
+					requestRestart();
+				}
 			}), uninstallPlugin && (0, react.createElement)(UninstallModal, {
 				plugin: uninstallPlugin,
 				done: uninstallDone,
 				task: queue.uninstallModalTask,
 				t,
 				langPath,
+				restarting,
 				onClose: () => {
 					setUninstallDone(false);
 					setUninstallPlugin(null);
 				},
 				onCancel: () => setUninstallPlugin(null),
 				onCopyCommand: copyUninstallCommand,
-				onConfirm: () => queue.uninstallNow(uninstallPlugin)
+				onConfirm: () => queue.uninstallNow(uninstallPlugin),
+				onRestart: () => {
+					requestRestart();
+				}
 			}), toast && (0, react.createElement)(Toast, {
 				toast,
 				t
@@ -1832,6 +2298,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				repo: errorMsg.repo,
 				kind: errorMsg.kind,
 				t,
+				env,
 				onCopy: () => {
 					doCopy(errorMsg.message);
 					setToast({
@@ -1843,6 +2310,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}), showFailures && (0, react.createElement)(FailuresModal, {
 				records: failures,
 				t,
+				env,
 				onClose: () => setShowFailures(false),
 				onCopy: (text) => {
 					doCopy(text);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 将 README 中的插件数量从写死的约数自动更新为官网的真实值。
+ * 将 README 中的插件统计数字与官网在线 API 的真实值保持同步。
  *
  * 用法：npm run readme:stats
  * 数字口径：total = 收录总数；verified = 人工精选验证数（compatibility.status === 'verified'）。

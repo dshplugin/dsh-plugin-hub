@@ -9,10 +9,14 @@ import type { HubPlugin, LocaleId, Translate } from '../types.ts'
 import { CATEGORY_LABELS, categoryLabel, pluginDetailUrl } from '../lib/catalog.ts'
 import { fmtStars, relTime } from '../lib/format.ts'
 
-export function PluginCard({ plugin: p, copied, installedName, t, langKey, langPath, onInstall, onUninstall }: {
+export function PluginCard({ plugin: p, copied, installedName, installedVersion, hasUpdate, t, langKey, langPath, onInstall, onUninstall }: {
   plugin: HubPlugin
   copied: string | null
   installedName: (p: HubPlugin) => string | null
+  /** 已安装版本号（安装时从目录信号记录；无 release 的仓库为空，无版本号可展示） */
+  installedVersion: (p: HubPlugin) => string | null
+  /** 已安装且目录有更新（有版本比版本、无版本比仓库更新时间） */
+  hasUpdate: (p: HubPlugin) => boolean
   t: Translate
   langKey: LocaleId
   langPath: string
@@ -23,11 +27,18 @@ export function PluginCard({ plugin: p, copied, installedName, t, langKey, langP
   const isCopied = copied === repo
   const pkg = installedName(p)
   const isInstalled = pkg !== null
+  const update = hasUpdate(p)
+  // 版本号展示：已安装 → 当前已装版本（最能反映用户状态）；未安装 → 目录最新版本
+  const versionShown = isInstalled ? installedVersion(p) : p.version
 
   return h('div', { className: styles.card },
     h('div', { className: styles.cardMain },
       h('div', { className: styles.cardHead },
         h('div', { className: styles.cardTitle, title: p.description ?? '' }, p.displayName ?? p.slug),
+        // 版本号紧跟插件名称：有版本才显示（无 release 的仓库不展示版本号）
+        versionShown ? h('span', { className: styles.versionBadge, title: t('version') }, versionShown) : null,
+        // 已安装且有更新：醒目提示（有 release 比版本号、无 release 比仓库最近更新时间）
+        update ? h('span', { className: styles.updateBadge, title: t('updateAvailableHint') }, t('updateAvailable')) : null,
         p.category ? h('span', { className: styles.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null,
         p.compatibility?.status === 'verified'
           ? h('span', { className: styles.verified }, t('verified'))
@@ -62,11 +73,18 @@ export function PluginCard({ plugin: p, copied, installedName, t, langKey, langP
             title: p.slug,
           }, t('detail')),
           isInstalled
-            ? h('button', {
-              className: styles.installBtnInstalled,
-              disabled: true,
-              title: t('installed'),
-            }, t('installed'))
+            // 已安装且有更新：按钮变「可更新」，点击直接覆盖安装（安装完成自动记录新版本）
+            ? (update
+              ? h('button', {
+                className: styles.installBtnUpdate,
+                title: t('updateAvailableHint'),
+                onClick: () => onInstall(p),
+              }, t('update'))
+              : h('button', {
+                className: styles.installBtnInstalled,
+                disabled: true,
+                title: t('installed'),
+              }, t('installed')))
             : h('button', {
               className: isCopied ? styles.installBtnCopied : styles.installBtn,
               // 文字恒定避免按钮宽度变化导致卡片跳动；点击先弹信任确认，

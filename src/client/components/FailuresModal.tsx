@@ -8,9 +8,10 @@
 import { createElement as h } from 'react'
 import type { MouseEvent } from 'react'
 import styles from '../styles/Section.module.css'
-import type { Translate } from '../types.ts'
+import type { EnvInfo, Translate } from '../types.ts'
 import type { FailureRecord } from '../lib/failures.ts'
-import { pluginIssueUrl } from '../lib/catalog.ts'
+import { classifyFailure } from '../lib/failures.ts'
+import { pluginIssueUrl, pluginSiteUrl } from '../lib/catalog.ts'
 import { CloseIcon } from './icons.tsx'
 
 /** 记录时间紧凑展示：今年内 MM-DD HH:mm，跨年补年份前缀。 */
@@ -21,9 +22,10 @@ function fmtTime(at: number): string {
   return d.getFullYear() === new Date().getFullYear() ? mmdd : `${d.getFullYear()}-${mmdd}`
 }
 
-export function FailuresModal({ records, t, onClose, onCopy, onClear }: {
+export function FailuresModal({ records, t, env, onClose, onCopy, onClear }: {
   records: FailureRecord[]
   t: Translate
+  env: EnvInfo | null
   onClose: () => void
   onCopy: (text: string) => void
   onClear: () => void
@@ -34,7 +36,7 @@ export function FailuresModal({ records, t, onClose, onCopy, onClear }: {
       if (e.target === e.currentTarget) onClose()
     },
   },
-    h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
+    h('div', { className: styles.errorModal, role: 'dialog', 'aria-modal': 'true' },
       h('div', { className: styles.modalHead },
         h('div', { className: styles.modalTitle }, t('failures')),
         h('button', {
@@ -56,7 +58,8 @@ export function FailuresModal({ records, t, onClose, onCopy, onClear }: {
                 r.repo
                   ? h('a', {
                     className: styles.failRepo,
-                    href: `https://github.com/${r.repo}`,
+                    // 跳转到官网详情页（含插件收录信息），不在失败弹窗直接跳 GitHub
+                    href: pluginSiteUrl(r.repo),
                     target: '_blank',
                     rel: 'noopener noreferrer',
                     title: r.repo,
@@ -71,15 +74,34 @@ export function FailuresModal({ records, t, onClose, onCopy, onClear }: {
                   onClick: () => onCopy(r.message),
                 }, t('failCopy')),
               ),
-              // 报错正文不展示了：每条记录就是一个灰字复制按钮 + 一键提交入口
-              // 每条记录一个大按钮：一键提交 BUG 到 GitHub Issue（带着本条错误日志与官网外链）
-              r.repo ? h('a', {
-                className: styles.failBigIssue,
-                href: pluginIssueUrl(r.repo, r.message),
-                target: '_blank',
-                rel: 'noopener noreferrer',
-                title: t('failIssueHint'),
-              }, t('failIssueBig')) : null,
+              // 每条记录是一个独立卡片：头部（类型/仓库/时间/复制完整日志）→ 修复或提 Issue 动作。
+              // 卡片不展示错误日志预览，完整日志靠「复制完整日志」按钮带走，避免每条卡片被日志撑高
+              (() => {
+                const kind = classifyFailure(r.message)
+                if (kind === 'pnpmAllowBuild') {
+                  return h('div', { className: styles.failAllowHint }, t('failAllowBuild'))
+                }
+                if (kind === 'pluginPrepare' || kind === 'pnpmIgnoredBuild') {
+                  // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
+                  return h('div', null, [
+                    h('div', { className: styles.failPrepareHint }, kind === 'pnpmIgnoredBuild' ? t('failIgnoredBuild') : t('failPrepareHint')),
+                    r.repo ? h('a', {
+                      className: styles.failBigIssue,
+                      href: pluginIssueUrl(r.repo, r.message, env),
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      title: t('failIssueHint'),
+                    }, t('failIssueBig')) : null,
+                  ])
+                }
+                return r.repo ? h('a', {
+                  className: styles.failBigIssue,
+                  href: pluginIssueUrl(r.repo, r.message, env),
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  title: t('failIssueHint'),
+                }, t('failIssueBig')) : null
+              })(),
             )),
           ),
         h('div', { className: styles.modalActions },

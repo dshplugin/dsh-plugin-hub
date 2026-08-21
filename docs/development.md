@@ -1,66 +1,67 @@
-# Development
+# 开发
 
-How to build, test and iterate on DSH-Plugin Hub locally.
+DSH-Plugin Hub 的本地构建、测试与迭代指南。
 
-## Prerequisites
+> **写代码前先读 [reference.md](reference.md)**——它是基于官方 DeepSeek Harness
+> 文档（loader、client-modules、profile/bundle、已知坑）的开发规范。
+> 遇到异常行为，先查官方文档和源码，不要猜。
 
-- Node.js >= 22.6 (type stripping is used by the test runner).
-- npm (lockfile is committed; keep it in sync when adding dependencies).
-- A booted DeepSeek Harness to see the plugin in action.
+## 前提
 
-## Commands
+- Node.js >= 22.6（测试运行器用到了类型剥离）。
+- npm（lockfile 已提交；加依赖时保持同步）。
+- 一个启动中的 DeepSeek Harness，才能看到插件实际效果。
 
-| Command                    | What it does                                    |
-| -------------------------- | ----------------------------------------------- |
-| `npm run build`            | compile server (`lib/`) + browser (`client/`)   |
-| `npm run typecheck`        | type-check client, server and tests             |
-| `npm test`                 | run unit tests (Node built-in runner)           |
-| `npm run check`            | typecheck + test + build (same as CI)           |
-| `npm run reload`           | restart the harness on port 7923                |
-| `npm run readme:stats`     | refresh marketplace stats in the README         |
-| `npm run verify:release`   | validate the package before publish             |
+## 常用命令
 
-## Typical dev loop
+| 命令                  | 作用                                          |
+| --------------------- | --------------------------------------------- |
+| `npm run build`       | 编译服务端（`lib/`）+ 浏览器（`client/`）     |
+| `npm run typecheck`   | 类型检查（客户端、服务端、测试）              |
+| `npm test`            | 跑单测（Node 内置 runner）                    |
+| `npm run check`       | typecheck + test + build（和 CI 一致）        |
+| `npm run reload`      | 重启 7923 端口的 Harness                     |
+| `npm run readme:stats`| 刷新 README 里的市场统计                      |
+| `npm run verify:release` | 发布前校验包                              |
 
-The harness is a long-running process and loads the plugin bundle at
-startup, so after every change:
+## 开发循环
+
+Harness 是常驻进程，启动时加载插件 bundle，所以每次改动后：
 
 ```sh
 npm run build && npm run reload
 ```
 
-`reload` stops the running `dsh web` on port 7923, waits for the port to
-release, and relaunches it detached. The development version is linked into
-`~/.dsh/profiles/web/package.json` as a `file:` dependency.
+`reload` 会停掉 7923 端口的 `dsh web`，等端口释放，再脱离地重启。
+开发版通过 `file:` 依赖链接到 `~/.dsh/profiles/web/package.json`。
 
-## Testing
+## 测试
 
-Tests live in `tests/` and target pure server logic — currently the
-progress estimation helpers in `src/server/progress.ts`. They run with the
-Node built-in test runner; no extra test framework is required.
+测试放在 `tests/`，针对纯服务端逻辑——目前是 `src/server/progress.ts`
+的进度估算辅助函数。用 Node 内置测试运行器，不需要额外框架。
 
 ```sh
-npm test              # single run
-npm run test:watch    # watch mode
+npm test              # 跑一次
+npm run test:watch    # 监听模式
 ```
 
-When adding behaviour with clear inputs/outputs (parsing, validation,
-estimation), add a test next to it.
+新增有明确输入/输出的行为（解析、校验、估算）时，在旁边加测试。
 
-## Releasing
+## 发布
 
-1. Bump the version in `package.json` (and this project's `CHANGELOG.md`).
-2. Run `npm run check` and `npm run verify:release`.
-3. `npm publish` — `prepublishOnly` re-verifies and `prepack` rebuilds.
+1. 升级 `package.json` 版本（以及本项目的 `CHANGELOG.md`）。
+2. 跑 `npm run check` 和 `npm run verify:release`。
+3. `npm publish`——`prepublishOnly` 会重新校验，`prepack` 重新构建。
 
-## Layout
+## 目录结构
 
 ```
-src/server/    harness-side runtime + local HTTP API
-src/client/    settings-page widget (browser bundle)
-scripts/       helper scripts (reload, banner check, stats sync, release guard)
-tests/         unit tests
-docs/          architecture and development guides
+src/server/    服务端运行时 + 本地 HTTP API
+src/client/    设置页组件（浏览器 bundle）
+scripts/run/    启动/重载脚本（dev-dsh、reload-dsh）
+scripts/tools/  工具脚本（banner 检查、统计同步、发布校验）
+tests/         单测
+docs/          架构与开发文档
 ```
 
-See [architecture.md](architecture.md) for the full picture.
+完整图景见 [architecture.md](architecture.md)。

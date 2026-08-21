@@ -5,8 +5,8 @@
 import { createElement as h, Fragment } from 'react'
 import styles from '../styles/Section.module.css'
 import type { Translate } from '../types.ts'
-import { PLUGIN_VERSION, SITE_URL } from '../lib/catalog.ts'
-import { LogoIcon } from './icons.tsx'
+import { GITHUB_URL, PLUGIN_VERSION, SITE_URL } from '../lib/catalog.ts'
+import { GitHubIcon, LogoIcon } from './icons.tsx'
 
 export function CatalogHeader({ t, langPath, statsTotal, statsVerified }: {
   t: Translate
@@ -16,26 +16,41 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified }: {
 }) {
   return h(Fragment, null,
     h('div', { className: styles.header },
-      // 整个头部（logo + 标题 + 副标题）即一个官网超链接：点任意位置跳 dsh-plugin.org，不再单放一个官网按钮
+      // 第一行：logo + 标题（官网链接）与 GitHub 源码图标同行，GitHub 顶到标题行末尾
+      h('div', { className: styles.headerTitleRow },
+        h('a', {
+          className: styles.brandTitle,
+          href: `${SITE_URL}${langPath}`,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          title: t('openHint'),
+          'aria-label': t('openHint'),
+        },
+          h(LogoIcon),
+          h('h1', { className: styles.title },
+            t('title'),
+            h('span', { className: styles.version }, ` v${PLUGIN_VERSION}`),
+          ),
+        ),
+        // GitHub 源码图标：独立链接（brandTitle 是官网 <a>，不能嵌套），space-between 顶到标题行最右
+        h('a', {
+          className: styles.githubLink,
+          href: GITHUB_URL,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          title: t('githubHint'),
+          'aria-label': t('githubHint'),
+        }, h(GitHubIcon)),
+      ),
+      // 第二行：副标题仍是官网链接，点击跳 dsh-plugin.org
       h('a', {
-        className: styles.brand,
+        className: styles.taglineLink,
         href: `${SITE_URL}${langPath}`,
         target: '_blank',
         rel: 'noopener noreferrer',
         title: t('openHint'),
-        'aria-label': t('openHint'),
       },
-        h('div', { className: styles.brandText },
-          h('div', { className: styles.titleRow },
-            // 品牌 logo + 短标题：logo 在标题左侧，标题只保留品牌词；右侧版本号浅灰弱化，不喧宾夺主
-            h(LogoIcon),
-            h('h1', { className: styles.title },
-              t('title'),
-              h('span', { className: styles.version }, ` v${PLUGIN_VERSION}`),
-            ),
-          ),
-          h('div', { className: styles.tagline }, t('tagline', { total: statsTotal, verified: statsVerified })),
-        ),
+        h('div', { className: styles.tagline }, t('tagline', { total: statsTotal, verified: statsVerified })),
       ),
     ),
     h('a', {

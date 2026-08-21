@@ -10,7 +10,7 @@ import type { HubPlugin, LocaleId, Translate } from '../types.ts'
 import { SITE_URL } from '../lib/catalog.ts'
 import { PluginCard } from './PluginCard.tsx'
 
-export function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, installedFilter, copied, installedName, langKey, onInstall, onUninstall }: {
+export function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, installedFilter, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall }: {
   plugins: HubPlugin[] | null
   failed: boolean
   visible: HubPlugin[]
@@ -22,6 +22,8 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
   installedFilter: 'all' | 'installed' | 'notInstalled'
   copied: string | null
   installedName: (p: HubPlugin) => string | null
+  installedVersion: (p: HubPlugin) => string | null
+  hasUpdate: (p: HubPlugin) => boolean
   langKey: LocaleId
   onInstall: (p: HubPlugin) => void
   onUninstall: (p: HubPlugin) => void
@@ -52,6 +54,8 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
         plugin: p,
         copied,
         installedName,
+        installedVersion,
+        hasUpdate,
         t,
         langKey,
         langPath,

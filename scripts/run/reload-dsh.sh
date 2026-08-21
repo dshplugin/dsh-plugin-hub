@@ -7,9 +7,9 @@
 # a log file — the same effect as a manual stop + start.
 #
 # Usage:
-#   ./scripts/reload-dsh.sh                # build + sync + restart (port 7923, profile web)
-#   ./scripts/reload-dsh.sh --skip-build   # reuse the current build output
-#   ./scripts/reload-dsh.sh --port=8080 --profile=dev
+#   ./scripts/run/reload-dsh.sh                # build + sync + restart (port 7923, profile web)
+#   ./scripts/run/reload-dsh.sh --skip-build   # reuse the current build output
+#   ./scripts/run/reload-dsh.sh --port=8080 --profile=dev
 set -u
 
 PORT=7923

@@ -50,15 +50,23 @@ export function CatalogControls({ query, setQuery, sort, setSort, installedFilte
         options: SORTS.map((key) => ({ value: key, label: t(key) })),
         onChange: setSort,
       }),
-      // 已安装 / 未安装筛选：两个独立按钮，外观尺寸与「安装失败记录」一致；
-      // 点击其一筛选对应状态，再点一次恢复全部；计数跟随当前分类，为 0 时置灰不可点
+      // 全部 / 已安装 / 未安装：互斥单选组，点击直接切换选中态，「全部」即默认恢复项；
+      // 已安装/未安装计数跟随当前分类，为 0 时置灰不可点
+      h('button', {
+        className: installedFilter === 'all'
+          ? styles.installedBtnActive
+          : styles.installedBtn,
+        onClick: () => setInstalledFilter('all'),
+        title: t('filterAllHint'),
+        'aria-pressed': installedFilter === 'all',
+      }, t('all')),
       h('button', {
         className: installedFilter === 'installed'
           ? styles.installedBtnActive
           : installedCount === 0
             ? styles.installedBtnDisabled
             : styles.installedBtn,
-        onClick: () => setInstalledFilter(installedFilter === 'installed' ? 'all' : 'installed'),
+        onClick: () => setInstalledFilter('installed'),
         disabled: installedCount === 0,
         title: installedCount === 0 ? t('filterInstalledNone') : t('filterInstalledHint'),
         'aria-pressed': installedFilter === 'installed',
@@ -73,7 +81,7 @@ export function CatalogControls({ query, setQuery, sort, setSort, installedFilte
           : notInstalledCount === 0
             ? styles.installedBtnDisabled
             : styles.installedBtn,
-        onClick: () => setInstalledFilter(installedFilter === 'notInstalled' ? 'all' : 'notInstalled'),
+        onClick: () => setInstalledFilter('notInstalled'),
         disabled: notInstalledCount === 0,
         title: notInstalledCount === 0 ? t('filterNotInstalledNone') : t('filterNotInstalledHint'),
         'aria-pressed': installedFilter === 'notInstalled',

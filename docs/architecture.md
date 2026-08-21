@@ -1,82 +1,75 @@
-# Architecture
+# 架构
 
-DSH-Plugin Hub is a [cordis](https://github.com/cordiverse/cordis) plugin
-for DeepSeek Harness. It ships two runtime artifacts:
+DSH-Plugin Hub 是 DeepSeek Harness（Cordis 体系）的一个插件，提供插件中心功能。
+它分两部分运行：
 
-| Artifact  | Source                | Build            | Output   |
-| --------- | --------------------- | ---------------- | -------- |
-| Server    | `src/server/`         | `tsc`            | `lib/`   |
-| Browser   | `src/client/`         | `tsdown`         | `client/`|
+| 部分    | 源码               | 构建   | 产物      |
+| ------- | ------------------ | ------ | --------- |
+| 服务端  | `src/server/`      | `tsc`  | `lib/`    |
+| 浏览器  | `src/client/`      | `tsdown` | `client/` |
 
-The server runs inside the harness process and owns every side effect;
-the browser bundle is a settings-page widget that talks to the server
-over same-origin HTTP.
+服务端跑在 Harness 进程内，负责所有副作用；浏览器端是设置页里的一个组件，
+通过同源 HTTP 与服务端通信。
 
-## Server (`src/server/`)
-
-```
-index.ts        cordis apply(): inject the host web server, mount routes
-http/routes.ts  local HTTP API: /install /uninstall /status /installed /restart
-services/install.ts   background task runner: spawns the official dsh CLI
-services/progress.ts  pure helpers: cleanLine() + estimateProgress() (unit-tested)
-```
-
-- **`http/routes.ts`** validates every mutation (profile grammar, repo/package
-  grammar, origin check, running-task mutex) before delegating to
-  `services/install.ts`. `readInstalled()` lists non-official dependencies
-  from the profile manifest.
-- **`services/install.ts`** spawns `dsh plugin --profile <p> <add|remove>
-  <target>` asynchronously. When the plugin runs inside a booted harness
-  entry it reuses that entry (`process.argv[1]`) so the CLI works even if
-  `dsh` is not on `PATH`. Every mutation becomes a tracked task: the caller
-  gets an `id` immediately and polls `/status` for progress.
-- **`services/progress.ts`** turns raw CLI fragments into clean lines and a
-  0-100 estimate. pnpm refreshes its `Progress:` line in place with carriage
-  returns, so fragments are split on both `\n` and `\r`, ANSI escapes are
-  stripped, and the estimate is a floor the task never regresses below.
-
-### Progress model
+## 服务端（`src/server/`）
 
 ```
-Progress: resolved N, reused X, downloaded Y, added Z   → (done/total), capped 90
+index.ts              插件入口：apply() 注入宿主 web server，挂载路由
+http/routes.ts        本地 HTTP API：/install /uninstall /status /installed /restart
+services/install.ts   后台任务执行器：调用官方 dsh CLI 装/卸插件
+services/progress.ts  纯函数工具：cleanLine() + estimateProgress()（有单测）
+```
+
+- **`http/routes.ts`** 先校验所有变更请求（profile 命名、仓库/包名格式、来源检查、
+  同一时刻只允许一个任务），再交给 `services/install.ts`。`readInstalled()` 从
+  profile 清单里列出非官方依赖。
+- **`services/install.ts`** 异步执行 `dsh plugin --profile <p> <add|remove> <target>`。
+  插件运行在已启动的 Harness 入口内时，复用该入口（`process.argv[1]`），
+  即使 `dsh` 不在 `PATH` 里也能工作。每个操作都是一个被跟踪的任务：调用方立刻
+  拿到 `id`，轮询 `/status` 看进度。
+- **`services/progress.ts`** 把 CLI 原始输出整理成干净行和 0-100 的进度估算。
+  pnpm 用回车符原地刷新 `Progress:` 行，所以按 `\n` 和 `\r` 都切分、去掉
+  ANSI 转义；进度估算是一个只升不降的下限。
+
+### 进度模型
+
+```
+Progress: resolved N, reused X, downloaded Y, added Z   → (done/total)，上限 90
 dependencies: / Packages:                               → 92
 Done in …                                              → 96
 [exit 0]                                               → 100
 ```
 
-Two fallbacks keep the bar honest when the CLI is quiet: each output line
-advances the estimate up to 85%, and a 500 ms timer bumps it one point at
-a time (capped at 85) so it never freezes on 0.
+CLI 不说话时有两个兜底让进度条不卡死：每输出一行进度上浮（最多 85%），
+外加一个 500ms 定时器每次加 1 点（封顶 85）。
 
-### Restart
+### 重启
 
-`POST /restart` spawns a detached `/bin/sh -c` script that finds the
-listener pid on the request port, sends `TERM`, waits for the port to free
-up, then relaunches `dsh web` with `nohup`. The script survives the death
-of the current harness process, so the host restarts itself cleanly.
+`POST /restart` 启动一个脱离的 `/bin/sh -c` 脚本：找到监听请求端口的进程，
+发 `TERM`，等端口释放，再用 `nohup` 重启 `dsh web`。脚本不依赖当前 Harness
+进程存活，所以宿主能干净地自我重启。
 
-## Browser client (`src/client/`)
+## 浏览器端（`src/client/`）
 
 ```
-index.tsx            thin entry: wires apply() → slots + locale
-types.ts             shared client types
-locales.ts           zh/en dictionaries
-components/          PluginHubSection (state) · modals · ProgressView · icons
-lib/                 catalog (API normalization) · format · markup (log colouring)
-styles/              Section.module.css (hashed class map, injected <style>)
+index.tsx  入口：apply() → slots + 语言
+types.ts   客户端共享类型
+locales.ts zh/en 文案
+components/   PluginHubSection（状态）· 弹窗 · 进度视图 · 图标
+lib/         catalog（接口数据归一化）· format
+styles/      Section.module.css（哈希类名映射，注入 <style>）
 ```
 
-The bundle is emitted by tsdown with a `window.__ModuleLoader__.load`
-wrapper (see `tsdown.config.ts`). CSS Modules are compiled inline via
-lightningcss: importing `Section.module.css` yields the hashed class map
-and auto-injects a `<style data-plugin-css>` tag. `react` and
-`react/jsx-runtime` are resolved from the host loader at runtime.
+浏览器包由 tsdown 打包，包一层 `window.__ModuleLoader__.load`（见
+`tsdown.config.ts`）。CSS Modules 用 lightningcss 编译内联：import
+`Section.module.css` 得到哈希类名映射，并自动注入 `<style data-plugin-css>`。
+`react` 和 `react/jsx-runtime` 运行时从宿主 loader 解析。
 
-### Install flow (end to end)
+### 安装流程（端到端）
 
-1. User clicks **Install** → `InstallModal` opens with command + progress.
-2. `POST /dsh-plugin-hub/install {repo}` → server returns `{task}`.
-3. The dialog polls `GET /status?task=<id>` every 600 ms; the terminal
-   panel renders the newest lines, the bar renders `task.progress`.
-4. On `done` the modal switches to a result view: **Restart now** calls
-   `POST /restart` (the host auto-refreshes), **Later** just closes it.
+1. 用户点 **安装** → 弹出 `InstallModal`，显示命令和进度。
+2. `POST /dsh-plugin-hub/install {repo}` → 服务端返回 `{task}`。
+3. 弹窗每 600ms 轮询 `GET /status?task=<id>`；终端面板渲染最新输出，
+   进度条渲染 `task.progress`。
+4. `done` 后弹窗切换为结果视图：**立即重启** 调 `POST /restart`（宿主自动刷新），
+   **稍后** 只关闭弹窗。

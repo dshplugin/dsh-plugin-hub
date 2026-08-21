@@ -7,18 +7,21 @@
 import { createElement as h } from 'react'
 import type { MouseEvent } from 'react'
 import styles from '../styles/Section.module.css'
-import type { HubPlugin, TaskState, ToastState, Translate } from '../types.ts'
+import type { EnvInfo, HubPlugin, TaskState, ToastState, Translate } from '../types.ts'
 import { CloseIcon, CopyIcon, LinkIcon } from './icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
-import { pluginDetailUrl, pluginIssueUrl } from '../lib/catalog.ts'
+import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../lib/catalog.ts'
+import { classifyFailure } from '../lib/failures.ts'
 
-/** 完成结果视图：绿色对勾 + 标题/描述 + 「完成」关闭按钮（安装/卸载本身已生效，无需提示重启） */
+/** 完成结果视图：绿色对勾 + 标题/描述 + 「稍后重启 / 立即重启」按钮对（部分插件需重启后才会挂载） */
 function ResultView({
-  title, desc, t, onClose,
+  title, desc, t, restarting, onRestart, onClose,
 }: {
   title: string
   desc: string
   t: Translate
+  restarting: boolean
+  onRestart: () => void
   onClose: () => void
 }) {
   return h('div', { className: styles.result },
@@ -40,9 +43,11 @@ function ResultView({
     ),
     h('div', { className: styles.resultTitle }, title),
     h('div', { className: styles.resultDesc }, desc),
+    h('div', { className: styles.resultRestarting }, restarting ? t('restarting') : t('restartHint')),
     h('div', { className: styles.modalActions },
-      // 复用主按钮样式：单个「完成」即可，关闭后回到列表
-      h('button', { className: styles.restartNow, onClick: onClose }, t('doneBtn')),
+      h('button', { className: styles.restartLater, onClick: onClose, disabled: restarting }, t('restartLater')),
+      h('button', { className: styles.restartNow, onClick: onRestart, disabled: restarting },
+        restarting ? t('restarting') : t('restartNow')),
     ),
   )
 }
@@ -53,9 +58,11 @@ export interface InstallModalProps {
   task: TaskState | null
   t: Translate
   langPath: string
+  restarting: boolean
   onClose: () => void
   onCopy: () => void
   onInstall: () => void
+  onRestart: () => void
 }
 
 /**
@@ -63,10 +70,13 @@ export interface InstallModalProps {
  * 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, done, task, t, langPath, onClose, onCopy, onInstall } = props
+  const { plugin, done, task, t, langPath, restarting, onClose, onCopy, onInstall, onRestart } = props
   const busy = task !== null && (task.status === 'pending' || task.status === 'running')
+  // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分
+  const name = plugin.displayName ?? plugin.slug
+  const busyTitle = (label: string) => langPath === 'zh/' ? `${name} 插件${label}` : `${label} ${name}`
   const title = busy
-    ? task!.status === 'pending' ? t('queuedTitle') : t('installing')
+    ? task!.status === 'pending' ? busyTitle(t('queuedTitle')) : busyTitle(t('installing'))
     : done ? t('installResultTitle') : t('confirmTitle')
   return h('div', {
     className: styles.overlay,
@@ -76,7 +86,11 @@ export function InstallModal(props: InstallModalProps) {
   },
     h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
       h('div', { className: styles.modalHead },
-        h('div', { className: styles.modalTitle }, title),
+        h('div', {
+          className: busy
+            ? `${styles.modalTitle} ${task!.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
+            : styles.modalTitle,
+        }, title),
         h('button', {
           className: styles.modalClose,
           'aria-label': t('confirmCancel'),
@@ -89,6 +103,8 @@ export function InstallModal(props: InstallModalProps) {
           title: t('installResultTitle'),
           desc: t('installResultDesc'),
           t,
+          restarting,
+          onRestart,
           onClose,
         })
         // 确认/进行中：来源行 + 安装命令 + 实时进度 + 操作按钮
@@ -118,7 +134,7 @@ export function InstallModal(props: InstallModalProps) {
             role: 'button',
             tabIndex: 0,
           },
-            h('span', { className: styles.modalCmdText }, `dsh plugin add ${plugin.source?.repo ?? ''}`),
+            h('span', { className: styles.modalCmdText }, `dsh plugin add github:${plugin.source?.repo ?? ''}`),
             h('span', { className: styles.modalCmdCopy }, h(CopyIcon), t('copyCmdLabel')),
           ),
           task && task.status === 'pending' ? h('div', { className: styles.queuedHint }, t('queuedHint')) : null,
@@ -146,18 +162,23 @@ export interface UninstallModalProps {
   task: TaskState | null
   t: Translate
   langPath: string
+  restarting: boolean
   onClose: () => void
   onCancel: () => void
   onCopyCommand: () => void
   onConfirm: () => void
+  onRestart: () => void
 }
 
 /** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 export function UninstallModal(props: UninstallModalProps) {
-  const { plugin, done, task, t, langPath, onClose, onCancel, onCopyCommand, onConfirm } = props
+  const { plugin, done, task, t, langPath, restarting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
   const busy = task !== null && (task.status === 'pending' || task.status === 'running')
+  // 进行中标题带上插件名，与安装弹窗一致，并用状态色区分
+  const name = plugin.displayName ?? plugin.slug
+  const busyTitle = (label: string) => langPath === 'zh/' ? `${name} 插件${label}` : `${label} ${name}`
   const title = busy
-    ? task!.status === 'pending' ? t('queuedTitle') : t('uninstalling')
+    ? task!.status === 'pending' ? busyTitle(t('queuedUninstallTitle')) : busyTitle(t('uninstalling'))
     : done ? t('uninstallResultTitle') : t('uninstallTitle')
   return h('div', {
     className: styles.overlay,
@@ -167,7 +188,11 @@ export function UninstallModal(props: UninstallModalProps) {
   },
     h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
       h('div', { className: styles.modalHead },
-        h('div', { className: styles.modalTitle }, title),
+        h('div', {
+          className: busy
+            ? `${styles.modalTitle} ${task!.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
+            : styles.modalTitle,
+        }, title),
         h('button', {
           className: styles.modalClose,
           'aria-label': t('confirmCancel'),
@@ -180,6 +205,8 @@ export function UninstallModal(props: UninstallModalProps) {
           title: t('uninstallResultTitle'),
           desc: t('uninstallResultDesc'),
           t,
+          restarting,
+          onRestart,
           onClose,
         })
         // 确认/进行中：来源行 + 实时进度 + 操作按钮
@@ -219,7 +246,7 @@ export function UninstallModal(props: UninstallModalProps) {
               className: styles.uninstallConfirm,
               disabled: busy,
               onClick: onConfirm,
-            }, busy ? (task!.status === 'pending' ? t('queuedTitle') : t('uninstalling')) : t('uninstall')),
+            }, busy ? (task!.status === 'pending' ? t('queuedUninstallTitle') : t('uninstalling')) : t('uninstall')),
           ),
         ),
     ),
@@ -228,21 +255,24 @@ export function UninstallModal(props: UninstallModalProps) {
 
 /** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 /** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
-export function ErrorModal({ message, repo, kind, t, onCopy, onClose }: {
+export function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }: {
   message: string
   repo: string | null
   kind: 'install' | 'uninstall'
   t: Translate
+  env: EnvInfo | null
   onCopy: () => void
   onClose: () => void
 }) {
+  // pnpm allowBuilds 拦截等机制类失败：不是插件仓库的问题，不引导提 Issue，改给修复指引
+  const failureKind = classifyFailure(message)
   return h('div', {
     className: styles.overlay,
     onClick: (e: MouseEvent<HTMLDivElement>) => {
       if (e.target === e.currentTarget) onClose()
     },
   },
-    h('div', { className: styles.modal, role: 'dialog', 'aria-modal': 'true' },
+    h('div', { className: styles.errorModal, role: 'dialog', 'aria-modal': 'true' },
       h('div', { className: styles.modalHead },
         // 标题按操作类型明确区分：安装失败 / 卸载失败
         h('div', { className: styles.errorTitle }, kind === 'install' ? t('errorTitleInstall') : t('errorTitleUninstall')),
@@ -259,10 +289,10 @@ export function ErrorModal({ message, repo, kind, t, onCopy, onClose }: {
             h('span', {
               className: kind === 'install' ? styles.failKindInstall : styles.failKindUninstall,
             }, kind === 'install' ? t('install') : t('uninstall')),
-            // 仓库地址（用户名/仓库）统一显示为可点击超链接，指向插件 GitHub 仓库
+            // 仓库地址（用户名/仓库）统一显示为可点击超链接，跳转到官网详情页（含插件收录信息），而非直接跳 GitHub
             repo ? h('a', {
               className: styles.failRepo,
-              href: `https://github.com/${repo}`,
+              href: pluginSiteUrl(repo),
               target: '_blank',
               rel: 'noopener noreferrer',
               title: repo,
@@ -272,14 +302,28 @@ export function ErrorModal({ message, repo, kind, t, onCopy, onClose }: {
           ),
           // 报错信息完整展示（可滚动），比失败记录的预览看得更多
           h('pre', { className: styles.errorBox }, message),
-          // 底部大按钮：一键提交 BUG 到 GitHub Issue（正文带官网收录外链）
-          repo ? h('a', {
-            className: styles.failBigIssue,
-            href: pluginIssueUrl(repo, message),
-            target: '_blank',
-            rel: 'noopener noreferrer',
-            title: t('failIssueHint'),
-          }, t('failIssueBig')) : null,
+          // 机制类失败（宿主配置）：给出修复指引；插件问题（prepare 执行失败 / 原生依赖构建被拦）：引导一键提 Issue
+          failureKind === 'pnpmAllowBuild'
+            ? h('div', { className: styles.failAllowHint }, t('failAllowBuild'))
+            : failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
+              ? h('div', null, [
+                // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
+                h('div', { className: styles.failPrepareHint }, failureKind === 'pnpmIgnoredBuild' ? t('failIgnoredBuild') : t('failPrepareHint')),
+                repo ? h('a', {
+                  className: styles.failBigIssue,
+                  href: pluginIssueUrl(repo, message, env),
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  title: t('failIssueHint'),
+                }, t('failIssueBig')) : null,
+              ])
+              : repo ? h('a', {
+                className: styles.failBigIssue,
+                href: pluginIssueUrl(repo, message, env),
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                title: t('failIssueHint'),
+              }, t('failIssueBig')) : null,
         ),
         h('div', { className: styles.modalActions },
           h('button', { className: styles.restartLater, onClick: onClose }, t('errorClose')),

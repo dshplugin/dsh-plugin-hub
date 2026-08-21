@@ -40,6 +40,8 @@ export interface HubPlugin {
   ownerSlug?: string
   slug: string
   displayName?: string
+  /** 仓库已发布版本（GitHub release tag，如 v1.2.3）；无 release 的仓库无此字段 */
+  version?: string
   category?: string
   topics?: string[]
   features?: string[]
@@ -53,8 +55,8 @@ export interface HubPlugin {
 /** 后台安装/卸载任务快照：进度 0-100 + 实时输出行（服务端估算，客户端轮询）。 */
 export interface TaskState {
   id: number
-  /** pending 排队中 / running 执行中 / done 完成 / failed 失败 / cancelled 已取消 */
-  status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'
+  /** pending 排队中 / running 执行中 / cancelling 取消中（客户端过渡态）/ done 完成 / failed 失败 / cancelled 已取消 */
+  status: 'pending' | 'running' | 'cancelling' | 'done' | 'failed' | 'cancelled'
   progress: number
   lines: string[]
 }
@@ -64,4 +66,15 @@ export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | '
 export interface ToastState {
   id: number
   kind: ToastKind
+}
+
+/** 宿主机器环境快照（后端 /dsh-plugin-hub/env）：提交 bug 时拼进 issue 正文，便于作者复现。 */
+export interface EnvInfo {
+  dshVersion: string | null
+  nodeVersion: string
+  platform: string
+  arch: string
+  release: string
+  profile: string
+  dshHome: string
 }

@@ -1,0 +1,90 @@
+name: Bug report
+description: Report something that is broken or behaving unexpectedly
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Fill in as much as you can — a reproducible
+        report is much easier to fix.
+  - type: input
+    id: harness-version
+    attributes:
+      label: DeepSeek Harness version
+      description: Run `dsh --version` (or check `dsh -v`) to find it.
+      placeholder: e.g. 0.x.x
+    validations:
+      required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin Hub version
+      description: Shown in the plugin header as "DSH-Plugin Hub vX.Y.Z".
+      placeholder: e.g. 0.1.1
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Run `node -v` to find it.
+      placeholder: e.g. v24.0.0
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: Profile
+      description: Which profile was active when the bug happened?
+      placeholder: e.g. web
+    validations:
+      required: false
+  - type: input
+    id: plugin-repo
+    attributes:
+      label: Affected plugin
+      description: The repo you were installing / removing (if relevant).
+      placeholder: e.g. owner/repo
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps that trigger the problem.
+      placeholder: |
+        1. Open Settings → Plugin Hub
+        2. Install ...
+        3. Click ...
+        4. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Paste the relevant error output here.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshots
+      description: A screenshot of the dialog helps a lot (drag & drop here).
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true

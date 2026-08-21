@@ -27,6 +27,8 @@ export function useCatalog(lang: LocaleId) {
   const [installedFilter, setInstalledFilter] = useState<'all' | 'installed' | 'notInstalled'>('all')
   /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
   const [installed, setInstalled] = useState<Record<string, string>>({})
+  /** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由） */
+  const [versions, setVersions] = useState<Record<string, { version: string; updatedAt: string }>>({})
 
   // 拉取目录 + 统计。在线 API 已只返回 verified；再过滤一次，保证只展示人工验证通过的插件。
   useEffect(() => {
@@ -35,7 +37,7 @@ export function useCatalog(lang: LocaleId) {
     setStats(null)
     setFailed(false)
     const fetchData = (url: string): Promise<unknown> =>
-      fetch(url).then((res) => {
+      fetch(url, { cache: 'no-store' }).then((res) => {
         if (!res.ok) throw new Error(String(res.status))
         return res.json()
       })
@@ -60,8 +62,9 @@ export function useCatalog(lang: LocaleId) {
     try {
       const res = await fetch('/dsh-plugin-hub/installed', { cache: 'no-store' })
       if (!res.ok) return
-      const data = await res.json() as { installed?: Record<string, string> }
+      const data = await res.json() as { installed?: Record<string, string>; versions?: Record<string, { version: string; updatedAt: string }> }
       setInstalled(data.installed ?? {})
+      setVersions(data.versions ?? {})
     } catch {
       // host without the plugin's server routes — keep the empty table
     }
@@ -79,6 +82,29 @@ export function useCatalog(lang: LocaleId) {
       if (spec.toLowerCase().includes(needle)) return name
     }
     return null
+  }
+
+  /** 该插件安装时记录的目录版本（无记录/未安装 → null）。 */
+  const installedVersion = (p: HubPlugin): string | null => {
+    const repo = p.source?.repo
+    if (!repo) return null
+    return versions[repo.toLowerCase()]?.version ?? null
+  }
+
+  /**
+   * 是否有更新：仅对已安装插件有意义。
+   * 双信号判定——有 release 版本的比版本；无版本（repo 不打 tag）的比仓库最近更新时间
+   * （repoUpdatedAt，ISO 字符串字典序 = 时间序），更新时间变新说明有新提交。
+   */
+  const hasUpdate = (p: HubPlugin): boolean => {
+    if (installedName(p) === null) return false
+    const repo = p.source?.repo
+    if (!repo) return false
+    const rec = versions[repo.toLowerCase()]
+    if (!rec) return false
+    if (p.version) return p.version !== rec.version
+    const current = p.dates?.repoUpdatedAt
+    return Boolean(current && rec.updatedAt && current > rec.updatedAt)
   }
 
   /** 当前分类下的插件（「全部」时为整个目录）。 */
@@ -144,6 +170,8 @@ export function useCatalog(lang: LocaleId) {
     reload: () => setReloadKey((k) => k + 1),
     installed,
     installedName,
+    installedVersion,
+    hasUpdate,
     refreshInstalled,
     category,
     setCategory,

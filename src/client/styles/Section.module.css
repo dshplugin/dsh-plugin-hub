@@ -19,15 +19,45 @@
 
 .header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2px;
   padding: 2px 2px 0;
 }
 
-/* 头部整体即官网链接：点击任意位置跳官网，悬浮变手型即可点；标题/描述保持各自默认色不变蓝 */
-.brand {
+/* 头部右上角 GitHub 源码图标：次级灰低调呈现，悬浮转品牌紫；纯图标不带按钮边框，保持品牌行克制 */
+.githubLink {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.githubLink:hover {
+  color: #4f46e5;
+  background-color: rgba(79, 70, 229, 0.08);
+}
+
+.githubIcon {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* 头部第一行：logo + 标题（官网链接）与 GitHub 图标同行，space-between 把 GitHub 顶到标题行末尾 */
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 标题行官网链接：logo + 短标题，点击跳官网；标题/描述保持各自默认色不变蓝 */
+.brandTitle {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -37,18 +67,14 @@
   cursor: pointer;
 }
 
-.brandText {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+/* 副标题行独立成行：仍为官网链接；与最左侧 logo 左对齐（顶格），不与标题文字对齐 */
+.taglineLink {
+  align-self: flex-start;
+  max-width: 100%;
   min-width: 0;
-}
-
-.titleRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .title {
@@ -389,7 +415,9 @@
 }
 
 .categoryBadge,
-.verified {
+.verified,
+.versionBadge,
+.updateBadge {
   flex-shrink: 0;
   font-size: 10px;
   line-height: 16px;
@@ -406,6 +434,19 @@
 .verified {
   color: var(--dsw-alias-state-success-primary, #1a7f37);
   border-color: var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.3));
+}
+
+/* 版本号徽标：中性灰，紧凑展示已发布版本（有 release 的仓库） */
+.versionBadge {
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  border-color: var(--dsw-alias-input-border, rgba(107, 114, 128, 0.25));
+}
+
+/* 有更新徽标：警示色（与 star 的琥珀同族），已安装且有新版本/新提交时醒目提示 */
+.updateBadge {
+  color: var(--dsw-alias-state-warn-primary, #b8860b);
+  border-color: var(--dsw-alias-state-warn-secondary, rgba(184, 134, 11, 0.35));
+  background: var(--dsw-alias-state-warn-secondary, rgba(184, 134, 11, 0.08));
 }
 
 .desc {
@@ -478,6 +519,7 @@
 .installBtn,
 .installBtnCopied,
 .installBtnInstalled,
+.installBtnUpdate,
 .uninstallBtn,
 .detailBtn {
   font-size: 11px;
@@ -495,6 +537,19 @@
   border: 1px solid var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.35));
   cursor: default;
   user-select: none;
+}
+
+/* 可更新：琥珀警示色实底按钮（与 star / 有更新徽标同族），点击直接覆盖安装更新 */
+.installBtnUpdate {
+  color: #fff;
+  background: var(--dsw-alias-state-warn-primary, #b8860b);
+  border: 1px solid transparent;
+  font-weight: 500;
+  user-select: none;
+}
+
+.installBtnUpdate:hover {
+  background: var(--dsw-alias-state-warn-secondary, rgba(184, 134, 11, 0.85));
 }
 
 /* 卸载：危险色描边按钮，与安装主按钮区分 */
@@ -611,9 +666,13 @@
   user-select: none;
 }
 
-.modal {
+/* 弹窗基座：安装/卸载确认、错误、失败记录共用；错误类弹窗（.errorModal）单独加宽 */
+.modal, .errorModal {
   width: 420px;
   max-width: calc(100vw - 32px);
+  /* 高度自适应屏幕（桌面/手机视口）：内容超长时窗体内滚动，头部与按钮不消失 */
+  max-height: calc(100dvh - 64px);
+  max-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -625,11 +684,18 @@
   animation: modalIn 180ms ease-out;
 }
 
+/* 错误/失败记录弹窗：宽一些，错误详情长行少折行、阅读更顺；两边留白也更稳 */
+.errorModal {
+  width: 640px;
+  max-width: calc(100vw - 48px);
+}
+
 .modalHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .modalTitle {
@@ -637,6 +703,16 @@
   font-weight: 600;
   line-height: 20px;
   color: var(--dsw-alias-label-primary, #1f2328);
+}
+
+/* 进行中标题（插件名 + 安装中/卸载中）：品牌蓝，与普通弹窗标题区分 */
+.modalTitleBusy {
+  color: var(--dsw-alias-state-business-primary, #4f6ef7);
+}
+
+/* 排队等待标题：琥珀色，提示任务还在队列里等待执行 */
+.modalTitleQueued {
+  color: var(--dsw-alias-state-warning-primary, #b45309);
 }
 
 .modalClose {
@@ -806,6 +882,10 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* 窗体内滚动：窗体高度触顶（max-height）后，内容在这里滚动，头部始终可见 */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* —— 进行中任务状态条（队列：进行中 + 排队，可展开查看/取消） —— */
@@ -874,25 +954,57 @@
   color: var(--dsw-alias-brand-primary, #4f6ef7);
 }
 
-/* 折叠卡展开区：每行一项任务（状态 / 目标 / 进度 / 取消），行间分隔、hover 高亮 */
-.queueList {
-  padding: 2px 0;
-  border-top: 1px solid rgba(79, 110, 247, 0.18);
+/* 弹窗内队列容器：复用 queueRow 卡片，但不需要内联展开时的顶部分隔线与内边距 */
+.queueModalList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+/* 弹窗内分区（待重启 / 进行中）：分区之间留出呼吸感，标题区分两类任务 */
+.queueSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.queueSectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  padding: 4px 2px 0;
+}
+
+/* 待重启状态文案：琥珀色 = 「需要你采取行动」，与「可更新」按钮同语义色 */
+.pendingRowStatus {
+  flex-shrink: 0;
+  color: var(--dsw-alias-state-warn-primary, #b8860b);
+  font-weight: 500;
+}
+
+/* 待重启操作按钮组：状态文案左侧、按钮靠右（稍后重启 / 立即重启） */
+.pendingRowActions {
+  margin-left: auto;
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+/* 每条任务 = 一张独立卡片：边框 + 底色 + 圆角，多条排队之间清晰分隔，互不混淆 */
 .queueRow {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 6px 10px 7px;
+  padding: 8px 10px;
   font-size: 12px;
   line-height: 18px;
-  border-bottom: 1px solid rgba(79, 110, 247, 0.12);
+  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.05));
   transition: background 120ms ease;
-}
-
-.queueRow:last-child {
-  border-bottom: none;
+  cursor: pointer;
+  user-select: none;
 }
 
 .queueRow:hover {
@@ -914,6 +1026,15 @@
   white-space: nowrap;
   color: var(--dsw-alias-label-primary, #1f2328);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* 仓库名下方的插件中文简介：灰字、最多两行截断，悬停完整显示 */
+.queueRowDesc {
+  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 状态 + 蓝色进度条 + 百分比一行：与插件名分开展示 */
@@ -960,6 +1081,12 @@
   background: rgba(229, 72, 77, 0.08);
   border-color: rgba(229, 72, 77, 0.4);
   color: #e5484d;
+}
+
+/* 取消中：按钮失效置灰，避免重复取消 */
+.stripCancel:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* 排队提示：任务已入队等待前序完成时，弹窗内显示 */
@@ -1228,6 +1355,20 @@
   pointer-events: none;
 }
 
+/* 成功结果视图（安装/卸载完成）：按钮对居中，与上方居中的对勾/标题/说明对齐，
+   而不是沿用通用 modalActions 的右对齐；等宽成组，视觉上不散落 */
+.result .modalActions {
+  justify-content: center;
+  gap: 10px;
+  margin-top: 0;
+  padding: 6px 0 2px;
+}
+
+.result .modalActions .restartLater,
+.result .modalActions .restartNow {
+  min-width: 100px;
+}
+
 /* —— 安装/卸载实时进度 —— */
 
 .progress {
@@ -1266,57 +1407,6 @@
 .progressFillFail {
   background: var(--dsw-alias-state-danger-primary, #d1242f);
 }
-
-/* 最近输出行：终端窗口（深色底、等宽字体、行级关键词高亮），日/夜间模式均清晰可读 */
-.progressLog {
-  margin: 8px 0 0;
-  border-radius: 8px;
-  background: #0d1117;
-  border: 1px solid rgba(127, 139, 163, 0.3);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  overflow: hidden;
-}
-
-.progressLogBar {
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(127, 139, 163, 0.2);
-}
-
-.progressLogTitle {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  color: #8b949e;
-}
-
-.progressLogLines {
-  margin: 0;
-  padding: 8px 10px;
-  max-height: 112px;
-  overflow: auto;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-word;
-  /* 终端输出同样放开文本选择：方便直接拖选命令/报错行 */
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.logLine {
-  display: block;
-}
-
-/* 行级着色：默认浅灰 / 成功与进度绿 / 错误红 / 移除黄 / 命令青 */
-.logLinePlain { color: #9da7b3; }
-.logLineOk { color: #3fb950; }
-.logLineErr { color: #f85149; }
-.logLineWarn { color: #d29922; }
-.logLineInfo { color: #58a6ff; }
 
 @keyframes overlayIn {
   from {
@@ -1378,21 +1468,20 @@
   background: #ffffff;
 }
 
-/* 失败记录列表：纵向滚动，每条一条记录 */
+/* 失败记录列表：纵向排列，高度随记录数自适应 —— 记录少时贴合内容，记录多时由窗体 max-height 兜底滚动 */
 .failList {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 300px;
-  overflow-y: auto;
+  gap: 12px;
   padding-right: 2px;
 }
 
+/* 每条失败记录 = 一张独立卡片：边框 + 底色 + 内边距，多条之间以间距清晰分隔，按钮归属一眼可辨 */
 .failRow {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px;
+  gap: 8px;
+  padding: 10px 12px;
   border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
   border-radius: 8px;
   background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.05));
@@ -1456,7 +1545,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 记录内的复制按钮：纯灰文字、无边框，低调隐蔽，点击即可复制该条错误日志 */
+/* 记录内的复制按钮：纯灰文字、无边框，低调隐蔽，点击即可复制该条完整错误日志 */
 .failCopy {
   flex-shrink: 0;
   display: inline-flex;
@@ -1484,6 +1573,23 @@
   font-size: 12px;
   line-height: 18px;
   color: var(--dsw-alias-label-tertiary, #8b93a1);
+}
+
+/* 卡片内的错误信息摘要：核心错误行（核心收集器提炼），灰底等宽、小框限高滚动 —— 不要太高，能滚动即可 */
+.failMsg {
+  margin: 0;
+  padding: 6px 8px;
+  max-height: 96px;
+  overflow-y: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dsw-alias-label-secondary, #6b7280);
+  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.05));
+  border: 1px solid var(--dsw-alias-border-l1, rgba(0, 0, 0, 0.06));
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* 清空记录：危险语义描边按钮 */
@@ -1531,6 +1637,30 @@
   background: var(--dsw-alias-state-danger-primary, #d1242f);
   border-color: var(--dsw-alias-state-danger-primary, #d1242f);
   box-shadow: 0 3px 10px rgba(209, 36, 47, 0.35);
+}
+
+/* 机制类失败（pnpm allowBuilds 拦截等）修复指引：琥珀警示块，替代「提 Issue」入口 */
+.failAllowHint {
+  margin-top: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-state-warning-primary, #b45309);
+  background: rgba(180, 83, 9, 0.08);
+  border: 1px solid rgba(180, 83, 9, 0.3);
+  border-radius: 6px;
+}
+
+/* 插件 prepare 构建脚本失败说明：位于提 Issue 按钮上方的补充说明，同琥珀警示样式 */
+.failPrepareHint {
+  margin-top: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-state-warning-primary, #b45309);
+  background: rgba(180, 83, 9, 0.08);
+  border: 1px solid rgba(180, 83, 9, 0.3);
+  border-radius: 6px;
 }
 
 /* —— states —— */
