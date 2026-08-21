@@ -20,6 +20,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			sortUpdated: "最近更新",
 			sortNewest: "最新收录",
 			openHint: "打开 dsh-plugin.org",
+			toggleLangHint: "切换界面语言",
 			fork: "Fork",
 			loading: "正在加载插件数据…",
 			failed: "插件数据加载失败",
@@ -113,7 +114,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		const en = {
 			nav: "Plugin Hub",
 			title: "DSH-Plugin Hub",
-			tagline: "DSH-Plugin Hub: the plugin marketplace for DeepSeek Harness — human-verified, traceable, free to install",
+			tagline: "DSH-Plugin Hub: a human-verified, free marketplace for DeepSeek Harness plugins",
 			adBadge: "Featured",
 			ad: "DSH-Plugin Hub: {total} plugins indexed, {verified} human-verified, updated daily",
 			search: "Search plugins by name, description, tags…",
@@ -123,6 +124,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			sortUpdated: "Recently updated",
 			sortNewest: "Newest added",
 			openHint: "Open dsh-plugin.org",
+			toggleLangHint: "Switch language",
 			githubHint: "View source on GitHub",
 			fork: "Fork",
 			loading: "Loading plugin data…",
@@ -216,7 +218,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Header.module.css.mjs
-		const css$4 = ".qikqja_root{min-width:0;height:100%;color:var(--hub-text-primary);flex-direction:column;gap:8px;display:flex}.qikqja_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.qikqja_githubLink{color:var(--hub-text-tertiary);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_githubLink:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubIcon{flex-shrink:0;display:block}.qikqja_headerTitleRow{justify-content:space-between;align-items:center;gap:8px;min-width:0;display:flex}.qikqja_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.qikqja_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.qikqja_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.qikqja_version{color:var(--hub-text-secondary)}.qikqja_logoIcon{flex-shrink:0;display:block}.qikqja_copyIcon{flex-shrink:0}.qikqja_tagline{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.qikqja_controls{flex-shrink:0;align-items:center;gap:8px;display:flex}.qikqja_filterResults{color:var(--hub-text-tertiary);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.qikqja_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.qikqja_adBanner{border:1px solid var(--hub-purple-border);background:linear-gradient(90deg, var(--hub-purple-1) 0%, var(--hub-purple-2) 100%);color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;box-shadow:0 2px 10px var(--hub-purple-shadow);border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex}.qikqja_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px var(--hub-purple-shadow-strong)}.qikqja_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.qikqja_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.qikqja_searchRow{padding:0 2px;display:flex}.qikqja_search{width:50%;color:inherit;border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.qikqja_search::placeholder{color:var(--hub-text-tertiary)}.qikqja_search:focus{border-color:var(--hub-brand)}.qikqja_installedBtn,.qikqja_installedBtnActive,.qikqja_installedBtnDisabled{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex}.qikqja_installedBtn{color:var(--hub-text-primary);background:0 0}.qikqja_installedBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_installedBtnDisabled,.qikqja_installedBtnDisabled:hover{color:var(--hub-text-disabled);cursor:not-allowed;background:0 0}.qikqja_installedBtnDisabled .qikqja_segCount{color:var(--hub-text-disabled);background:#8080800f}.qikqja_installedBtnActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_segCount,.qikqja_segCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_segCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.qikqja_installedBtnActive .qikqja_segCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_tabs{border-bottom:1px solid var(--hub-border-1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.qikqja_tab,.qikqja_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s;display:inline-flex}.qikqja_tab{color:var(--hub-text-secondary);background:0 0}.qikqja_tab:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_tabActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_tabCount{text-align:center;min-width:16px;color:var(--hub-text-tertiary);background:var(--hub-bg-btn);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_tabActive .qikqja_tabCount{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_failBtn{box-sizing:border-box;border:1px solid var(--hub-border-2);height:24px;color:var(--hub-text-primary);background:var(--hub-bg-hover);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;margin-left:auto;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex;position:relative}.qikqja_failBtn:hover{color:var(--hub-text-primary);background:#80808047}.qikqja_failBadge{z-index:1;text-align:center;color:#fff;background:var(--hub-danger);border-radius:999px;min-width:16px;height:16px;padding:0 5px;font-size:10px;font-weight:600;line-height:16px;position:absolute;top:-16px;right:-7px;box-shadow:0 1px 4px #d1242f66}";
+		const css$4 = ".qikqja_root{min-width:0;height:100%;color:var(--hub-text-primary);flex-direction:column;gap:8px;display:flex}.qikqja_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.qikqja_headerRight{flex-shrink:0;align-items:center;gap:2px;display:inline-flex}.qikqja_langBtn{height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;padding:0 8px;font-size:12px;font-weight:600;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_langBtn:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubLink{color:var(--hub-text-tertiary);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_githubLink:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubIcon{flex-shrink:0;display:block}.qikqja_headerTitleRow{justify-content:space-between;align-items:center;gap:8px;min-width:0;display:flex}.qikqja_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.qikqja_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.qikqja_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.qikqja_version{color:var(--hub-text-secondary)}.qikqja_logoIcon{flex-shrink:0;display:block}.qikqja_copyIcon{flex-shrink:0}.qikqja_tagline{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;margin:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_controls{flex-shrink:0;align-items:center;gap:4px;display:flex}.qikqja_filterResults{color:var(--hub-text-tertiary);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.qikqja_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.qikqja_adBanner{border:1px solid var(--hub-purple-border);background:linear-gradient(90deg, var(--hub-purple-1) 0%, var(--hub-purple-2) 100%);color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;box-shadow:0 2px 10px var(--hub-purple-shadow);border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex}.qikqja_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px var(--hub-purple-shadow-strong)}.qikqja_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.qikqja_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.qikqja_searchRow{padding:0 2px;display:flex}.qikqja_search{width:50%;color:inherit;border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.qikqja_search::placeholder{color:var(--hub-text-tertiary)}.qikqja_search:focus{border-color:var(--hub-brand)}.qikqja_installedBtn,.qikqja_installedBtnActive,.qikqja_installedBtnDisabled{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 8px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex}.qikqja_installedBtn{color:var(--hub-text-primary);background:0 0}.qikqja_installedBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_installedBtnDisabled,.qikqja_installedBtnDisabled:hover{color:var(--hub-text-disabled);cursor:not-allowed;background:0 0}.qikqja_installedBtnDisabled .qikqja_segCount{color:var(--hub-text-disabled);background:#8080800f}.qikqja_installedBtnActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_segCount,.qikqja_segCountActive{text-align:center;border-radius:999px;min-width:14px;padding:0 4px;font-size:10px;line-height:14px}.qikqja_segCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.qikqja_installedBtnActive .qikqja_segCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_tabs{border-bottom:1px solid var(--hub-border-1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.qikqja_tab,.qikqja_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s;display:inline-flex}.qikqja_tab{color:var(--hub-text-secondary);background:0 0}.qikqja_tab:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_tabActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_tabCount{text-align:center;min-width:16px;color:var(--hub-text-tertiary);background:var(--hub-bg-btn);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_tabActive .qikqja_tabCount{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_failBtn{box-sizing:border-box;border:1px solid var(--hub-border-2);height:24px;color:var(--hub-text-primary);background:var(--hub-bg-hover);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;margin-left:auto;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex;position:relative}.qikqja_failBtn:hover{color:var(--hub-text-primary);background:#80808047}.qikqja_failBadge{z-index:1;text-align:center;color:#fff;background:var(--hub-danger);border-radius:999px;min-width:16px;height:16px;padding:0 5px;font-size:10px;font-weight:600;line-height:16px;position:absolute;top:-16px;right:-7px;box-shadow:0 1px 4px #d1242f66}";
 		const tagId$4 = "dsh-plugin/Header.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$4) + "]") === null) {
 			const tag = document.createElement("style");
@@ -226,38 +228,40 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Header_module_css_default = {
+			"githubLink": "qikqja_githubLink",
+			"searchRow": "qikqja_searchRow",
+			"adBanner": "qikqja_adBanner",
+			"filterResults": "qikqja_filterResults",
+			"tabActive": "qikqja_tabActive",
+			"langBtn": "qikqja_langBtn",
+			"headerTitleRow": "qikqja_headerTitleRow",
+			"installedBtn": "qikqja_installedBtn",
+			"installedBtnActive": "qikqja_installedBtnActive",
+			"brandTitle": "qikqja_brandTitle",
+			"segCountActive": "qikqja_segCountActive",
+			"tab": "qikqja_tab",
+			"adBadge": "qikqja_adBadge",
+			"tagline": "qikqja_tagline",
+			"adText": "qikqja_adText",
+			"title": "qikqja_title",
+			"root": "qikqja_root",
+			"search": "qikqja_search",
+			"version": "qikqja_version",
+			"adArrow": "qikqja_adArrow",
+			"githubIcon": "qikqja_githubIcon",
+			"segCount": "qikqja_segCount",
+			"tabs": "qikqja_tabs",
+			"controls": "qikqja_controls",
+			"logoIcon": "qikqja_logoIcon",
 			"taglineLink": "qikqja_taglineLink",
 			"copyIcon": "qikqja_copyIcon",
-			"adBanner": "qikqja_adBanner",
-			"adText": "qikqja_adText",
-			"segCount": "qikqja_segCount",
-			"header": "qikqja_header",
-			"controls": "qikqja_controls",
-			"segCountActive": "qikqja_segCountActive",
-			"failBadge": "qikqja_failBadge",
 			"tabCount": "qikqja_tabCount",
-			"installedBtnActive": "qikqja_installedBtnActive",
-			"title": "qikqja_title",
-			"tagline": "qikqja_tagline",
-			"installedBtnDisabled": "qikqja_installedBtnDisabled",
-			"tabs": "qikqja_tabs",
-			"adArrow": "qikqja_adArrow",
-			"githubLink": "qikqja_githubLink",
-			"logoIcon": "qikqja_logoIcon",
-			"searchRow": "qikqja_searchRow",
-			"filterResults": "qikqja_filterResults",
-			"failBtn": "qikqja_failBtn",
-			"root": "qikqja_root",
-			"headerTitleRow": "qikqja_headerTitleRow",
 			"resultCount": "qikqja_resultCount",
-			"tab": "qikqja_tab",
-			"brandTitle": "qikqja_brandTitle",
-			"version": "qikqja_version",
-			"adBadge": "qikqja_adBadge",
-			"search": "qikqja_search",
-			"tabActive": "qikqja_tabActive",
-			"githubIcon": "qikqja_githubIcon",
-			"installedBtn": "qikqja_installedBtn"
+			"header": "qikqja_header",
+			"failBtn": "qikqja_failBtn",
+			"headerRight": "qikqja_headerRight",
+			"installedBtnDisabled": "qikqja_installedBtnDisabled",
+			"failBadge": "qikqja_failBadge"
 		};
 		//#endregion
 		//#region src/client/lib/failures.ts
@@ -676,7 +680,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				return () => {
 					cancelled = true;
 				};
-			}, [reloadKey]);
+			}, [reloadKey, lang]);
 			/** 刷新当前 profile 已安装插件表；宿主未挂本地路由时静默降级为空表。 */
 			const refreshInstalled = async () => {
 				try {
@@ -1141,90 +1145,90 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Modal_module_css_default = {
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"toastFail": "BiQ1zG_toastFail",
-			"progressText": "BiQ1zG_progressText",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"modalClose": "BiQ1zG_modalClose",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"queueRowBody": "BiQ1zG_queueRowBody",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"failKind": "BiQ1zG_failKind",
-			"failRepo": "BiQ1zG_failRepo",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"resultDesc": "BiQ1zG_resultDesc",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"modalValue": "BiQ1zG_modalValue",
-			"errorTitle": "BiQ1zG_errorTitle",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"failClear": "BiQ1zG_failClear",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"errorBox": "BiQ1zG_errorBox",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"modalIn": "BiQ1zG_modalIn",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"noticeMain": "BiQ1zG_noticeMain",
-			"failCopy": "BiQ1zG_failCopy",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"noticeList": "BiQ1zG_noticeList",
-			"failTime": "BiQ1zG_failTime",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"failHead": "BiQ1zG_failHead",
-			"restartNow": "BiQ1zG_restartNow",
-			"errorHint": "BiQ1zG_errorHint",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"queueSection": "BiQ1zG_queueSection",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"modalActions": "BiQ1zG_modalActions",
-			"overlay": "BiQ1zG_overlay",
-			"trustHint": "BiQ1zG_trustHint",
-			"result": "BiQ1zG_result",
-			"progress": "BiQ1zG_progress",
-			"failList": "BiQ1zG_failList",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"queueRow": "BiQ1zG_queueRow",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"progressFill": "BiQ1zG_progressFill",
-			"toastIn": "BiQ1zG_toastIn",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"modalHead": "BiQ1zG_modalHead",
-			"modal": "BiQ1zG_modal",
-			"failRow": "BiQ1zG_failRow",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"modalRow": "BiQ1zG_modalRow",
-			"modalBody": "BiQ1zG_modalBody",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"modalLink": "BiQ1zG_modalLink",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"progressHead": "BiQ1zG_progressHead",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"errorModal": "BiQ1zG_errorModal",
-			"toast": "BiQ1zG_toast",
-			"restartLater": "BiQ1zG_restartLater",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
 			"linkIcon": "BiQ1zG_linkIcon",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon"
+			"failKind": "BiQ1zG_failKind",
+			"restartLater": "BiQ1zG_restartLater",
+			"noticeList": "BiQ1zG_noticeList",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"trustHint": "BiQ1zG_trustHint",
+			"progressText": "BiQ1zG_progressText",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"failClear": "BiQ1zG_failClear",
+			"modal": "BiQ1zG_modal",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"failRepo": "BiQ1zG_failRepo",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"failRow": "BiQ1zG_failRow",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"modalHead": "BiQ1zG_modalHead",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"progressHead": "BiQ1zG_progressHead",
+			"failList": "BiQ1zG_failList",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"failTime": "BiQ1zG_failTime",
+			"errorModal": "BiQ1zG_errorModal",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"modalLink": "BiQ1zG_modalLink",
+			"failCopy": "BiQ1zG_failCopy",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"modalClose": "BiQ1zG_modalClose",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"failHead": "BiQ1zG_failHead",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"restartNow": "BiQ1zG_restartNow",
+			"progressFill": "BiQ1zG_progressFill",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"queueSection": "BiQ1zG_queueSection",
+			"result": "BiQ1zG_result",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"modalValue": "BiQ1zG_modalValue",
+			"modalIn": "BiQ1zG_modalIn",
+			"modalActions": "BiQ1zG_modalActions",
+			"toastIn": "BiQ1zG_toastIn",
+			"overlay": "BiQ1zG_overlay",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
+			"modalBody": "BiQ1zG_modalBody",
+			"progress": "BiQ1zG_progress",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"toastFail": "BiQ1zG_toastFail",
+			"queueRow": "BiQ1zG_queueRow",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"modalRow": "BiQ1zG_modalRow",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"errorBox": "BiQ1zG_errorBox",
+			"toast": "BiQ1zG_toast",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"errorHint": "BiQ1zG_errorHint",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon"
 		};
 		//#endregion
 		//#region src/client/components/icons.tsx
@@ -1723,7 +1727,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* Section header: brand title row (H1 + open-site button) + tagline, followed
 		* by the purple ad banner that promotes the catalog stats.
 		*/
-		function CatalogHeader({ t, langPath, statsTotal, statsVerified }) {
+		function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggleLang }) {
 			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Header_module_css_default.header }, (0, react.createElement)("div", { className: Header_module_css_default.headerTitleRow }, (0, react.createElement)("a", {
 				className: Header_module_css_default.brandTitle,
 				href: `${SITE_URL}${langPath}`,
@@ -1731,14 +1735,20 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				rel: "noopener noreferrer",
 				title: t("openHint"),
 				"aria-label": t("openHint")
-			}, (0, react.createElement)(LogoIcon), (0, react.createElement)("h1", { className: Header_module_css_default.title }, t("title"), (0, react.createElement)("span", { className: Header_module_css_default.version }, ` v${PLUGIN_VERSION}`))), (0, react.createElement)("a", {
+			}, (0, react.createElement)(LogoIcon), (0, react.createElement)("h1", { className: Header_module_css_default.title }, t("title"), (0, react.createElement)("span", { className: Header_module_css_default.version }, ` v${PLUGIN_VERSION}`))), (0, react.createElement)("div", { className: Header_module_css_default.headerRight }, (0, react.createElement)("button", {
+				className: Header_module_css_default.langBtn,
+				type: "button",
+				onClick: onToggleLang,
+				title: t("toggleLangHint"),
+				"aria-label": t("toggleLangHint")
+			}, langPath === "zh/" ? "EN" : "中文"), (0, react.createElement)("a", {
 				className: Header_module_css_default.githubLink,
 				href: GITHUB_URL,
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("githubHint"),
 				"aria-label": t("githubHint")
-			}, (0, react.createElement)(GitHubIcon))), (0, react.createElement)("a", {
+			}, (0, react.createElement)(GitHubIcon)))), (0, react.createElement)("a", {
 				className: Header_module_css_default.taglineLink,
 				href: `${SITE_URL}${langPath}`,
 				target: "_blank",
@@ -1777,7 +1787,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
-		const css$2 = ".B_Gxsq_dropdown{flex-shrink:0;display:inline-flex;position:relative}.B_Gxsq_dropdownBtn{height:24px;color:var(--hub-text-primary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;border-radius:6px;align-items:center;gap:6px;padding:0 10px;font-size:12px;line-height:22px;transition:background .12s;display:inline-flex}.B_Gxsq_dropdownBtn:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownArrow,.B_Gxsq_dropdownArrowOpen{color:var(--hub-text-tertiary);justify-content:center;align-items:center;transition:transform .12s;display:inline-flex}.B_Gxsq_dropdownArrowOpen{transform:rotate(180deg)}.B_Gxsq_dropdownPanel{z-index:50;background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:8px;flex-direction:column;gap:2px;min-width:100%;padding:4px;display:flex;position:absolute;top:calc(100% + 4px);left:0;box-shadow:0 8px 24px #00000024}.B_Gxsq_dropdownItem,.B_Gxsq_dropdownItemActive{cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;text-align:left;border:none;border-radius:6px;justify-content:space-between;align-items:center;gap:10px;padding:4px 9px;font-size:12px;line-height:18px;transition:background .12s,color .12s;display:flex}.B_Gxsq_dropdownItem{color:var(--hub-text-primary);background:0 0}.B_Gxsq_dropdownItem:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownItemActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.B_Gxsq_dropdownItemLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownCount,.B_Gxsq_dropdownCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 6px;font-size:10px;line-height:14px}.B_Gxsq_dropdownCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.B_Gxsq_dropdownItemActive .B_Gxsq_dropdownCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}";
+		const css$2 = ".B_Gxsq_dropdown{flex-shrink:0;display:inline-flex;position:relative}.B_Gxsq_dropdownBtn{height:24px;color:var(--hub-text-primary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;border-radius:6px;align-items:center;gap:6px;padding:0 8px;font-size:12px;line-height:22px;transition:background .12s;display:inline-flex}.B_Gxsq_dropdownBtn:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownArrow,.B_Gxsq_dropdownArrowOpen{color:var(--hub-text-tertiary);justify-content:center;align-items:center;transition:transform .12s;display:inline-flex}.B_Gxsq_dropdownArrowOpen{transform:rotate(180deg)}.B_Gxsq_dropdownPanel{z-index:50;background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:8px;flex-direction:column;gap:2px;min-width:100%;padding:4px;display:flex;position:absolute;top:calc(100% + 4px);left:0;box-shadow:0 8px 24px #00000024}.B_Gxsq_dropdownItem,.B_Gxsq_dropdownItemActive{cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;text-align:left;border:none;border-radius:6px;justify-content:space-between;align-items:center;gap:10px;padding:4px 9px;font-size:12px;line-height:18px;transition:background .12s,color .12s;display:flex}.B_Gxsq_dropdownItem{color:var(--hub-text-primary);background:0 0}.B_Gxsq_dropdownItem:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownItemActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.B_Gxsq_dropdownItemLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownCount,.B_Gxsq_dropdownCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 6px;font-size:10px;line-height:14px}.B_Gxsq_dropdownCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.B_Gxsq_dropdownItemActive .B_Gxsq_dropdownCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}";
 		const tagId$2 = "dsh-plugin/Dropdown.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
 			const tag = document.createElement("style");
@@ -1787,17 +1797,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Dropdown_module_css_default = {
-			"dropdownBtn": "B_Gxsq_dropdownBtn",
 			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
 			"dropdownCount": "B_Gxsq_dropdownCount",
 			"dropdown": "B_Gxsq_dropdown",
+			"dropdownBtn": "B_Gxsq_dropdownBtn",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownLabel": "B_Gxsq_dropdownLabel",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
+			"dropdownArrow": "B_Gxsq_dropdownArrow",
 			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen"
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive"
 		};
 		//#endregion
 		//#region src/client/components/Dropdown.tsx
@@ -1912,37 +1922,37 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var List_module_css_default = {
-			"cardMain": "_3XaZHa_cardMain",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"installBtn": "_3XaZHa_installBtn",
-			"footer": "_3XaZHa_footer",
-			"topic": "_3XaZHa_topic",
 			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"state": "_3XaZHa_state",
-			"detailBtn": "_3XaZHa_detailBtn",
 			"stateTitle": "_3XaZHa_stateTitle",
+			"categoryBadge": "_3XaZHa_categoryBadge",
 			"star": "_3XaZHa_star",
+			"cardMain": "_3XaZHa_cardMain",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"topic": "_3XaZHa_topic",
+			"date": "_3XaZHa_date",
+			"list": "_3XaZHa_list",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"cardHead": "_3XaZHa_cardHead",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"body": "_3XaZHa_body",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"verified": "_3XaZHa_verified",
+			"installBtn": "_3XaZHa_installBtn",
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"stateDesc": "_3XaZHa_stateDesc",
+			"actions": "_3XaZHa_actions",
+			"cardSide": "_3XaZHa_cardSide",
+			"stats": "_3XaZHa_stats",
 			"footLink": "_3XaZHa_footLink",
+			"footer": "_3XaZHa_footer",
+			"topics": "_3XaZHa_topics",
 			"card": "_3XaZHa_card",
 			"fork": "_3XaZHa_fork",
-			"date": "_3XaZHa_date",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"body": "_3XaZHa_body",
+			"state": "_3XaZHa_state",
 			"desc": "_3XaZHa_desc",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"cardSide": "_3XaZHa_cardSide",
-			"actions": "_3XaZHa_actions",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"cardHead": "_3XaZHa_cardHead",
-			"list": "_3XaZHa_list",
-			"topics": "_3XaZHa_topics",
-			"verified": "_3XaZHa_verified",
-			"stats": "_3XaZHa_stats",
-			"stateDesc": "_3XaZHa_stateDesc"
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled"
 		};
 		//#endregion
 		//#region src/client/lib/format.ts
@@ -1984,7 +1994,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, versionShown) : null, update ? (0, react.createElement)("span", {
 				className: List_module_css_default.updateBadge,
 				title: t("updateAvailableHint")
-			}, t("updateAvailable")) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null), p.description && (langKey === "zh" || !/[\u4e00-\u9fff]/.test(p.description)) ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
+			}, t("updateAvailable")) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null), p.description ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
 				key: topic,
 				className: List_module_css_default.topic
 			}, topic))) : null), (0, react.createElement)("div", { className: List_module_css_default.cardSide }, (0, react.createElement)("div", { className: List_module_css_default.stats }, (0, react.createElement)("span", { className: List_module_css_default.star }, "★ ", fmtStars(p.stats?.stargazers_count)), (0, react.createElement)("span", { className: List_module_css_default.fork }, t("fork"), " ", fmtStars(p.stats?.forks_count)), (0, react.createElement)("span", { className: List_module_css_default.date }, relTime(p.dates?.repoUpdatedAt, t))), repo ? (0, react.createElement)("div", { className: List_module_css_default.actions }, (0, react.createElement)("a", {
@@ -2057,8 +2067,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* folder; only the dialogs/toast and the section-level copy actions remain.
 		*/
 		function PluginHubSection({ t: _hostT, locale }) {
-			/** 界面语言跟随宿主（系统）语言自动切换，不提供手动切换按钮 */
-			const lang = locale.getSnapshot().active;
+			/** 界面语言：默认跟随宿主（系统）语言；右上角按钮可手动切换，切换后以手动选择为准 */
+			const [manualLang, setManualLang] = (0, react.useState)(null);
+			const lang = manualLang ?? locale.getSnapshot().active;
 			const langKey = lang === "en" ? "en" : "zh";
 			const langPath = langPathOf(lang);
 			const dict = langKey === "en" ? en : zh;
@@ -2248,7 +2259,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				t,
 				langPath,
 				statsTotal,
-				statsVerified
+				statsVerified,
+				onToggleLang: () => setManualLang(lang === "en" ? "zh" : "en")
 			}), (0, react.createElement)(CategoryTabs, {
 				category: catalog.category,
 				setCategory: catalog.setCategory,

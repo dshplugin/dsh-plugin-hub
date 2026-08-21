@@ -55,7 +55,9 @@ export function useCatalog(lang: LocaleId) {
       }
     }).catch(() => {})
     return () => { cancelled = true }
-  }, [reloadKey])
+    // lang 必须进依赖：切换界面语言要重新拉对应语言的数据文件，
+    // 否则英文模式仍停留在 plugins.zh.json，描述/名称全是中文
+  }, [reloadKey, lang])
 
   /** 刷新当前 profile 已安装插件表；宿主未挂本地路由时静默降级为空表。 */
   const refreshInstalled = async () => {

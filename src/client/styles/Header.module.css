@@ -1,0 +1,432 @@
+/* Plugin Hub section header: brand row, tagline, ad banner, search input,
+ * filter toolbar (installed / not installed, failures entry) and category
+ * tabs. Colors resolve through the --hub-* design tokens. */
+
+.root {
+  height: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--hub-text-primary);
+}
+
+/* —— header —— */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 2px 0;
+}
+
+/* 头部右上角控件组：语言切换 + GitHub 源码图标，右侧一列对齐 */
+.headerRight {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* 语言切换按钮：与 GitHub 图标同风格（次级灰低调、悬浮品牌紫），文字显示目标语言 */
+.langBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hub-text-tertiary);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.langBtn:hover {
+  color: var(--hub-purple-1);
+  background-color: var(--hub-purple-tint);
+}
+
+/* 头部右上角 GitHub 源码图标：次级灰低调呈现，悬浮转品牌紫；纯图标不带按钮边框，保持品牌行克制 */
+.githubLink {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--hub-text-tertiary);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.githubLink:hover {
+  color: var(--hub-purple-1);
+  background-color: var(--hub-purple-tint);
+}
+
+.githubIcon {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* 头部第一行：logo + 标题（官网链接）与 GitHub 图标同行，space-between 把 GitHub 顶到标题行末尾 */
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 标题行官网链接：logo + 短标题，点击跳官网；标题/描述保持各自默认色不变蓝 */
+.brandTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 副标题行独立成行：仍为官网链接；与最左侧 logo 左对齐（顶格），不与标题文字对齐 */
+.taglineLink {
+  align-self: flex-start;
+  max-width: 100%;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* 标题里的版本号：非标题主内容，颜色弱化为次级灰 */
+.version {
+  color: var(--hub-text-secondary);
+}
+
+/* 品牌 logo 图标：与标题文字垂直居中对齐 */
+.logoIcon {
+  flex-shrink: 0;
+  display: block;
+}
+
+/* 复制图标：跟随父元素 currentColor 变色 */
+.copyIcon {
+  flex-shrink: 0;
+}
+
+.tagline {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-tertiary);
+  margin: 0;
+  /* 品牌副标题强制单行：中文/英文都不换行，超宽时省略号截断兜底 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  /* 左右分区：左侧操作控件靠左，通知入口经 margin-left:auto 独立顶到最右 */
+}
+
+/* 列表头部筛选结果数：位于排序下拉之前，弱化灰字提示「筛选出 N 条插件」，字号与相邻按钮一致 */
+.filterResults {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+}
+
+/* 结果数里的数字：等宽数字 + 固定 5 位宽度；数字在预留位中始终居中，两侧位置都固定不跳动 */
+.resultCount {
+  font-variant-numeric: tabular-nums;
+  min-width: 5ch;
+  text-align: center;
+}
+
+/* —— ad banner —— */
+
+/* 广告条：固定蓝紫渐变 + 白字，不随主题变量漂移，两种主题下都醒目。
+   与 toast 相同思路：固定颜色保证可读性。 */
+.adBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--hub-purple-border);
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--hub-purple-1) 0%, var(--hub-purple-2) 100%);
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 10px var(--hub-purple-shadow);
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.adBanner:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 16px var(--hub-purple-shadow-strong);
+}
+
+.adBadge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+.adText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 18px;
+  color: #ffffff;
+}
+
+.adArrow {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.searchRow {
+  display: flex;
+  padding: 0 2px;
+}
+
+/* 搜索框：用户指定只占整行一半宽，右侧留白给排序/筛选/通知控件组 */
+.search {
+  width: 50%;
+  font-size: 12px;
+  line-height: 18px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  padding: 4px 9px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.search::placeholder {
+  color: var(--hub-text-tertiary);
+}
+
+.search:focus {
+  border-color: var(--hub-brand);
+}
+
+/* —— install-state filter —— */
+
+/* 已安装 / 未安装：两个独立按钮，外观尺寸与「安装失败记录」按钮一致（高 24px）；
+   各自点击筛选对应安装状态，再点一次恢复全部。公共规则统一无边框，
+   避免激活态回落到浏览器默认 2px 边框导致点击时按钮变粗跳动。 */
+.installedBtn,
+.installedBtnActive,
+.installedBtnDisabled {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.installedBtn {
+  color: var(--hub-text-primary);
+  background: transparent;
+}
+
+/* 悬浮：明显加重底色，保证「看得见、点得准」。 */
+.installedBtn:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+}
+
+/* 置灰：当前分类下无对应安装状态的插件时不可点；尺寸保持 24px 不塌陷，
+   文字弱化，配合 disabled 属性天然屏蔽 hover/点击。 */
+.installedBtnDisabled,
+.installedBtnDisabled:hover {
+  color: var(--hub-text-disabled);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.installedBtnDisabled .segCount {
+  color: var(--hub-text-disabled);
+  background: rgba(128, 128, 128, 0.06);
+}
+
+.installedBtnActive {
+  color: var(--hub-text-on-fill);
+  background: var(--hub-btn-fill);
+}
+
+.segCount,
+.segCountActive {
+  font-size: 10px;
+  line-height: 14px;
+  border-radius: 999px;
+  padding: 0 4px;
+  min-width: 14px;
+  text-align: center;
+}
+
+.segCount {
+  color: var(--hub-text-tertiary);
+  background: var(--hub-bg-btn);
+}
+
+.installedBtnActive .segCountActive {
+  color: var(--hub-text-on-fill);
+  background: var(--hub-bg-on-fill);
+}
+
+/* —— category chips —— */
+
+.tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 2px 8px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.tab,
+.tabActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 18px;
+  border: none;
+  border-radius: 999px;
+  padding: 3px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.tab {
+  color: var(--hub-text-secondary);
+  background: transparent;
+}
+
+.tab:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+}
+
+.tabActive {
+  color: var(--hub-text-on-fill);
+  background: var(--hub-btn-fill);
+}
+
+/* 「全部」标签上的总数徽标：浅灰胶囊，选中态转深色底白字胶囊 */
+.tabCount {
+  font-size: 10px;
+  line-height: 14px;
+  border-radius: 999px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  color: var(--hub-text-tertiary);
+  background: var(--hub-bg-btn);
+}
+
+.tabActive .tabCount {
+  color: var(--hub-text-on-fill);
+  background: var(--hub-bg-on-fill);
+}
+
+/* —— notifications entry —— */
+
+/* 通知中心入口：中性次级按钮（浅灰底 + 细边框），与左侧操作按钮区分、常态可辨；
+   box-sizing: border-box 让 1px 边框包含在 24px 高度内，与「已安装/未安装」无边框按钮外尺寸一致；
+   有通知时右上角悬浮的红圈白字徽标成为提醒焦点 */
+.failBtn {
+  position: relative;
+  flex-shrink: 0;
+  /* 与左侧操作按钮分开：自动吃掉剩余空间，把按钮顶到控件行最右 */
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 22px;
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.failBtn:hover {
+  color: var(--hub-text-primary);
+  background: rgba(128, 128, 128, 0.28);
+}
+
+/* 计数徽标：红色圆形 + 白色数字，整体浮在按钮右上角上沿之外（16px 徽章 + top:-16px
+   完全悬于按钮灰底之上，不遮盖灰底），只在通知数 >0 时出现 */
+.failBadge {
+  position: absolute;
+  top: -16px;
+  right: -7px;
+  z-index: 1;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  color: #ffffff;
+  background: var(--hub-danger);
+  box-shadow: 0 1px 4px rgba(209, 36, 47, 0.4);
+}

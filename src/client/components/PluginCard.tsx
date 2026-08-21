@@ -44,11 +44,9 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
           ? h('span', { className: styles.verified }, t('verified'))
           : null,
       ),
-      // 英文模式下隐藏仍为中文的描述：站点英文数据缺翻译时 description 会回退成中文，
-      // 不显示可保证界面语言一致，不残留中文字符。
-      p.description && (langKey === 'zh' || !/[\u4e00-\u9fff]/.test(p.description))
-        ? h('p', { className: styles.desc }, p.description)
-        : null,
+      // 描述始终显示：站点英文数据缺翻译时 description 回退成中文也照常展示，
+      // 描述是了解插件的第一入口，比隐藏更实用（不再为求语言一致而砍内容）。
+      p.description ? h('p', { className: styles.desc }, p.description) : null,
       (p.topics?.length ?? 0) > 0
         ? h('div', { className: styles.topics },
           p.topics!.slice(0, 3).map((topic) => h('span', { key: topic, className: styles.topic }, topic)),

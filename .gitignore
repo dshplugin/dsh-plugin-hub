@@ -6,8 +6,10 @@ node_modules/
 .env
 .env.*
 coverage/
-# 构建产物：lib（server 编译输出）、client（tsdown 打包输出）每次构建整目录重建，
+# 构建产物：/lib（server 编译输出）、/client（tsdown 打包输出）每次构建整目录重建，
 # 排除后 IDE 索引（尊重 .gitignore）不再反复重扫它们。已跟踪的产物不受影响
 # （git 直装仍需提交产物）；新增的未跟踪产物文件发布时用 `git add -f lib client` 强制加入。
-lib/
-client/
+# 注意：必须写 /lib /client 锚定仓库根 —— 不带前导斜杠的 `client/` 会连 src/client 源码一起忽略，
+# 导致新组件/样式文件永远进不了版本库（曾因此漏提 NotificationsModal 与四个样式模块）。
+/lib/
+/client/

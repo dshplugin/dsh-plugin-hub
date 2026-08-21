@@ -1,0 +1,86 @@
+/* Plugin Hub design tokens.
+ *
+ * Semantic aliases over the host's --dsw-alias-* theme tokens, each with the
+ * original light-mode literal as fallback for hosts that do not define the
+ * underlying token. Declared on :root and on the dark body so every theme
+ * re-resolves the aliases against its own token set; the custom property is
+ * then inherited by all section elements.
+ *
+ * Keep raw colors out of the per-area stylesheets: reference --hub-* here so
+ * new styles pick up the theme automatically. */
+:root,
+body[data-ds-dark-theme] {
+  /* text */
+  --hub-text-primary: var(--dsw-alias-label-primary, #1f2328);
+  --hub-text-secondary: var(--dsw-alias-label-secondary, #6b7280);
+  --hub-text-tertiary: var(--dsw-alias-label-tertiary, #8b93a1);
+  --hub-text-disabled: var(--dsw-alias-label-disabled, #aab1bd);
+  --hub-text-on-fill: var(--dsw-alias-label-primary-foreground, #ffffff);
+
+  /* surfaces */
+  --hub-bg-1: var(--dsw-alias-bg-layer-1, #ffffff);
+  --hub-bg-2: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.08));
+  --hub-bg-3: rgba(128, 128, 128, 0.1);
+  /* 计数胶囊底色（已安装/未安装按钮内的数量胶囊） */
+  --hub-bg-btn: rgba(128, 128, 128, 0.12);
+  --hub-bg-hover: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.16));
+  --hub-bg-on-fill: rgba(128, 128, 128, 0.22);
+
+  /* borders */
+  --hub-border-1: var(--dsw-alias-border-l1, #eceef1);
+  --hub-border-2: var(--dsw-alias-border-l2, #e5e7eb);
+  --hub-border-ghost: var(--dsw-alias-button-ghost-active-border, rgba(79, 110, 247, 0.25));
+  --hub-border-input: var(--dsw-alias-input-border, rgba(107, 114, 128, 0.25));
+
+  /* brand (fixed in both themes) */
+  --hub-brand: var(--dsw-alias-state-business-primary, #4f6ef7);
+  --hub-brand-hover: #3b5bdb;
+  --hub-brand-tint: rgba(79, 110, 247, 0.06);
+  --hub-brand-tint-strong: rgba(79, 110, 247, 0.12);
+  --hub-brand-border: rgba(79, 110, 247, 0.35);
+  --hub-brand-border-soft: rgba(79, 110, 247, 0.22);
+
+  /* purple brand accents (fixed in both themes) */
+  --hub-purple-1: #4f46e5;
+  --hub-purple-2: #7c3aed;
+  --hub-purple-border: rgba(139, 92, 246, 0.55);
+  --hub-purple-tint: rgba(79, 70, 229, 0.08);
+  --hub-purple-shadow: rgba(79, 70, 229, 0.28);
+  --hub-purple-shadow-strong: rgba(124, 58, 237, 0.42);
+
+  /* primary action button */
+  --hub-btn-fill: var(--dsw-alias-button-primary-fill, #1f2328);
+  --hub-btn-hover: var(--dsw-alias-button-primary-hover, #43454a);
+
+  /* success */
+  --hub-success: var(--dsw-alias-state-success-primary, #1a7f37);
+  --hub-success-tint: rgba(34, 197, 94, 0.14);
+  --hub-success-border: var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.3));
+
+  /* warning (amber) */
+  --hub-warn: var(--dsw-alias-state-warn-primary, #b8860b);
+  --hub-warn-tint: rgba(184, 134, 11, 0.08);
+  --hub-warn-border: rgba(184, 134, 11, 0.35);
+  --hub-warn-strong: rgba(184, 134, 11, 0.85);
+
+  /* warning (deep amber) */
+  --hub-warning: var(--dsw-alias-state-warning-primary, #b45309);
+  --hub-warning-tint: rgba(180, 83, 9, 0.08);
+  --hub-warning-border: rgba(180, 83, 9, 0.3);
+
+  /* danger */
+  --hub-danger: var(--dsw-alias-state-danger-primary, #d1242f);
+  --hub-danger-hover: var(--dsw-alias-state-danger-hover, #b91c1c);
+  --hub-danger-strong: #b0202a;
+  --hub-danger-text: #e5484d;
+  --hub-danger-tint: rgba(229, 72, 77, 0.08);
+  --hub-danger-tint-weak: rgba(229, 72, 77, 0.05);
+  --hub-danger-border: rgba(229, 72, 77, 0.35);
+  --hub-danger-border-soft: rgba(229, 72, 77, 0.28);
+  --hub-danger-soft: rgba(209, 36, 47, 0.08);
+}
+
+/* 暗色下的计数胶囊底色：白半透明，深色底上更可辨 */
+body[data-ds-dark-theme] {
+  --hub-bg-btn: rgba(255, 255, 255, 0.12);
+}

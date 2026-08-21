@@ -22,8 +22,9 @@ import { CatalogControls } from './CatalogControls.tsx'
 import { CatalogList } from './CatalogList.tsx'
 
 export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
-  /** 界面语言跟随宿主（系统）语言自动切换，不提供手动切换按钮 */
-  const lang: LocaleId = locale.getSnapshot().active
+  /** 界面语言：默认跟随宿主（系统）语言；右上角按钮可手动切换，切换后以手动选择为准 */
+  const [manualLang, setManualLang] = useState<LocaleId | null>(null)
+  const lang: LocaleId = manualLang ?? locale.getSnapshot().active
   const langKey: LocaleId = lang === 'en' ? 'en' : 'zh'
   // dsh-plugin.org keeps zh pages under the /zh/ prefix; en is the root.
   const langPath = langPathOf(lang)
@@ -207,6 +208,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       langPath,
       statsTotal,
       statsVerified,
+      onToggleLang: () => setManualLang(lang === 'en' ? 'zh' : 'en'),
     }),
     h(CategoryTabs, {
       category: catalog.category,

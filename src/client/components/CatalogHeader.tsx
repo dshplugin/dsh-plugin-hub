@@ -8,11 +8,12 @@ import type { Translate } from '../types.ts'
 import { GITHUB_URL, PLUGIN_VERSION, SITE_URL } from '../lib/catalog.ts'
 import { GitHubIcon, LogoIcon } from './icons.tsx'
 
-export function CatalogHeader({ t, langPath, statsTotal, statsVerified }: {
+export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggleLang }: {
   t: Translate
   langPath: string
   statsTotal: number
   statsVerified: number
+  onToggleLang: () => void
 }) {
   return h(Fragment, null,
     h('div', { className: styles.header },
@@ -32,15 +33,26 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified }: {
             h('span', { className: styles.version }, ` v${PLUGIN_VERSION}`),
           ),
         ),
-        // GitHub 源码图标：独立链接（brandTitle 是官网 <a>，不能嵌套），space-between 顶到标题行最右
-        h('a', {
-          className: styles.githubLink,
-          href: GITHUB_URL,
-          target: '_blank',
-          rel: 'noopener noreferrer',
-          title: t('githubHint'),
-          'aria-label': t('githubHint'),
-        }, h(GitHubIcon)),
+        // 右侧控件组：语言切换 + GitHub 源码图标（独立链接，brandTitle 是官网 <a> 不能嵌套），
+        // 一起 space-between 顶到标题行最右
+        h('div', { className: styles.headerRight },
+          // 语言切换：按钮文字始终显示「要切到的语言」，点击即切，无需图标
+          h('button', {
+            className: styles.langBtn,
+            type: 'button',
+            onClick: onToggleLang,
+            title: t('toggleLangHint'),
+            'aria-label': t('toggleLangHint'),
+          }, langPath === 'zh/' ? 'EN' : '中文'),
+          h('a', {
+            className: styles.githubLink,
+            href: GITHUB_URL,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            title: t('githubHint'),
+            'aria-label': t('githubHint'),
+          }, h(GitHubIcon)),
+        ),
       ),
       // 第二行：副标题仍是官网链接，点击跳 dsh-plugin.org
       h('a', {
