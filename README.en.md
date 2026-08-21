@@ -6,7 +6,7 @@
 
 # DSH-Plugin Hub for DeepSeek Harness
 
-**A community plugin marketplace for DeepSeek Harness · 4,261 DSH plugins indexed · 2,487 human-verified**
+**A community plugin marketplace for DeepSeek Harness · 4,315 DSH plugins indexed · 2,526 human-verified**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -48,7 +48,7 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 **Rich catalog · human-curated**
 
-- Indexes **4,261** community plugins, **2,487** of which are hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
+- Indexes **4,315** community plugins, **2,526** of which are hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
 - Covers UI & experience, sessions & messages, memory & context, tooling and more — browse by category or search straight to it
 - Every plugin shows its verification status (verified), star / fork ratings, version and last-update time — fully sourced
 
@@ -81,7 +81,7 @@ The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugi
 
 ## Why DSH-Plugin Hub
 
-The DSH-Plugin Hub indexes **4,261** DeepSeek Harness plugins (DSH), **2,487** of which are hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
+The DSH-Plugin Hub indexes **4,315** DeepSeek Harness plugins (DSH), **2,526** of which are hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
 
 ### Always Fresh
 
