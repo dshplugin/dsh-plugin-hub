@@ -4,7 +4,7 @@
  * carry no counts so their widths stay uniform.
  */
 import { createElement as h } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/Header.module.css'
 import type { LocaleId } from '../types.ts'
 import { CATEGORY_ORDER, CATEGORY_SHORT_LABELS, categoryLabel } from '../lib/catalog.ts'
 

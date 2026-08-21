@@ -3,7 +3,7 @@
  * by the purple ad banner that promotes the catalog stats.
  */
 import { createElement as h, Fragment } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/Header.module.css'
 import type { Translate } from '../types.ts'
 import { GITHUB_URL, PLUGIN_VERSION, SITE_URL } from '../lib/catalog.ts'
 import { GitHubIcon, LogoIcon } from './icons.tsx'

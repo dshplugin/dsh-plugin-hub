@@ -1,17 +1,17 @@
 /**
  * Toolbar above the list: search input + sort dropdown + installed / not
- * installed filter buttons + the failures entry. All buttons share the
- * same size (24px high, like the failure-record button).
+ * installed filter buttons + the notifications entry. All buttons share the
+ * same size (24px high, like the notification entry button).
  */
 import { createElement as h, Fragment } from 'react'
 import type { FormEvent } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/Header.module.css'
 import type { Translate } from '../types.ts'
 import { SORTS } from '../lib/catalog.ts'
 import type { SortKey } from '../lib/catalog.ts'
 import { Dropdown } from './Dropdown.tsx'
 
-export function CatalogControls({ query, setQuery, sort, setSort, installedFilter, setInstalledFilter, installedCount, notInstalledCount, t, resultText, failCount, onOpenFailures }: {
+export function CatalogControls({ query, setQuery, sort, setSort, installedFilter, setInstalledFilter, installedCount, notInstalledCount, t, resultText, noticeCount, onOpenNotifications }: {
   query: string
   setQuery: (value: string) => void
   sort: SortKey
@@ -22,8 +22,8 @@ export function CatalogControls({ query, setQuery, sort, setSort, installedFilte
   notInstalledCount: number
   t: Translate
   resultText: string | null
-  failCount: number
-  onOpenFailures: () => void
+  noticeCount: number
+  onOpenNotifications: () => void
 }) {
   return h(Fragment, null,
     h('div', { className: styles.searchRow },
@@ -45,11 +45,6 @@ export function CatalogControls({ query, setQuery, sort, setSort, installedFilte
           /^\d+$/.test(part)
             ? h('span', { key: i, className: styles.resultCount }, part)
             : part)) : null,
-      Dropdown<SortKey>({
-        value: sort,
-        options: SORTS.map((key) => ({ value: key, label: t(key) })),
-        onChange: setSort,
-      }),
       // 全部 / 已安装 / 未安装：互斥单选组，点击直接切换选中态，「全部」即默认恢复项；
       // 已安装/未安装计数跟随当前分类，为 0 时置灰不可点
       h('button', {
@@ -60,6 +55,12 @@ export function CatalogControls({ query, setQuery, sort, setSort, installedFilte
         title: t('filterAllHint'),
         'aria-pressed': installedFilter === 'all',
       }, t('all')),
+      // 排序下拉框：紧跟「全部」之后，按需切换排序方式
+      Dropdown<SortKey>({
+        value: sort,
+        options: SORTS.map((key) => ({ value: key, label: t(key) })),
+        onChange: setSort,
+      }),
       h('button', {
         className: installedFilter === 'installed'
           ? styles.installedBtnActive
@@ -90,13 +91,14 @@ export function CatalogControls({ query, setQuery, sort, setSort, installedFilte
         h('span', {
           className: installedFilter === 'notInstalled' ? styles.segCountActive : styles.segCount,
         }, notInstalledCount)),
-      // 失败记录入口：独立红色按钮，>0 时带红色计数徽标
+      // 通知中心入口：整行控件最右侧、贴右对齐；有任何通知时右上角悬浮红圈白字计数；
+      // 按钮文字用短文案（notificationsBtn），避免英文长标题挤占工具栏空间被截断
       h('button', {
         className: styles.failBtn,
-        onClick: onOpenFailures,
-        title: t('failuresHint'),
-        'aria-label': t('failuresHint'),
-      }, t('failures'), failCount > 0 ? h('span', { className: styles.failBadge }, failCount) : null),
+        onClick: onOpenNotifications,
+        title: t('notificationsHint'),
+        'aria-label': t('notificationsHint'),
+      }, t('notificationsBtn'), noticeCount > 0 ? h('span', { className: styles.failBadge }, noticeCount) : null),
     ),
   )
 }

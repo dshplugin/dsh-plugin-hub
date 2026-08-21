@@ -6,7 +6,7 @@
  */
 import { createElement as h } from 'react'
 import type { MouseEvent } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, TaskState, ToastState, Translate } from '../types.ts'
 import { CloseIcon, CopyIcon, LinkIcon } from './icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
@@ -59,6 +59,8 @@ export interface InstallModalProps {
   t: Translate
   langPath: string
   restarting: boolean
+  /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
+  submitting: boolean
   onClose: () => void
   onCopy: () => void
   onInstall: () => void
@@ -70,13 +72,13 @@ export interface InstallModalProps {
  * 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, onClose, onCopy, onInstall, onRestart } = props
-  const busy = task !== null && (task.status === 'pending' || task.status === 'running')
+  const { plugin, done, task, t, langPath, restarting, submitting, onClose, onCopy, onInstall, onRestart } = props
+  const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分
   const name = plugin.displayName ?? plugin.slug
   const busyTitle = (label: string) => langPath === 'zh/' ? `${name} 插件${label}` : `${label} ${name}`
   const title = busy
-    ? task!.status === 'pending' ? busyTitle(t('queuedTitle')) : busyTitle(t('installing'))
+    ? task && task.status === 'pending' ? busyTitle(t('queuedTitle')) : busyTitle(t('installing'))
     : done ? t('installResultTitle') : t('confirmTitle')
   return h('div', {
     className: styles.overlay,
@@ -88,7 +90,7 @@ export function InstallModal(props: InstallModalProps) {
       h('div', { className: styles.modalHead },
         h('div', {
           className: busy
-            ? `${styles.modalTitle} ${task!.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
+            ? `${styles.modalTitle} ${task && task.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
             : styles.modalTitle,
         }, title),
         h('button', {
@@ -149,7 +151,7 @@ export function InstallModal(props: InstallModalProps) {
               className: styles.modalInstall,
               disabled: busy,
               onClick: onInstall,
-            }, busy ? (task!.status === 'pending' ? t('queuedTitle') : t('installing')) : t('installNow')),
+            }, busy ? (task && task.status === 'pending' ? t('queuedTitle') : t('installing')) : t('installNow')),
           ),
         ),
     ),
@@ -163,6 +165,8 @@ export interface UninstallModalProps {
   t: Translate
   langPath: string
   restarting: boolean
+  /** 卸载请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
+  submitting: boolean
   onClose: () => void
   onCancel: () => void
   onCopyCommand: () => void
@@ -172,13 +176,13 @@ export interface UninstallModalProps {
 
 /** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 export function UninstallModal(props: UninstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
-  const busy = task !== null && (task.status === 'pending' || task.status === 'running')
+  const { plugin, done, task, t, langPath, restarting, submitting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
+  const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名，与安装弹窗一致，并用状态色区分
   const name = plugin.displayName ?? plugin.slug
   const busyTitle = (label: string) => langPath === 'zh/' ? `${name} 插件${label}` : `${label} ${name}`
   const title = busy
-    ? task!.status === 'pending' ? busyTitle(t('queuedUninstallTitle')) : busyTitle(t('uninstalling'))
+    ? task && task.status === 'pending' ? busyTitle(t('queuedUninstallTitle')) : busyTitle(t('uninstalling'))
     : done ? t('uninstallResultTitle') : t('uninstallTitle')
   return h('div', {
     className: styles.overlay,
@@ -246,7 +250,7 @@ export function UninstallModal(props: UninstallModalProps) {
               className: styles.uninstallConfirm,
               disabled: busy,
               onClick: onConfirm,
-            }, busy ? (task!.status === 'pending' ? t('queuedUninstallTitle') : t('uninstalling')) : t('uninstall')),
+            }, busy ? (task && task.status === 'pending' ? t('queuedUninstallTitle') : t('uninstalling')) : t('uninstall')),
           ),
         ),
     ),
@@ -261,10 +265,10 @@ export function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }: {
   kind: 'install' | 'uninstall'
   t: Translate
   env: EnvInfo | null
-  onCopy: () => void
+  onCopy: (text: string) => void
   onClose: () => void
 }) {
-  // pnpm allowBuilds 拦截等机制类失败：不是插件仓库的问题，不引导提 Issue，改给修复指引
+  // 失败归类：用官方默认安装方式装不上 = 插件仓库的问题，一律引导提 Issue
   const failureKind = classifyFailure(message)
   return h('div', {
     className: styles.overlay,
@@ -298,32 +302,33 @@ export function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }: {
               title: repo,
             }, repo) : null,
             // 复制按钮放最上面、浅灰隐蔽；报错正文不允许鼠标选择复制，只能点这里
-            h('button', { className: styles.errorCopySoft, onClick: onCopy }, t('errorCopy')),
+            h('button', { className: styles.errorCopySoft, onClick: () => onCopy(message) }, t('errorCopy')),
           ),
           // 报错信息完整展示（可滚动），比失败记录的预览看得更多
           h('pre', { className: styles.errorBox }, message),
-          // 机制类失败（宿主配置）：给出修复指引；插件问题（prepare 执行失败 / 原生依赖构建被拦）：引导一键提 Issue
-          failureKind === 'pnpmAllowBuild'
-            ? h('div', { className: styles.failAllowHint }, t('failAllowBuild'))
-            : failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
-              ? h('div', null, [
-                // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
-                h('div', { className: styles.failPrepareHint }, failureKind === 'pnpmIgnoredBuild' ? t('failIgnoredBuild') : t('failPrepareHint')),
-                repo ? h('a', {
-                  className: styles.failBigIssue,
-                  href: pluginIssueUrl(repo, message, env),
-                  target: '_blank',
-                  rel: 'noopener noreferrer',
-                  title: t('failIssueHint'),
-                }, t('failIssueBig')) : null,
-              ])
-              : repo ? h('a', {
+          // 插件问题（prepare 构建失败 / 原生依赖构建被拦截 / git 分发缺产物）：都是插件打包分发问题 —— 先说明原因，按钮在下方引导提 Issue
+          failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
+            ? h('div', null, [
+              // [packaging]（预检/装后校验拦截：git 分发缺产物，不支持官方默认安装方式）与
+              // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
+              h('div', { className: styles.failPrepareHint }, failureKind === 'pnpmIgnoredBuild'
+                ? t('failIgnoredBuild')
+                : /\[packaging\]/i.test(message) ? t('failPackagingHint') : t('failPrepareHint')),
+              repo ? h('a', {
                 className: styles.failBigIssue,
                 href: pluginIssueUrl(repo, message, env),
                 target: '_blank',
                 rel: 'noopener noreferrer',
                 title: t('failIssueHint'),
               }, t('failIssueBig')) : null,
+            ])
+            : repo ? h('a', {
+              className: styles.failBigIssue,
+              href: pluginIssueUrl(repo, message, env),
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              title: t('failIssueHint'),
+            }, t('failIssueBig')) : null,
         ),
         h('div', { className: styles.modalActions },
           h('button', { className: styles.restartLater, onClick: onClose }, t('errorClose')),

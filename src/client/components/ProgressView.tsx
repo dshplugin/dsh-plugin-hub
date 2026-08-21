@@ -5,7 +5,7 @@
  * empty for most of the run; failures surface their full output in ErrorModal.
  */
 import { createElement as h } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/Modal.module.css'
 import type { TaskState } from '../types.ts'
 
 export function ProgressView({ task }: { task: TaskState }) {

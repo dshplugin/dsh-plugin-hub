@@ -1,44 +1,50 @@
 /**
- * Persistent install/remove failure records.
+ * Persistent install/remove notifications.
  *
- * Failures are appended to localStorage the moment the backend reports them,
- * so a failed task is never lost even when the error dialog was dismissed or
- * nobody was watching the progress strip. Newest first, capped at MAX entries.
+ * Every settled task — success or failure — is appended to localStorage the
+ * moment the backend reports it, so a result is never lost even when the
+ * dialog was dismissed or nobody was watching the progress strip. Newest
+ * first, capped at MAX entries. Failures keep their full output for the
+ * issue-filing flow; successes are lightweight (no log).
  */
-export interface FailureRecord {
+export interface NotificationRecord {
   id: number
   kind: 'install' | 'uninstall'
+  /** true = 成功（轻量记录）；false = 失败（message 携带完整错误日志） */
+  ok: boolean
   /** owner/repo（可能为空：请求层失败但拿不到仓库时） */
   repo: string
+  /** 失败时的完整错误日志；成功记录为空串 */
   message: string
-  /** 失败时间（epoch ms） */
+  /** 结束时间（epoch ms） */
   at: number
 }
 
 const KEY = 'gro.ngilp-hsd.failure-records'
 const MAX = 50
 
-export type FailureKind = 'pnpmAllowBuild' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
+export type FailureKind = 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
 
 /**
- * 失败归类，四态：
- * - pnpmAllowBuild：git 插件自身 prepare 脚本被 pnpm 白名单拦截（机制：git 依赖默认禁跑
- *   prepare，宿主会解析 key 自动放行并重试）—— 所有 git 插件首次安装都会遇到，属宿主
- *   配置问题 → 给修复指引，不提 Issue
+ * 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+ * 对用户而言结果都一样 —— 用官方默认安装方式装不上，就是插件仓库的问题，一律引导提 Issue：
  * - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
  *   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
  *   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
- * - pluginPrepare：白名单放行后，插件的 prepare/构建脚本实际执行失败（git tarball 常因
- *   缺失子模块或构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
- * - repo：其余失败，默认按插件仓库问题引导提 Issue
+ * - pluginPrepare：插件的 prepare/构建脚本实际执行失败（git tarball 常因缺失子模块或
+ *   构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
+ * - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
  */
 export function classifyFailure(message: string): FailureKind {
-  // 原生模块构建被忽略（IGNORED_BUILDS）要在 allowBuilds 提示语之前判定：dsh 尾部固定提示
-  // 语永远带 allowBuilds/pnpm-workspace.yaml，不能据此把插件自身问题误判成宿主配置问题
+  // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
+  // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
+  if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
+  // 原生模块构建被忽略（IGNORED_BUILDS）要在 prepare 判定之前：dsh 尾部固定提示语带
+  // allowBuilds/pnpm-workspace.yaml，不能据此把插件自身问题误判成通用失败
   if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return 'pnpmIgnoredBuild'
   // 再判 prepare 实际执行失败：只有构建脚本真的跑挂了才是插件问题
   if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return 'pluginPrepare'
-  if (/ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED|allowBuilds|pnpm-workspace\.yaml/i.test(message)) return 'pnpmAllowBuild'
+  // 其余失败（含 git prepare 被 pnpm 白名单拦截）：官方方式装不上 = 插件仓库的问题，一律提 Issue
   return 'repo'
 }
 
@@ -93,30 +99,24 @@ export function coreErrorCode(message: string): string | null {
 const storage = (): Storage | undefined =>
   (globalThis as { localStorage?: Storage }).localStorage
 
-/** 读取本地失败记录（损坏/不可用时返回空列表，不抛错）。列表最新在前；同一仓库只保留最新一条，空 repo 无法定位插件，全部保留。 */
-export function loadFailures(): FailureRecord[] {
+/** 读取本地通知记录（损坏/不可用时返回空列表，不抛错）。列表最新在前，全部保留，只由「清空」按钮手动移除。 */
+export function loadNotifications(): NotificationRecord[] {
   try {
     const raw = storage()?.getItem(KEY)
     if (!raw) return []
     const list = JSON.parse(raw) as unknown
     if (!Array.isArray(list)) return []
-    const valid = list.filter((r): r is FailureRecord =>
-      !!r && typeof r === 'object' && typeof r.message === 'string')
-    // 兜底去重：旧数据可能已存有同仓库多条，只留最新（首次出现的）
-    const seen = new Set<string>()
-    const deduped: FailureRecord[] = []
-    for (const r of valid) {
-      if (r.repo && seen.has(r.repo)) continue
-      if (r.repo) seen.add(r.repo)
-      deduped.push(r)
-    }
-    return deduped
+    return list
+      .filter((r): r is NotificationRecord =>
+        !!r && typeof r === 'object' && typeof (r as { message?: unknown }).message === 'string')
+      // 历史失败记录没有 ok 字段：缺省按失败渲染，保证旧数据照常可查
+      .map((r) => ({ ...r, ok: r.ok === true }))
   } catch {
     return []
   }
 }
 
-function save(list: FailureRecord[]): void {
+function save(list: NotificationRecord[]): void {
   try {
     storage()?.setItem(KEY, JSON.stringify(list))
   } catch {
@@ -124,20 +124,30 @@ function save(list: FailureRecord[]): void {
   }
 }
 
-/** 追加一条失败记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。同一仓库只保留最新一次失败。 */
-export function addFailure(record: Omit<FailureRecord, 'id' | 'at'>): FailureRecord[] {
-  const prev = loadFailures()
+/** 追加一条通知记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。
+ *  每次成功/失败都各自留痕：同一插件的安装/卸载记录都完整保留、只由「清空」按钮手动移除，
+ *  不会因后续操作被自动覆盖清除。 */
+export function addNotification(record: Omit<NotificationRecord, 'id' | 'at'>): NotificationRecord[] {
+  const prev = loadNotifications()
   let id = Date.now()
   while (prev.some((r) => r.id === id)) id += 1
-  // 同一个仓库（同一插件）只保留最后一次失败：先剔除旧记录，再把新记录放到最前
-  const rest = record.repo ? prev.filter((r) => r.repo !== record.repo) : prev
-  const next = [{ ...record, id, at: id }, ...rest].slice(0, MAX)
+  const next = [{ ...record, id, at: id }, ...prev].slice(0, MAX)
   save(next)
   return next
 }
 
-/** 清空全部失败记录，返回空列表。 */
-export function clearFailures(): FailureRecord[] {
+/** 记录一次失败：携带完整错误日志，供通知中心查看/复制/提 Issue。 */
+export function addFailure(record: Omit<NotificationRecord, 'id' | 'at' | 'ok'>): NotificationRecord[] {
+  return addNotification({ ...record, ok: false })
+}
+
+/** 记录一次成功：轻量记录，不带日志。 */
+export function addSuccess(record: Omit<NotificationRecord, 'id' | 'at' | 'ok' | 'message'>): NotificationRecord[] {
+  return addNotification({ ...record, ok: true, message: '' })
+}
+
+/** 清空全部通知记录，返回空列表。 */
+export function clearNotifications(): NotificationRecord[] {
   save([])
   return []
 }

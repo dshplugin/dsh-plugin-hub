@@ -18,7 +18,7 @@ SKIP_BUILD=0
 
 # Directory of the dsh-plugin repo owning this script (used to detect a
 # file: dependency on it from the profile, and to re-sync the copied build).
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROFILE_DIR="$HOME/.dsh/profiles/$PROFILE"
 
 for arg in "$@"; do

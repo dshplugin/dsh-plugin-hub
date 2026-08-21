@@ -11,8 +11,8 @@ import { classifyFailure, coreErrorCode, summarizeError } from '../src/client/li
 
 const dshTailHint = 'dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in /Users/x/.dsh/profiles/web/pnpm-workspace.yaml, then re-run'
 
-test('classifyFailure: pure allowlist block is an install mechanism issue', () => {
-  assert.equal(classifyFailure('[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] ... not in the "allowBuilds" allowlist'), 'pnpmAllowBuild')
+test('classifyFailure: git prepare blocked by the allowlist is still the plugin repo issue (file a bug)', () => {
+  assert.equal(classifyFailure('[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] ... not in the "allowBuilds" allowlist'), 'repo')
 })
 
 test('classifyFailure: ignored native-module builds are a plugin issue, even with the host hint attached', () => {
@@ -23,8 +23,6 @@ test('classifyFailure: ignored native-module builds are a plugin issue, even wit
     '[exit 1]',
   ].join('\n')
   assert.equal(classifyFailure(msg), 'pnpmIgnoredBuild')
-  // the allowBuilds tail hint alone must not downgrade it to a host-config issue
-  assert.notEqual(classifyFailure(msg), 'pnpmAllowBuild')
 })
 
 test('classifyFailure: prepare script actually failing is a plugin issue, even with the host hint attached', () => {

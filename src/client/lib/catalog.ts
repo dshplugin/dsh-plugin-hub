@@ -53,15 +53,17 @@ export function pluginSiteUrl(repo: string): string {
  */
 export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | null): string {
   const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`
-  // 原因判定：让作者一眼知道这是不是自己插件的问题
+  // 原因判定：让作者一眼知道这是不是自己插件的问题。
+  // [packaging]（预检/装后校验拦截）单独列：点明「不支持官方默认安装方式」，并写清官方默认方式
+  // 是什么（git 直装要求仓库提交构建产物或提供 prepare 脚本），作者照此适配即可。
   const kind = classifyFailure(message)
-  const reason = kind === 'pnpmAllowBuild'
-    ? 'pnpm build-script allowlist block (host install mechanism, not the plugin)'
-    : kind === 'pluginPrepare'
-      ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
-      : kind === 'pnpmIgnoredBuild'
-        ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
-        : 'plugin-side install failure'
+  const reason = /\[packaging\]/i.test(message)
+    ? 'plugin does NOT support the official default install method (dsh plugin add github:owner/repo — requires build output committed to the repo or a prepare script); its git distribution lacks the entry file declared in package.json'
+      : kind === 'pluginPrepare'
+        ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
+        : kind === 'pnpmIgnoredBuild'
+          ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
+          : 'plugin-side install failure'
   const code = coreErrorCode(message)
   // 按给定核心摘要预算构建完整预填 URL（含 URL 编码）；预算可调，供超长时逐档缩小
   const build = (coreChars: number): string => {
@@ -70,10 +72,19 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       `- Cause: ${reason}`,
       ...(code ? [`- Key error: \`${code}\``] : []),
       '',
-      // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 复现命令，链接由常量动态拼接
+      // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的官方安装命令（含 --profile）与执行结果，链接由常量动态拼接
       `## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
       `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
-      `- 复现命令：\`dsh plugin add github:${repo}\``,
+      `- 使用的安装命令（官方默认安装方式）：\`dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add github:${repo}\``,
+      `- 执行结果：安装失败，未能安装该插件。`,
+      // [packaging] 场景：向作者说明官方默认安装方式具体是什么，请其按该方式适配（提交构建产物或提供 prepare 脚本）
+      ...(/\[packaging\]/i.test(message)
+        ? [
+          '',
+          '## 官方默认安装方式',
+          'DSH 生态的官方默认安装方式是 `dsh plugin add github:owner/repo`（git 直装）：插件仓库需提交构建产物，或在 package.json 提供 `prepare` 脚本让 pnpm 安装时自动构建。当前插件两者皆不具备，因此无法按官方方式安装。',
+        ]
+        : []),
       '',
       '## Environment',
       `- Plugin: \`${repo}\``,

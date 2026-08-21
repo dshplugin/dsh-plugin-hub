@@ -16,7 +16,7 @@ set -u
 PORT=7923
 PROFILE=web
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROFILE_DIR="$HOME/.dsh/profiles/$PROFILE"
 TARGET="$PROFILE_DIR/node_modules/dsh-plugin"
 

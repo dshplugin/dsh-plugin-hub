@@ -6,3 +6,8 @@ node_modules/
 .env
 .env.*
 coverage/
+# 构建产物：lib（server 编译输出）、client（tsdown 打包输出）每次构建整目录重建，
+# 排除后 IDE 索引（尊重 .gitignore）不再反复重扫它们。已跟踪的产物不受影响
+# （git 直装仍需提交产物）；新增的未跟踪产物文件发布时用 `git add -f lib client` 强制加入。
+lib/
+client/

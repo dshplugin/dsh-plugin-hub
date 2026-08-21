@@ -7,6 +7,7 @@
 import { createElement as h, useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import styles from '../styles/Dropdown.module.css'
+import { ChevronDownIcon } from './icons.tsx'
 
 export interface DropdownOption<T extends string> {
   value: T
@@ -55,7 +56,7 @@ export function Dropdown<T extends string>({ value, options, onChange, title }: 
       onClick: () => setOpen((v) => !v),
     },
       h('span', { className: styles.dropdownLabel }, current?.label ?? value),
-      h('span', { className: open ? styles.dropdownArrowOpen : styles.dropdownArrow }, '\u25be'),
+      h('span', { className: open ? styles.dropdownArrowOpen : styles.dropdownArrow }, h(ChevronDownIcon)),
     ),
     open && h('div', { className: styles.dropdownPanel, role: 'listbox' },
       options.map((o) => h('button', {

@@ -5,7 +5,7 @@
  * folder; only the dialogs/toast and the section-level copy actions remain.
  */
 import { createElement as h, useEffect, useState } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/Header.module.css'
 import { en, zh } from '../locales.ts'
 import type { EnvInfo, HubPlugin, LocaleId, SectionProps, ToastState } from '../types.ts'
 import { langPathOf } from '../lib/catalog.ts'
@@ -13,13 +13,12 @@ import { getEnv } from '../lib/env.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
 import { useTaskQueue } from '../hooks/useTaskQueue.ts'
 import { ErrorModal, InstallModal, UninstallModal, Toast } from './modals.tsx'
-import { FailuresModal } from './FailuresModal.tsx'
-import { addFailure, clearFailures, loadFailures } from '../lib/failures.ts'
-import type { FailureRecord } from '../lib/failures.ts'
+import { NotificationsModal } from './NotificationsModal.tsx'
+import { addFailure, addSuccess, clearNotifications, loadNotifications } from '../lib/failures.ts'
+import type { NotificationRecord } from '../lib/failures.ts'
 import { CatalogHeader } from './CatalogHeader.tsx'
 import { CategoryTabs } from './CategoryTabs.tsx'
 import { CatalogControls } from './CatalogControls.tsx'
-import { ProgressStrip } from './ProgressStrip.tsx'
 import { CatalogList } from './CatalogList.tsx'
 
 export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
@@ -55,9 +54,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [restarting, setRestarting] = useState(false)
   /** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」） */
   const [errorMsg, setErrorMsg] = useState<{ message: string; repo: string | null; kind: 'install' | 'uninstall' } | null>(null)
-  /** 安装/卸载失败记录：localStorage 持久化，失败即落盘，即使错过弹窗也能回来查看 */
-  const [failures, setFailures] = useState<FailureRecord[]>(() => loadFailures())
-  const [showFailures, setShowFailures] = useState(false)
+  /** 安装/卸载任务通知记录：localStorage 持久化，成败即落盘，即使错过弹窗也能回来查看 */
+  const [notifications, setNotifications] = useState<NotificationRecord[]>(() => loadNotifications())
+  const [showNotifications, setShowNotifications] = useState(false)
   /** 宿主机器环境快照：提交 bug 的 issue 正文附带；取不到为 null（链接少环境段，不阻塞） */
   const [env, setEnv] = useState<EnvInfo | null>(null)
   useEffect(() => {
@@ -69,12 +68,21 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const queue = useTaskQueue({
     t,
     refreshInstalled: catalog.refreshInstalled,
-    onInstallDone: (viaModal) => (viaModal ? setInstallDone(true) : setToast({ id: Date.now(), kind: 'done' })),
-    onUninstallDone: (viaModal) => (viaModal ? setUninstallDone(true) : setToast({ id: Date.now(), kind: 'removed' })),
+    onInstallDone: (viaModal, repo) => {
+      if (viaModal) setInstallDone(true)
+      else setToast({ id: Date.now(), kind: 'done' })
+      // 安装成功也写入通知记录：通知中心里成功与失败都能看到
+      setNotifications(addSuccess({ kind: 'install', repo: repo ?? '' }))
+    },
+    onUninstallDone: (viaModal, repo) => {
+      if (viaModal) setUninstallDone(true)
+      else setToast({ id: Date.now(), kind: 'removed' })
+      setNotifications(addSuccess({ kind: 'uninstall', repo: repo ?? '' }))
+    },
     onError: (message, repo, kind) => {
       setErrorMsg({ message, repo, kind })
-      // 失败自动写入「安装失败记录」：任务在后台结束时没人盯着也能留痕
-      setFailures(addFailure({ kind, repo: repo ?? '', message }))
+      // 失败自动写入通知记录：任务在后台结束时没人盯着也能留痕
+      setNotifications(addFailure({ kind, repo: repo ?? '', message }))
     },
     installPlugin: confirmPlugin,
     uninstallPlugin,
@@ -86,20 +94,20 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     },
   })
 
-  // 信任/卸载/失败记录弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
+  // 信任/卸载/通知记录弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
   useEffect(() => {
-    if (!confirmPlugin && !uninstallPlugin && !showFailures) return
+    if (!confirmPlugin && !uninstallPlugin && !showNotifications) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
         setUninstallPlugin(null)
         setUninstallDone(false)
-        setShowFailures(false)
+        setShowNotifications(false)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [confirmPlugin, uninstallPlugin, showFailures])
+  }, [confirmPlugin, uninstallPlugin, showNotifications])
 
   // Toast 统一自动消失
   useEffect(() => {
@@ -224,24 +232,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         : catalog.category === 'all' && count === total
           ? t('pluginsTotal', { n: count })
           : t('filterResults', { n: count }),
-      failCount: failures.length,
-      onOpenFailures: () => setShowFailures(true),
+      // 通知入口计数：历史通知记录数 + 进行中任务数 + 待重启数 ——
+      // 待重启不可清除，装完等重启时必须持续亮着提示「必须重启」，不能因为队列空了就归零
+      // 红圈白字数字（进行中的任务见通知中心「进行中」分区，待重启见「待重启」分区）
+      noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
+      onOpenNotifications: () => setShowNotifications(true),
     }),
-    // 进行中任务面板：弹窗内已有实时进度时不重复显示；刷新后恢复的任务同样走这里。
-    // 待重启任务常驻：装完没重启时状态条一直显示「N 个插件待重启」，直到宿主真正重启。
-    (queue.queue.length > 0 || queue.pendingRestarts.length > 0) && !confirmPlugin && !uninstallPlugin
-      ? h(ProgressStrip, {
-        queue: queue.queue,
-        pendingRestarts: queue.pendingRestarts,
-        stripSummary: queue.stripSummary,
-        showProgress: queue.showProgress,
-        setShowProgress: queue.setShowProgress,
-        cancelTask: queue.cancelTask,
-        onRestart: () => { void requestRestart() },
-        restarting,
-        t,
-      })
-      : null,
     h(CatalogList, {
       plugins: catalog.plugins,
       failed: catalog.failed,
@@ -277,6 +273,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       t,
       langPath,
       restarting,
+      submitting: queue.submitting,
       onClose: () => setConfirmPlugin(null),
       onCopy: () => copyCommand(confirmPlugin),
       onInstall: () => queue.installNow(confirmPlugin),
@@ -290,6 +287,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       t,
       langPath,
       restarting,
+      submitting: queue.submitting,
       onClose: () => {
         setUninstallDone(false)
         setUninstallPlugin(null)
@@ -307,23 +305,29 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       kind: errorMsg.kind,
       t,
       env,
-      onCopy: () => {
-        doCopy(errorMsg.message)
+      onCopy: (text: string) => {
+        doCopy(text)
         setToast({ id: Date.now(), kind: 'errCopied' })
       },
       onClose: () => setErrorMsg(null),
     }),
-    // 安装失败记录：本地持久化的失败清单，随时可回来查看/复制/清空
-    showFailures && h(FailuresModal, {
-      records: failures,
+    // 安装/卸载任务通知记录：本地持久化的成败清单，随时可回来查看/复制/清空；
+    // 进行中的任务（实时进度）与待重启插件也一并展示，关掉任务弹窗后仍可盯着
+    showNotifications && h(NotificationsModal, {
+      records: notifications,
+      tasks: queue.queue,
+      pendingRestarts: queue.pendingRestarts,
       t,
       env,
-      onClose: () => setShowFailures(false),
+      onClose: () => setShowNotifications(false),
       onCopy: (text) => {
         doCopy(text)
         setToast({ id: Date.now(), kind: 'errCopied' })
       },
-      onClear: () => setFailures(clearFailures()),
+      onClear: () => setNotifications(clearNotifications()),
+      cancelTask: queue.cancelTask,
+      restarting,
+      onRestart: () => { void requestRestart() },
     }),
   )
 }

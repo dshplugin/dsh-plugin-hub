@@ -55,31 +55,20 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			installDone: "安装成功",
 			installResultTitle: "安装完成",
 			installResultDesc: "插件已安装。",
-			installFail: "安装失败，可复制命令手动安装",
+			installFail: "安装失败",
 			confirmCancel: "取消",
 			doneBtn: "完成",
 			restartNow: "立即重启",
 			restartLater: "稍后重启",
 			restarting: "正在重启…",
 			restartHint: "部分插件（如插件市场、顶层 bundle）需重启后才会生效。",
-			runningTask: "插件操作进行中…",
-			activeTasksTitle: "有任务正在进行中",
-			taskQueueTitle: "任务队列",
-			taskQueueEmpty: "当前没有排队中的任务",
-			restartPendingTitle: "有待重启的任务",
-			restartPendingStrip: "{n} 个插件待重启",
 			restartPendingHint: "安装成功，重启后生效",
 			restartPendingHintUninstall: "卸载成功，重启后移除",
 			sectionPendingRestart: "待重启",
 			sectionInProgress: "进行中",
-			runningInstall: "插件安装进行中…",
-			runningUninstall: "插件卸载进行中…",
-			progressShow: "查看进度",
 			queuedTitle: "已加入安装排队",
 			queuedUninstallTitle: "已加入卸载排队",
 			queuedHint: "已加入排队，前序任务完成后将自动开始，可关闭本窗口继续浏览。",
-			queueMore: "另有 {n} 项排队",
-			queueWaiting: "队列中有 {n} 项任务等待执行",
 			cancelTask: "取消任务",
 			cancelling: "正在取消…",
 			errorTitle: "操作失败",
@@ -88,19 +77,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			errorPlugin: "插件",
 			errorClose: "知道了",
 			errorCopy: "复制错误信息",
-			errCopied: "错误信息已复制，可去终端排查",
-			failures: "安装失败",
-			failuresHint: "查看安装/卸载失败记录",
-			failuresDesc: "失败会自动记录在这里，即使错过错误弹窗也能随时回来查看。",
-			failuresEmpty: "暂无失败记录",
-			failuresClear: "清空记录",
+			errCopied: "错误信息已复制",
+			notifications: "通知",
+			notificationsBtn: "通知",
+			notificationsHint: "查看安装/卸载通知（含失败记录）",
+			notificationsDesc: "安装、卸载任务的成败都会记录在这里，即使错过提示也能随时回来查看。",
+			notificationsEmpty: "暂无通知记录",
+			notificationsClear: "清空通知",
 			failCopy: "复制完整错误信息",
 			failIssueHint: "带着错误日志去作者仓库一键提交 Issue（正文含官网收录链接）",
 			failIssueBig: "一键提交 BUG 到 GitHub Issue 为开源作贡献",
-			failAllowBuild: "这是 pnpm 构建脚本白名单拦截，不是插件仓库的问题。请将报错中 allowBuilds 的 key 加入当前 profile 的 pnpm-workspace.yaml（形如 owner@https://codeload.github.com/...），然后重新安装。",
-			failPrepareHint: "该插件安装时的构建脚本执行失败（git 分发常缺失子模块或构建产物），属插件打包分发问题。建议向作者仓库反馈；若作者提供 npm 版本，亦可改装 npm 版。",
+			failPrepareHint: "该插件安装时的构建脚本执行失败（git 分发常缺失子模块或构建产物），属插件打包分发问题。请向作者仓库提交 Issue 反馈。",
+			failPackagingHint: "该插件不支持官方默认安装方式：其 git 分发缺少构建产物（package.json 声明的入口文件在仓库中不存在），说明作者未适配官方安装流程。请到作者仓库提交 Issue 反馈，请其提交构建产物或发布 npm 版。",
 			failIgnoredBuild: "该插件依赖了需要编译的原生模块（如 node-pty），pnpm 默认拦截这类构建脚本导致安装失败 —— 其他插件不受影响，属该插件的依赖/打包问题。建议向作者仓库一键反馈，请作者改用预编译版本（如 node-pty-prebuilt-multiarch）。",
-			errorHint: "该错误来自插件作者提供的安装程序，与插件中心无关。可复制错误信息，或一键前往插件仓库提交 Issue。",
 			reportIssue: "去插件仓库提交 Issue",
 			detail: "打开详情",
 			noResult: "没有找到匹配的插件",
@@ -177,24 +166,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			restartLater: "Later",
 			restarting: "Restarting…",
 			restartHint: "Some plugins (such as plugin markets / top-level bundles) only take effect after a restart.",
-			runningTask: "Plugin operation in progress…",
-			activeTasksTitle: "Tasks in progress",
-			taskQueueTitle: "Task queue",
-			taskQueueEmpty: "No tasks in the queue",
-			restartPendingTitle: "Restart pending",
-			restartPendingStrip: "{n} plugin(s) awaiting restart",
 			restartPendingHint: "Installed — takes effect after restart",
 			restartPendingHintUninstall: "Removed — cleaned up after restart",
 			sectionPendingRestart: "Pending restart",
 			sectionInProgress: "In progress",
-			runningInstall: "Plugin install in progress…",
-			runningUninstall: "Plugin removal in progress…",
-			progressShow: "View progress",
 			queuedTitle: "Queued…",
 			queuedUninstallTitle: "Queued for removal…",
 			queuedHint: "Queued — starts automatically after earlier tasks finish. You may close this window.",
-			queueMore: "{n} more queued",
-			queueWaiting: "{n} tasks waiting in queue",
 			cancelTask: "Cancel task",
 			cancelling: "Cancelling…",
 			errorTitle: "Operation failed",
@@ -203,19 +181,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			errorPlugin: "Plugin",
 			errorClose: "Got it",
 			errorCopy: "Copy error",
-			errCopied: "Error copied — check it in your terminal",
-			failures: "Install failures",
-			failuresHint: "View install/remove failure records",
-			failuresDesc: "Failures are logged here automatically, even if you missed the error dialog.",
-			failuresEmpty: "No failure records yet",
-			failuresClear: "Clear records",
+			errCopied: "Error copied",
+			notifications: "Notifications",
+			notificationsBtn: "Notice",
+			notificationsHint: "View install/remove notifications (including failures)",
+			notificationsDesc: "Every install and remove result is logged here — even if you missed the prompt, you can always check back.",
+			notificationsEmpty: "No notifications yet",
+			notificationsClear: "Clear notifications",
 			failCopy: "Copy full log",
 			failIssueHint: "Open a pre-filled issue on the author repo with this error log (includes catalog links)",
 			failIssueBig: "Report this bug to GitHub — contribute to open source",
-			failAllowBuild: "This is a pnpm build-script allowlist block, not a plugin issue. Add the allowBuilds key shown in the error to your profile's pnpm-workspace.yaml (e.g. owner@https://codeload.github.com/...), then reinstall.",
-			failPrepareHint: "This plugin failed while running its build scripts during install (git tarballs often miss submodules or build output). This is a packaging issue of the plugin itself — please report it to the author repository; if an npm version is available, install that instead.",
+			failPrepareHint: "This plugin failed while running its build scripts during install (git tarballs often miss submodules or build output). This is a packaging issue of the plugin itself — please report it to the author repository.",
+			failPackagingHint: "This plugin does not support the official default install method: its git distribution lacks the build output (the entry file declared in package.json is not in the repository), so it has not been adapted to the official install flow. Please file an Issue on the author's repo asking for committed build output or an npm release.",
 			failIgnoredBuild: "This plugin depends on a native module (e.g. node-pty) whose build script pnpm blocks by default, so the install fails — other plugins are unaffected. This is a dependency/packaging issue of the plugin itself. Please report it to the author repository and ask the author to switch to a prebuilt variant (e.g. node-pty-prebuilt-multiarch).",
-			errorHint: "This error comes from the plugin author's installer, not the Plugin Hub. Copy it or report it to the plugin repository.",
 			reportIssue: "Report an Issue to the plugin repo",
 			detail: "Open details",
 			noResult: "No plugins match your search",
@@ -237,188 +215,68 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			dataFrom: "Data from dsh-plugin.org · curated daily"
 		};
 		//#endregion
-		//#region \0dsh-css:src/client/styles/Section.module.css.mjs
-		const css$1 = ".p2YUJW_root{--dsw-alias-brand-primary:var(--dsw-alias-state-business-primary,#4f6ef7);min-width:0;height:100%;color:var(--dsw-alias-label-primary,#1f2328);flex-direction:column;gap:8px;display:flex}.p2YUJW_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.p2YUJW_githubLink{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.p2YUJW_githubLink:hover{color:#4f46e5;background-color:#4f46e514}.p2YUJW_githubIcon{flex-shrink:0;display:block}.p2YUJW_headerTitleRow{justify-content:space-between;align-items:center;gap:8px;min-width:0;display:flex}.p2YUJW_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.p2YUJW_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.p2YUJW_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.p2YUJW_version{color:var(--dsw-alias-label-secondary,#6b7280)}.p2YUJW_logoIcon{flex-shrink:0;display:block}.p2YUJW_copyIcon{flex-shrink:0}.p2YUJW_tagline{color:var(--dsw-alias-label-tertiary,#8b93a1);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.p2YUJW_controls{flex-shrink:0;align-items:center;gap:8px;display:flex}.p2YUJW_filterResults{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.p2YUJW_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.p2YUJW_adBanner{color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;background:linear-gradient(90deg,#4f46e5 0%,#7c3aed 100%);border:1px solid #8b5cf68c;border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex;box-shadow:0 2px 10px #4f46e547}.p2YUJW_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px #7c3aed6b}.p2YUJW_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.p2YUJW_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.p2YUJW_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.p2YUJW_searchRow{padding:0 2px;display:flex}.p2YUJW_search{width:100%;color:inherit;border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.p2YUJW_search::placeholder{color:var(--dsw-alias-label-tertiary,#8b93a1)}.p2YUJW_search:focus{border-color:var(--dsw-alias-brand-primary,#4f6ef7)}.p2YUJW_installedBtn,.p2YUJW_installedBtnActive,.p2YUJW_installedBtnDisabled{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.p2YUJW_installedBtn{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014)}.p2YUJW_installedBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#8080802e)}.p2YUJW_installedBtnDisabled,.p2YUJW_installedBtnDisabled:hover{color:var(--dsw-alias-label-disabled,#aab1bd);background:var(--dsw-alias-bg-layer-1,#80808008);border-color:var(--dsw-alias-border-l1,#eceef1);cursor:not-allowed}.p2YUJW_installedBtnDisabled .p2YUJW_segCount{color:var(--dsw-alias-label-disabled,#aab1bd);background:#8080800f}.p2YUJW_installedBtnActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);border-color:var(--dsw-alias-button-primary-fill,#1f2328)}.p2YUJW_segCount,.p2YUJW_segCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 5px;font-size:10px;line-height:14px}.p2YUJW_segCount{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a)}.p2YUJW_installedBtnActive .p2YUJW_segCountActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}.p2YUJW_tabs{border-bottom:1px solid var(--dsw-alias-border-l1,#eceef1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.p2YUJW_tab,.p2YUJW_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.p2YUJW_tab{color:var(--dsw-alias-label-secondary,#6b7280);border-color:var(--dsw-alias-border-l2,#e5e7eb);background:0 0}.p2YUJW_tab:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-border-l1,#eceef1)}.p2YUJW_tabActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);border-color:var(--dsw-alias-button-primary-fill,#1f2328)}.p2YUJW_tabCount{text-align:center;min-width:16px;color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.p2YUJW_tabActive .p2YUJW_tabCount{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}.p2YUJW_body{flex-direction:column;flex:1;min-height:0;display:flex}.p2YUJW_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}.p2YUJW_card{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-1,#8080800f);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}.p2YUJW_card:hover{border-color:var(--dsw-alias-brand-primary,#4f6ef7);background:var(--dsw-alias-bg-layer-2,#8080801a)}.p2YUJW_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}.p2YUJW_cardHead{align-items:center;gap:6px;min-width:0;display:flex}.p2YUJW_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}.p2YUJW_categoryBadge,.p2YUJW_verified,.p2YUJW_versionBadge,.p2YUJW_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}.p2YUJW_categoryBadge{color:var(--dsw-alias-brand-primary,#4f6ef7);border-color:var(--dsw-alias-button-ghost-active-border,#4f6ef740)}.p2YUJW_verified{color:var(--dsw-alias-state-success-primary,#1a7f37);border-color:var(--dsw-alias-state-success-secondary,#1a7f374d)}.p2YUJW_versionBadge{color:var(--dsw-alias-label-secondary,#6b7280);border-color:var(--dsw-alias-input-border,#6b728040)}.p2YUJW_updateBadge{color:var(--dsw-alias-state-warn-primary,#b8860b);border-color:var(--dsw-alias-state-warn-secondary,#b8860b59);background:var(--dsw-alias-state-warn-secondary,#b8860b14)}.p2YUJW_desc{color:var(--dsw-alias-label-secondary,#6b7280);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.p2YUJW_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}.p2YUJW_topic{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}.p2YUJW_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}.p2YUJW_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}.p2YUJW_star{color:var(--dsw-alias-state-warn-primary,#b8860b);white-space:nowrap;font-size:11px;line-height:16px}.p2YUJW_fork{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;font-size:11px;line-height:16px}.p2YUJW_date{color:var(--dsw-alias-label-tertiary,#8b93a1);white-space:nowrap;font-size:10px;line-height:14px}.p2YUJW_installBtn,.p2YUJW_installBtnCopied,.p2YUJW_installBtnInstalled,.p2YUJW_installBtnUpdate,.p2YUJW_uninstallBtn,.p2YUJW_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_installBtnInstalled{color:var(--dsw-alias-state-success-primary,#1a7f37);border:1px solid var(--dsw-alias-state-success-secondary,#1a7f3759);cursor:default;-webkit-user-select:none;user-select:none;background:#22c55e1f}.p2YUJW_installBtnUpdate{color:#fff;background:var(--dsw-alias-state-warn-primary,#b8860b);-webkit-user-select:none;user-select:none;border:1px solid #0000;font-weight:500}.p2YUJW_installBtnUpdate:hover{background:var(--dsw-alias-state-warn-secondary,#b8860bd9)}.p2YUJW_uninstallBtn{color:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-secondary,#d1242f66);-webkit-user-select:none;user-select:none;background:0 0}.p2YUJW_uninstallBtn:hover{border-color:var(--dsw-alias-state-danger-primary,#d1242f);background:#d1242f14}.p2YUJW_installBtn{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);-webkit-user-select:none;user-select:none;border:1px solid #0000;font-weight:500}.p2YUJW_installBtn:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_detailBtn{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);-webkit-user-select:none;user-select:none;background:0 0;align-items:center;text-decoration:none;display:inline-flex}.p2YUJW_detailBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_actions{align-items:center;gap:6px;display:flex}.p2YUJW_installBtnCopied{color:var(--dsw-alias-state-success-primary,#1a7f37);border:1px solid var(--dsw-alias-state-success-secondary,#1a7f3766);-webkit-user-select:none;user-select:none;background:#22c55e24}.p2YUJW_toast{z-index:1000;background:var(--dsw-alias-button-primary-fill,#1f2328);color:var(--dsw-alias-label-primary-foreground,#fff);pointer-events:none;white-space:nowrap;border:1px solid #0000;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out p2YUJW_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes p2YUJW_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.p2YUJW_toastFail{color:#fff;background:#d1242f;border-color:#ffffff3d}.p2YUJW_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out p2YUJW_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.p2YUJW_modal,.p2YUJW_errorModal{background:var(--dsw-alias-bg-layer-1,#fff);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out p2YUJW_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.p2YUJW_errorModal{width:640px;max-width:calc(100vw - 48px)}.p2YUJW_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.p2YUJW_modalTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:14px;font-weight:600;line-height:20px}.p2YUJW_modalTitleBusy{color:var(--dsw-alias-state-business-primary,#4f6ef7)}.p2YUJW_modalTitleQueued{color:var(--dsw-alias-state-warning-primary,#b45309)}.p2YUJW_modalClose{width:24px;height:24px;color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.p2YUJW_modalClose:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#8080801a)}.p2YUJW_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.p2YUJW_modalDesc{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:18px}.p2YUJW_trustHint{color:var(--dsw-alias-danger,#e5484d);background:#e5484d14;border:1px solid #e5484d47;border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.p2YUJW_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.p2YUJW_modalLabel{min-width:64px;color:var(--dsw-alias-label-tertiary,#8b93a1);flex-shrink:0}.p2YUJW_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-label-primary,#1f2328);font-weight:500;overflow:hidden}.p2YUJW_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.p2YUJW_modalLink:hover{color:#3b5bdb;text-decoration:underline}.p2YUJW_linkIcon{flex-shrink:0}.p2YUJW_modalCmd{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.p2YUJW_modalCmd:hover{border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da);background:#8080801a}.p2YUJW_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.p2YUJW_modalCmdCopy{color:var(--dsw-alias-brand-primary,#4f6ef7);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,border-color .12s,background .12s;display:inline-flex}.p2YUJW_modalCmdCopy:hover{color:#3b5bdb;border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da);background:#8080800f}.p2YUJW_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.p2YUJW_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.p2YUJW_progressStrip{background:#4f6ef70f;border:1px solid #4f6ef759;border-radius:6px;flex-direction:column;align-items:stretch;display:flex;overflow:hidden}.p2YUJW_progressStripMain{min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;flex:1;align-items:center;gap:8px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,color .12s;display:flex}.p2YUJW_progressStripMain:hover{color:#3b5bdb;background:#4f6ef714}.p2YUJW_progressStripDot{background:var(--dsw-alias-brand-primary,#4f6ef7);border-radius:50%;flex-shrink:0;width:8px;height:8px;animation:1.1s ease-in-out infinite p2YUJW_progressPulse}@keyframes p2YUJW_progressPulse{0%,to{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}.p2YUJW_progressStripText{text-overflow:ellipsis;white-space:nowrap;text-align:left;flex:1;min-width:0;overflow:hidden}.p2YUJW_progressStripToggle{color:var(--dsw-alias-brand-primary,#4f6ef7);flex-shrink:0}.p2YUJW_queueModalList,.p2YUJW_queueSection{flex-direction:column;gap:6px;display:flex}.p2YUJW_queueSectionTitle{color:var(--dsw-alias-label-secondary,#6b7280);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.p2YUJW_pendingRowStatus{color:var(--dsw-alias-state-warn-primary,#b8860b);flex-shrink:0;font-weight:500}.p2YUJW_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.p2YUJW_queueRow{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-2,#8080800d);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.p2YUJW_queueRow:hover{background:#4f6ef70d}.p2YUJW_queueRowHead{align-items:center;gap:10px;display:flex}.p2YUJW_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-label-primary,#1f2328);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.p2YUJW_queueRowDesc{color:var(--dsw-alias-label-tertiary,#8b93a1);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.p2YUJW_queueRowBody{align-items:center;gap:8px;display:flex}.p2YUJW_queueRowStatus{color:var(--dsw-alias-brand-primary,#4f6ef7);flex-shrink:0;font-weight:500}.p2YUJW_queueRowTrack{flex:1;min-width:0}.p2YUJW_queueRowPct{color:var(--dsw-alias-label-tertiary,#8b93a1);font-variant-numeric:tabular-nums;flex-shrink:0}.p2YUJW_stripCancel{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,border-color .12s,color .12s}.p2YUJW_stripCancel:hover{color:#e5484d;background:#e5484d14;border-color:#e5484d66}.p2YUJW_stripCancel:disabled{opacity:.45;cursor:default}.p2YUJW_queuedHint{color:var(--dsw-alias-brand-primary,#4f6ef7);background:#4f6ef70f;border:1px solid #4f6ef738;border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.p2YUJW_errorTitle{color:#e5484d;font-size:14px;font-weight:600;line-height:20px}.p2YUJW_errorBox{max-height:240px;color:var(--dsw-alias-label-primary,#1f2328);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;background:#e5484d0d;border:1px solid #e5484d59;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.p2YUJW_errorPlugin{color:var(--dsw-alias-label-primary,#1f2328);text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;font-weight:600;line-height:18px;overflow:hidden}.p2YUJW_errorCopySoft{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.p2YUJW_errorCopySoft:hover{color:var(--dsw-alias-label-secondary,#6b7280);background:#80808014}.p2YUJW_errorHint{color:var(--dsw-alias-label-tertiary,#8b93a1);font-size:12px;line-height:18px}.p2YUJW_reportBtn{color:var(--dsw-alias-brand-primary,#4f6ef7);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;align-items:center;padding:5px 14px;font-size:12px;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s;display:inline-flex}.p2YUJW_reportBtn:hover{background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_modalCancel,.p2YUJW_modalCopy{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_modalCancel:hover,.p2YUJW_modalCopy:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014)}.p2YUJW_modalConfirm,.p2YUJW_modalInstall{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_modalConfirm:hover,.p2YUJW_modalInstall:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_modalCopy:disabled,.p2YUJW_modalInstall:disabled,.p2YUJW_modalCancel:disabled,.p2YUJW_modalClose:disabled,.p2YUJW_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.p2YUJW_uninstallConfirm{color:#fff;background:var(--dsw-alias-state-danger-primary,#d1242f);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_uninstallConfirm:hover{background:var(--dsw-alias-state-danger-hover,#b91c1c)}.p2YUJW_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.p2YUJW_resultCheck{width:40px;height:40px;color:var(--dsw-alias-state-success-primary,#1a7f37);background:#22c55e24;border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.p2YUJW_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.p2YUJW_resultTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;font-weight:600;line-height:20px}.p2YUJW_resultDesc{color:var(--dsw-alias-label-secondary,#6b7280);font-size:12px;line-height:18px}.p2YUJW_resultRestarting{color:var(--dsw-alias-label-tertiary,#8b93a1);padding:12px 0 6px;font-size:12px;line-height:18px}.p2YUJW_restartLater{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,border-color .12s,background .12s}.p2YUJW_restartLater:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014)}.p2YUJW_restartNow{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.p2YUJW_restartNow:hover{background:var(--dsw-alias-button-primary-hover,#43454a)}.p2YUJW_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.p2YUJW_result .p2YUJW_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.p2YUJW_result .p2YUJW_modalActions .p2YUJW_restartLater,.p2YUJW_result .p2YUJW_modalActions .p2YUJW_restartNow{min-width:100px}.p2YUJW_progress{margin:10px 0 2px}.p2YUJW_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.p2YUJW_progressText{color:var(--dsw-alias-label-secondary,#6b7280);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.p2YUJW_progressTrack{background:var(--dsw-alias-border-l2,#e5e7eb);border-radius:2px;height:4px;overflow:hidden}.p2YUJW_progressFill{background:var(--dsw-alias-brand-primary,#4f6ef7);border-radius:2px;height:100%;transition:width .32s}.p2YUJW_progressFillFail{background:var(--dsw-alias-state-danger-primary,#d1242f)}@keyframes p2YUJW_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes p2YUJW_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.p2YUJW_failBtn{color:#fff;background:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-primary,#d1242f);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:background .12s,border-color .12s;display:inline-flex}.p2YUJW_failBtn:hover{background:#b0202a;border-color:#b0202a}.p2YUJW_failBadge{text-align:center;min-width:16px;height:16px;color:var(--dsw-alias-state-danger-primary,#d1242f);background:#fff;border-radius:999px;flex-shrink:0;padding:0 5px;font-size:10px;line-height:16px}.p2YUJW_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.p2YUJW_failRow{border:1px solid var(--dsw-alias-border-l2,#e5e7eb);background:var(--dsw-alias-bg-layer-2,#8080800d);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.p2YUJW_failHead{align-items:center;gap:8px;min-width:0;display:flex}.p2YUJW_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.p2YUJW_failKindInstall{color:#e5484d;background:#e5484d14;border-color:#e5484d59}.p2YUJW_failKindUninstall{color:#b8860b;background:#b8860b14;border-color:#b8860b59}.p2YUJW_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--dsw-alias-brand-primary,#4f6ef7);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.p2YUJW_failRepo:hover{text-decoration:underline}.p2YUJW_failTime{color:var(--dsw-alias-label-tertiary,#8b93a1);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.p2YUJW_failCopy{color:var(--dsw-alias-label-tertiary,#8b93a1);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.p2YUJW_failCopy:hover{color:var(--dsw-alias-label-secondary,#6b7280);background:#80808014}.p2YUJW_failEmpty{text-align:center;color:var(--dsw-alias-label-tertiary,#8b93a1);padding:24px 0;font-size:12px;line-height:18px}.p2YUJW_failMsg{max-height:96px;color:var(--dsw-alias-label-secondary,#6b7280);background:var(--dsw-alias-bg-layer-2,#8080800d);border:1px solid var(--dsw-alias-border-l1,#0000000f);white-space:pre-wrap;word-break:break-word;border-radius:6px;margin:0;padding:6px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;overflow-y:auto}.p2YUJW_failClear{color:var(--dsw-alias-state-danger-primary,#d1242f);border:1px solid var(--dsw-alias-state-danger-secondary,#d1242f66);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:background .12s,border-color .12s}.p2YUJW_failClear:hover{border-color:var(--dsw-alias-state-danger-primary,#d1242f);background:#d1242f14}.p2YUJW_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;background:#e5484d;border:1px solid #e5484d;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.p2YUJW_failBigIssue:hover{background:var(--dsw-alias-state-danger-primary,#d1242f);border-color:var(--dsw-alias-state-danger-primary,#d1242f);box-shadow:0 3px 10px #d1242f59}.p2YUJW_failAllowHint{color:var(--dsw-alias-state-warning-primary,#b45309);background:#b4530914;border:1px solid #b453094d;border-radius:6px;margin-top:4px;padding:8px 12px;font-size:12px;line-height:18px}.p2YUJW_failPrepareHint{color:var(--dsw-alias-state-warning-primary,#b45309);background:#b4530914;border:1px solid #b453094d;border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}.p2YUJW_state{text-align:center;min-height:160px;color:var(--dsw-alias-label-tertiary,#8b93a1);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}.p2YUJW_stateTitle{color:var(--dsw-alias-label-primary,#1f2328);font-size:13px;font-weight:600}.p2YUJW_stateDesc{max-width:420px}.p2YUJW_retryBtn{color:var(--dsw-alias-label-secondary,#6b7280);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;margin-top:4px;padding:4px 12px;font-size:12px;line-height:18px}.p2YUJW_retryBtn:hover{color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-interactive-bg-hover,#80808014);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.p2YUJW_footer{border-top:1px solid var(--dsw-alias-border-l1,#eceef1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}.p2YUJW_footLink{color:var(--dsw-alias-brand-primary,#4f6ef7);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}.p2YUJW_footLink:hover{text-decoration:underline}";
-		const tagId$1 = "dsh-plugin/Section.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
+		//#region \0dsh-css:src/client/styles/Header.module.css.mjs
+		const css$4 = ".qikqja_root{min-width:0;height:100%;color:var(--hub-text-primary);flex-direction:column;gap:8px;display:flex}.qikqja_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.qikqja_githubLink{color:var(--hub-text-tertiary);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_githubLink:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubIcon{flex-shrink:0;display:block}.qikqja_headerTitleRow{justify-content:space-between;align-items:center;gap:8px;min-width:0;display:flex}.qikqja_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.qikqja_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.qikqja_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.qikqja_version{color:var(--hub-text-secondary)}.qikqja_logoIcon{flex-shrink:0;display:block}.qikqja_copyIcon{flex-shrink:0}.qikqja_tagline{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}.qikqja_controls{flex-shrink:0;align-items:center;gap:8px;display:flex}.qikqja_filterResults{color:var(--hub-text-tertiary);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.qikqja_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.qikqja_adBanner{border:1px solid var(--hub-purple-border);background:linear-gradient(90deg, var(--hub-purple-1) 0%, var(--hub-purple-2) 100%);color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;box-shadow:0 2px 10px var(--hub-purple-shadow);border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex}.qikqja_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px var(--hub-purple-shadow-strong)}.qikqja_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.qikqja_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.qikqja_searchRow{padding:0 2px;display:flex}.qikqja_search{width:50%;color:inherit;border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.qikqja_search::placeholder{color:var(--hub-text-tertiary)}.qikqja_search:focus{border-color:var(--hub-brand)}.qikqja_installedBtn,.qikqja_installedBtnActive,.qikqja_installedBtnDisabled{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex}.qikqja_installedBtn{color:var(--hub-text-primary);background:0 0}.qikqja_installedBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_installedBtnDisabled,.qikqja_installedBtnDisabled:hover{color:var(--hub-text-disabled);cursor:not-allowed;background:0 0}.qikqja_installedBtnDisabled .qikqja_segCount{color:var(--hub-text-disabled);background:#8080800f}.qikqja_installedBtnActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_segCount,.qikqja_segCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_segCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.qikqja_installedBtnActive .qikqja_segCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_tabs{border-bottom:1px solid var(--hub-border-1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.qikqja_tab,.qikqja_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s;display:inline-flex}.qikqja_tab{color:var(--hub-text-secondary);background:0 0}.qikqja_tab:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_tabActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_tabCount{text-align:center;min-width:16px;color:var(--hub-text-tertiary);background:var(--hub-bg-btn);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_tabActive .qikqja_tabCount{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_failBtn{box-sizing:border-box;border:1px solid var(--hub-border-2);height:24px;color:var(--hub-text-primary);background:var(--hub-bg-hover);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;margin-left:auto;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex;position:relative}.qikqja_failBtn:hover{color:var(--hub-text-primary);background:#80808047}.qikqja_failBadge{z-index:1;text-align:center;color:#fff;background:var(--hub-danger);border-radius:999px;min-width:16px;height:16px;padding:0 5px;font-size:10px;font-weight:600;line-height:16px;position:absolute;top:-16px;right:-7px;box-shadow:0 1px 4px #d1242f66}";
+		const tagId$4 = "dsh-plugin/Header.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$4) + "]") === null) {
 			const tag = document.createElement("style");
 			tag.dataset.plugin = "dsh-plugin";
-			tag.dataset.pluginCss = tagId$1;
-			tag.textContent = css$1;
+			tag.dataset.pluginCss = tagId$4;
+			tag.textContent = css$4;
 			document.head.appendChild(tag);
 		}
-		var Section_module_css_default = {
-			"modalHead": "p2YUJW_modalHead",
-			"trustHint": "p2YUJW_trustHint",
-			"installBtnCopied": "p2YUJW_installBtnCopied",
-			"queuedHint": "p2YUJW_queuedHint",
-			"pendingRowActions": "p2YUJW_pendingRowActions",
-			"title": "p2YUJW_title",
-			"modalCancel": "p2YUJW_modalCancel",
-			"tabs": "p2YUJW_tabs",
-			"installBtn": "p2YUJW_installBtn",
-			"cardHead": "p2YUJW_cardHead",
-			"root": "p2YUJW_root",
-			"body": "p2YUJW_body",
-			"headerTitleRow": "p2YUJW_headerTitleRow",
-			"failList": "p2YUJW_failList",
-			"modalRow": "p2YUJW_modalRow",
-			"failRepo": "p2YUJW_failRepo",
-			"taglineLink": "p2YUJW_taglineLink",
-			"tabActive": "p2YUJW_tabActive",
-			"queueRow": "p2YUJW_queueRow",
-			"topic": "p2YUJW_topic",
-			"tabCount": "p2YUJW_tabCount",
-			"failBigIssue": "p2YUJW_failBigIssue",
-			"failCopy": "p2YUJW_failCopy",
-			"queueSectionTitle": "p2YUJW_queueSectionTitle",
-			"installBtnUpdate": "p2YUJW_installBtnUpdate",
-			"resultCheckIcon": "p2YUJW_resultCheckIcon",
-			"search": "p2YUJW_search",
-			"overlayIn": "p2YUJW_overlayIn",
-			"overlay": "p2YUJW_overlay",
-			"footLink": "p2YUJW_footLink",
-			"footer": "p2YUJW_footer",
-			"errorCopySoft": "p2YUJW_errorCopySoft",
-			"githubLink": "p2YUJW_githubLink",
-			"resultRestarting": "p2YUJW_resultRestarting",
-			"progressStrip": "p2YUJW_progressStrip",
-			"restartLater": "p2YUJW_restartLater",
-			"modalClose": "p2YUJW_modalClose",
-			"queueSection": "p2YUJW_queueSection",
-			"adArrow": "p2YUJW_adArrow",
-			"stateDesc": "p2YUJW_stateDesc",
-			"modalDesc": "p2YUJW_modalDesc",
-			"resultCheck": "p2YUJW_resultCheck",
-			"card": "p2YUJW_card",
-			"cardMain": "p2YUJW_cardMain",
-			"verified": "p2YUJW_verified",
-			"modalConfirm": "p2YUJW_modalConfirm",
-			"toast": "p2YUJW_toast",
-			"detailBtn": "p2YUJW_detailBtn",
-			"modalLink": "p2YUJW_modalLink",
-			"resultTitle": "p2YUJW_resultTitle",
-			"progressFillFail": "p2YUJW_progressFillFail",
-			"failRow": "p2YUJW_failRow",
-			"resultCount": "p2YUJW_resultCount",
-			"installedBtnActive": "p2YUJW_installedBtnActive",
-			"queueModalList": "p2YUJW_queueModalList",
-			"uninstallBtn": "p2YUJW_uninstallBtn",
-			"queueRowDesc": "p2YUJW_queueRowDesc",
-			"segCount": "p2YUJW_segCount",
-			"failClear": "p2YUJW_failClear",
-			"adText": "p2YUJW_adText",
-			"toastFail": "p2YUJW_toastFail",
-			"modalCmdText": "p2YUJW_modalCmdText",
-			"progressHead": "p2YUJW_progressHead",
-			"retryBtn": "p2YUJW_retryBtn",
-			"modalInstall": "p2YUJW_modalInstall",
-			"failBadge": "p2YUJW_failBadge",
-			"progressStripDot": "p2YUJW_progressStripDot",
-			"errorHint": "p2YUJW_errorHint",
-			"desc": "p2YUJW_desc",
-			"header": "p2YUJW_header",
-			"progressTrack": "p2YUJW_progressTrack",
-			"progressStripMain": "p2YUJW_progressStripMain",
-			"modalCloseIcon": "p2YUJW_modalCloseIcon",
-			"reportBtn": "p2YUJW_reportBtn",
-			"queueRowTrack": "p2YUJW_queueRowTrack",
-			"result": "p2YUJW_result",
-			"queueRowPct": "p2YUJW_queueRowPct",
-			"modalBody": "p2YUJW_modalBody",
-			"progressPulse": "p2YUJW_progressPulse",
-			"versionBadge": "p2YUJW_versionBadge",
-			"modalValue": "p2YUJW_modalValue",
-			"tab": "p2YUJW_tab",
-			"resultDesc": "p2YUJW_resultDesc",
-			"failKindInstall": "p2YUJW_failKindInstall",
-			"toastIn": "p2YUJW_toastIn",
-			"modalCmdCopy": "p2YUJW_modalCmdCopy",
-			"failBtn": "p2YUJW_failBtn",
-			"errorModal": "p2YUJW_errorModal",
-			"modalLabel": "p2YUJW_modalLabel",
-			"restartNow": "p2YUJW_restartNow",
-			"errorTitle": "p2YUJW_errorTitle",
-			"modalIn": "p2YUJW_modalIn",
-			"githubIcon": "p2YUJW_githubIcon",
-			"queueRowStatus": "p2YUJW_queueRowStatus",
-			"stateTitle": "p2YUJW_stateTitle",
-			"installedBtn": "p2YUJW_installedBtn",
-			"modal": "p2YUJW_modal",
-			"modalTitle": "p2YUJW_modalTitle",
-			"progressStripToggle": "p2YUJW_progressStripToggle",
-			"errorBox": "p2YUJW_errorBox",
-			"errorPlugin": "p2YUJW_errorPlugin",
-			"failKind": "p2YUJW_failKind",
-			"failAllowHint": "p2YUJW_failAllowHint",
-			"filterResults": "p2YUJW_filterResults",
-			"stripCancel": "p2YUJW_stripCancel",
-			"failHead": "p2YUJW_failHead",
-			"categoryBadge": "p2YUJW_categoryBadge",
-			"failPrepareHint": "p2YUJW_failPrepareHint",
-			"modalTitleBusy": "p2YUJW_modalTitleBusy",
-			"brandTitle": "p2YUJW_brandTitle",
-			"installBtnInstalled": "p2YUJW_installBtnInstalled",
-			"actions": "p2YUJW_actions",
-			"state": "p2YUJW_state",
-			"modalTitleQueued": "p2YUJW_modalTitleQueued",
-			"copyIcon": "p2YUJW_copyIcon",
-			"failTime": "p2YUJW_failTime",
-			"pendingRowStatus": "p2YUJW_pendingRowStatus",
-			"adBadge": "p2YUJW_adBadge",
-			"cardSide": "p2YUJW_cardSide",
-			"modalActions": "p2YUJW_modalActions",
-			"failKindUninstall": "p2YUJW_failKindUninstall",
-			"adBanner": "p2YUJW_adBanner",
-			"star": "p2YUJW_star",
-			"queueRowBody": "p2YUJW_queueRowBody",
-			"queueRowHead": "p2YUJW_queueRowHead",
-			"uninstallConfirm": "p2YUJW_uninstallConfirm",
-			"failEmpty": "p2YUJW_failEmpty",
-			"failMsg": "p2YUJW_failMsg",
-			"progressFill": "p2YUJW_progressFill",
-			"segCountActive": "p2YUJW_segCountActive",
-			"installedBtnDisabled": "p2YUJW_installedBtnDisabled",
-			"fork": "p2YUJW_fork",
-			"queueRowTarget": "p2YUJW_queueRowTarget",
-			"stats": "p2YUJW_stats",
-			"searchRow": "p2YUJW_searchRow",
-			"date": "p2YUJW_date",
-			"progressText": "p2YUJW_progressText",
-			"modalCopy": "p2YUJW_modalCopy",
-			"version": "p2YUJW_version",
-			"tagline": "p2YUJW_tagline",
-			"progressStripText": "p2YUJW_progressStripText",
-			"logoIcon": "p2YUJW_logoIcon",
-			"controls": "p2YUJW_controls",
-			"updateBadge": "p2YUJW_updateBadge",
-			"list": "p2YUJW_list",
-			"progress": "p2YUJW_progress",
-			"cardTitle": "p2YUJW_cardTitle",
-			"topics": "p2YUJW_topics",
-			"linkIcon": "p2YUJW_linkIcon",
-			"modalCmd": "p2YUJW_modalCmd"
+		var Header_module_css_default = {
+			"taglineLink": "qikqja_taglineLink",
+			"copyIcon": "qikqja_copyIcon",
+			"adBanner": "qikqja_adBanner",
+			"adText": "qikqja_adText",
+			"segCount": "qikqja_segCount",
+			"header": "qikqja_header",
+			"controls": "qikqja_controls",
+			"segCountActive": "qikqja_segCountActive",
+			"failBadge": "qikqja_failBadge",
+			"tabCount": "qikqja_tabCount",
+			"installedBtnActive": "qikqja_installedBtnActive",
+			"title": "qikqja_title",
+			"tagline": "qikqja_tagline",
+			"installedBtnDisabled": "qikqja_installedBtnDisabled",
+			"tabs": "qikqja_tabs",
+			"adArrow": "qikqja_adArrow",
+			"githubLink": "qikqja_githubLink",
+			"logoIcon": "qikqja_logoIcon",
+			"searchRow": "qikqja_searchRow",
+			"filterResults": "qikqja_filterResults",
+			"failBtn": "qikqja_failBtn",
+			"root": "qikqja_root",
+			"headerTitleRow": "qikqja_headerTitleRow",
+			"resultCount": "qikqja_resultCount",
+			"tab": "qikqja_tab",
+			"brandTitle": "qikqja_brandTitle",
+			"version": "qikqja_version",
+			"adBadge": "qikqja_adBadge",
+			"search": "qikqja_search",
+			"tabActive": "qikqja_tabActive",
+			"githubIcon": "qikqja_githubIcon",
+			"installedBtn": "qikqja_installedBtn"
 		};
 		//#endregion
 		//#region src/client/lib/failures.ts
 		const KEY = "gro.ngilp-hsd.failure-records";
 		const MAX = 50;
 		/**
-		* 失败归类，四态：
-		* - pnpmAllowBuild：git 插件自身 prepare 脚本被 pnpm 白名单拦截（机制：git 依赖默认禁跑
-		*   prepare，宿主会解析 key 自动放行并重试）—— 所有 git 插件首次安装都会遇到，属宿主
-		*   配置问题 → 给修复指引，不提 Issue
+		* 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+		* 对用户而言结果都一样 —— 用官方默认安装方式装不上，就是插件仓库的问题，一律引导提 Issue：
 		* - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
 		*   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
 		*   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
-		* - pluginPrepare：白名单放行后，插件的 prepare/构建脚本实际执行失败（git tarball 常因
-		*   缺失子模块或构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
-		* - repo：其余失败，默认按插件仓库问题引导提 Issue
+		* - pluginPrepare：插件的 prepare/构建脚本实际执行失败（git tarball 常因缺失子模块或
+		*   构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
+		* - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
 		*/
 		function classifyFailure(message) {
+			if (/\[packaging\]|entry file missing/i.test(message)) return "pluginPrepare";
 			if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return "pnpmIgnoredBuild";
 			if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return "pluginPrepare";
-			if (/ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED|allowBuilds|pnpm-workspace\.yaml/i.test(message)) return "pnpmAllowBuild";
 			return "repo";
 		}
 		/** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */
@@ -464,22 +322,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 运行时 localStorage 访问：类型上不依赖 DOM lib（Node 测试环境也能编译），浏览器里取 window。 */
 		const storage = () => globalThis.localStorage;
-		/** 读取本地失败记录（损坏/不可用时返回空列表，不抛错）。列表最新在前；同一仓库只保留最新一条，空 repo 无法定位插件，全部保留。 */
-		function loadFailures() {
+		/** 读取本地通知记录（损坏/不可用时返回空列表，不抛错）。列表最新在前，全部保留，只由「清空」按钮手动移除。 */
+		function loadNotifications() {
 			try {
 				const raw = storage()?.getItem(KEY);
 				if (!raw) return [];
 				const list = JSON.parse(raw);
 				if (!Array.isArray(list)) return [];
-				const valid = list.filter((r) => !!r && typeof r === "object" && typeof r.message === "string");
-				const seen = /* @__PURE__ */ new Set();
-				const deduped = [];
-				for (const r of valid) {
-					if (r.repo && seen.has(r.repo)) continue;
-					if (r.repo) seen.add(r.repo);
-					deduped.push(r);
-				}
-				return deduped;
+				return list.filter((r) => !!r && typeof r === "object" && typeof r.message === "string").map((r) => ({
+					...r,
+					ok: r.ok === true
+				}));
 			} catch {
 				return [];
 			}
@@ -489,22 +342,38 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				storage()?.setItem(KEY, JSON.stringify(list));
 			} catch {}
 		}
-		/** 追加一条失败记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。同一仓库只保留最新一次失败。 */
-		function addFailure(record) {
-			const prev = loadFailures();
+		/** 追加一条通知记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。
+		*  每次成功/失败都各自留痕：同一插件的安装/卸载记录都完整保留、只由「清空」按钮手动移除，
+		*  不会因后续操作被自动覆盖清除。 */
+		function addNotification(record) {
+			const prev = loadNotifications();
 			let id = Date.now();
 			while (prev.some((r) => r.id === id)) id += 1;
-			const rest = record.repo ? prev.filter((r) => r.repo !== record.repo) : prev;
 			const next = [{
 				...record,
 				id,
 				at: id
-			}, ...rest].slice(0, MAX);
+			}, ...prev].slice(0, MAX);
 			save(next);
 			return next;
 		}
-		/** 清空全部失败记录，返回空列表。 */
-		function clearFailures() {
+		/** 记录一次失败：携带完整错误日志，供通知中心查看/复制/提 Issue。 */
+		function addFailure(record) {
+			return addNotification({
+				...record,
+				ok: false
+			});
+		}
+		/** 记录一次成功：轻量记录，不带日志。 */
+		function addSuccess(record) {
+			return addNotification({
+				...record,
+				ok: true,
+				message: ""
+			});
+		}
+		/** 清空全部通知记录，返回空列表。 */
+		function clearNotifications() {
 			save([]);
 			return [];
 		}
@@ -549,7 +418,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		function pluginIssueUrl(repo, message, env) {
 			const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`;
 			const kind = classifyFailure(message);
-			const reason = kind === "pnpmAllowBuild" ? "pnpm build-script allowlist block (host install mechanism, not the plugin)" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
+			const reason = /\[packaging\]/i.test(message) ? "plugin does NOT support the official default install method (dsh plugin add github:owner/repo — requires build output committed to the repo or a prepare script); its git distribution lacks the entry file declared in package.json" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
 			const code = coreErrorCode(message);
 			const build = (coreChars) => {
 				const body = [
@@ -559,7 +428,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					"",
 					`## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
 					`本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
-					`- 复现命令：\`dsh plugin add github:${repo}\``,
+					`- 使用的安装命令（官方默认安装方式）：\`dsh plugin${env?.profile ? ` --profile ${env.profile}` : ""} add github:${repo}\``,
+					`- 执行结果：安装失败，未能安装该插件。`,
+					.../\[packaging\]/i.test(message) ? [
+						"",
+						"## 官方默认安装方式",
+						"DSH 生态的官方默认安装方式是 `dsh plugin add github:owner/repo`（git 直装）：插件仓库需提交构建产物，或在 package.json 提供 `prepare` 脚本让 pnpm 安装时自动构建。当前插件两者皆不具备，因此无法按官方方式安装。"
+					] : [],
 					"",
 					"## Environment",
 					`- Plugin: \`${repo}\``,
@@ -943,8 +818,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const modalTaskRef = (0, react.useRef)(null);
 			/** 轮询定时器句柄（队列清空/组件卸载时清理） */
 			const pollRef = (0, react.useRef)(null);
-			/** 进行中状态条是否展开（刷新后恢复的任务可点击展开查看实时输出） */
-			const [showProgress, setShowProgress] = (0, react.useState)(false);
+			/** 请求在途的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
+			*  本地队列任务要等 fetch 返回后才入队，仅靠 queueRef 检查拦不住请求窗口内的重复点击。 */
+			const submittingRef = (0, react.useRef)(/* @__PURE__ */ new Set());
+			/** 请求在途标记：弹窗据此禁用确认按钮，避免等待响应期间被再次点击。 */
+			const [submitting, setSubmitting] = (0, react.useState)(false);
 			/** 停止后台任务轮询（任务结束或组件卸载时清理）。 */
 			const stopPoll = () => {
 				if (pollRef.current !== null) {
@@ -1023,14 +901,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					refreshInstalled();
 					if (q.kind === "uninstall") {
 						syncInstalledVersion(q.repo, void 0, void 0);
-						onUninstallDone(modalTaskRef.current === q.id);
+						onUninstallDone(modalTaskRef.current === q.id, q.repo);
 					} else {
 						syncInstalledVersion(q.repo, q.version, q.updatedAt);
 						pendingInfoRef.current.set(q.target, {
 							desc: q.desc,
 							version: q.version
 						});
-						onInstallDone(modalTaskRef.current === q.id);
+						onInstallDone(modalTaskRef.current === q.id, q.repo);
 					}
 				} else {
 					const detail = lines.length > 0 ? [...lines].reverse().join("\n") : q.kind === "uninstall" ? t("uninstallFail") : t("installFail");
@@ -1133,6 +1011,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				const repo = p.source?.repo ?? "";
 				if (!repo) return;
 				if (queueRef.current.some((q) => q.kind === "install" && q.target === repo)) return;
+				if (submittingRef.current.has(repo)) return;
+				submittingRef.current.add(repo);
+				setSubmitting(true);
 				try {
 					const res = await fetch("/dsh-plugin-hub/install", {
 						method: "POST",
@@ -1150,8 +1031,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						id: taskId,
 						kind: "install",
 						target: repo,
-						desc: p.description,
 						repo,
+						desc: p.description,
 						version: p.version,
 						updatedAt: p.dates?.repoUpdatedAt,
 						status: "pending",
@@ -1165,6 +1046,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					pollQueue();
 				} catch {
 					onError(t("installFail"), repo, "install");
+				} finally {
+					submittingRef.current.delete(repo);
+					setSubmitting(false);
 				}
 			};
 			/** 弹窗动作：直接卸载。与安装同一队列机制，弹窗内实时显示进度。 */
@@ -1173,6 +1057,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				if (!name) return;
 				const repo = p.source?.repo ?? null;
 				if (queueRef.current.some((q) => q.kind === "uninstall" && q.target === name)) return;
+				if (submittingRef.current.has(name)) return;
+				submittingRef.current.add(name);
+				setSubmitting(true);
 				try {
 					const res = await fetch("/dsh-plugin-hub/uninstall", {
 						method: "POST",
@@ -1202,6 +1089,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					pollQueue();
 				} catch {
 					onError(t("uninstallFail"), repo, "uninstall");
+				} finally {
+					submittingRef.current.delete(name);
+					setSubmitting(false);
 				}
 			};
 			/** 取消任务：排队中立即出队，执行中终止子进程；先标记「正在取消」短暂过渡后再移除。 */
@@ -1227,28 +1117,115 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const clearModalTask = () => {
 				modalTaskRef.current = null;
 			};
-			const installModalTask = installPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === (installPlugin.source?.repo ?? "") && q.status !== "cancelling") ?? null : null;
-			const uninstallModalTask = uninstallPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "uninstall" && q.target === (installedName(uninstallPlugin) ?? "") && q.status !== "cancelling") ?? null : null;
-			const running = queue.find((q) => q.status === "running");
-			const queued = queue.filter((q) => q.status === "pending").length;
-			const pendingCount = pendingRestarts.length;
-			const runningText = running ? `${running.kind === "install" ? t("runningInstall") : t("runningUninstall")} ${running.progress}%${queued > 0 ? ` · ${t("queueMore", { n: queued })}` : ""}` : null;
 			return {
 				queue,
 				pendingRestarts,
-				running,
-				pendingCount,
-				stripSummary: pendingCount > 0 ? runningText ? `${t("restartPendingStrip", { n: pendingCount })} · ${runningText}` : t("restartPendingStrip", { n: pendingCount }) : runningText ?? t("queueWaiting", { n: queue.length }),
-				installModalTask,
-				uninstallModalTask,
-				showProgress,
-				setShowProgress,
+				installModalTask: installPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === (installPlugin.source?.repo ?? "") && q.status !== "cancelling") ?? null : null,
+				uninstallModalTask: uninstallPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "uninstall" && q.target === (installedName(uninstallPlugin) ?? "") && q.status !== "cancelling") ?? null : null,
+				submitting,
 				installNow,
 				uninstallNow,
 				cancelTask,
 				clearModalTask
 			};
 		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
+		const css$3 = ".BiQ1zG_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out BiQ1zG_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.BiQ1zG_modal,.BiQ1zG_errorModal{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out BiQ1zG_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.BiQ1zG_errorModal{width:640px;max-width:calc(100vw - 48px)}.BiQ1zG_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.BiQ1zG_modalTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_modalTitleBusy{color:var(--hub-brand)}.BiQ1zG_modalTitleQueued{color:var(--hub-warning)}.BiQ1zG_modalClose{width:24px;height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.BiQ1zG_modalClose:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.BiQ1zG_modalDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_trustHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.BiQ1zG_modalLabel{min-width:64px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);font-weight:500;overflow:hidden}.BiQ1zG_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.BiQ1zG_modalLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_linkIcon{flex-shrink:0}.BiQ1zG_modalCmd{color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_modalCmd:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.BiQ1zG_modalCmdCopy{color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_modalCmdCopy:hover{color:var(--hub-brand-hover);background:var(--hub-bg-2)}.BiQ1zG_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.BiQ1zG_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.BiQ1zG_toast{z-index:1000;background:var(--hub-btn-fill);color:var(--hub-text-on-fill);pointer-events:none;white-space:nowrap;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out BiQ1zG_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes BiQ1zG_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.BiQ1zG_toastFail{background:var(--hub-danger);color:#fff;border-color:#ffffff3d}.BiQ1zG_queueSection{flex-direction:column;gap:6px;display:flex}.BiQ1zG_queueSectionTitle{color:var(--hub-text-secondary);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_pendingRowStatus{color:var(--hub-warn);flex-shrink:0;font-weight:500}.BiQ1zG_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.BiQ1zG_queueRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.BiQ1zG_queueRow:hover{background:var(--hub-brand-tint)}.BiQ1zG_queueRowHead{align-items:center;gap:10px;display:flex}.BiQ1zG_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.BiQ1zG_queueRowDesc{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.BiQ1zG_queueRowBody{align-items:center;gap:8px;display:flex}.BiQ1zG_queueRowStatus{color:var(--hub-brand);flex-shrink:0;font-weight:500}.BiQ1zG_queueRowTrack{flex:1;min-width:0}.BiQ1zG_queueRowPct{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0}.BiQ1zG_stripCancel{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,color .12s}.BiQ1zG_stripCancel:hover{background:var(--hub-danger-tint);color:var(--hub-danger-text)}.BiQ1zG_stripCancel:disabled{opacity:.45;cursor:default}.BiQ1zG_queuedHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.BiQ1zG_errorTitle{color:var(--hub-danger-text);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_errorBox{border:1px solid var(--hub-danger-border);background:var(--hub-danger-tint-weak);max-height:240px;color:var(--hub-text-primary);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.BiQ1zG_errorCopySoft{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_errorCopySoft:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_errorHint{color:var(--hub-text-tertiary);font-size:12px;line-height:18px}.BiQ1zG_modalCancel,.BiQ1zG_modalCopy{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_modalCancel:hover,.BiQ1zG_modalCopy:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalInstall{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_modalInstall:hover{background:var(--hub-btn-hover)}.BiQ1zG_modalCopy:disabled,.BiQ1zG_modalInstall:disabled,.BiQ1zG_modalCancel:disabled,.BiQ1zG_modalClose:disabled,.BiQ1zG_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_uninstallConfirm{color:#fff;background:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_uninstallConfirm:hover{background:var(--hub-danger-hover)}.BiQ1zG_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.BiQ1zG_resultCheck{background:var(--hub-success-tint);width:40px;height:40px;color:var(--hub-success);border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.BiQ1zG_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.BiQ1zG_resultTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_resultDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_resultRestarting{color:var(--hub-text-tertiary);padding:12px 0 6px;font-size:12px;line-height:18px}.BiQ1zG_restartLater{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_restartLater:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_restartNow{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNow:hover{background:var(--hub-btn-hover)}.BiQ1zG_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_result .BiQ1zG_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartLater,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNow{min-width:100px}.BiQ1zG_progress{margin:10px 0 2px}.BiQ1zG_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.BiQ1zG_progressText{color:var(--hub-text-secondary);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.BiQ1zG_progressTrack{background:var(--hub-border-2);border-radius:2px;height:4px;overflow:hidden}.BiQ1zG_progressFill{background:var(--hub-brand);border-radius:2px;height:100%;transition:width .32s}.BiQ1zG_progressFillFail{background:var(--hub-danger)}@keyframes BiQ1zG_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes BiQ1zG_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.BiQ1zG_noticeList{flex-direction:column;gap:10px;padding-right:2px;display:flex}.BiQ1zG_noticeRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;align-items:center;gap:10px;padding:10px 12px;display:flex}.BiQ1zG_noticeBadgeOk,.BiQ1zG_noticeBadgeFail{border-radius:50%;flex-shrink:0;justify-content:center;align-items:center;width:28px;height:28px;display:inline-flex;box-shadow:0 2px 6px #0000002e}.BiQ1zG_noticeBadgeOk{background:var(--hub-success)}.BiQ1zG_noticeBadgeFail{background:var(--hub-danger)}.BiQ1zG_noticeBadgeIcon{flex-shrink:0;width:12px;height:12px}.BiQ1zG_noticeMain{flex-direction:column;flex:1;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeTextOk{color:var(--hub-success);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeTextFail{color:var(--hub-danger-text);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.BiQ1zG_failRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.BiQ1zG_failHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.BiQ1zG_failKindInstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}.BiQ1zG_failKindUninstall{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}.BiQ1zG_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.BiQ1zG_failRepo:hover{text-decoration:underline}.BiQ1zG_failTime{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.BiQ1zG_failCopy{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_failCopy:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_failEmpty{text-align:center;color:var(--hub-text-tertiary);padding:24px 0;font-size:12px;line-height:18px}.BiQ1zG_failClear{color:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_failClear:hover{color:#fff;background:var(--hub-danger)}.BiQ1zG_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.BiQ1zG_failBigIssue:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover);box-shadow:0 3px 10px #d1242f59}.BiQ1zG_failPrepareHint{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}";
+		const tagId$3 = "dsh-plugin/Modal.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$3) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$3;
+			tag.textContent = css$3;
+			document.head.appendChild(tag);
+		}
+		var Modal_module_css_default = {
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"toastFail": "BiQ1zG_toastFail",
+			"progressText": "BiQ1zG_progressText",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"modalClose": "BiQ1zG_modalClose",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"failKind": "BiQ1zG_failKind",
+			"failRepo": "BiQ1zG_failRepo",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"modalValue": "BiQ1zG_modalValue",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"failClear": "BiQ1zG_failClear",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"errorBox": "BiQ1zG_errorBox",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"modalIn": "BiQ1zG_modalIn",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"failCopy": "BiQ1zG_failCopy",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"noticeList": "BiQ1zG_noticeList",
+			"failTime": "BiQ1zG_failTime",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"failHead": "BiQ1zG_failHead",
+			"restartNow": "BiQ1zG_restartNow",
+			"errorHint": "BiQ1zG_errorHint",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"queueSection": "BiQ1zG_queueSection",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"modalActions": "BiQ1zG_modalActions",
+			"overlay": "BiQ1zG_overlay",
+			"trustHint": "BiQ1zG_trustHint",
+			"result": "BiQ1zG_result",
+			"progress": "BiQ1zG_progress",
+			"failList": "BiQ1zG_failList",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"queueRow": "BiQ1zG_queueRow",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"progressFill": "BiQ1zG_progressFill",
+			"toastIn": "BiQ1zG_toastIn",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"modalHead": "BiQ1zG_modalHead",
+			"modal": "BiQ1zG_modal",
+			"failRow": "BiQ1zG_failRow",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"modalRow": "BiQ1zG_modalRow",
+			"modalBody": "BiQ1zG_modalBody",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"modalLink": "BiQ1zG_modalLink",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"progressHead": "BiQ1zG_progressHead",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"errorModal": "BiQ1zG_errorModal",
+			"toast": "BiQ1zG_toast",
+			"restartLater": "BiQ1zG_restartLater",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon"
+		};
 		//#endregion
 		//#region src/client/components/icons.tsx
 		/**
@@ -1258,7 +1235,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** 弹窗右上角关闭按钮图标：内联 SVG 十字（stroke 继承 currentColor），随按钮禁用态一起变淡。 */
 		function CloseIcon() {
 			return (0, react.createElement)("svg", {
-				className: Section_module_css_default.modalCloseIcon,
+				className: Modal_module_css_default.modalCloseIcon,
 				viewBox: "0 0 16 16",
 				width: 14,
 				height: 14,
@@ -1274,7 +1251,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** 来源链接图标：链节（stroke 继承 currentColor），弹窗里官网收录地址旁提示「可点击跳转」。 */
 		function LinkIcon() {
 			return (0, react.createElement)("svg", {
-				className: Section_module_css_default.linkIcon,
+				className: Modal_module_css_default.linkIcon,
 				viewBox: "0 0 24 24",
 				width: 13,
 				height: 13,
@@ -1297,7 +1274,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** 品牌 logo 图标：蓝紫渐变圆角方块 + 白色拼图块（2x2 错落），标题左侧的品牌标识。 */
 		function LogoIcon() {
 			return (0, react.createElement)("svg", {
-				className: Section_module_css_default.logoIcon,
+				className: Header_module_css_default.logoIcon,
 				viewBox: "0 0 24 24",
 				width: 20,
 				height: 20,
@@ -1356,7 +1333,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** GitHub 图标：官方 GitHub Mark（octocat），fill 继承 currentColor，头部右上角源码链接用。 */
 		function GitHubIcon() {
 			return (0, react.createElement)("svg", {
-				className: Section_module_css_default.githubIcon,
+				className: Header_module_css_default.githubIcon,
 				viewBox: "0 0 24 24",
 				width: 18,
 				height: 18,
@@ -1367,7 +1344,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** 复制图标：双层矩形（stroke 继承 currentColor），手动命令旁的复制按钮用。 */
 		function CopyIcon() {
 			return (0, react.createElement)("svg", {
-				className: Section_module_css_default.copyIcon,
+				className: Header_module_css_default.copyIcon,
 				viewBox: "0 0 16 16",
 				width: 12,
 				height: 12,
@@ -1388,6 +1365,22 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeLinecap: "round"
 			}));
 		}
+		/** 下拉箭头图标：向下 V 形（stroke 继承 currentColor），下拉框触发器右侧提示可展开。 */
+		function ChevronDownIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 16 16",
+				width: 12,
+				height: 12,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: "M3.5 5.5L8 10l4.5-4.5",
+				stroke: "currentColor",
+				strokeWidth: 1.6,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
 		//#endregion
 		//#region src/client/components/ProgressView.tsx
 		/**
@@ -1397,8 +1390,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* empty for most of the run; failures surface their full output in ErrorModal.
 		*/
 		function ProgressView({ task }) {
-			return (0, react.createElement)("div", { className: Section_module_css_default.progress }, (0, react.createElement)("div", { className: Section_module_css_default.progressHead }, (0, react.createElement)("span", { className: Section_module_css_default.progressText }, `${Math.round(task.progress)}%`)), (0, react.createElement)("div", { className: Section_module_css_default.progressTrack }, (0, react.createElement)("div", {
-				className: task.status === "failed" ? `${Section_module_css_default.progressFill} ${Section_module_css_default.progressFillFail}` : Section_module_css_default.progressFill,
+			return (0, react.createElement)("div", { className: Modal_module_css_default.progress }, (0, react.createElement)("div", { className: Modal_module_css_default.progressHead }, (0, react.createElement)("span", { className: Modal_module_css_default.progressText }, `${Math.round(task.progress)}%`)), (0, react.createElement)("div", { className: Modal_module_css_default.progressTrack }, (0, react.createElement)("div", {
+				className: task.status === "failed" ? `${Modal_module_css_default.progressFill} ${Modal_module_css_default.progressFillFail}` : Modal_module_css_default.progressFill,
 				style: { width: `${task.progress}%` }
 			})));
 		}
@@ -1412,8 +1405,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*/
 		/** 完成结果视图：绿色对勾 + 标题/描述 + 「稍后重启 / 立即重启」按钮对（部分插件需重启后才会挂载） */
 		function ResultView({ title, desc, t, restarting, onRestart, onClose }) {
-			return (0, react.createElement)("div", { className: Section_module_css_default.result }, (0, react.createElement)("div", { className: Section_module_css_default.resultCheck }, (0, react.createElement)("svg", {
-				className: Section_module_css_default.resultCheckIcon,
+			return (0, react.createElement)("div", { className: Modal_module_css_default.result }, (0, react.createElement)("div", { className: Modal_module_css_default.resultCheck }, (0, react.createElement)("svg", {
+				className: Modal_module_css_default.resultCheckIcon,
 				viewBox: "0 0 16 16",
 				width: 20,
 				height: 20,
@@ -1425,12 +1418,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeWidth: 2,
 				strokeLinecap: "round",
 				strokeLinejoin: "round"
-			}))), (0, react.createElement)("div", { className: Section_module_css_default.resultTitle }, title), (0, react.createElement)("div", { className: Section_module_css_default.resultDesc }, desc), (0, react.createElement)("div", { className: Section_module_css_default.resultRestarting }, restarting ? t("restarting") : t("restartHint")), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Section_module_css_default.restartLater,
+			}))), (0, react.createElement)("div", { className: Modal_module_css_default.resultTitle }, title), (0, react.createElement)("div", { className: Modal_module_css_default.resultDesc }, desc), (0, react.createElement)("div", { className: Modal_module_css_default.resultRestarting }, restarting ? t("restarting") : t("restartHint")), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartLater,
 				onClick: onClose,
 				disabled: restarting
 			}, t("restartLater")), (0, react.createElement)("button", {
-				className: Section_module_css_default.restartNow,
+				className: Modal_module_css_default.restartNow,
 				onClick: onRestart,
 				disabled: restarting
 			}, restarting ? t("restarting") : t("restartNow"))));
@@ -1440,22 +1433,22 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
 		*/
 		function InstallModal(props) {
-			const { plugin, done, task, t, langPath, restarting, onClose, onCopy, onInstall, onRestart } = props;
-			const busy = task !== null && (task.status === "pending" || task.status === "running");
+			const { plugin, done, task, t, langPath, restarting, submitting, onClose, onCopy, onInstall, onRestart } = props;
+			const busy = submitting || task !== null && (task.status === "pending" || task.status === "running");
 			const name = plugin.displayName ?? plugin.slug;
 			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
-			const title = busy ? task.status === "pending" ? busyTitle(t("queuedTitle")) : busyTitle(t("installing")) : done ? t("installResultTitle") : t("confirmTitle");
+			const title = busy ? task && task.status === "pending" ? busyTitle(t("queuedTitle")) : busyTitle(t("installing")) : done ? t("installResultTitle") : t("confirmTitle");
 			return (0, react.createElement)("div", {
-				className: Section_module_css_default.overlay,
+				className: Modal_module_css_default.overlay,
 				onClick: (e) => {
 					if (e.target === e.currentTarget) onClose();
 				}
 			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.modal,
+				className: Modal_module_css_default.modal,
 				role: "dialog",
 				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: busy ? `${Section_module_css_default.modalTitle} ${task.status === "pending" ? Section_module_css_default.modalTitleQueued : Section_module_css_default.modalTitleBusy}` : Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalClose,
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: busy ? `${Modal_module_css_default.modalTitle} ${task && task.status === "pending" ? Modal_module_css_default.modalTitleQueued : Modal_module_css_default.modalTitleBusy}` : Modal_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
 				"aria-label": t("confirmCancel"),
 				onClick: () => onClose()
 			}, (0, react.createElement)(CloseIcon))), done ? (0, react.createElement)(ResultView, {
@@ -1465,49 +1458,49 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				restarting,
 				onRestart,
 				onClose
-			}) : (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.trustHint }, t("confirmDesc")), (0, react.createElement)("div", { className: Section_module_css_default.modalRow }, (0, react.createElement)("span", { className: Section_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
-				className: Section_module_css_default.modalValue,
+			}) : (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.trustHint }, t("confirmDesc")), (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
+				className: Modal_module_css_default.modalValue,
 				title: plugin.displayName ?? plugin.slug
-			}, plugin.displayName ?? plugin.slug)), plugin.source?.repo ? (0, react.createElement)("div", { className: Section_module_css_default.modalRow }, (0, react.createElement)("span", { className: Section_module_css_default.modalLabel }, t("confirmSource")), (0, react.createElement)("a", {
-				className: Section_module_css_default.modalLink,
+			}, plugin.displayName ?? plugin.slug)), plugin.source?.repo ? (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmSource")), (0, react.createElement)("a", {
+				className: Modal_module_css_default.modalLink,
 				href: pluginDetailUrl(plugin, langPath),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: plugin.source.repo
 			}, (0, react.createElement)(LinkIcon), plugin.source.repo)) : null, (0, react.createElement)("div", {
-				className: Section_module_css_default.modalCmd,
+				className: Modal_module_css_default.modalCmd,
 				onClick: onCopy,
 				title: t("copyInstallCommand"),
 				role: "button",
 				tabIndex: 0
-			}, (0, react.createElement)("span", { className: Section_module_css_default.modalCmdText }, `dsh plugin add github:${plugin.source?.repo ?? ""}`), (0, react.createElement)("span", { className: Section_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), task && task.status === "pending" ? (0, react.createElement)("div", { className: Section_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Section_module_css_default.modalCopy,
+			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, `dsh plugin add github:${plugin.source?.repo ?? ""}`), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopy
 			}, t("copyInstallCommand")), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalInstall,
+				className: Modal_module_css_default.modalInstall,
 				disabled: busy,
 				onClick: onInstall
-			}, busy ? task.status === "pending" ? t("queuedTitle") : t("installing") : t("installNow"))))));
+			}, busy ? task && task.status === "pending" ? t("queuedTitle") : t("installing") : t("installNow"))))));
 		}
 		/** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 		function UninstallModal(props) {
-			const { plugin, done, task, t, langPath, restarting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props;
-			const busy = task !== null && (task.status === "pending" || task.status === "running");
+			const { plugin, done, task, t, langPath, restarting, submitting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props;
+			const busy = submitting || task !== null && (task.status === "pending" || task.status === "running");
 			const name = plugin.displayName ?? plugin.slug;
 			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
-			const title = busy ? task.status === "pending" ? busyTitle(t("queuedUninstallTitle")) : busyTitle(t("uninstalling")) : done ? t("uninstallResultTitle") : t("uninstallTitle");
+			const title = busy ? task && task.status === "pending" ? busyTitle(t("queuedUninstallTitle")) : busyTitle(t("uninstalling")) : done ? t("uninstallResultTitle") : t("uninstallTitle");
 			return (0, react.createElement)("div", {
-				className: Section_module_css_default.overlay,
+				className: Modal_module_css_default.overlay,
 				onClick: (e) => {
 					if (e.target === e.currentTarget) onClose();
 				}
 			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.modal,
+				className: Modal_module_css_default.modal,
 				role: "dialog",
 				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: busy ? `${Section_module_css_default.modalTitle} ${task.status === "pending" ? Section_module_css_default.modalTitleQueued : Section_module_css_default.modalTitleBusy}` : Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalClose,
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: busy ? `${Modal_module_css_default.modalTitle} ${task.status === "pending" ? Modal_module_css_default.modalTitleQueued : Modal_module_css_default.modalTitleBusy}` : Modal_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
 				"aria-label": t("confirmCancel"),
 				onClick: () => onClose()
 			}, (0, react.createElement)(CloseIcon))), done ? (0, react.createElement)(ResultView, {
@@ -1517,68 +1510,68 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				restarting,
 				onRestart,
 				onClose
-			}) : (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.modalDesc }, t("uninstallDesc")), (0, react.createElement)("div", { className: Section_module_css_default.modalRow }, (0, react.createElement)("span", { className: Section_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
-				className: Section_module_css_default.modalValue,
+			}) : (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.modalDesc }, t("uninstallDesc")), (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
+				className: Modal_module_css_default.modalValue,
 				title: plugin.displayName ?? plugin.slug
-			}, plugin.displayName ?? plugin.slug)), plugin.source?.repo ? (0, react.createElement)("div", { className: Section_module_css_default.modalRow }, (0, react.createElement)("span", { className: Section_module_css_default.modalLabel }, t("confirmSource")), (0, react.createElement)("a", {
-				className: Section_module_css_default.modalLink,
+			}, plugin.displayName ?? plugin.slug)), plugin.source?.repo ? (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmSource")), (0, react.createElement)("a", {
+				className: Modal_module_css_default.modalLink,
 				href: pluginDetailUrl(plugin, langPath),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: plugin.source.repo
-			}, (0, react.createElement)(LinkIcon), plugin.source.repo)) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Section_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Section_module_css_default.modalCancel,
+			}, (0, react.createElement)(LinkIcon), plugin.source.repo)) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalCancel,
 				onClick: onCancel
 			}, t("confirmCancel")), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalCopy,
+				className: Modal_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopyCommand
 			}, t("copyUninstallCommand")), (0, react.createElement)("button", {
-				className: Section_module_css_default.uninstallConfirm,
+				className: Modal_module_css_default.uninstallConfirm,
 				disabled: busy,
 				onClick: onConfirm
-			}, busy ? task.status === "pending" ? t("queuedUninstallTitle") : t("uninstalling") : t("uninstall"))))));
+			}, busy ? task && task.status === "pending" ? t("queuedUninstallTitle") : t("uninstalling") : t("uninstall"))))));
 		}
 		/** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 		/** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
 		function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }) {
 			const failureKind = classifyFailure(message);
 			return (0, react.createElement)("div", {
-				className: Section_module_css_default.overlay,
+				className: Modal_module_css_default.overlay,
 				onClick: (e) => {
 					if (e.target === e.currentTarget) onClose();
 				}
 			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.errorModal,
+				className: Modal_module_css_default.errorModal,
 				role: "dialog",
 				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.errorTitle }, kind === "install" ? t("errorTitleInstall") : t("errorTitleUninstall")), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalClose,
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.errorTitle }, kind === "install" ? t("errorTitleInstall") : t("errorTitleUninstall")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
 				"aria-label": t("errorClose"),
 				onClick: onClose
-			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.failRow }, (0, react.createElement)("div", { className: Section_module_css_default.failHead }, (0, react.createElement)("span", { className: kind === "install" ? Section_module_css_default.failKindInstall : Section_module_css_default.failKindUninstall }, kind === "install" ? t("install") : t("uninstall")), repo ? (0, react.createElement)("a", {
-				className: Section_module_css_default.failRepo,
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.failRow }, (0, react.createElement)("div", { className: Modal_module_css_default.failHead }, (0, react.createElement)("span", { className: kind === "install" ? Modal_module_css_default.failKindInstall : Modal_module_css_default.failKindUninstall }, kind === "install" ? t("install") : t("uninstall")), repo ? (0, react.createElement)("a", {
+				className: Modal_module_css_default.failRepo,
 				href: pluginSiteUrl(repo),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: repo
 			}, repo) : null, (0, react.createElement)("button", {
-				className: Section_module_css_default.errorCopySoft,
-				onClick: onCopy
-			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Section_module_css_default.errorBox }, message), failureKind === "pnpmAllowBuild" ? (0, react.createElement)("div", { className: Section_module_css_default.failAllowHint }, t("failAllowBuild")) : failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Section_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
-				className: Section_module_css_default.failBigIssue,
+				className: Modal_module_css_default.errorCopySoft,
+				onClick: () => onCopy(message)
+			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Modal_module_css_default.errorBox }, message), failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(message) ? t("failPackagingHint") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
+				className: Modal_module_css_default.failBigIssue,
 				href: pluginIssueUrl(repo, message, env),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("failIssueHint")
 			}, t("failIssueBig")) : null]) : repo ? (0, react.createElement)("a", {
-				className: Section_module_css_default.failBigIssue,
+				className: Modal_module_css_default.failBigIssue,
 				href: pluginIssueUrl(repo, message, env),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("failIssueHint")
-			}, t("failIssueBig")) : null), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Section_module_css_default.restartLater,
+			}, t("failIssueBig")) : null), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartLater,
 				onClick: onClose
 			}, t("errorClose"))))));
 		}
@@ -1588,17 +1581,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const fail = toast.kind === "fail" || toast.kind === "removeFail";
 			return (0, react.createElement)("div", {
 				key: toast.id,
-				className: fail ? `${Section_module_css_default.toast} ${Section_module_css_default.toastFail}` : Section_module_css_default.toast
+				className: fail ? `${Modal_module_css_default.toast} ${Modal_module_css_default.toastFail}` : Modal_module_css_default.toast
 			}, text);
 		}
 		//#endregion
-		//#region src/client/components/FailuresModal.tsx
+		//#region src/client/components/NotificationsModal.tsx
 		/**
-		* Failure-record dialog: a persistent log of install/remove failures.
+		* Notification-center dialog: a persistent log of every settled install /
+		* remove task — successes and failures alike.
 		*
-		* Records are written to localStorage at failure time (see lib/failures.ts),
-		* so a failed task is never lost even when the error dialog was dismissed or
-		* the user was away when the task failed. Opened from the header entry button.
+		* Records are written to localStorage at settle time (see lib/failures.ts),
+		* so a result is never lost even when the dialog was dismissed or the user
+		* was away. Each entry carries a circular status badge (green check for
+		* success, red cross for failure) with white glyph and message text;
+		* failures keep their copy / fix / file-an-issue actions. Opened from the
+		* header entry button.
 		*/
 		/** 记录时间紧凑展示：今年内 MM-DD HH:mm，跨年补年份前缀。 */
 		function fmtTime(at) {
@@ -1607,57 +1604,116 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const mmdd = `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 			return d.getFullYear() === (/* @__PURE__ */ new Date()).getFullYear() ? mmdd : `${d.getFullYear()}-${mmdd}`;
 		}
-		function FailuresModal({ records, t, env, onClose, onCopy, onClear }) {
+		/** 圆形状态徽标内的白色图形：成功为对勾、失败为叉。 */
+		function BadgeGlyph({ ok }) {
+			return (0, react.createElement)("svg", {
+				className: Modal_module_css_default.noticeBadgeIcon,
+				viewBox: "0 0 16 16",
+				width: 12,
+				height: 12,
+				fill: "none",
+				"aria-hidden": "true"
+			}, ok ? (0, react.createElement)("path", {
+				d: "M3 8.5l3.5 3.5 6.5-6.5",
+				stroke: "#ffffff",
+				strokeWidth: 2,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}) : (0, react.createElement)("path", {
+				d: "M4 4l8 8M12 4L4 12",
+				stroke: "#ffffff",
+				strokeWidth: 2,
+				strokeLinecap: "round"
+			}));
+		}
+		function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, cancelTask, restarting, onRestart }) {
 			return (0, react.createElement)("div", {
-				className: Section_module_css_default.overlay,
+				className: Modal_module_css_default.overlay,
 				onClick: (e) => {
 					if (e.target === e.currentTarget) onClose();
 				}
 			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.errorModal,
+				className: Modal_module_css_default.errorModal,
 				role: "dialog",
 				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.modalTitle }, t("failures")), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalClose,
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.modalTitle }, t("notifications")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
 				"aria-label": t("errorClose"),
 				onClick: onClose
-			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, (0, react.createElement)("div", { className: Section_module_css_default.errorHint }, t("failuresDesc")), records.length === 0 ? (0, react.createElement)("div", { className: Section_module_css_default.failEmpty }, t("failuresEmpty")) : (0, react.createElement)("div", { className: Section_module_css_default.failList }, records.map((r) => (0, react.createElement)("div", {
-				key: r.id,
-				className: Section_module_css_default.failRow
-			}, (0, react.createElement)("div", { className: Section_module_css_default.failHead }, (0, react.createElement)("span", { className: `${Section_module_css_default.failKind} ${r.kind === "install" ? Section_module_css_default.failKindInstall : Section_module_css_default.failKindUninstall}` }, r.kind === "install" ? t("install") : t("uninstall")), r.repo ? (0, react.createElement)("a", {
-				className: Section_module_css_default.failRepo,
-				href: pluginSiteUrl(r.repo),
-				target: "_blank",
-				rel: "noopener noreferrer",
-				title: r.repo
-			}, r.repo) : null, (0, react.createElement)("span", {
-				className: Section_module_css_default.failTime,
-				title: new Date(r.at).toLocaleString()
-			}, fmtTime(r.at)), (0, react.createElement)("button", {
-				className: Section_module_css_default.failCopy,
-				onClick: () => onCopy(r.message)
-			}, t("failCopy"))), (() => {
-				const kind = classifyFailure(r.message);
-				if (kind === "pnpmAllowBuild") return (0, react.createElement)("div", { className: Section_module_css_default.failAllowHint }, t("failAllowBuild"));
-				if (kind === "pluginPrepare" || kind === "pnpmIgnoredBuild") return (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Section_module_css_default.failPrepareHint }, kind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : t("failPrepareHint")), r.repo ? (0, react.createElement)("a", {
-					className: Section_module_css_default.failBigIssue,
-					href: pluginIssueUrl(r.repo, r.message, env),
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.errorHint }, t("notificationsDesc")), tasks.length > 0 || pendingRestarts.length > 0 ? (0, react.createElement)("div", null, [pendingRestarts.length > 0 ? (0, react.createElement)("div", { className: Modal_module_css_default.queueSection }, (0, react.createElement)("div", { className: Modal_module_css_default.queueSectionTitle }, t("sectionPendingRestart")), pendingRestarts.map((p) => (0, react.createElement)("div", {
+				key: `restart-${p.target}`,
+				className: Modal_module_css_default.queueRow
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.queueRowHead }, (0, react.createElement)("span", { className: `${Modal_module_css_default.failKind} ${p.kind === "uninstall" ? Modal_module_css_default.failKindUninstall : Modal_module_css_default.failKindInstall}` }, p.kind === "uninstall" ? t("uninstall") : t("install")), (0, react.createElement)("span", {
+				className: Modal_module_css_default.queueRowTarget,
+				title: p.target
+			}, p.target)), p.desc ? (0, react.createElement)("div", {
+				className: Modal_module_css_default.queueRowDesc,
+				title: p.desc
+			}, p.desc) : null, (0, react.createElement)("div", { className: Modal_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Modal_module_css_default.pendingRowStatus }, p.kind === "uninstall" ? t("restartPendingHintUninstall") : t("restartPendingHint")), (0, react.createElement)("span", { className: Modal_module_css_default.pendingRowActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartLater,
+				disabled: restarting,
+				onClick: onClose
+			}, t("restartLater")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartNow,
+				disabled: restarting,
+				onClick: onRestart
+			}, restarting ? t("restarting") : t("restartNow"))))))) : null, tasks.length > 0 ? (0, react.createElement)("div", { className: Modal_module_css_default.queueSection }, (0, react.createElement)("div", { className: Modal_module_css_default.queueSectionTitle }, t("sectionInProgress")), tasks.map((q) => (0, react.createElement)("div", {
+				key: q.id,
+				className: Modal_module_css_default.queueRow
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.queueRowHead }, (0, react.createElement)("span", { className: `${Modal_module_css_default.failKind} ${q.kind === "install" ? Modal_module_css_default.failKindInstall : Modal_module_css_default.failKindUninstall}` }, q.kind === "install" ? t("install") : t("uninstall")), (0, react.createElement)("span", {
+				className: Modal_module_css_default.queueRowTarget,
+				title: q.target
+			}, q.target), (0, react.createElement)("button", {
+				className: Modal_module_css_default.stripCancel,
+				disabled: q.status === "cancelling",
+				onClick: (e) => {
+					e.stopPropagation();
+					cancelTask(q.id);
+				}
+			}, t("cancelTask"))), q.desc ? (0, react.createElement)("div", {
+				className: Modal_module_css_default.queueRowDesc,
+				title: q.desc
+			}, q.desc) : null, (0, react.createElement)("div", { className: Modal_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Modal_module_css_default.queueRowStatus }, q.status === "running" ? q.kind === "install" ? t("installing") : t("uninstalling") : q.status === "cancelling" ? t("cancelling") : q.kind === "install" ? t("queuedTitle") : t("queuedUninstallTitle")), (0, react.createElement)("div", { className: `${Modal_module_css_default.progressTrack} ${Modal_module_css_default.queueRowTrack}` }, (0, react.createElement)("div", {
+				className: Modal_module_css_default.progressFill,
+				style: { width: `${q.progress}%` }
+			})), (0, react.createElement)("span", { className: Modal_module_css_default.queueRowPct }, `${q.progress}%`))))) : null]) : null, records.length === 0 ? (0, react.createElement)("div", { className: Modal_module_css_default.failEmpty }, t("notificationsEmpty")) : (0, react.createElement)("div", { className: Modal_module_css_default.noticeList }, records.map((r) => {
+				return (0, react.createElement)("div", {
+					key: r.id,
+					className: Modal_module_css_default.noticeRow
+				}, (0, react.createElement)("div", { className: r.ok ? Modal_module_css_default.noticeBadgeOk : Modal_module_css_default.noticeBadgeFail }, (0, react.createElement)(BadgeGlyph, { ok: r.ok })), (0, react.createElement)("div", { className: Modal_module_css_default.noticeMain }, (0, react.createElement)("div", { className: Modal_module_css_default.noticeHead }, (0, react.createElement)("span", { className: r.ok ? Modal_module_css_default.noticeTextOk : Modal_module_css_default.noticeTextFail }, r.ok ? r.kind === "install" ? t("installDone") : t("uninstallDone") : r.kind === "install" ? t("errorTitleInstall") : t("errorTitleUninstall")), r.repo ? (0, react.createElement)("a", {
+					className: Modal_module_css_default.failRepo,
+					href: pluginSiteUrl(r.repo),
 					target: "_blank",
 					rel: "noopener noreferrer",
-					title: t("failIssueHint")
-				}, t("failIssueBig")) : null]);
-				return r.repo ? (0, react.createElement)("a", {
-					className: Section_module_css_default.failBigIssue,
-					href: pluginIssueUrl(r.repo, r.message, env),
-					target: "_blank",
-					rel: "noopener noreferrer",
-					title: t("failIssueHint")
-				}, t("failIssueBig")) : null;
-			})()))), (0, react.createElement)("div", { className: Section_module_css_default.modalActions }, records.length > 0 ? (0, react.createElement)("button", {
-				className: Section_module_css_default.failClear,
+					title: r.repo
+				}, r.repo) : null, (0, react.createElement)("span", {
+					className: Modal_module_css_default.failTime,
+					title: new Date(r.at).toLocaleString()
+				}, fmtTime(r.at)), !r.ok && (0, react.createElement)("button", {
+					className: Modal_module_css_default.failCopy,
+					onClick: () => onCopy(r.message)
+				}, t("failCopy"))), !r.ok && (() => {
+					const kind = classifyFailure(r.message);
+					if (kind === "pluginPrepare" || kind === "pnpmIgnoredBuild") return (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, kind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(r.message) ? t("failPackagingHint") : t("failPrepareHint")), r.repo ? (0, react.createElement)("a", {
+						className: Modal_module_css_default.failBigIssue,
+						href: pluginIssueUrl(r.repo, r.message, env),
+						target: "_blank",
+						rel: "noopener noreferrer",
+						title: t("failIssueHint")
+					}, t("failIssueBig")) : null]);
+					return r.repo ? (0, react.createElement)("a", {
+						className: Modal_module_css_default.failBigIssue,
+						href: pluginIssueUrl(r.repo, r.message, env),
+						target: "_blank",
+						rel: "noopener noreferrer",
+						title: t("failIssueHint")
+					}, t("failIssueBig")) : null;
+				})()));
+			})), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, records.length > 0 ? (0, react.createElement)("button", {
+				className: Modal_module_css_default.failClear,
 				onClick: onClear
-			}, t("failuresClear")) : null, (0, react.createElement)("button", {
-				className: Section_module_css_default.restartNow,
+			}, t("notificationsClear")) : null, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartNow,
 				onClick: onClose
 			}, t("errorClose"))))));
 		}
@@ -1668,38 +1724,38 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* by the purple ad banner that promotes the catalog stats.
 		*/
 		function CatalogHeader({ t, langPath, statsTotal, statsVerified }) {
-			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Section_module_css_default.header }, (0, react.createElement)("div", { className: Section_module_css_default.headerTitleRow }, (0, react.createElement)("a", {
-				className: Section_module_css_default.brandTitle,
+			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Header_module_css_default.header }, (0, react.createElement)("div", { className: Header_module_css_default.headerTitleRow }, (0, react.createElement)("a", {
+				className: Header_module_css_default.brandTitle,
 				href: `${SITE_URL}${langPath}`,
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("openHint"),
 				"aria-label": t("openHint")
-			}, (0, react.createElement)(LogoIcon), (0, react.createElement)("h1", { className: Section_module_css_default.title }, t("title"), (0, react.createElement)("span", { className: Section_module_css_default.version }, ` v${PLUGIN_VERSION}`))), (0, react.createElement)("a", {
-				className: Section_module_css_default.githubLink,
+			}, (0, react.createElement)(LogoIcon), (0, react.createElement)("h1", { className: Header_module_css_default.title }, t("title"), (0, react.createElement)("span", { className: Header_module_css_default.version }, ` v${PLUGIN_VERSION}`))), (0, react.createElement)("a", {
+				className: Header_module_css_default.githubLink,
 				href: GITHUB_URL,
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("githubHint"),
 				"aria-label": t("githubHint")
 			}, (0, react.createElement)(GitHubIcon))), (0, react.createElement)("a", {
-				className: Section_module_css_default.taglineLink,
+				className: Header_module_css_default.taglineLink,
 				href: `${SITE_URL}${langPath}`,
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("openHint")
-			}, (0, react.createElement)("div", { className: Section_module_css_default.tagline }, t("tagline", {
+			}, (0, react.createElement)("div", { className: Header_module_css_default.tagline }, t("tagline", {
 				total: statsTotal,
 				verified: statsVerified
 			})))), (0, react.createElement)("a", {
-				className: Section_module_css_default.adBanner,
+				className: Header_module_css_default.adBanner,
 				href: `${SITE_URL}${langPath}`,
 				target: "_blank",
 				rel: "noopener noreferrer"
-			}, (0, react.createElement)("span", { className: Section_module_css_default.adBadge }, t("adBadge")), (0, react.createElement)("span", { className: Section_module_css_default.adText }, t("ad", {
+			}, (0, react.createElement)("span", { className: Header_module_css_default.adBadge }, t("adBadge")), (0, react.createElement)("span", { className: Header_module_css_default.adText }, t("ad", {
 				total: statsTotal,
 				verified: statsVerified
-			})), (0, react.createElement)("span", { className: Section_module_css_default.adArrow }, "↗")));
+			})), (0, react.createElement)("span", { className: Header_module_css_default.adArrow }, "↗")));
 		}
 		//#endregion
 		//#region src/client/components/CategoryTabs.tsx
@@ -1709,39 +1765,39 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* carry no counts so their widths stay uniform.
 		*/
 		function CategoryTabs({ category, setCategory, allLabel, totalCount, langKey }) {
-			return (0, react.createElement)("div", { className: Section_module_css_default.tabs }, (0, react.createElement)("button", {
+			return (0, react.createElement)("div", { className: Header_module_css_default.tabs }, (0, react.createElement)("button", {
 				key: "all",
-				className: category === "all" ? Section_module_css_default.tabActive : Section_module_css_default.tab,
+				className: category === "all" ? Header_module_css_default.tabActive : Header_module_css_default.tab,
 				onClick: () => setCategory("all")
-			}, allLabel, (0, react.createElement)("span", { className: Section_module_css_default.tabCount }, totalCount)), CATEGORY_ORDER.map((id) => (0, react.createElement)("button", {
+			}, allLabel, (0, react.createElement)("span", { className: Header_module_css_default.tabCount }, totalCount)), CATEGORY_ORDER.map((id) => (0, react.createElement)("button", {
 				key: id,
-				className: category === id ? Section_module_css_default.tabActive : Section_module_css_default.tab,
+				className: category === id ? Header_module_css_default.tabActive : Header_module_css_default.tab,
 				onClick: () => setCategory(id)
 			}, categoryLabel(CATEGORY_SHORT_LABELS, id, langKey))));
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
-		const css = ".B_Gxsq_dropdown{flex-shrink:0;display:inline-flex;position:relative}.B_Gxsq_dropdownBtn{height:24px;color:var(--dsw-alias-label-primary,#1f2328);background:var(--dsw-alias-bg-layer-2,#80808014);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;border-radius:6px;align-items:center;gap:6px;padding:0 10px;font-size:12px;line-height:22px;transition:background .12s,border-color .12s;display:inline-flex}.B_Gxsq_dropdownBtn:hover{background:var(--dsw-alias-interactive-bg-hover,#80808029);border-color:var(--dsw-alias-button-ghost-active-border,#d0d4da)}.B_Gxsq_dropdownLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownArrow,.B_Gxsq_dropdownArrowOpen{color:var(--dsw-alias-label-tertiary,#8b93a1);font-size:10px;line-height:1;transition:transform .12s}.B_Gxsq_dropdownArrowOpen{transform:rotate(180deg)}.B_Gxsq_dropdownPanel{z-index:50;background:var(--dsw-alias-bg-layer-1,#fff);border:1px solid var(--dsw-alias-border-l2,#e5e7eb);border-radius:8px;flex-direction:column;gap:2px;min-width:100%;padding:4px;display:flex;position:absolute;top:calc(100% + 4px);left:0;box-shadow:0 8px 24px #00000024}.B_Gxsq_dropdownItem,.B_Gxsq_dropdownItemActive{cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;text-align:left;border:none;border-radius:6px;justify-content:space-between;align-items:center;gap:10px;padding:4px 9px;font-size:12px;line-height:18px;transition:background .12s,color .12s;display:flex}.B_Gxsq_dropdownItem{color:var(--dsw-alias-label-primary,#1f2328);background:0 0}.B_Gxsq_dropdownItem:hover{background:var(--dsw-alias-interactive-bg-hover,#8080802e)}.B_Gxsq_dropdownItemActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:var(--dsw-alias-button-primary-fill,#1f2328)}.B_Gxsq_dropdownItemLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownCount,.B_Gxsq_dropdownCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 6px;font-size:10px;line-height:14px}.B_Gxsq_dropdownCount{color:var(--dsw-alias-label-tertiary,#8b93a1);background:var(--dsw-alias-bg-layer-2,#8080801a)}.B_Gxsq_dropdownItemActive .B_Gxsq_dropdownCountActive{color:var(--dsw-alias-label-primary-foreground,#fff);background:#80808038}";
-		const tagId = "dsh-plugin/Dropdown.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
+		const css$2 = ".B_Gxsq_dropdown{flex-shrink:0;display:inline-flex;position:relative}.B_Gxsq_dropdownBtn{height:24px;color:var(--hub-text-primary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;border-radius:6px;align-items:center;gap:6px;padding:0 10px;font-size:12px;line-height:22px;transition:background .12s;display:inline-flex}.B_Gxsq_dropdownBtn:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownArrow,.B_Gxsq_dropdownArrowOpen{color:var(--hub-text-tertiary);justify-content:center;align-items:center;transition:transform .12s;display:inline-flex}.B_Gxsq_dropdownArrowOpen{transform:rotate(180deg)}.B_Gxsq_dropdownPanel{z-index:50;background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:8px;flex-direction:column;gap:2px;min-width:100%;padding:4px;display:flex;position:absolute;top:calc(100% + 4px);left:0;box-shadow:0 8px 24px #00000024}.B_Gxsq_dropdownItem,.B_Gxsq_dropdownItemActive{cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;text-align:left;border:none;border-radius:6px;justify-content:space-between;align-items:center;gap:10px;padding:4px 9px;font-size:12px;line-height:18px;transition:background .12s,color .12s;display:flex}.B_Gxsq_dropdownItem{color:var(--hub-text-primary);background:0 0}.B_Gxsq_dropdownItem:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownItemActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.B_Gxsq_dropdownItemLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownCount,.B_Gxsq_dropdownCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 6px;font-size:10px;line-height:14px}.B_Gxsq_dropdownCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.B_Gxsq_dropdownItemActive .B_Gxsq_dropdownCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}";
+		const tagId$2 = "dsh-plugin/Dropdown.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
 			const tag = document.createElement("style");
 			tag.dataset.plugin = "dsh-plugin";
-			tag.dataset.pluginCss = tagId;
-			tag.textContent = css;
+			tag.dataset.pluginCss = tagId$2;
+			tag.textContent = css$2;
 			document.head.appendChild(tag);
 		}
 		var Dropdown_module_css_default = {
 			"dropdownBtn": "B_Gxsq_dropdownBtn",
 			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
-			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
-			"dropdown": "B_Gxsq_dropdown",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
 			"dropdownLabel": "B_Gxsq_dropdownLabel",
+			"dropdownArrow": "B_Gxsq_dropdownArrow",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
 			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive"
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownItem": "B_Gxsq_dropdownItem",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen"
 		};
 		//#endregion
 		//#region src/client/components/Dropdown.tsx
@@ -1780,7 +1836,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				"aria-haspopup": "listbox",
 				"aria-expanded": open,
 				onClick: () => setOpen((v) => !v)
-			}, (0, react.createElement)("span", { className: Dropdown_module_css_default.dropdownLabel }, current?.label ?? value), (0, react.createElement)("span", { className: open ? Dropdown_module_css_default.dropdownArrowOpen : Dropdown_module_css_default.dropdownArrow }, "▾")), open && (0, react.createElement)("div", {
+			}, (0, react.createElement)("span", { className: Dropdown_module_css_default.dropdownLabel }, current?.label ?? value), (0, react.createElement)("span", { className: open ? Dropdown_module_css_default.dropdownArrowOpen : Dropdown_module_css_default.dropdownArrow }, (0, react.createElement)(ChevronDownIcon))), open && (0, react.createElement)("div", {
 				className: Dropdown_module_css_default.dropdownPanel,
 				role: "listbox"
 			}, options.map((o) => (0, react.createElement)("button", {
@@ -1799,21 +1855,26 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#region src/client/components/CatalogControls.tsx
 		/**
 		* Toolbar above the list: search input + sort dropdown + installed / not
-		* installed filter buttons + the failures entry. All buttons share the
-		* same size (24px high, like the failure-record button).
+		* installed filter buttons + the notifications entry. All buttons share the
+		* same size (24px high, like the notification entry button).
 		*/
-		function CatalogControls({ query, setQuery, sort, setSort, installedFilter, setInstalledFilter, installedCount, notInstalledCount, t, resultText, failCount, onOpenFailures }) {
-			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Section_module_css_default.searchRow }, (0, react.createElement)("input", {
-				className: Section_module_css_default.search,
+		function CatalogControls({ query, setQuery, sort, setSort, installedFilter, setInstalledFilter, installedCount, notInstalledCount, t, resultText, noticeCount, onOpenNotifications }) {
+			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Header_module_css_default.searchRow }, (0, react.createElement)("input", {
+				className: Header_module_css_default.search,
 				type: "search",
 				placeholder: t("search"),
 				value: query,
 				spellCheck: false,
 				onInput: (e) => setQuery(e.target.value)
-			})), (0, react.createElement)("div", { className: Section_module_css_default.controls }, resultText ? (0, react.createElement)("span", { className: Section_module_css_default.filterResults }, ...resultText.split(/(\d+)/).map((part, i) => /^\d+$/.test(part) ? (0, react.createElement)("span", {
+			})), (0, react.createElement)("div", { className: Header_module_css_default.controls }, resultText ? (0, react.createElement)("span", { className: Header_module_css_default.filterResults }, ...resultText.split(/(\d+)/).map((part, i) => /^\d+$/.test(part) ? (0, react.createElement)("span", {
 				key: i,
-				className: Section_module_css_default.resultCount
-			}, part) : part)) : null, Dropdown({
+				className: Header_module_css_default.resultCount
+			}, part) : part)) : null, (0, react.createElement)("button", {
+				className: installedFilter === "all" ? Header_module_css_default.installedBtnActive : Header_module_css_default.installedBtn,
+				onClick: () => setInstalledFilter("all"),
+				title: t("filterAllHint"),
+				"aria-pressed": installedFilter === "all"
+			}, t("all")), Dropdown({
 				value: sort,
 				options: SORTS.map((key) => ({
 					value: key,
@@ -1821,98 +1882,68 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				})),
 				onChange: setSort
 			}), (0, react.createElement)("button", {
-				className: installedFilter === "all" ? Section_module_css_default.installedBtnActive : Section_module_css_default.installedBtn,
-				onClick: () => setInstalledFilter("all"),
-				title: t("filterAllHint"),
-				"aria-pressed": installedFilter === "all"
-			}, t("all")), (0, react.createElement)("button", {
-				className: installedFilter === "installed" ? Section_module_css_default.installedBtnActive : installedCount === 0 ? Section_module_css_default.installedBtnDisabled : Section_module_css_default.installedBtn,
+				className: installedFilter === "installed" ? Header_module_css_default.installedBtnActive : installedCount === 0 ? Header_module_css_default.installedBtnDisabled : Header_module_css_default.installedBtn,
 				onClick: () => setInstalledFilter("installed"),
 				disabled: installedCount === 0,
 				title: installedCount === 0 ? t("filterInstalledNone") : t("filterInstalledHint"),
 				"aria-pressed": installedFilter === "installed"
-			}, t("installed"), (0, react.createElement)("span", { className: installedFilter === "installed" ? Section_module_css_default.segCountActive : Section_module_css_default.segCount }, installedCount)), (0, react.createElement)("button", {
-				className: installedFilter === "notInstalled" ? Section_module_css_default.installedBtnActive : notInstalledCount === 0 ? Section_module_css_default.installedBtnDisabled : Section_module_css_default.installedBtn,
+			}, t("installed"), (0, react.createElement)("span", { className: installedFilter === "installed" ? Header_module_css_default.segCountActive : Header_module_css_default.segCount }, installedCount)), (0, react.createElement)("button", {
+				className: installedFilter === "notInstalled" ? Header_module_css_default.installedBtnActive : notInstalledCount === 0 ? Header_module_css_default.installedBtnDisabled : Header_module_css_default.installedBtn,
 				onClick: () => setInstalledFilter("notInstalled"),
 				disabled: notInstalledCount === 0,
 				title: notInstalledCount === 0 ? t("filterNotInstalledNone") : t("filterNotInstalledHint"),
 				"aria-pressed": installedFilter === "notInstalled"
-			}, t("notInstalled"), (0, react.createElement)("span", { className: installedFilter === "notInstalled" ? Section_module_css_default.segCountActive : Section_module_css_default.segCount }, notInstalledCount)), (0, react.createElement)("button", {
-				className: Section_module_css_default.failBtn,
-				onClick: onOpenFailures,
-				title: t("failuresHint"),
-				"aria-label": t("failuresHint")
-			}, t("failures"), failCount > 0 ? (0, react.createElement)("span", { className: Section_module_css_default.failBadge }, failCount) : null)));
+			}, t("notInstalled"), (0, react.createElement)("span", { className: installedFilter === "notInstalled" ? Header_module_css_default.segCountActive : Header_module_css_default.segCount }, notInstalledCount)), (0, react.createElement)("button", {
+				className: Header_module_css_default.failBtn,
+				onClick: onOpenNotifications,
+				title: t("notificationsHint"),
+				"aria-label": t("notificationsHint")
+			}, t("notificationsBtn"), noticeCount > 0 ? (0, react.createElement)("span", { className: Header_module_css_default.failBadge }, noticeCount) : null)));
 		}
 		//#endregion
-		//#region src/client/components/ProgressStrip.tsx
-		/**
-		* Progress strip + task queue dialog.
-		*
-		* The strip is a summary bar shown while tasks run; clicking it opens a
-		* modal that lists every queued/running install-remove task with its
-		* progress and a cancel button. The modal reuses the error-dialog width
-		* (640px) and grows with its content. No live log pane — pnpm emits
-		* nothing during the git clone/build phase, so a log window would sit
-		* empty; failures surface their full output in the error dialog instead.
-		*/
-		function ProgressStrip({ queue, pendingRestarts, stripSummary, showProgress, setShowProgress, cancelTask, onRestart, restarting, t }) {
-			const title = pendingRestarts.length > 0 ? t("restartPendingTitle") : queue.length > 0 ? t("activeTasksTitle") : t("taskQueueTitle");
-			return (0, react.createElement)("div", { className: Section_module_css_default.progressStrip }, (0, react.createElement)("button", {
-				className: Section_module_css_default.progressStripMain,
-				onClick: () => setShowProgress(true),
-				title: t("runningTask")
-			}, (0, react.createElement)("span", { className: Section_module_css_default.progressStripDot }), (0, react.createElement)("span", { className: Section_module_css_default.progressStripText }, stripSummary), (0, react.createElement)("span", { className: Section_module_css_default.progressStripToggle }, t("progressShow"))), showProgress ? (0, react.createElement)("div", {
-				className: Section_module_css_default.overlay,
-				onClick: (e) => {
-					if (e.target === e.currentTarget) setShowProgress(false);
-				}
-			}, (0, react.createElement)("div", {
-				className: Section_module_css_default.errorModal,
-				role: "dialog",
-				"aria-modal": "true"
-			}, (0, react.createElement)("div", { className: Section_module_css_default.modalHead }, (0, react.createElement)("div", { className: Section_module_css_default.modalTitle }, title), (0, react.createElement)("button", {
-				className: Section_module_css_default.modalClose,
-				"aria-label": t("errorClose"),
-				onClick: () => setShowProgress(false)
-			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Section_module_css_default.modalBody }, queue.length === 0 && pendingRestarts.length === 0 ? (0, react.createElement)("div", { className: Section_module_css_default.failEmpty }, t("taskQueueEmpty")) : (0, react.createElement)("div", { className: Section_module_css_default.queueModalList }, pendingRestarts.length > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.queueSection }, (0, react.createElement)("div", { className: Section_module_css_default.queueSectionTitle }, t("sectionPendingRestart")), pendingRestarts.map((p) => (0, react.createElement)("div", {
-				key: `restart-${p.target}`,
-				className: Section_module_css_default.queueRow
-			}, (0, react.createElement)("div", { className: Section_module_css_default.queueRowHead }, (0, react.createElement)("span", { className: `${Section_module_css_default.failKind} ${p.kind === "uninstall" ? Section_module_css_default.failKindUninstall : Section_module_css_default.failKindInstall}` }, p.kind === "uninstall" ? t("uninstall") : t("install")), (0, react.createElement)("span", {
-				className: Section_module_css_default.queueRowTarget,
-				title: p.target
-			}, p.target)), p.desc ? (0, react.createElement)("div", {
-				className: Section_module_css_default.queueRowDesc,
-				title: p.desc
-			}, p.desc) : null, (0, react.createElement)("div", { className: Section_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Section_module_css_default.pendingRowStatus }, p.kind === "uninstall" ? t("restartPendingHintUninstall") : t("restartPendingHint")), (0, react.createElement)("span", { className: Section_module_css_default.pendingRowActions }, (0, react.createElement)("button", {
-				className: Section_module_css_default.restartLater,
-				disabled: restarting,
-				onClick: () => setShowProgress(false)
-			}, t("restartLater")), (0, react.createElement)("button", {
-				className: Section_module_css_default.restartNow,
-				disabled: restarting,
-				onClick: onRestart
-			}, restarting ? t("restarting") : t("restartNow"))))))) : null, queue.length > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.queueSection }, (0, react.createElement)("div", { className: Section_module_css_default.queueSectionTitle }, t("sectionInProgress")), queue.map((q) => (0, react.createElement)("div", {
-				key: q.id,
-				className: Section_module_css_default.queueRow
-			}, (0, react.createElement)("div", { className: Section_module_css_default.queueRowHead }, (0, react.createElement)("span", { className: `${Section_module_css_default.failKind} ${q.kind === "install" ? Section_module_css_default.failKindInstall : Section_module_css_default.failKindUninstall}` }, q.kind === "install" ? t("install") : t("uninstall")), (0, react.createElement)("span", {
-				className: Section_module_css_default.queueRowTarget,
-				title: q.target
-			}, q.target), (0, react.createElement)("button", {
-				className: Section_module_css_default.stripCancel,
-				disabled: q.status === "cancelling",
-				onClick: (e) => {
-					e.stopPropagation();
-					cancelTask(q.id);
-				}
-			}, t("cancelTask"))), q.desc ? (0, react.createElement)("div", {
-				className: Section_module_css_default.queueRowDesc,
-				title: q.desc
-			}, q.desc) : null, (0, react.createElement)("div", { className: Section_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Section_module_css_default.queueRowStatus }, q.status === "running" ? q.kind === "install" ? t("installing") : t("uninstalling") : q.status === "cancelling" ? t("cancelling") : q.kind === "install" ? t("queuedTitle") : t("queuedUninstallTitle")), (0, react.createElement)("div", { className: `${Section_module_css_default.progressTrack} ${Section_module_css_default.queueRowTrack}` }, (0, react.createElement)("div", {
-				className: Section_module_css_default.progressFill,
-				style: { width: `${q.progress}%` }
-			})), (0, react.createElement)("span", { className: Section_module_css_default.queueRowPct }, `${q.progress}%`))))) : null)))) : null);
+		//#region \0dsh-css:src/client/styles/List.module.css.mjs
+		const css$1 = "._3XaZHa_body{flex-direction:column;flex:1;min-height:0;display:flex}._3XaZHa_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}._3XaZHa_card{border:1px solid var(--hub-border-2);background:var(--hub-bg-1);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}._3XaZHa_card:hover{border-color:var(--hub-brand);background:var(--hub-bg-2)}._3XaZHa_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}._3XaZHa_cardHead{align-items:center;gap:6px;min-width:0;display:flex}._3XaZHa_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}._3XaZHa_categoryBadge,._3XaZHa_verified,._3XaZHa_versionBadge,._3XaZHa_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_categoryBadge{color:var(--hub-brand);border-color:var(--hub-border-ghost)}._3XaZHa_verified{color:var(--hub-success);border-color:var(--hub-success-border)}._3XaZHa_versionBadge{color:var(--hub-text-secondary);border-color:var(--hub-border-input)}._3XaZHa_updateBadge{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3XaZHa_desc{color:var(--hub-text-secondary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}._3XaZHa_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}._3XaZHa_topic{color:var(--hub-text-tertiary);background:var(--hub-bg-3);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}._3XaZHa_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}._3XaZHa_star{color:var(--hub-warn);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_fork{color:var(--hub-text-tertiary);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_date{color:var(--hub-text-tertiary);white-space:nowrap;font-size:10px;line-height:14px}._3XaZHa_installBtn,._3XaZHa_installBtnCopied,._3XaZHa_installBtnInstalled,._3XaZHa_installBtnUpdate,._3XaZHa_uninstallBtn,._3XaZHa_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}._3XaZHa_installBtnInstalled{color:var(--hub-success);background:var(--hub-success-tint);cursor:default;-webkit-user-select:none;user-select:none;border:none}._3XaZHa_installBtnUpdate{color:#fff;background:var(--hub-warn);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtnUpdate:hover{background:var(--hub-warn-strong)}._3XaZHa_uninstallBtn{color:var(--hub-danger);-webkit-user-select:none;user-select:none;background:0 0;border:none}._3XaZHa_uninstallBtn:hover{color:#fff;background:var(--hub-danger)}._3XaZHa_installBtn{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtn:hover{background:var(--hub-btn-hover)}._3XaZHa_detailBtn{color:var(--hub-text-secondary);-webkit-user-select:none;user-select:none;background:0 0;border:none;align-items:center;text-decoration:none;display:inline-flex}._3XaZHa_detailBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_actions{align-items:center;gap:6px;display:flex}._3XaZHa_installBtnCopied{color:var(--hub-success);background:var(--hub-success-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_state{text-align:center;min-height:160px;color:var(--hub-text-tertiary);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}._3XaZHa_stateTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600}._3XaZHa_stateDesc{max-width:420px}._3XaZHa_retryBtn{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;margin-top:4px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_retryBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_footer{border-top:1px solid var(--hub-border-1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}._3XaZHa_footLink{color:var(--hub-brand);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}._3XaZHa_footLink:hover{text-decoration:underline}";
+		const tagId$1 = "dsh-plugin/List.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$1;
+			tag.textContent = css$1;
+			document.head.appendChild(tag);
 		}
+		var List_module_css_default = {
+			"cardMain": "_3XaZHa_cardMain",
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"installBtn": "_3XaZHa_installBtn",
+			"footer": "_3XaZHa_footer",
+			"topic": "_3XaZHa_topic",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"state": "_3XaZHa_state",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"star": "_3XaZHa_star",
+			"footLink": "_3XaZHa_footLink",
+			"card": "_3XaZHa_card",
+			"fork": "_3XaZHa_fork",
+			"date": "_3XaZHa_date",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"body": "_3XaZHa_body",
+			"desc": "_3XaZHa_desc",
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"cardSide": "_3XaZHa_cardSide",
+			"actions": "_3XaZHa_actions",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"cardHead": "_3XaZHa_cardHead",
+			"list": "_3XaZHa_list",
+			"topics": "_3XaZHa_topics",
+			"verified": "_3XaZHa_verified",
+			"stats": "_3XaZHa_stats",
+			"stateDesc": "_3XaZHa_stateDesc"
+		};
 		//#endregion
 		//#region src/client/lib/format.ts
 		/** 星数/分支数的紧凑展示：<1k 原样；千级 1.2k；十万级取整。 */
@@ -1944,37 +1975,37 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const isInstalled = installedName(p) !== null;
 			const update = hasUpdate(p);
 			const versionShown = isInstalled ? installedVersion(p) : p.version;
-			return (0, react.createElement)("div", { className: Section_module_css_default.card }, (0, react.createElement)("div", { className: Section_module_css_default.cardMain }, (0, react.createElement)("div", { className: Section_module_css_default.cardHead }, (0, react.createElement)("div", {
-				className: Section_module_css_default.cardTitle,
+			return (0, react.createElement)("div", { className: List_module_css_default.card }, (0, react.createElement)("div", { className: List_module_css_default.cardMain }, (0, react.createElement)("div", { className: List_module_css_default.cardHead }, (0, react.createElement)("div", {
+				className: List_module_css_default.cardTitle,
 				title: p.description ?? ""
 			}, p.displayName ?? p.slug), versionShown ? (0, react.createElement)("span", {
-				className: Section_module_css_default.versionBadge,
+				className: List_module_css_default.versionBadge,
 				title: t("version")
 			}, versionShown) : null, update ? (0, react.createElement)("span", {
-				className: Section_module_css_default.updateBadge,
+				className: List_module_css_default.updateBadge,
 				title: t("updateAvailableHint")
-			}, t("updateAvailable")) : null, p.category ? (0, react.createElement)("span", { className: Section_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: Section_module_css_default.verified }, t("verified")) : null), p.description && (langKey === "zh" || !/[\u4e00-\u9fff]/.test(p.description)) ? (0, react.createElement)("p", { className: Section_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: Section_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
+			}, t("updateAvailable")) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null), p.description && (langKey === "zh" || !/[\u4e00-\u9fff]/.test(p.description)) ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
 				key: topic,
-				className: Section_module_css_default.topic
-			}, topic))) : null), (0, react.createElement)("div", { className: Section_module_css_default.cardSide }, (0, react.createElement)("div", { className: Section_module_css_default.stats }, (0, react.createElement)("span", { className: Section_module_css_default.star }, "★ ", fmtStars(p.stats?.stargazers_count)), (0, react.createElement)("span", { className: Section_module_css_default.fork }, t("fork"), " ", fmtStars(p.stats?.forks_count)), (0, react.createElement)("span", { className: Section_module_css_default.date }, relTime(p.dates?.repoUpdatedAt, t))), repo ? (0, react.createElement)("div", { className: Section_module_css_default.actions }, (0, react.createElement)("a", {
-				className: Section_module_css_default.detailBtn,
+				className: List_module_css_default.topic
+			}, topic))) : null), (0, react.createElement)("div", { className: List_module_css_default.cardSide }, (0, react.createElement)("div", { className: List_module_css_default.stats }, (0, react.createElement)("span", { className: List_module_css_default.star }, "★ ", fmtStars(p.stats?.stargazers_count)), (0, react.createElement)("span", { className: List_module_css_default.fork }, t("fork"), " ", fmtStars(p.stats?.forks_count)), (0, react.createElement)("span", { className: List_module_css_default.date }, relTime(p.dates?.repoUpdatedAt, t))), repo ? (0, react.createElement)("div", { className: List_module_css_default.actions }, (0, react.createElement)("a", {
+				className: List_module_css_default.detailBtn,
 				href: pluginDetailUrl(p, langPath),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: p.slug
 			}, t("detail")), isInstalled ? update ? (0, react.createElement)("button", {
-				className: Section_module_css_default.installBtnUpdate,
+				className: List_module_css_default.installBtnUpdate,
 				title: t("updateAvailableHint"),
 				onClick: () => onInstall(p)
 			}, t("update")) : (0, react.createElement)("button", {
-				className: Section_module_css_default.installBtnInstalled,
+				className: List_module_css_default.installBtnInstalled,
 				disabled: true,
 				title: t("installed")
 			}, t("installed")) : (0, react.createElement)("button", {
-				className: isCopied ? Section_module_css_default.installBtnCopied : Section_module_css_default.installBtn,
+				className: isCopied ? List_module_css_default.installBtnCopied : List_module_css_default.installBtn,
 				onClick: () => onInstall(p)
 			}, t("install")), isInstalled ? (0, react.createElement)("button", {
-				className: Section_module_css_default.uninstallBtn,
+				className: List_module_css_default.uninstallBtn,
 				onClick: () => onUninstall(p)
 			}, t("uninstall")) : null) : null));
 		}
@@ -1992,13 +2023,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			(0, react.useEffect)(() => {
 				listRef.current?.scrollTo({ top: 0 });
 			}, [category, installedFilter]);
-			return (0, react.createElement)("div", { className: Section_module_css_default.body }, (0, react.createElement)("div", {
+			return (0, react.createElement)("div", { className: List_module_css_default.body }, (0, react.createElement)("div", {
 				ref: listRef,
-				className: Section_module_css_default.list
-			}, plugins === null && !failed && (0, react.createElement)("div", { className: Section_module_css_default.state }, t("loading")), failed && (0, react.createElement)("div", { className: Section_module_css_default.state }, (0, react.createElement)("div", { className: Section_module_css_default.stateTitle }, t("failed")), (0, react.createElement)("div", { className: Section_module_css_default.stateDesc }, t("failedDesc")), (0, react.createElement)("button", {
-				className: Section_module_css_default.retryBtn,
+				className: List_module_css_default.list
+			}, plugins === null && !failed && (0, react.createElement)("div", { className: List_module_css_default.state }, t("loading")), failed && (0, react.createElement)("div", { className: List_module_css_default.state }, (0, react.createElement)("div", { className: List_module_css_default.stateTitle }, t("failed")), (0, react.createElement)("div", { className: List_module_css_default.stateDesc }, t("failedDesc")), (0, react.createElement)("button", {
+				className: List_module_css_default.retryBtn,
 				onClick: () => reload()
-			}, t("retry"))), plugins !== null && !failed && visible.length === 0 && (0, react.createElement)("div", { className: Section_module_css_default.state }, (0, react.createElement)("div", { className: Section_module_css_default.stateTitle }, t("noResult")), (0, react.createElement)("div", { className: Section_module_css_default.stateDesc }, t("noResultDesc"))), plugins !== null && !failed && visible.map((p) => (0, react.createElement)(PluginCard, {
+			}, t("retry"))), plugins !== null && !failed && visible.length === 0 && (0, react.createElement)("div", { className: List_module_css_default.state }, (0, react.createElement)("div", { className: List_module_css_default.stateTitle }, t("noResult")), (0, react.createElement)("div", { className: List_module_css_default.stateDesc }, t("noResultDesc"))), plugins !== null && !failed && visible.map((p) => (0, react.createElement)(PluginCard, {
 				key: p.ownerSlug ? `${p.ownerSlug}/${p.slug}` : p.slug,
 				plugin: p,
 				copied,
@@ -2010,8 +2041,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				langPath,
 				onInstall,
 				onUninstall
-			}))), plugins !== null && !failed && (0, react.createElement)("div", { className: Section_module_css_default.footer }, (0, react.createElement)("a", {
-				className: Section_module_css_default.footLink,
+			}))), plugins !== null && !failed && (0, react.createElement)("div", { className: List_module_css_default.footer }, (0, react.createElement)("a", {
+				className: List_module_css_default.footLink,
 				href: `https://dsh-plugin.org/${langPath}`,
 				target: "_blank",
 				rel: "noopener noreferrer"
@@ -2051,9 +2082,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [restarting, setRestarting] = (0, react.useState)(false);
 			/** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」） */
 			const [errorMsg, setErrorMsg] = (0, react.useState)(null);
-			/** 安装/卸载失败记录：localStorage 持久化，失败即落盘，即使错过弹窗也能回来查看 */
-			const [failures, setFailures] = (0, react.useState)(() => loadFailures());
-			const [showFailures, setShowFailures] = (0, react.useState)(false);
+			/** 安装/卸载任务通知记录：localStorage 持久化，成败即落盘，即使错过弹窗也能回来查看 */
+			const [notifications, setNotifications] = (0, react.useState)(() => loadNotifications());
+			const [showNotifications, setShowNotifications] = (0, react.useState)(false);
 			/** 宿主机器环境快照：提交 bug 的 issue 正文附带；取不到为 null（链接少环境段，不阻塞） */
 			const [env, setEnv] = (0, react.useState)(null);
 			(0, react.useEffect)(() => {
@@ -2068,21 +2099,35 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const queue = useTaskQueue({
 				t,
 				refreshInstalled: catalog.refreshInstalled,
-				onInstallDone: (viaModal) => viaModal ? setInstallDone(true) : setToast({
-					id: Date.now(),
-					kind: "done"
-				}),
-				onUninstallDone: (viaModal) => viaModal ? setUninstallDone(true) : setToast({
-					id: Date.now(),
-					kind: "removed"
-				}),
+				onInstallDone: (viaModal, repo) => {
+					if (viaModal) setInstallDone(true);
+					else setToast({
+						id: Date.now(),
+						kind: "done"
+					});
+					setNotifications(addSuccess({
+						kind: "install",
+						repo: repo ?? ""
+					}));
+				},
+				onUninstallDone: (viaModal, repo) => {
+					if (viaModal) setUninstallDone(true);
+					else setToast({
+						id: Date.now(),
+						kind: "removed"
+					});
+					setNotifications(addSuccess({
+						kind: "uninstall",
+						repo: repo ?? ""
+					}));
+				},
 				onError: (message, repo, kind) => {
 					setErrorMsg({
 						message,
 						repo,
 						kind
 					});
-					setFailures(addFailure({
+					setNotifications(addFailure({
 						kind,
 						repo: repo ?? "",
 						message
@@ -2100,13 +2145,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				}
 			});
 			(0, react.useEffect)(() => {
-				if (!confirmPlugin && !uninstallPlugin && !showFailures) return;
+				if (!confirmPlugin && !uninstallPlugin && !showNotifications) return;
 				const onKey = (e) => {
 					if (e.key === "Escape") {
 						setConfirmPlugin(null);
 						setUninstallPlugin(null);
 						setUninstallDone(false);
-						setShowFailures(false);
+						setShowNotifications(false);
 					}
 				};
 				window.addEventListener("keydown", onKey);
@@ -2114,7 +2159,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, [
 				confirmPlugin,
 				uninstallPlugin,
-				showFailures
+				showNotifications
 			]);
 			(0, react.useEffect)(() => {
 				if (!toast) return;
@@ -2199,7 +2244,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const statsTotal = catalog.stats?.total ?? total;
 			const statsVerified = catalog.stats?.verified ?? 0;
 			const count = catalog.visible.length;
-			return (0, react.createElement)("div", { className: Section_module_css_default.root }, (0, react.createElement)(CatalogHeader, {
+			return (0, react.createElement)("div", { className: Header_module_css_default.root }, (0, react.createElement)(CatalogHeader, {
 				t,
 				langPath,
 				statsTotal,
@@ -2221,21 +2266,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				notInstalledCount: catalog.notInstalledCountInCategory,
 				t,
 				resultText: catalog.plugins === null || catalog.failed ? null : catalog.category === "all" && count === total ? t("pluginsTotal", { n: count }) : t("filterResults", { n: count }),
-				failCount: failures.length,
-				onOpenFailures: () => setShowFailures(true)
-			}), (queue.queue.length > 0 || queue.pendingRestarts.length > 0) && !confirmPlugin && !uninstallPlugin ? (0, react.createElement)(ProgressStrip, {
-				queue: queue.queue,
-				pendingRestarts: queue.pendingRestarts,
-				stripSummary: queue.stripSummary,
-				showProgress: queue.showProgress,
-				setShowProgress: queue.setShowProgress,
-				cancelTask: queue.cancelTask,
-				onRestart: () => {
-					requestRestart();
-				},
-				restarting,
-				t
-			}) : null, (0, react.createElement)(CatalogList, {
+				noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
+				onOpenNotifications: () => setShowNotifications(true)
+			}), (0, react.createElement)(CatalogList, {
 				plugins: catalog.plugins,
 				failed: catalog.failed,
 				visible: catalog.visible,
@@ -2267,6 +2300,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				t,
 				langPath,
 				restarting,
+				submitting: queue.submitting,
 				onClose: () => setConfirmPlugin(null),
 				onCopy: () => copyCommand(confirmPlugin),
 				onInstall: () => queue.installNow(confirmPlugin),
@@ -2280,6 +2314,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				t,
 				langPath,
 				restarting,
+				submitting: queue.submitting,
 				onClose: () => {
 					setUninstallDone(false);
 					setUninstallPlugin(null);
@@ -2299,19 +2334,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				kind: errorMsg.kind,
 				t,
 				env,
-				onCopy: () => {
-					doCopy(errorMsg.message);
-					setToast({
-						id: Date.now(),
-						kind: "errCopied"
-					});
-				},
-				onClose: () => setErrorMsg(null)
-			}), showFailures && (0, react.createElement)(FailuresModal, {
-				records: failures,
-				t,
-				env,
-				onClose: () => setShowFailures(false),
 				onCopy: (text) => {
 					doCopy(text);
 					setToast({
@@ -2319,8 +2341,39 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						kind: "errCopied"
 					});
 				},
-				onClear: () => setFailures(clearFailures())
+				onClose: () => setErrorMsg(null)
+			}), showNotifications && (0, react.createElement)(NotificationsModal, {
+				records: notifications,
+				tasks: queue.queue,
+				pendingRestarts: queue.pendingRestarts,
+				t,
+				env,
+				onClose: () => setShowNotifications(false),
+				onCopy: (text) => {
+					doCopy(text);
+					setToast({
+						id: Date.now(),
+						kind: "errCopied"
+					});
+				},
+				onClear: () => setNotifications(clearNotifications()),
+				cancelTask: queue.cancelTask,
+				restarting,
+				onRestart: () => {
+					requestRestart();
+				}
 			}));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/tokens.module.css.mjs
+		const css = ":root,body[data-ds-dark-theme]{--hub-text-primary:var(--dsw-alias-label-primary,#1f2328);--hub-text-secondary:var(--dsw-alias-label-secondary,#6b7280);--hub-text-tertiary:var(--dsw-alias-label-tertiary,#8b93a1);--hub-text-disabled:var(--dsw-alias-label-disabled,#aab1bd);--hub-text-on-fill:var(--dsw-alias-label-primary-foreground,#fff);--hub-bg-1:var(--dsw-alias-bg-layer-1,#fff);--hub-bg-2:var(--dsw-alias-bg-layer-2,#80808014);--hub-bg-3:#8080801a;--hub-bg-btn:#8080801f;--hub-bg-hover:var(--dsw-alias-interactive-bg-hover,#80808029);--hub-bg-on-fill:#80808038;--hub-border-1:var(--dsw-alias-border-l1,#eceef1);--hub-border-2:var(--dsw-alias-border-l2,#e5e7eb);--hub-border-ghost:var(--dsw-alias-button-ghost-active-border,#4f6ef740);--hub-border-input:var(--dsw-alias-input-border,#6b728040);--hub-brand:var(--dsw-alias-state-business-primary,#4f6ef7);--hub-brand-hover:#3b5bdb;--hub-brand-tint:#4f6ef70f;--hub-brand-tint-strong:#4f6ef71f;--hub-brand-border:#4f6ef759;--hub-brand-border-soft:#4f6ef738;--hub-purple-1:#4f46e5;--hub-purple-2:#7c3aed;--hub-purple-border:#8b5cf68c;--hub-purple-tint:#4f46e514;--hub-purple-shadow:#4f46e547;--hub-purple-shadow-strong:#7c3aed6b;--hub-btn-fill:var(--dsw-alias-button-primary-fill,#1f2328);--hub-btn-hover:var(--dsw-alias-button-primary-hover,#43454a);--hub-success:var(--dsw-alias-state-success-primary,#1a7f37);--hub-success-tint:#22c55e24;--hub-success-border:var(--dsw-alias-state-success-secondary,#1a7f374d);--hub-warn:var(--dsw-alias-state-warn-primary,#b8860b);--hub-warn-tint:#b8860b14;--hub-warn-border:#b8860b59;--hub-warn-strong:#b8860bd9;--hub-warning:var(--dsw-alias-state-warning-primary,#b45309);--hub-warning-tint:#b4530914;--hub-warning-border:#b453094d;--hub-danger:var(--dsw-alias-state-danger-primary,#d1242f);--hub-danger-hover:var(--dsw-alias-state-danger-hover,#b91c1c);--hub-danger-strong:#b0202a;--hub-danger-text:#e5484d;--hub-danger-tint:#e5484d14;--hub-danger-tint-weak:#e5484d0d;--hub-danger-border:#e5484d59;--hub-danger-border-soft:#e5484d47;--hub-danger-soft:#d1242f14}body[data-ds-dark-theme]{--hub-bg-btn:#ffffff1f}";
+		const tagId = "dsh-plugin/tokens.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId;
+			tag.textContent = css;
+			document.head.appendChild(tag);
 		}
 		//#endregion
 		//#region src/client/index.tsx

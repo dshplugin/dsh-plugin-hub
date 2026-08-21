@@ -4,7 +4,7 @@
  * uninstall actions.
  */
 import { createElement as h } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/List.module.css'
 import type { HubPlugin, LocaleId, Translate } from '../types.ts'
 import { CATEGORY_LABELS, categoryLabel, pluginDetailUrl } from '../lib/catalog.ts'
 import { fmtStars, relTime } from '../lib/format.ts'

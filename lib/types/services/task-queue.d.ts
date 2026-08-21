@@ -46,6 +46,16 @@ export declare function startPluginMutation(options: {
     uninstallLoader?: LoaderHandle;
 }): InstallTask;
 /**
+ * 安装后校验已装包的入口文件（package.json 的 main / exports["."].default）是否真实存在。
+ * git: 分发常不提交构建产物（lib/ 等），pnpm 装完没有报错，但宿主重启加载插件树时会
+ * ERR_MODULE_NOT_FOUND 直接崩溃、网页打不开 —— 这里在登记「待重启」前就把这类残缺包拦下。
+ * 返回 { name, missing }：name 为空表示无法定位目标包（跳过校验）；missing 为缺失的入口路径。
+ */
+export declare function verifyInstalledEntry(profile: string, target: string): {
+    name: string | null;
+    missing: string | null;
+};
+/**
  * Run a plugin mutation with one recovery path: when `add` fails because a
  * git-hosted package's `prepare` script is blocked by pnpm's allowBuilds
  * gate (`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`), read the exact allowlist

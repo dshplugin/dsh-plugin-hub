@@ -1,5 +1,5 @@
-/* 自绘下拉（替换原生 <select>）。颜色跟随宿主 --dsw-alias-* 主题变量，
- * 与 Section 的控件（排序/分段）保持一致的描边 + 圆角语言。 */
+/* 自绘下拉（替换原生 <select>）。颜色跟随宿主主题：经 --hub-* 设计令牌解析，
+ * 与 Header 的控件（排序/分段）保持一致的无边框 + 圆角语言。 */
 .dropdown {
   position: relative;
   display: inline-flex;
@@ -14,19 +14,18 @@
   padding: 0 10px;
   font-size: 12px;
   line-height: 22px;
-  color: var(--dsw-alias-label-primary, #1f2328);
-  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.08));
-  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  color: var(--hub-text-primary);
+  background: transparent;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background 120ms ease;
 }
 
 .dropdownBtn:hover {
-  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.16));
-  border-color: var(--dsw-alias-button-ghost-active-border, #d0d4da);
+  background: var(--hub-bg-hover);
 }
 
 .dropdownLabel {
@@ -37,9 +36,10 @@
 
 .dropdownArrow,
 .dropdownArrowOpen {
-  font-size: 10px;
-  line-height: 1;
-  color: var(--dsw-alias-label-tertiary, #8b93a1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hub-text-tertiary);
   transition: transform 120ms ease;
 }
 
@@ -57,8 +57,8 @@
   flex-direction: column;
   gap: 2px;
   padding: 4px;
-  background: var(--dsw-alias-bg-layer-1, #ffffff);
-  border: 1px solid var(--dsw-alias-border-l2, #e5e7eb);
+  background: var(--hub-bg-1);
+  border: 1px solid var(--hub-border-2);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
 }
@@ -82,18 +82,18 @@
 }
 
 .dropdownItem {
-  color: var(--dsw-alias-label-primary, #1f2328);
+  color: var(--hub-text-primary);
   background: transparent;
 }
 
 /* 悬浮选项：明显加重底色，保证「看得见、点得准」。 */
 .dropdownItem:hover {
-  background: var(--dsw-alias-interactive-bg-hover, rgba(128, 128, 128, 0.18));
+  background: var(--hub-bg-hover);
 }
 
 .dropdownItemActive {
-  color: var(--dsw-alias-label-primary-foreground, #fff);
-  background: var(--dsw-alias-button-primary-fill, #1f2328);
+  color: var(--hub-text-on-fill);
+  background: var(--hub-btn-fill);
 }
 
 .dropdownItemLabel {
@@ -113,11 +113,11 @@
 }
 
 .dropdownCount {
-  color: var(--dsw-alias-label-tertiary, #8b93a1);
-  background: var(--dsw-alias-bg-layer-2, rgba(128, 128, 128, 0.1));
+  color: var(--hub-text-tertiary);
+  background: var(--hub-bg-btn);
 }
 
 .dropdownItemActive .dropdownCountActive {
-  color: var(--dsw-alias-label-primary-foreground, #fff);
-  background: rgba(128, 128, 128, 0.22);
+  color: var(--hub-text-on-fill);
+  background: var(--hub-bg-on-fill);
 }

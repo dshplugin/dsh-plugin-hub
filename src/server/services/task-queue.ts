@@ -4,14 +4,15 @@
  * 输出流式收集到任务上；卸载成功时尝试从运行中 loader 即时停用（见 loader.ts）。
  */
 import { spawn } from 'node:child_process'
-import { dirname, resolve } from 'node:path'
+import { readFileSync, statSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 import type { InstallResult, InstallTask, Invocation, QueueItem } from './install-types.ts'
 import { CAPTURE_LIMIT_BYTES, MAX_TASKS, MAX_TASK_LINES } from './install-types.ts'
 import { cleanLine, estimateProgress } from './progress.ts'
 import type { LoaderHandle } from './loader.ts'
 import { removeLoadedEntry } from './loader.ts'
 import { addPendingRestart, clearPendingRestart } from './pending-restart.ts'
-import { addAllowBuildsKey, parseAllowBuildsKey } from './profile.ts'
+import { addAllowBuildsKey, parseAllowBuildsKey, profileDirectory } from './profile.ts'
 
 /** In-memory task registry, keyed by task id. */
 const tasks = new Map<number, InstallTask>()
@@ -353,6 +354,46 @@ function spawnMutation(options: {
 }
 
 /**
+ * 安装后校验已装包的入口文件（package.json 的 main / exports["."].default）是否真实存在。
+ * git: 分发常不提交构建产物（lib/ 等），pnpm 装完没有报错，但宿主重启加载插件树时会
+ * ERR_MODULE_NOT_FOUND 直接崩溃、网页打不开 —— 这里在登记「待重启」前就把这类残缺包拦下。
+ * 返回 { name, missing }：name 为空表示无法定位目标包（跳过校验）；missing 为缺失的入口路径。
+ */
+export function verifyInstalledEntry(profile: string, target: string): { name: string | null; missing: string | null } {
+  let profilePkg: Record<string, unknown> | null = null
+  try {
+    profilePkg = JSON.parse(readFileSync(join(profileDirectory(profile), 'package.json'), 'utf8')) as Record<string, unknown>
+  } catch {
+    return { name: null, missing: null }
+  }
+  const deps = (profilePkg?.dependencies ?? {}) as Record<string, string>
+  // target 自身是依赖名（npm 包），或通过 github: specifier 反查依赖名
+  const name = deps[target] !== undefined ? target : Object.keys(deps).find((k) => deps[k] === target)
+  if (!name) return { name: null, missing: null }
+  const pkgDir = join(profileDirectory(profile), 'node_modules', name)
+  let entry: string | null = null
+  try {
+    const meta = JSON.parse(readFileSync(join(pkgDir, 'package.json'), 'utf8')) as {
+      main?: unknown
+      exports?: unknown
+    }
+    const dot = (meta.exports as Record<string, unknown> | undefined)?.['.']
+    const resolved = typeof dot === 'string' ? dot
+      : dot !== null && typeof dot === 'object'
+        ? (dot as Record<string, unknown>).default
+        : undefined
+    entry = typeof resolved === 'string' ? resolved : typeof meta.main === 'string' ? meta.main : 'index.js'
+  } catch {
+    return { name, missing: null }
+  }
+  try {
+    return { name, missing: statSync(join(pkgDir, entry)).isFile() ? null : entry }
+  } catch {
+    return { name, missing: entry }
+  }
+}
+
+/**
  * Run a plugin mutation with one recovery path: when `add` fails because a
  * git-hosted package's `prepare` script is blocked by pnpm's allowBuilds
  * gate (`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`), read the exact allowlist
@@ -387,6 +428,22 @@ export async function runPluginMutation(options: {
         addAllowBuildsKey(options.profile, key)
         return spawnMutation(options)
       }
+    }
+  }
+  // pnpm 安装本身成功，但目标包入口文件缺失（git 分发缺构建产物）→ 判为失败：
+  // 撤销刚登记的待重启，避免用户重启时宿主加载残缺包直接崩溃
+  if (options.action === 'add' && result.exitCode === 0 && !result.timedOut) {
+    const verified = verifyInstalledEntry(options.profile, options.target)
+    if (verified.name !== null && verified.missing !== null) {
+      clearPendingRestart(options.displayTarget ?? options.target)
+      const detail = `[packaging] ${verified.name}: entry file missing: ${verified.missing} (git distribution lacks build output — install the npm version or report to the author)`
+      if (options.task && options.task.status !== 'cancelled') {
+        options.task.status = 'failed'
+        options.task.exitCode = null
+        options.task.progress = 0
+        pushLine(options.task, detail)
+      }
+      return { exitCode: 1, timedOut: false, error: `entry file missing: ${verified.missing}`, stdout: result.stdout, stderr: `${result.stderr}\n${detail}` }
     }
   }
   return result

@@ -41,9 +41,9 @@ export interface PendingRestart {
 export interface TaskQueueOptions {
   t: Translate
   refreshInstalled: () => void
-  /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast。 */
-  onInstallDone: (viaModal: boolean) => void
-  onUninstallDone: (viaModal: boolean) => void
+  /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录。 */
+  onInstallDone: (viaModal: boolean, repo: string | null) => void
+  onUninstallDone: (viaModal: boolean, repo: string | null) => void
   /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）。 */
   onError: (message: string, repo: string | null, kind: 'install' | 'uninstall') => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
@@ -73,8 +73,11 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   const modalTaskRef = useRef<number | null>(null)
   /** 轮询定时器句柄（队列清空/组件卸载时清理） */
   const pollRef = useRef<number | null>(null)
-  /** 进行中状态条是否展开（刷新后恢复的任务可点击展开查看实时输出） */
-  const [showProgress, setShowProgress] = useState(false)
+  /** 请求在途的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
+   *  本地队列任务要等 fetch 返回后才入队，仅靠 queueRef 检查拦不住请求窗口内的重复点击。 */
+  const submittingRef = useRef<Set<string>>(new Set())
+  /** 请求在途标记：弹窗据此禁用确认按钮，避免等待响应期间被再次点击。 */
+  const [submitting, setSubmitting] = useState(false)
 
   /** 停止后台任务轮询（任务结束或组件卸载时清理）。 */
   const stopPoll = () => {
@@ -153,13 +156,13 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       if (q.kind === 'uninstall') {
         // 卸载成功：清掉本地版本记录
         void syncInstalledVersion(q.repo, undefined, undefined)
-        onUninstallDone(modalTaskRef.current === q.id)
+        onUninstallDone(modalTaskRef.current === q.id, q.repo)
       } else {
         // 安装成功：记录安装时的目录信号（版本 + 仓库更新时间），供「有更新」比对；
         // 同时缓存展示信息，待重启列表（服务端已登记）合并时直接补齐简介/版本
         void syncInstalledVersion(q.repo, q.version, q.updatedAt)
         pendingInfoRef.current.set(q.target, { desc: q.desc, version: q.version })
-        onInstallDone(modalTaskRef.current === q.id)
+        onInstallDone(modalTaskRef.current === q.id, q.repo)
       }
     } else {
       // 失败：完整展示全部输出行（最新在前，逆序为日志阅读顺序），不裁剪
@@ -288,6 +291,10 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     if (!repo) return
     // 防重复入队：同一目标已在排队/执行中则忽略
     if (queueRef.current.some((q) => q.kind === 'install' && q.target === repo)) return
+    // 请求在途防重：任务要等响应回来才进本地队列，这之前再次点击（双击）直接忽略
+    if (submittingRef.current.has(repo)) return
+    submittingRef.current.add(repo)
+    setSubmitting(true)
     try {
       const res = await fetch('/dsh-plugin-hub/install', {
         method: 'POST',
@@ -302,13 +309,16 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       }
       const taskId = data.task
       modalTaskRef.current = taskId
-      applyQueue((prev) => [...prev, { id: taskId, kind: 'install', target: repo, desc: p.description, repo, version: p.version, updatedAt: p.dates?.repoUpdatedAt, status: 'pending', progress: 0, lines: [] }])
+      applyQueue((prev) => [...prev, { id: taskId, kind: 'install', target: repo, repo, desc: p.description, version: p.version, updatedAt: p.dates?.repoUpdatedAt, status: 'pending', progress: 0, lines: [] }])
       // 提前缓存展示信息：安装成功后服务端登记待重启，轮询合并时不用等目录解析
       pendingInfoRef.current.set(repo, { desc: p.description, version: p.version })
       // 摘要条常驻顶部（含实时进度），明细面板保持折叠，想看时再点开
       pollQueue()
     } catch {
       onError(t('installFail'), repo, 'install')
+    } finally {
+      submittingRef.current.delete(repo)
+      setSubmitting(false)
     }
   }
 
@@ -318,6 +328,10 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     if (!name) return
     const repo = p.source?.repo ?? null
     if (queueRef.current.some((q) => q.kind === 'uninstall' && q.target === name)) return
+    // 请求在途防重：与安装一致，响应回来前再次点击直接忽略
+    if (submittingRef.current.has(name)) return
+    submittingRef.current.add(name)
+    setSubmitting(true)
     try {
       const res = await fetch('/dsh-plugin-hub/uninstall', {
         method: 'POST',
@@ -336,6 +350,9 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       pollQueue()
     } catch {
       onError(t('uninstallFail'), repo, 'uninstall')
+    } finally {
+      submittingRef.current.delete(name)
+      setSubmitting(false)
     }
   }
 
@@ -374,27 +391,12 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       ?? null)
     : null
 
-  // 状态条摘要：有待重启任务时置顶提醒（常驻不消失），其次当前任务类型 + 进度 + 排队数
-  const running = queue.find((q) => q.status === 'running')
-  const queued = queue.filter((q) => q.status === 'pending').length
-  const pendingCount = pendingRestarts.length
-  const runningText = running
-    ? `${(running.kind === 'install' ? t('runningInstall') : t('runningUninstall'))} ${running.progress}%${queued > 0 ? ` · ${t('queueMore', { n: queued })}` : ''}`
-    : null
-  const stripSummary = pendingCount > 0
-    ? (runningText ? `${t('restartPendingStrip', { n: pendingCount })} · ${runningText}` : t('restartPendingStrip', { n: pendingCount }))
-    : (runningText ?? t('queueWaiting', { n: queue.length }))
-
   return {
     queue,
     pendingRestarts,
-    running,
-    pendingCount,
-    stripSummary,
     installModalTask,
     uninstallModalTask,
-    showProgress,
-    setShowProgress,
+    submitting,
     installNow,
     uninstallNow,
     cancelTask,

@@ -7,6 +7,7 @@ import { createElement as h } from 'react'
 import type { HubClientContext } from './types.ts'
 import { en, zh } from './locales.ts'
 import { PluginHubSection } from './components/PluginHubSection.tsx'
+import './styles/tokens.module.css'
 
 const NS = 'dsh-plugin'
 

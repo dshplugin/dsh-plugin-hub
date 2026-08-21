@@ -5,7 +5,7 @@
  * not mistaken for a no-op update.
  */
 import { createElement as h, useEffect, useRef } from 'react'
-import styles from '../styles/Section.module.css'
+import styles from '../styles/List.module.css'
 import type { HubPlugin, LocaleId, Translate } from '../types.ts'
 import { SITE_URL } from '../lib/catalog.ts'
 import { PluginCard } from './PluginCard.tsx'

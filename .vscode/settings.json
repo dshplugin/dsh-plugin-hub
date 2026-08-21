@@ -1,0 +1,19 @@
+{
+  // 构建产物与依赖目录不监听、不全文索引：
+  // reload/dev 每次执行 `rm -rf lib && tsc` + tsdown 都会整目录删除重建，
+  // 若 IDE 监听/索引这些目录会触发 ripgrep 多进程并行重扫，导致 CPU 100%。
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/node_modules/**": true,
+    "**/lib/**": true,
+    "**/client/**": true,
+    "**/coverage/**": true
+  },
+  "search.exclude": {
+    "**/.git/**": true,
+    "**/node_modules/**": true,
+    "**/lib/**": true,
+    "**/client/**": true,
+    "**/coverage/**": true
+  }
+}
