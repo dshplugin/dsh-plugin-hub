@@ -29,16 +29,55 @@
 DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="docs/assets/screenshot-plugin-hub-en.png" alt="DSH-Plugin Hub inside DeepSeek Harness" width="840">
+  <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-dark-en.png" alt="DSH-Plugin Hub inside DeepSeek Harness" width="840">
 </p>
 
 ## Plugin Hub Features
 
-- **Native integration** — lives inside Harness **Settings → Plugin Hub**, with a bilingual UI that follows your system language
-- **Curated · updated daily** — indexes **4,261** community plugins, **2,487** of which are hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
-- **Always in sync** — same data source as the website; the catalog updates automatically, no manual upgrade needed
-- **One-click access** — open any plugin's detail page instantly; share and bookmark from your browser
-- **Lightweight & private** — browser-side only, no host dependencies, no telemetry, no data collection
+**One-click everything · fully visualized**
+
+- **One-click install** — click and done: a serial background queue with live progress in the dialog, cancellable anytime; most plugins take effect on page refresh, no restart needed
+- **One-click upgrade** — new versions are detected automatically; the card turns into "Update" and overwrite-installs in one click
+- **One-click uninstall** — fully visualized with live progress; changes take effect immediately
+- **Full trace** — every install / upgrade / uninstall, success or failure, is recorded in the notification center for later review
+
+**Notification center**
+
+- Live progress and cancel for running tasks, pending restarts, and full success / failure history in one place
+- Failed installs can be filed as a GitHub Issue in one click; pending restarts offer "later" or "restart now"
+
+**Rich catalog · human-curated**
+
+- Indexes **4,261** community plugins, **2,487** of which are hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
+- Covers UI & experience, sessions & messages, memory & context, tooling and more — browse by category or search straight to it
+- Every plugin shows its verification status (verified), star / fork ratings, version and last-update time — fully sourced
+
+**Bilingual · easy to filter**
+
+- The UI follows your system language by default and switches manually anytime from the top-right; copy and plugin data switch together
+- Sort by popularity / newest / earliest indexed, with bilingual descriptions and capability tags at a glance
+- Filter by installed / not installed and search across names, descriptions and tags
+
+**Always in sync · lightweight & private**
+
+- Same data source as the website; the catalog updates automatically, no manual upgrade needed
+- Browser-side only, no host dependencies, no telemetry, no data collection
+
+## Feature Highlights
+
+| Visual install & uninstall | Visual notifications |
+| :---: | :---: |
+| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-uninstall.png" alt="Visual install and uninstall" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications.png" alt="Visual notifications" width="400"> |
+| Install, update and remove are fully visualized: live progress at a glance, cancellable anytime | Running tasks, pending restarts and full success/failure history in one place; failed installs can be filed as a GitHub Issue in one click |
+
+## Website Overview
+
+The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugin.org) and stays in sync with the site; on the website you can also see plugin details, ratings and links back to their GitHub sources.
+
+| Homepage | Browse by category |
+| :---: | :---: |
+| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-site-home.png" alt="DSH-Plugin website homepage" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH-Plugin category browsing" width="400"> |
+| Same data source as the hub — human-verified, updated daily | Browse every indexed plugin by category, search straight to it |
 
 ## Why DSH-Plugin Hub
 
@@ -81,26 +120,6 @@ Restart `dsh web` after installing, then open **Settings → Plugin Hub** to bro
 ## Submit your DSH plugin
 
 Publish your plugin to GitHub and add the `dsh-plugin` topic — it will be discovered and indexed automatically. Requirements and the submission flow are on the [Submit a Plugin](https://dsh-plugin.org/submit) page.
-
-## Development
-
-```bash
-npm install
-npm run check        # typecheck + build
-npm run build        # build client/client.js (committed artifact)
-npm run readme:stats # refresh README plugin counts from the live website API
-```
-
-Structure:
-
-```
-src/client/       browser-side plugin (registers the settings.section slot)
-lib/index.js      host loader entry (placeholder)
-client/client.js  tsdown build artifact (committed & published)
-cordis.patch.yml  dsh bundle patch (injects the plugin line into profiles)
-scripts/run/     launch/reload scripts (dev, reload)
-scripts/tools/   build & release tooling (banner check, stats sync, release verify)
-```
 
 ## Contributing
 

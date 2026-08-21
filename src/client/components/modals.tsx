@@ -59,6 +59,8 @@ export interface InstallModalProps {
   t: Translate
   langPath: string
   restarting: boolean
+  /** 已安装插件的覆盖更新（走同一条 add 命令原位重装，文案区分安装/更新） */
+  update: boolean
   /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
   onClose: () => void
@@ -72,14 +74,18 @@ export interface InstallModalProps {
  * 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, submitting, onClose, onCopy, onInstall, onRestart } = props
+  const { plugin, done, task, t, langPath, restarting, submitting, update, onClose, onCopy, onInstall, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分
   const name = plugin.displayName ?? plugin.slug
   const busyTitle = (label: string) => langPath === 'zh/' ? `${name} 插件${label}` : `${label} ${name}`
   const title = busy
-    ? task && task.status === 'pending' ? busyTitle(t('queuedTitle')) : busyTitle(t('installing'))
-    : done ? t('installResultTitle') : t('confirmTitle')
+    ? task && task.status === 'pending'
+      ? busyTitle(update ? t('queuedUpdateTitle') : t('queuedTitle'))
+      : busyTitle(update ? t('updating') : t('installing'))
+    : done
+      ? update ? t('updateResultTitle') : t('installResultTitle')
+      : update ? t('confirmUpdateTitle') : t('confirmTitle')
   return h('div', {
     className: styles.overlay,
     onClick: (e: MouseEvent<HTMLDivElement>) => {
@@ -100,10 +106,10 @@ export function InstallModal(props: InstallModalProps) {
         }, h(CloseIcon)),
       ),
       done
-        // 安装完成：结果视图（成功即生效，仅「完成」关闭）
+        // 安装完成：结果视图（成功即生效，仅「完成」关闭）；更新时标题/描述区分语义
         ? h(ResultView, {
-          title: t('installResultTitle'),
-          desc: t('installResultDesc'),
+          title: update ? t('updateResultTitle') : t('installResultTitle'),
+          desc: update ? t('updateResultDesc') : t('installResultDesc'),
           t,
           restarting,
           onRestart,
@@ -151,7 +157,11 @@ export function InstallModal(props: InstallModalProps) {
               className: styles.modalInstall,
               disabled: busy,
               onClick: onInstall,
-            }, busy ? (task && task.status === 'pending' ? t('queuedTitle') : t('installing')) : t('installNow')),
+            }, busy
+              ? (task && task.status === 'pending'
+                ? (update ? t('queuedUpdateTitle') : t('queuedTitle'))
+                : (update ? t('updating') : t('installing')))
+              : (update ? t('updateNow') : t('installNow'))),
           ),
         ),
     ),
@@ -194,7 +204,8 @@ export function UninstallModal(props: UninstallModalProps) {
       h('div', { className: styles.modalHead },
         h('div', {
           className: busy
-            ? `${styles.modalTitle} ${task!.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
+            // 注意 task 判空：submitting（请求在途）时任务尚未入队，task 为 null，不能直接解引用
+            ? `${styles.modalTitle} ${task !== null && task.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
             : styles.modalTitle,
         }, title),
         h('button', {

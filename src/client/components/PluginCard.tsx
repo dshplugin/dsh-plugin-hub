@@ -20,7 +20,8 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
   t: Translate
   langKey: LocaleId
   langPath: string
-  onInstall: (p: HubPlugin) => void
+  /** 第二个参数标记「更新」（已安装目标的覆盖安装）：按钮/弹窗据此走更新语义 */
+  onInstall: (p: HubPlugin, opts?: { update?: boolean }) => void
   onUninstall: (p: HubPlugin) => void
 }) {
   const repo = p.source?.repo ?? ''
@@ -76,7 +77,7 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
               ? h('button', {
                 className: styles.installBtnUpdate,
                 title: t('updateAvailableHint'),
-                onClick: () => onInstall(p),
+                onClick: () => onInstall(p, { update: true }),
               }, t('update'))
               : h('button', {
                 className: styles.installBtnInstalled,

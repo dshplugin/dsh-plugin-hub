@@ -60,5 +60,10 @@ DeepSeek Harness 是开源仓库（MIT）。强烈建议把官方源码克隆到
 
 ## 素材（`assets/`）
 
+> README 中展示的截图已全部改为官网 URL 引用（`https://dsh-plugin.org/screenshots/...`，走 CDN 加速），
+> 本地不再维护 README 用图副本；`assets/` 仅保留 logo 与历史素材。
+
 - `logo.svg`：项目标识。
-- `screenshot-plugin-hub-en.png`：插件中心界面截图（英文界面），用于 README / 发布材料。
+- `screenshot-hub-main.png`：插件中心主界面截图（历史素材；README 主图现引用 `dsh-plugin-hub-dark-en/zh.png`）。
+- `screenshot-install-uninstall.png`：可视化安装/卸载过程截图（历史素材；README 现引用 `dsh-plugin-hub-install-uninstall.png`）。
+- `screenshot-notifications.png`：可视化消息通知截图（历史素材；README 现引用 `dsh-plugin-hub-notifications.png`）。

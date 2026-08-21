@@ -46,6 +46,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [copied, setCopied] = useState<string | null>(null)
   /** 信任确认弹窗：记录待安装的插件，确认后才执行复制 */
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
+  /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
+  const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
   /** 卸载确认弹窗：记录待卸载的插件 */
   const [uninstallPlugin, setUninstallPlugin] = useState<HubPlugin | null>(null)
   /** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
@@ -255,8 +257,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       installedVersion,
       hasUpdate,
       langKey,
-      onInstall: (p) => {
+      onInstall: (p, opts) => {
         setInstallDone(false)
+        setConfirmIsUpdate(opts?.update ?? false)
         // 与卸载一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务而禁用安装按钮
         queue.clearModalTask()
         setConfirmPlugin(p)
@@ -267,7 +270,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setUninstallPlugin(p)
       },
     }),
-    // 安装确认弹窗：锁定/进度/结果视图逻辑收敛在 modals.tsx
+    // 安装确认弹窗：锁定/进度/结果视图逻辑收敛在 modals.tsx；更新与安装同入口，仅标记 update
     confirmPlugin && h(InstallModal, {
       plugin: confirmPlugin,
       done: installDone,
@@ -275,10 +278,11 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       t,
       langPath,
       restarting,
+      update: confirmIsUpdate,
       submitting: queue.submitting,
       onClose: () => setConfirmPlugin(null),
       onCopy: () => copyCommand(confirmPlugin),
-      onInstall: () => queue.installNow(confirmPlugin),
+      onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : undefined),
       onRestart: () => { void requestRestart() },
     }),
     // 卸载确认弹窗：确认/进度/结果视图逻辑收敛在 modals.tsx

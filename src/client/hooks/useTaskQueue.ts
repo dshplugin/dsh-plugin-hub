@@ -286,7 +286,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   }, [])
 
   /** 弹窗动作：直接安装。请求宿主本地路由，任务进入服务端队列（FIFO），弹窗内实时显示进度。 */
-  const installNow = async (p: HubPlugin) => {
+  const installNow = async (p: HubPlugin, opts?: { update?: boolean }) => {
     const repo = p.source?.repo ?? ''
     if (!repo) return
     // 防重复入队：同一目标已在排队/执行中则忽略
@@ -299,7 +299,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       const res = await fetch('/dsh-plugin-hub/install', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ repo }),
+        body: JSON.stringify({ repo, mode: opts?.update ? 'update' : undefined }),
       })
       const data = await res.json() as { ok?: boolean; task?: number; error?: string }
       if (!data.ok || typeof data.task !== 'number') {

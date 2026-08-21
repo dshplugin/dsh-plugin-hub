@@ -25,7 +25,7 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
   installedVersion: (p: HubPlugin) => string | null
   hasUpdate: (p: HubPlugin) => boolean
   langKey: LocaleId
-  onInstall: (p: HubPlugin) => void
+  onInstall: (p: HubPlugin, opts?: { update?: boolean }) => void
   onUninstall: (p: HubPlugin) => void
 }) {
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
