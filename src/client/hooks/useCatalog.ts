@@ -7,7 +7,8 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { HubPlugin, LocaleId } from '../types.ts'
-import { normalize } from '../lib/catalog.ts'
+import { HUB_ABOUT_URL, HUB_REPO, HUB_UPDATE_URL, normalize, PLUGIN_VERSION } from '../lib/catalog.ts'
+import type { HubAboutInfo, HubUpdateInfo } from '../lib/catalog.ts'
 import type { SortKey } from '../lib/catalog.ts'
 
 const PLUGINS_URL = (lang: LocaleId) => `https://dsh-plugin.org/api/plugins.${lang}.json`
@@ -30,6 +31,10 @@ export function useCatalog(lang: LocaleId) {
   /** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由）；
    *  npmPackage 为 npm 优先通道反查命中的包名映射（目录数据未下发时客户端靠它把依赖 key 匹配回仓库） */
   const [versions, setVersions] = useState<Record<string, { version: string; updatedAt: string; npmPackage?: string }>>({})
+  /** Hub 自我更新信息：来自 CF Worker 版本控制中心（hub.dsh-plugin.org），与目录数据解耦 */
+  const [hubUpdateInfo, setHubUpdateInfo] = useState<HubUpdateInfo | null>(null)
+  /** 头部「关注我们」弹窗内容（平台介绍 + 反馈群二维码）：来自同款 Worker /about，Markdown 推送非写死 */
+  const [hubAboutInfo, setHubAboutInfo] = useState<HubAboutInfo | null>(null)
 
   // 拉取目录 + 统计。在线 API 已只返回 verified；再过滤一次，保证只展示人工验证通过的插件。
   useEffect(() => {
@@ -42,19 +47,23 @@ export function useCatalog(lang: LocaleId) {
         if (!res.ok) throw new Error(String(res.status))
         return res.json()
       })
-    fetchData(PLUGINS_URL(lang)).then((data) => {
-      if (cancelled) return
-      const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
-      setPlugins(list.filter((p) => p.compatibility?.status === 'verified'))
-    }).catch(() => {
-      if (!cancelled) setFailed(true)
-    })
-    fetchData(STATS_URL).then((s) => {
-      const stats = s as { total?: number; verified?: number }
-      if (!cancelled && stats && typeof stats.total === 'number' && typeof stats.verified === 'number') {
-        setStats({ total: stats.total, verified: stats.verified })
-      }
-    }).catch(() => {})
+    // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口；
+    // 数据接口 CDN 缓存 1 小时，发布新数据后最长 1 小时全网生效。
+    const load = () =>
+      Promise.all([fetchData(PLUGINS_URL(lang)), fetchData(STATS_URL)])
+    load()
+      .then(([data, s]) => {
+        if (cancelled) return
+        const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
+        setPlugins(list.filter((p) => p.compatibility?.status === 'verified'))
+        const stats = s as { total?: number; verified?: number }
+        if (stats && typeof stats.total === 'number' && typeof stats.verified === 'number') {
+          setStats({ total: stats.total, verified: stats.verified })
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true)
+      })
     return () => { cancelled = true }
     // lang 必须进依赖：切换界面语言要重新拉对应语言的数据文件，
     // 否则英文模式仍停留在 plugins.zh.json，描述/名称全是中文
@@ -75,6 +84,42 @@ export function useCatalog(lang: LocaleId) {
 
   // 首次进入拉取已安装表（依赖宿主 webServer 服务）
   useEffect(() => { refreshInstalled() }, [])
+
+  // Hub 自身版本检查走独立 Worker（版本控制中心）：发新版后写一次 Worker KV，
+  // 所有已装用户立即看到「可更新」+ Markdown 变更记录，不再依赖主站目录数据管道。
+  // 失败静默降级为 null（徽标不出现，不影响目录本身加载）。
+  useEffect(() => {
+    let cancelled = false
+    fetch(HUB_UPDATE_URL, { cache: 'no-store' })
+      .then((res): Promise<HubUpdateInfo | null> => (res.ok ? res.json() : Promise.resolve(null)))
+      .then((data) => {
+        if (cancelled || !data) { if (!cancelled) setHubUpdateInfo(null); return }
+        const version = typeof data.version === 'string' && data.version.length > 0 ? data.version : null
+        setHubUpdateInfo(version === null
+          ? null
+          : { version, publishedAt: data.publishedAt ?? null, notes: data.notes ?? null })
+      })
+      .catch(() => { if (!cancelled) setHubUpdateInfo(null) })
+    return () => { cancelled = true }
+  }, [reloadKey])
+
+  // 「关注我们」内容走同一套 Worker：作者写好 Markdown（平台介绍 + 反馈群二维码）推送 /admin/about，
+  // 客户端下次进入拉 /about 即可看到最新，非写死。失败静默为 null（弹窗展示兜底文案，不阻塞）。
+  useEffect(() => {
+    let cancelled = false
+    fetch(HUB_ABOUT_URL, { cache: 'no-store' })
+      .then((res): Promise<HubAboutInfo | null> => (res.ok ? res.json() : Promise.resolve(null)))
+      .then((data) => {
+        if (cancelled) return
+        if (!data || data.content === null || data.content === undefined) { setHubAboutInfo(null); return }
+        const content = typeof data.content === 'string' || typeof data.content === 'object' ? data.content : null
+        setHubAboutInfo(content === null
+          ? null
+          : { content, updatedAt: data.updatedAt ?? null })
+      })
+      .catch(() => { if (!cancelled) setHubAboutInfo(null) })
+    return () => { cancelled = true }
+  }, [reloadKey])
 
   /** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
   const installedName = (p: HubPlugin): string | null => {
@@ -118,6 +163,18 @@ export function useCatalog(lang: LocaleId) {
     const current = p.dates?.repoUpdatedAt
     return Boolean(current && rec.updatedAt && current > rec.updatedAt)
   }
+
+  /**
+   * Hub 自身是否有可用更新：Hub 就是当前运行的应用（始终已安装，无需 installedName 命中）。
+   * 以 Worker 版本控制中心返回的「最新版本」为准，与当前运行的版本号比对——
+   * 构建时注入的 PLUGIN_VERSION 是运行 bundle 的真实版本；测试/异常场景缺失时
+   * 回退到安装时记录的版本。版本号不等即新版（版本号只在发版时变更，绝无降级场景）。
+   */
+  const hubHasUpdate = (() => {
+    if (!hubUpdateInfo) return false
+    const current = PLUGIN_VERSION || versions[HUB_REPO]?.version || null
+    return current !== null && hubUpdateInfo.version !== current
+  })()
 
   /** 当前分类下的插件（「全部」时为整个目录）。 */
   const categoryPlugins = useMemo(() => {
@@ -184,6 +241,9 @@ export function useCatalog(lang: LocaleId) {
     installedName,
     installedVersion,
     hasUpdate,
+    hubHasUpdate,
+    hubUpdateInfo,
+    hubAboutInfo,
     refreshInstalled,
     category,
     setCategory,
