@@ -46,7 +46,7 @@ export interface HubPlugin {
   topics?: string[]
   features?: string[]
   description?: string
-  source?: { repo?: string }
+  source?: { repo?: string; npmPackage?: string }
   compatibility?: { status?: string }
   dates?: { repoUpdatedAt?: string; addedAt?: string }
   stats?: { stargazers_count?: number; forks_count?: number }

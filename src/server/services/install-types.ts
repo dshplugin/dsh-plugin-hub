@@ -13,6 +13,12 @@ export interface InstallTask {
   id: number
   /** 操作目标：`github:<owner>/<repo>`（安装）或 npm 包名（卸载），冲突/恢复时需要展示给用户 */
   target: string
+  /** 展示用目标（owner/repo）：npm 安装时 target 是包名，前端恢复用此字段显示仓库名，保持用户无感知 */
+  displayTarget?: string
+  /** 尝试过的安装方式（npm registry 反查 + 实际执行的 CLI 命令，按先后顺序）：
+   *  失败提 Issue 时如实贴给作者，作者据此反推正确的 npm 包名（组织 scope 与 GitHub 用户名不一致时
+   *  仅凭仓库名猜不到，作者看到我们查过/试过的命令就能直接指认）。 */
+  attempts: string[]
   action: 'add' | 'remove'
   /** 队列语义：pending 排队中 / running 执行中 / done / failed / cancelled（用户取消） */
   status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'

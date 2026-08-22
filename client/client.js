@@ -242,40 +242,40 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Header_module_css_default = {
-			"failBtn": "qikqja_failBtn",
-			"tabActive": "qikqja_tabActive",
-			"logoIcon": "qikqja_logoIcon",
-			"resultCount": "qikqja_resultCount",
-			"githubLink": "qikqja_githubLink",
-			"adArrow": "qikqja_adArrow",
-			"searchRow": "qikqja_searchRow",
-			"copyIcon": "qikqja_copyIcon",
-			"tabs": "qikqja_tabs",
-			"adBadge": "qikqja_adBadge",
-			"filterResults": "qikqja_filterResults",
-			"taglineLink": "qikqja_taglineLink",
-			"installedBtn": "qikqja_installedBtn",
-			"segCountActive": "qikqja_segCountActive",
-			"brandTitle": "qikqja_brandTitle",
-			"search": "qikqja_search",
-			"installedBtnActive": "qikqja_installedBtnActive",
-			"title": "qikqja_title",
-			"tabCount": "qikqja_tabCount",
-			"root": "qikqja_root",
-			"githubIcon": "qikqja_githubIcon",
-			"tab": "qikqja_tab",
-			"tagline": "qikqja_tagline",
-			"header": "qikqja_header",
 			"headerTitleRow": "qikqja_headerTitleRow",
-			"adBanner": "qikqja_adBanner",
-			"controls": "qikqja_controls",
-			"segCount": "qikqja_segCount",
-			"headerRight": "qikqja_headerRight",
-			"langBtn": "qikqja_langBtn",
-			"version": "qikqja_version",
 			"failBadge": "qikqja_failBadge",
+			"installedBtnActive": "qikqja_installedBtnActive",
+			"langBtn": "qikqja_langBtn",
+			"adArrow": "qikqja_adArrow",
+			"installedBtn": "qikqja_installedBtn",
+			"search": "qikqja_search",
+			"githubIcon": "qikqja_githubIcon",
+			"segCountActive": "qikqja_segCountActive",
+			"tabs": "qikqja_tabs",
+			"version": "qikqja_version",
+			"adText": "qikqja_adText",
+			"taglineLink": "qikqja_taglineLink",
+			"tagline": "qikqja_tagline",
+			"controls": "qikqja_controls",
+			"searchRow": "qikqja_searchRow",
+			"headerRight": "qikqja_headerRight",
+			"copyIcon": "qikqja_copyIcon",
+			"tab": "qikqja_tab",
+			"tabCount": "qikqja_tabCount",
+			"filterResults": "qikqja_filterResults",
+			"failBtn": "qikqja_failBtn",
+			"brandTitle": "qikqja_brandTitle",
+			"root": "qikqja_root",
 			"installedBtnDisabled": "qikqja_installedBtnDisabled",
-			"adText": "qikqja_adText"
+			"adBanner": "qikqja_adBanner",
+			"adBadge": "qikqja_adBadge",
+			"tabActive": "qikqja_tabActive",
+			"segCount": "qikqja_segCount",
+			"title": "qikqja_title",
+			"githubLink": "qikqja_githubLink",
+			"logoIcon": "qikqja_logoIcon",
+			"header": "qikqja_header",
+			"resultCount": "qikqja_resultCount"
 		};
 		//#endregion
 		//#region src/client/lib/failures.ts
@@ -283,7 +283,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		const MAX = 50;
 		/**
 		* 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
-		* 对用户而言结果都一样 —— 用官方默认安装方式装不上，就是插件仓库的问题，一律引导提 Issue：
+		* 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
+		* 一律引导提 Issue：
 		* - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
 		*   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
 		*   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
@@ -434,15 +435,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/**
 		* 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
-		* 核心信息 —— 原因判定 + 关键错误代码 + 宿主机器环境快照 + 错误核心摘要（完整日志
-		* 太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，故只收集重点）。
-		* 错误弹窗、失败记录共用此逻辑。
+		* 核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
+		* 错误核心摘要（完整日志太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，
+		* 故只收集重点）。错误弹窗、失败记录共用此逻辑。
 		* env 取不到时为 null，链接照常生成、只是少环境段。
+		* attempts（尝试过的安装方式，npm 反查 + 实际执行命令）：作者看到我们查过/试过的命令，
+		* 组织 scope 与 GitHub 用户名不一致时也能直接指认正确的 npm 包名。
 		*/
-		function pluginIssueUrl(repo, message, env) {
+		function pluginIssueUrl(repo, message, env, command, attempts) {
 			const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`;
 			const kind = classifyFailure(message);
-			const reason = /\[packaging\]/i.test(message) ? "plugin does NOT support the official default install method (dsh plugin add github:owner/repo — requires build output committed to the repo or a prepare script); its git distribution lacks the entry file declared in package.json" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
+			const reason = /\[packaging\]/i.test(message) ? "plugin distribution is incomplete — the entry file declared in package.json is missing from the published package (github tarball or npm package); please commit build output or publish a complete package" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
 			const code = coreErrorCode(message);
 			const build = (coreChars) => {
 				const body = [
@@ -452,12 +455,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					"",
 					`## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
 					`本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
-					`- 使用的安装命令（官方默认安装方式）：\`dsh plugin${env?.profile ? ` --profile ${env.profile}` : ""} add github:${repo}\``,
+					`- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ""} add github:${repo}`}\``,
 					`- 执行结果：安装失败，未能安装该插件。`,
+					...attempts && attempts.length > 0 ? [
+						"",
+						"## Attempted install channels（已尝试的安装方式）",
+						...attempts.map((a) => `- ${a}`)
+					] : [],
 					.../\[packaging\]/i.test(message) ? [
 						"",
-						"## 官方默认安装方式",
-						"DSH 生态的官方默认安装方式是 `dsh plugin add github:owner/repo`（git 直装）：插件仓库需提交构建产物，或在 package.json 提供 `prepare` 脚本让 pnpm 安装时自动构建。当前插件两者皆不具备，因此无法按官方方式安装。"
+						"## 安装方式说明",
+						"DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add github:owner/repo`（git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。"
 					] : [],
 					"",
 					"## Environment",
@@ -528,7 +536,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				topics: Array.isArray(raw.t) ? raw.t : void 0,
 				features: Array.isArray(raw.f) ? raw.f : void 0,
 				description: typeof raw.d === "string" ? raw.d : void 0,
-				source: typeof raw.r === "string" ? { repo: raw.r } : void 0,
+				source: typeof raw.r === "string" ? { repo: raw.r } : raw.r !== null && typeof raw.r === "object" ? {
+					repo: typeof raw.r.repo === "string" ? raw.r.repo : void 0,
+					npmPackage: typeof raw.r.npmPackage === "string" ? raw.r.npmPackage : void 0
+				} : void 0,
 				compatibility: typeof raw.v === "string" ? { status: raw.v } : void 0,
 				dates: {
 					repoUpdatedAt: typeof raw.u === "string" ? raw.u : void 0,
@@ -540,6 +551,28 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				}
 			};
 			return raw;
+		}
+		/**
+		* 安装通道决策（用户无感知）：目录探测到 npm 包名 → 用 npm 包名安装
+		* （走 npm registry tarball，更快、与 GitHub 网络无关）；无 npm 包名 → git 直装。
+		* 返回值 target 即传给后端 /install 的安装目标（npm 包名 或 owner/repo）。
+		*/
+		function installTargetOf(p) {
+			const pkg = (p.source?.npmPackage ?? "").trim();
+			const repo = (p.source?.repo ?? "").trim();
+			if (pkg && repo) return {
+				target: pkg,
+				via: "npm"
+			};
+			return {
+				target: repo,
+				via: "github"
+			};
+		}
+		/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示 github: 源。 */
+		function installCommandOf(p, withProfile = false) {
+			const { target, via } = installTargetOf(p);
+			return via === "npm" ? `dsh plugin${withProfile ? " --profile web" : ""} add ${target}` : `dsh plugin${withProfile ? " --profile web" : ""} add github:${target}`;
 		}
 		const CATEGORY_LABELS = {
 			interface: {
@@ -672,7 +705,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [installedFilter, setInstalledFilter] = (0, react.useState)("all");
 			/** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
 			const [installed, setInstalled] = (0, react.useState)({});
-			/** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由） */
+			/** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由）；
+			*  npmPackage 为 npm 优先通道反查命中的包名映射（目录数据未下发时客户端靠它把依赖 key 匹配回仓库） */
 			const [versions, setVersions] = (0, react.useState)({});
 			(0, react.useEffect)(() => {
 				let cancelled = false;
@@ -714,12 +748,16 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			(0, react.useEffect)(() => {
 				refreshInstalled();
 			}, []);
-			/** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`；命中返回 npm 包名。 */
+			/** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
 			const installedName = (p) => {
 				const repo = p.source?.repo;
 				if (!repo) return null;
 				const needle = `github:${repo.toLowerCase()}`;
 				for (const [name, spec] of Object.entries(installed)) if (spec.toLowerCase().includes(needle)) return name;
+				const pkg = ((p.source?.npmPackage || versions[repo.toLowerCase()]?.npmPackage) ?? "").toLowerCase();
+				if (pkg) {
+					for (const name of Object.keys(installed)) if (name.toLowerCase() === pkg) return name;
+				}
 				return null;
 			};
 			/** 该插件安装时记录的目录版本（无记录/未安装 → null）。 */
@@ -840,6 +878,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			resolvePendingRef.current = resolvePending;
 			/** 当前打开弹窗所对应的任务 id：该任务完成时弹窗切换为结果视图 */
 			const modalTaskRef = (0, react.useRef)(null);
+			/** 已开始收尾但尚未结束的任务 id（服务端 /active 已消失 → 查 /status 中）：并发轮询时跳过，避免重复收尾 */
+			const settlingRef = (0, react.useRef)(/* @__PURE__ */ new Set());
 			/** 轮询定时器句柄（队列清空/组件卸载时清理） */
 			const pollRef = (0, react.useRef)(null);
 			/** 请求在途的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
@@ -938,7 +978,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					}
 				} else {
 					const detail = lines.length > 0 ? [...lines].reverse().join("\n") : q.kind === "uninstall" ? t("uninstallFail") : t("installFail");
-					onError(detail, q.repo, q.kind);
+					onError(detail, q.repo, q.kind, q.command, q.attempts);
 				}
 				maybeStopPoll();
 			};
@@ -973,18 +1013,23 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const settleTask = async (q) => {
 				let status = "failed";
 				let lines = [];
+				let attempts;
 				try {
 					const res = await fetch(`/dsh-plugin-hub/status?task=${q.id}`, { cache: "no-store" });
 					if (res.ok) {
 						const data = await res.json();
 						status = data.task?.status ?? "failed";
 						lines = data.task?.lines ?? [];
+						attempts = Array.isArray(data.task?.attempts) ? data.task.attempts : void 0;
 					}
 				} catch {}
 				if (status === "done") {
 					if (q.kind === "uninstall") settleDone(q, lines);
 					else finishQueueTask(true, q, lines);
-				} else if (status === "failed") finishQueueTask(false, q, lines);
+				} else if (status === "failed") finishQueueTask(false, {
+					...q,
+					attempts
+				}, lines);
 				else {
 					applyQueue((prev) => prev.filter((x) => x.id !== q.id));
 					maybeStopPoll();
@@ -1019,15 +1064,26 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 									updatedAt: prevTask?.updatedAt,
 									status: a.status === "running" ? "running" : "pending",
 									progress: typeof a.progress === "number" ? a.progress : prevTask?.progress ?? 0,
-									lines: Array.isArray(a.lines) ? a.lines : prevTask?.lines ?? []
+									lines: Array.isArray(a.lines) ? a.lines : prevTask?.lines ?? [],
+									attempts: Array.isArray(a.attempts) ? a.attempts : prevTask?.attempts ?? []
 								});
 							}
 							const keepOpt = prev.filter((q) => q.optimistic && !next.some((x) => x.id === q.id));
 							if (keepOpt.length > 0) next.push(...keepOpt);
+							const keepGone = prev.filter((q) => !byId.has(q.id) && !next.some((x) => x.id === q.id) && q.status !== "cancelling" && !q.optimistic);
+							if (keepGone.length > 0) next.push(...keepGone);
 							return next;
 						});
-						const gone = prevQueue.filter((q) => !byId.has(q.id) && q.status !== "cancelling" && !q.optimistic);
-						for (const q of gone) await settleTask(q);
+						const gone = prevQueue.filter((q) => !byId.has(q.id) && q.status !== "cancelling" && !q.optimistic && !settlingRef.current.has(q.id));
+						for (const q of gone) {
+							if (!queueRef.current.some((x) => x.id === q.id)) continue;
+							settlingRef.current.add(q.id);
+							try {
+								await settleTask(q);
+							} finally {
+								settlingRef.current.delete(q.id);
+							}
+						}
 					} catch {}
 				}, 600);
 			};
@@ -1042,14 +1098,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						applyPending(parsePendingRestarts(data.pendingRestarts));
 						const items = (data.tasks ?? []).filter((a) => typeof a.id === "number").map((a) => {
 							const isRemove = a.action === "remove";
+							const display = typeof a.displayTarget === "string" ? a.displayTarget.replace(/^github:/, "") : "";
+							const fallback = typeof a.target === "string" ? a.target.replace(/^github:/, "") : "";
 							return {
 								id: a.id,
 								kind: isRemove ? "uninstall" : "install",
-								target: typeof a.target === "string" ? a.target.replace(/^github:/, "") : "",
-								repo: isRemove ? null : typeof a.target === "string" ? a.target.replace(/^github:/, "") : null,
+								target: isRemove ? fallback : display || fallback,
+								repo: isRemove ? null : display || fallback,
 								status: a.status === "running" ? "running" : "pending",
 								progress: typeof a.progress === "number" ? a.progress : 0,
-								lines: Array.isArray(a.lines) ? a.lines : []
+								lines: Array.isArray(a.lines) ? a.lines : [],
+								attempts: Array.isArray(a.attempts) ? a.attempts : []
 							};
 						});
 						if (items.length > 0 || pendingRef.current.length > 0) {
@@ -1067,6 +1126,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const installNow = async (p, opts) => {
 				const repo = p.source?.repo ?? "";
 				if (!repo) return;
+				const { target } = installTargetOf(p);
+				if (!target) return;
 				if (queueRef.current.some((q) => q.kind === "install" && q.target === repo)) return;
 				if (submittingRef.current.has(repo)) return;
 				submittingRef.current.add(repo);
@@ -1084,7 +1145,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					status: "running",
 					progress: 0,
 					lines: [],
-					optimistic: true
+					optimistic: true,
+					command: installCommandOf(p, true),
+					attempts: []
 				}]);
 				setSubmitting(true);
 				try {
@@ -1092,14 +1155,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						method: "POST",
 						headers: { "content-type": "application/json" },
 						body: JSON.stringify({
-							repo,
+							repo: target,
+							display: repo,
 							mode: opts?.update ? "update" : void 0
 						})
 					});
 					const data = await res.json();
 					if (!data.ok || typeof data.task !== "number") {
 						applyQueue((prev) => prev.filter((x) => x.id !== tempId));
-						onError(data.error ?? `HTTP ${res.status}`, repo, "install");
+						onError(data.error ?? `HTTP ${res.status}`, repo, "install", installCommandOf(p, true), data.attempts);
 						return;
 					}
 					const taskId = data.task;
@@ -1116,7 +1180,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					pollQueue();
 				} catch {
 					applyQueue((prev) => prev.filter((x) => x.id !== tempId));
-					onError(t("installFail"), repo, "install");
+					onError(t("installFail"), repo, "install", installCommandOf(p, true));
 				} finally {
 					submittingRef.current.delete(repo);
 					setSubmitting(false);
@@ -1212,93 +1276,93 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Modal_module_css_default = {
-			"stripCancel": "BiQ1zG_stripCancel",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"failHead": "BiQ1zG_failHead",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"queueRow": "BiQ1zG_queueRow",
-			"queueRowBody": "BiQ1zG_queueRowBody",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"failList": "BiQ1zG_failList",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"modalBody": "BiQ1zG_modalBody",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"toastFail": "BiQ1zG_toastFail",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"queueSection": "BiQ1zG_queueSection",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"queuedHint": "BiQ1zG_queuedHint",
 			"toastIn": "BiQ1zG_toastIn",
-			"modal": "BiQ1zG_modal",
-			"progressHead": "BiQ1zG_progressHead",
-			"modalValue": "BiQ1zG_modalValue",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"modalLink": "BiQ1zG_modalLink",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"modalClose": "BiQ1zG_modalClose",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"overlay": "BiQ1zG_overlay",
-			"errorHint": "BiQ1zG_errorHint",
-			"noticeMain": "BiQ1zG_noticeMain",
-			"toast": "BiQ1zG_toast",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"modalHead": "BiQ1zG_modalHead",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"errorModal": "BiQ1zG_errorModal",
-			"modalRow": "BiQ1zG_modalRow",
-			"trustHint": "BiQ1zG_trustHint",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"resultDesc": "BiQ1zG_resultDesc",
 			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"restartLater": "BiQ1zG_restartLater",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"result": "BiQ1zG_result",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"modalActions": "BiQ1zG_modalActions",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"progressFill": "BiQ1zG_progressFill",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"failCopy": "BiQ1zG_failCopy",
-			"failClear": "BiQ1zG_failClear",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"errorBox": "BiQ1zG_errorBox",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"failRow": "BiQ1zG_failRow",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"modalValue": "BiQ1zG_modalValue",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"errorHint": "BiQ1zG_errorHint",
+			"modalDesc": "BiQ1zG_modalDesc",
 			"progress": "BiQ1zG_progress",
+			"modalHead": "BiQ1zG_modalHead",
+			"overlay": "BiQ1zG_overlay",
+			"queueRow": "BiQ1zG_queueRow",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"restartNow": "BiQ1zG_restartNow",
+			"trustHint": "BiQ1zG_trustHint",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"modalRow": "BiQ1zG_modalRow",
+			"toastFail": "BiQ1zG_toastFail",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"failRepo": "BiQ1zG_failRepo",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"errorModal": "BiQ1zG_errorModal",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"progressFill": "BiQ1zG_progressFill",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"failCopy": "BiQ1zG_failCopy",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"failKind": "BiQ1zG_failKind",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"failClear": "BiQ1zG_failClear",
+			"modalIn": "BiQ1zG_modalIn",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"toast": "BiQ1zG_toast",
+			"modalActions": "BiQ1zG_modalActions",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"noticeList": "BiQ1zG_noticeList",
+			"restartLater": "BiQ1zG_restartLater",
 			"failKindInstall": "BiQ1zG_failKindInstall",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"errorBox": "BiQ1zG_errorBox",
+			"progressText": "BiQ1zG_progressText",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"failList": "BiQ1zG_failList",
 			"noticeRemove": "BiQ1zG_noticeRemove",
 			"queueRowPct": "BiQ1zG_queueRowPct",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"progressText": "BiQ1zG_progressText",
-			"noticeList": "BiQ1zG_noticeList",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"errorTitle": "BiQ1zG_errorTitle",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"restartNow": "BiQ1zG_restartNow",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"modalLink": "BiQ1zG_modalLink",
+			"progressTrack": "BiQ1zG_progressTrack",
 			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"failRepo": "BiQ1zG_failRepo",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"failKind": "BiQ1zG_failKind",
-			"modalIn": "BiQ1zG_modalIn"
+			"modal": "BiQ1zG_modal",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"failRow": "BiQ1zG_failRow",
+			"modalClose": "BiQ1zG_modalClose",
+			"modalBody": "BiQ1zG_modalBody",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"progressHead": "BiQ1zG_progressHead",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"failHead": "BiQ1zG_failHead",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"result": "BiQ1zG_result",
+			"queueSection": "BiQ1zG_queueSection",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued"
 		};
 		//#endregion
 		//#region src/client/components/icons.tsx
@@ -1547,7 +1611,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("copyInstallCommand"),
 				role: "button",
 				tabIndex: 0
-			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, `dsh plugin add github:${plugin.source?.repo ?? ""}`), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, installCommandOf(plugin)), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
 				className: Modal_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopy
@@ -1608,7 +1672,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 		/** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
-		function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }) {
+		function ErrorModal({ message, repo, kind, command, attempts, t, env, onCopy, onClose }) {
 			const failureKind = classifyFailure(message);
 			return (0, react.createElement)("div", {
 				className: Modal_module_css_default.overlay,
@@ -1634,13 +1698,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onClick: () => onCopy(message)
 			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Modal_module_css_default.errorBox }, message), failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(message) ? t("failPackagingHint") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
 				className: Modal_module_css_default.failBigIssue,
-				href: pluginIssueUrl(repo, message, env),
+				href: pluginIssueUrl(repo, message, env, command, attempts),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("failIssueHint")
 			}, t("failIssueBig")) : null]) : repo ? (0, react.createElement)("a", {
 				className: Modal_module_css_default.failBigIssue,
-				href: pluginIssueUrl(repo, message, env),
+				href: pluginIssueUrl(repo, message, env, command, attempts),
 				target: "_blank",
 				rel: "noopener noreferrer",
 				title: t("failIssueHint")
@@ -1774,14 +1838,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					const kind = classifyFailure(r.message);
 					if (kind === "pluginPrepare" || kind === "pnpmIgnoredBuild") return (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, kind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(r.message) ? t("failPackagingHint") : t("failPrepareHint")), r.repo ? (0, react.createElement)("a", {
 						className: Modal_module_css_default.failBigIssue,
-						href: pluginIssueUrl(r.repo, r.message, env),
+						href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
 						target: "_blank",
 						rel: "noopener noreferrer",
 						title: t("failIssueHint")
 					}, t("failIssueBig")) : null]);
 					return r.repo ? (0, react.createElement)("a", {
 						className: Modal_module_css_default.failBigIssue,
-						href: pluginIssueUrl(r.repo, r.message, env),
+						href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
 						target: "_blank",
 						rel: "noopener noreferrer",
 						title: t("failIssueHint")
@@ -1874,17 +1938,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Dropdown_module_css_default = {
+			"dropdownLabel": "B_Gxsq_dropdownLabel",
+			"dropdownBtn": "B_Gxsq_dropdownBtn",
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
 			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
 			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
 			"dropdownPanel": "B_Gxsq_dropdownPanel",
 			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdown": "B_Gxsq_dropdown",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive"
+			"dropdownArrow": "B_Gxsq_dropdownArrow"
 		};
 		//#endregion
 		//#region src/client/components/Dropdown.tsx
@@ -1999,37 +2063,37 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var List_module_css_default = {
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"cardMain": "_3XaZHa_cardMain",
-			"list": "_3XaZHa_list",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"body": "_3XaZHa_body",
-			"star": "_3XaZHa_star",
-			"cardSide": "_3XaZHa_cardSide",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"actions": "_3XaZHa_actions",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"retryBtn": "_3XaZHa_retryBtn",
+			"date": "_3XaZHa_date",
 			"detailBtn": "_3XaZHa_detailBtn",
-			"footLink": "_3XaZHa_footLink",
-			"cardHead": "_3XaZHa_cardHead",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"footer": "_3XaZHa_footer",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
 			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"topics": "_3XaZHa_topics",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"topic": "_3XaZHa_topic",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"card": "_3XaZHa_card",
+			"body": "_3XaZHa_body",
 			"stateTitle": "_3XaZHa_stateTitle",
 			"installBtn": "_3XaZHa_installBtn",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"fork": "_3XaZHa_fork",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"desc": "_3XaZHa_desc",
-			"state": "_3XaZHa_state",
-			"verified": "_3XaZHa_verified",
-			"footer": "_3XaZHa_footer",
+			"actions": "_3XaZHa_actions",
+			"topic": "_3XaZHa_topic",
 			"stats": "_3XaZHa_stats",
-			"date": "_3XaZHa_date"
+			"state": "_3XaZHa_state",
+			"cardHead": "_3XaZHa_cardHead",
+			"stateDesc": "_3XaZHa_stateDesc",
+			"cardMain": "_3XaZHa_cardMain",
+			"desc": "_3XaZHa_desc",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"topics": "_3XaZHa_topics",
+			"fork": "_3XaZHa_fork",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"verified": "_3XaZHa_verified",
+			"list": "_3XaZHa_list",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"footLink": "_3XaZHa_footLink",
+			"star": "_3XaZHa_star",
+			"card": "_3XaZHa_card",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"cardSide": "_3XaZHa_cardSide"
 		};
 		//#endregion
 		//#region src/client/lib/format.ts
@@ -2170,7 +2234,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [uninstallDone, setUninstallDone] = (0, react.useState)(false);
 			/** 结果视图「立即重启」：请求宿主重启后进入等待，服务回来后整页刷新 */
 			const [restarting, setRestarting] = (0, react.useState)(false);
-			/** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」） */
+			/** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
 			const [errorMsg, setErrorMsg] = (0, react.useState)(null);
 			/** 安装/卸载任务通知记录：localStorage 持久化，成败即落盘，即使错过弹窗也能回来查看 */
 			const [notifications, setNotifications] = (0, react.useState)(() => loadNotifications());
@@ -2211,16 +2275,20 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						repo: repo ?? ""
 					}));
 				},
-				onError: (message, repo, kind) => {
+				onError: (message, repo, kind, command, attempts) => {
 					setErrorMsg({
 						message,
 						repo,
-						kind
+						kind,
+						command,
+						attempts
 					});
 					setNotifications(addFailure({
 						kind,
 						repo: repo ?? "",
-						message
+						message,
+						command,
+						attempts
 					}));
 				},
 				installPlugin: confirmPlugin,
@@ -2278,10 +2346,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					return ok;
 				}
 			};
-			/** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行。 */
+			/** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行（npm 通道显示包名命令）。 */
 			const copyCommand = async (p) => {
 				const repo = p.source?.repo ?? "";
-				if (await doCopy(`dsh plugin add github:${repo}`)) {
+				if (await doCopy(installCommandOf(p))) {
 					setCopied(repo);
 					setToast({
 						id: Date.now(),
@@ -2425,6 +2493,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				message: errorMsg.message,
 				repo: errorMsg.repo,
 				kind: errorMsg.kind,
+				command: errorMsg.command,
+				attempts: errorMsg.attempts,
 				t,
 				env,
 				onCopy: (text) => {

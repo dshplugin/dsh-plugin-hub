@@ -8,7 +8,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { normalize } from '../src/client/lib/catalog.ts'
+import { normalize, pluginIssueUrl } from '../src/client/lib/catalog.ts'
 
 test('normalize: parses the vr short key into version', () => {
   const p = normalize({
@@ -31,4 +31,22 @@ test('normalize: missing vr leaves version undefined', () => {
   const p = normalize({ s: 'x', n: 'X', c: 'tools' } as Record<string, unknown>)
   assert.equal(p.version, undefined)
   assert.equal(p.slug, 'x')
+})
+
+test('pluginIssueUrl: 把尝试过的安装方式（npm 反查 + 实际执行命令）贴进 issue 正文', () => {
+  const attempts = [
+    'npm registry search: `npm search repository:ccch1mneyyy/dsh-tui` → found `@deepseek-harness-tui/dsh-tui`',
+    'dsh plugin --profile web add @deepseek-harness-tui/dsh-tui',
+  ]
+  const url = pluginIssueUrl('ccch1mneyyy/dsh-tui', 'prepare failed', null, 'dsh plugin --profile web add github:ccch1mneyyy/dsh-tui', attempts)
+  const body = decodeURIComponent(url.split('body=')[1])
+  assert.match(body, /## Attempted install channels/)
+  // 每条尝试都以 markdown 列表项出现在正文里（保留反引号）：作者据此反推正确的 npm 包名
+  for (const a of attempts) assert.ok(body.includes(`- ${a}`))
+})
+
+test('pluginIssueUrl: 无尝试记录时正文不含该段落', () => {
+  const url = pluginIssueUrl('owner/repo', 'error xyz')
+  const body = decodeURIComponent(url.split('body=')[1])
+  assert.ok(!body.includes('Attempted install channels'))
 })

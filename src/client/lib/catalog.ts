@@ -46,19 +46,21 @@ export function pluginSiteUrl(repo: string): string {
 
 /**
  * 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
- * 核心信息 —— 原因判定 + 关键错误代码 + 宿主机器环境快照 + 错误核心摘要（完整日志
- * 太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，故只收集重点）。
- * 错误弹窗、失败记录共用此逻辑。
+ * 核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
+ * 错误核心摘要（完整日志太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，
+ * 故只收集重点）。错误弹窗、失败记录共用此逻辑。
  * env 取不到时为 null，链接照常生成、只是少环境段。
+ * attempts（尝试过的安装方式，npm 反查 + 实际执行命令）：作者看到我们查过/试过的命令，
+ * 组织 scope 与 GitHub 用户名不一致时也能直接指认正确的 npm 包名。
  */
-export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | null): string {
+export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | null, command?: string, attempts?: string[]): string {
   const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`
   // 原因判定：让作者一眼知道这是不是自己插件的问题。
-  // [packaging]（预检/装后校验拦截）单独列：点明「不支持官方默认安装方式」，并写清官方默认方式
-  // 是什么（git 直装要求仓库提交构建产物或提供 prepare 脚本），作者照此适配即可。
+  // [packaging]（预检/装后校验拦截）单独列：无论走 npm 还是 git 通道，都是分发物不完整
+  // （package.json 声明的入口文件在发布物里缺失），作者照此补齐即可。
   const kind = classifyFailure(message)
   const reason = /\[packaging\]/i.test(message)
-    ? 'plugin does NOT support the official default install method (dsh plugin add github:owner/repo — requires build output committed to the repo or a prepare script); its git distribution lacks the entry file declared in package.json'
+    ? 'plugin distribution is incomplete — the entry file declared in package.json is missing from the published package (github tarball or npm package); please commit build output or publish a complete package'
       : kind === 'pluginPrepare'
         ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
         : kind === 'pnpmIgnoredBuild'
@@ -72,17 +74,23 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       `- Cause: ${reason}`,
       ...(code ? [`- Key error: \`${code}\``] : []),
       '',
-      // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的官方安装命令（含 --profile）与执行结果，链接由常量动态拼接
+      // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的安装命令（含 --profile）与执行结果，链接由常量动态拼接
       `## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
       `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
-      `- 使用的安装命令（官方默认安装方式）：\`dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add github:${repo}\``,
+      `- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add github:${repo}`}\``,
       `- 执行结果：安装失败，未能安装该插件。`,
-      // [packaging] 场景：向作者说明官方默认安装方式具体是什么，请其按该方式适配（提交构建产物或提供 prepare 脚本）
+      // 尝试过的安装方式（npm 反查 + 实际执行命令，按先后顺序）：作者据此反推正确的
+      // npm 包名 —— 组织 scope 与 GitHub 用户名不一致时仅凭仓库名猜不到，作者看到我们
+      // 查过/试过的命令就能直接指认
+      ...(attempts && attempts.length > 0
+        ? ['', '## Attempted install channels（已尝试的安装方式）', ...attempts.map((a) => `- ${a}`)]
+        : []),
+      // [packaging] 场景：说明两种官方安装通道（npm 包 / git 直装），当前插件在对应通道下分发不完整
       ...(/\[packaging\]/i.test(message)
         ? [
           '',
-          '## 官方默认安装方式',
-          'DSH 生态的官方默认安装方式是 `dsh plugin add github:owner/repo`（git 直装）：插件仓库需提交构建产物，或在 package.json 提供 `prepare` 脚本让 pnpm 安装时自动构建。当前插件两者皆不具备，因此无法按官方方式安装。',
+          '## 安装方式说明',
+          'DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add github:owner/repo`（git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。',
         ]
         : []),
       '',
@@ -156,7 +164,15 @@ export function normalize(raw: Record<string, unknown>): HubPlugin {
       topics: Array.isArray(raw.t) ? (raw.t as string[]) : undefined,
       features: Array.isArray(raw.f) ? (raw.f as string[]) : undefined,
       description: typeof raw.d === 'string' ? raw.d : undefined,
-      source: typeof raw.r === 'string' ? { repo: raw.r } : undefined,
+      // 投影输出两种形态：老数据 source 是 repo 字符串；新数据是 { repo, npmPackage }
+      source: typeof raw.r === 'string'
+        ? { repo: raw.r }
+        : raw.r !== null && typeof raw.r === 'object'
+          ? {
+            repo: typeof (raw.r as { repo?: unknown }).repo === 'string' ? (raw.r as { repo: string }).repo : undefined,
+            npmPackage: typeof (raw.r as { npmPackage?: unknown }).npmPackage === 'string' ? (raw.r as { npmPackage: string }).npmPackage : undefined,
+          }
+          : undefined,
       compatibility: typeof raw.v === 'string' ? { status: raw.v } : undefined,
       dates: {
         repoUpdatedAt: typeof raw.u === 'string' ? raw.u : undefined,
@@ -169,6 +185,26 @@ export function normalize(raw: Record<string, unknown>): HubPlugin {
     }
   }
   return raw as unknown as HubPlugin
+}
+
+/**
+ * 安装通道决策（用户无感知）：目录探测到 npm 包名 → 用 npm 包名安装
+ * （走 npm registry tarball，更快、与 GitHub 网络无关）；无 npm 包名 → git 直装。
+ * 返回值 target 即传给后端 /install 的安装目标（npm 包名 或 owner/repo）。
+ */
+export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'github' } {
+  const pkg = (p.source?.npmPackage ?? '').trim()
+  const repo = (p.source?.repo ?? '').trim()
+  if (pkg && repo) return { target: pkg, via: 'npm' }
+  return { target: repo, via: 'github' }
+}
+
+/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示 github: 源。 */
+export function installCommandOf(p: HubPlugin, withProfile = false): string {
+  const { target, via } = installTargetOf(p)
+  return via === 'npm'
+    ? `dsh plugin${withProfile ? ' --profile web' : ''} add ${target}`
+    : `dsh plugin${withProfile ? ' --profile web' : ''} add github:${target}`
 }
 
 export const CATEGORY_LABELS: Record<string, { zh: string; en: string }> = {

@@ -8,7 +8,7 @@ import { createElement as h, useEffect, useState } from 'react'
 import styles from '../styles/Header.module.css'
 import { en, zh } from '../locales.ts'
 import type { EnvInfo, HubPlugin, LocaleId, SectionProps, ToastState } from '../types.ts'
-import { langPathOf } from '../lib/catalog.ts'
+import { langPathOf, installCommandOf } from '../lib/catalog.ts'
 import { getEnv } from '../lib/env.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
 import { useTaskQueue } from '../hooks/useTaskQueue.ts'
@@ -55,8 +55,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [uninstallDone, setUninstallDone] = useState(false)
   /** 结果视图「立即重启」：请求宿主重启后进入等待，服务回来后整页刷新 */
   const [restarting, setRestarting] = useState(false)
-  /** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」） */
-  const [errorMsg, setErrorMsg] = useState<{ message: string; repo: string | null; kind: 'install' | 'uninstall' } | null>(null)
+  /** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
+  const [errorMsg, setErrorMsg] = useState<{ message: string; repo: string | null; kind: 'install' | 'uninstall'; command?: string; attempts?: string[] } | null>(null)
   /** 安装/卸载任务通知记录：localStorage 持久化，成败即落盘，即使错过弹窗也能回来查看 */
   const [notifications, setNotifications] = useState<NotificationRecord[]>(() => loadNotifications())
   const [showNotifications, setShowNotifications] = useState(false)
@@ -82,10 +82,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       else setToast({ id: Date.now(), kind: 'removed' })
       setNotifications(addSuccess({ kind: 'uninstall', repo: repo ?? '' }))
     },
-    onError: (message, repo, kind) => {
-      setErrorMsg({ message, repo, kind })
+    onError: (message, repo, kind, command, attempts) => {
+      setErrorMsg({ message, repo, kind, command, attempts })
       // 失败自动写入通知记录：任务在后台结束时没人盯着也能留痕
-      setNotifications(addFailure({ kind, repo: repo ?? '', message }))
+      setNotifications(addFailure({ kind, repo: repo ?? '', message, command, attempts }))
     },
     installPlugin: confirmPlugin,
     uninstallPlugin,
@@ -144,10 +144,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
   }
 
-  /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行。 */
+  /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行（npm 通道显示包名命令）。 */
   const copyCommand = async (p: HubPlugin) => {
     const repo = p.source?.repo ?? ''
-    const ok = await doCopy(`dsh plugin add github:${repo}`)
+    const ok = await doCopy(installCommandOf(p))
     if (ok) {
       setCopied(repo)
       setToast({ id: Date.now(), kind: 'copied' })
@@ -309,6 +309,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       message: errorMsg.message,
       repo: errorMsg.repo,
       kind: errorMsg.kind,
+      command: errorMsg.command,
+      attempts: errorMsg.attempts,
       t,
       env,
       onCopy: (text: string) => {

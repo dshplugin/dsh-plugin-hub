@@ -9,6 +9,8 @@ export interface ActiveTaskInfo {
     status: 'pending' | 'running';
     progress: number;
     lines: string[];
+    /** 尝试过的安装方式（npm 反查 + 实际执行命令）：失败时前端 issue 预填需要 */
+    attempts: string[];
 }
 /** All non-terminal tasks in queue order (running first, then pending). Lets the client resume a queue after a page reload. */
 export declare function activeTask(): ActiveTaskInfo[];
@@ -44,6 +46,8 @@ export declare function startPluginMutation(options: {
     displayTarget?: string;
     /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
     uninstallLoader?: LoaderHandle;
+    /** 入队前已尝试的安装方式（npm registry 反查等）：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
+    attempts?: string[];
 }): InstallTask;
 /**
  * 安装后校验已装包的入口文件（package.json 的 main / exports["."].default）是否真实存在。
@@ -56,11 +60,13 @@ export declare function verifyInstalledEntry(profile: string, target: string): {
     missing: string | null;
 };
 /**
- * Run a plugin mutation with one recovery path: when `add` fails because a
- * git-hosted package's `prepare` script is blocked by pnpm's allowBuilds
- * gate (`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`), read the exact allowlist
- * key pnpm printed, write it into the profile's pnpm-workspace.yaml, and
- * retry once. Other failures fall through to the single-spawn result.
+ * Run a plugin mutation with one recovery path: when `add` fails because
+ * pnpm's allowBuilds gate blocks a build script — either the git-hosted
+ * package's own `prepare` (`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`, key from
+ * the printed key@url hint) or a dependency's native build
+ * (`ERR_PNPM_IGNORED_BUILDS`, key = the listed name@version) — write the
+ * exact keys into the profile's pnpm-workspace.yaml and retry once.
+ * Other failures fall through to the single-spawn result.
  */
 export declare function runPluginMutation(options: {
     action: 'add' | 'remove';

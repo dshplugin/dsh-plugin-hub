@@ -21,6 +21,13 @@ SKIP_BUILD=0
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROFILE_DIR="$HOME/.dsh/profiles/$PROFILE"
 
+# The whole script exists to boot `dsh web`; fail early with a clear message
+# instead of a confusing nohup failure at the end.
+command -v dsh >/dev/null 2>&1 || {
+  echo "[reload] error: 'dsh' command not found in PATH — install the DeepSeek CLI first." >&2
+  exit 1
+}
+
 for arg in "$@"; do
   case "$arg" in
     --port=*) PORT="${arg#*=}" ;;
@@ -95,9 +102,18 @@ sync_profile_plugin() {
     exit 1
   fi
   [[ -d "$target" ]] || { echo "[reload] error: plugin copy still missing after install — aborting" >&2; exit 1; }
-  rsync -a --delete "$REPO_DIR/lib/" "$target/lib/"
-  rsync -a --delete "$REPO_DIR/client/" "$target/client/"
-  cp -f "$REPO_DIR/package.json" "$target/package.json"
+  # `rsync --delete` interrupted mid-flight leaves the plugin copy half-synced
+  # (missing entry files → dsh web crashes on boot with ERR_MODULE_NOT_FOUND).
+  # Any sync failure aborts immediately so the copy is never left incomplete.
+  rsync -a --delete "$REPO_DIR/lib/" "$target/lib/" \
+    || { echo "[reload] error: failed to sync lib/ — plugin copy may be incomplete, aborting" >&2; exit 1; }
+  rsync -a --delete "$REPO_DIR/client/" "$target/client/" \
+    || { echo "[reload] error: failed to sync client/ — aborting" >&2; exit 1; }
+  # Copy package.json with rsync too: some shells alias `cp` to -n
+  # (no-clobber), which exits non-zero on an identical existing target and
+  # would wrongly abort the reload here.
+  rsync -a "$REPO_DIR/package.json" "$target/package.json" \
+    || { echo "[reload] error: failed to copy package.json — aborting" >&2; exit 1; }
   echo "[reload] plugin copy is up to date."
 }
 

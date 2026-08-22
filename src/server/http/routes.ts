@@ -10,7 +10,8 @@ import { homedir, release } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
 import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubTarget, hasQueuedTarget, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install.ts'
-import { recordInstalledVersion, readInstalledVersions, removeInstalledVersion } from '../services/installed-versions.ts'
+import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/installed-versions.ts'
+import { resolveNpmPackage } from '../services/npm-resolve.ts'
 import { preflightTarget } from '../services/preflight.ts'
 
 export interface WebRoute {
@@ -172,17 +173,44 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           const rawRepo = typeof body === 'object' && body !== null && typeof (body as { repo?: unknown }).repo === 'string'
             ? (body as { repo: string }).repo.trim()
             : ''
+          // 前端决策的展示用仓库名（owner/repo）：npm 安装时 body.repo 是包名，display 用于
+          // 待重启行 / 任务恢复时展示仓库名，保证用户无感知（安装通道变化不改变所见目标）
+          const displayRepo = typeof body === 'object' && body !== null && typeof (body as { display?: unknown }).display === 'string'
+            ? (body as { display: string }).display.trim()
+            : rawRepo
           // 目标语法两态：owner/repo → github 源（走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装
           const repoTarget = githubTarget(rawRepo)
-          const target = repoTarget ?? (repoTarget === null && validPackageName(rawRepo) ? rawRepo : null)
+          let target: string | null = repoTarget ?? (repoTarget === null && validPackageName(rawRepo) ? rawRepo : null)
           if (target === null) {
             sendJson(response, 400, { error: 'unsupported install target' })
             return
           }
+          // npm 优先：git 目标先反查该仓库的官方 npm 包，命中则改走 npm 通道。
+          // git 分发常缺构建产物/子模块导致 prepare 必败，而 npm 包是作者发布的
+          // 完整产物，成功率高得多；未命中或查询失败保留 github 直装（不阻塞安装，
+          // 预检仍会兜底拦截 git 分发缺入口文件的情况）。通用机制，不针对具体插件。
+          // 反查本身计入「已尝试的安装方式」：组织 scope 与 GitHub 用户名不一致时仅凭
+          // 仓库名猜不到包名，失败提 Issue 时作者看到我们查过的命令就能直接指认正确包名。
+          const attempts: string[] = []
+          if (repoTarget !== null) {
+            const npmName = await resolveNpmPackage(rawRepo)
+            if (npmName !== null) {
+              target = npmName
+              attempts.push(`npm registry search: \`npm search repository:${rawRepo}\` → found \`${npmName}\``)
+              // 持久化 repo → npm 包名映射：目录数据未下发 npmPackage（组织 scope 与 GitHub
+              // 用户名不一致）时，客户端仍能通过 /installed 的 versions 把依赖 key 匹配回仓库，
+              // 列表立即显示「已安装」，避免安装成功后仍显示可安装
+              recordResolvedNpmPackage(profile, rawRepo, npmName)
+            } else {
+              attempts.push(`npm registry search: \`npm search repository:${rawRepo}\` → no matching package found (falling back to git install)`)
+            }
+          }
           // 重复安装防护：非更新请求命中已安装目标时直接拒绝，不重复跑 CLI
           // （否则 CLI 会因「已存在」失败，且用户看到的是莫名其妙的报错）；
-          // 更新请求（mode: 'update'）放行，CLI 的 add 对已存在依赖是 pnpm 原位覆盖重装
-          const already = installedByRepo(readInstalled(profile), target)
+          // 更新请求（mode: 'update'）放行，CLI 的 add 对已存在依赖是 pnpm 原位覆盖重装。
+          // 命中判定双通道：npm 包名按 dependencies 键直接命中，github: 目标按 spec 值匹配。
+          const installed = readInstalled(profile)
+          const already = installedByRepo(installed, target) ?? (installed[target] !== undefined ? target : null)
           if (already !== null && mode !== 'update') {
             sendJson(response, 409, { error: `already installed: ${already}` })
             return
@@ -194,13 +222,16 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           }
           // 安装前预检：仅新安装走预检（github 源分发改入口文件缺失时直接拦截）。
           // 更新是已信任目标的覆盖重装，跳过预检避免重复下载 tarball。
-          // 只支持官方默认安装方式（dsh plugin add github:owner/repo），不做任何 npm 兜底降级；
-          // [packaging] 前缀供客户端归类为「插件未适配官方默认安装方式」并引导去仓库提 Issue
+          // npm 包信任 registry 直接放行；github 源拦截时标记 [packaging] 前缀，
+          // 供客户端归类为「插件分发不完整」并引导去仓库提 Issue
           if (already === null) {
             const preflight = await preflightTarget(target)
             if (!preflight.ok) {
+              // 预检拦截（git 分发缺入口文件）：同步 400 返回，附上已尝试的安装方式，
+              // 客户端失败弹窗提 Issue 时一并贴给作者
               sendJson(response, 400, {
-                error: `[packaging] ${target}: does not support the official default install method — the git distribution lacks build output (the entry file ${preflight.missing ?? '?'} declared in package.json is not in the repository). Report to the author.`,
+                error: `[packaging] ${target}: plugin distribution is incomplete — the entry file ${preflight.missing ?? '?'} declared in package.json is not present in the git distribution (build output not committed). Report to the author.`,
+                attempts,
               })
               return
             }
@@ -217,6 +248,10 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             action: 'add',
             profile,
             target,
+            // npm 安装时 target 是包名：displayTarget 固定展示仓库名，待重启行/前端恢复不受通道变化影响
+            displayTarget: githubTarget(displayRepo) ?? undefined,
+            // 已尝试的安装方式（npm 反查）：实际执行命令由 spawn 时追加，失败 issue 一并展示
+            attempts,
             timeoutMs: COMMAND_TIMEOUT_MS,
             env: { ...process.env, CI: 'true' },
           })

@@ -16,6 +16,10 @@ export interface NotificationRecord {
   repo: string
   /** 失败时的完整错误日志；成功记录为空串 */
   message: string
+  /** 实际执行的安装/卸载命令（issue 预填时如实展示）；历史记录可能缺失 */
+  command?: string
+  /** 尝试过的安装方式（npm registry 反查 + 实际执行命令，按先后顺序）：失败提 Issue 时贴给作者，便于反推正确的 npm 包名 */
+  attempts?: string[]
   /** 结束时间（epoch ms） */
   at: number
 }
@@ -27,7 +31,8 @@ export type FailureKind = 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
 
 /**
  * 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
- * 对用户而言结果都一样 —— 用官方默认安装方式装不上，就是插件仓库的问题，一律引导提 Issue：
+ * 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
+ * 一律引导提 Issue：
  * - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
  *   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
  *   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
@@ -44,7 +49,7 @@ export function classifyFailure(message: string): FailureKind {
   if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return 'pnpmIgnoredBuild'
   // 再判 prepare 实际执行失败：只有构建脚本真的跑挂了才是插件问题
   if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return 'pluginPrepare'
-  // 其余失败（含 git prepare 被 pnpm 白名单拦截）：官方方式装不上 = 插件仓库的问题，一律提 Issue
+  // 其余失败（含 git prepare 被 pnpm 白名单拦截）：当前通道装不上 = 插件分发/依赖的问题，一律提 Issue
   return 'repo'
 }
 

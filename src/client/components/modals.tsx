@@ -10,7 +10,7 @@ import styles from '../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, TaskState, ToastState, Translate } from '../types.ts'
 import { CloseIcon, CopyIcon, LinkIcon } from './icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
-import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../lib/catalog.ts'
+import { installCommandOf, pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../lib/catalog.ts'
 import { classifyFailure } from '../lib/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述 + 「稍后重启 / 立即重启」按钮对（部分插件需重启后才会挂载） */
@@ -142,7 +142,7 @@ export function InstallModal(props: InstallModalProps) {
             role: 'button',
             tabIndex: 0,
           },
-            h('span', { className: styles.modalCmdText }, `dsh plugin add github:${plugin.source?.repo ?? ''}`),
+            h('span', { className: styles.modalCmdText }, installCommandOf(plugin)),
             h('span', { className: styles.modalCmdCopy }, h(CopyIcon), t('copyCmdLabel')),
           ),
           task && task.status === 'pending' ? h('div', { className: styles.queuedHint }, t('queuedHint')) : null,
@@ -270,16 +270,19 @@ export function UninstallModal(props: UninstallModalProps) {
 
 /** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 /** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
-export function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }: {
+export function ErrorModal({ message, repo, kind, command, attempts, t, env, onCopy, onClose }: {
   message: string
   repo: string | null
   kind: 'install' | 'uninstall'
+  command?: string
+  /** 尝试过的安装方式（npm 反查 + 实际执行命令）：issue 预填一并贴给作者，便于反推正确的 npm 包名 */
+  attempts?: string[]
   t: Translate
   env: EnvInfo | null
   onCopy: (text: string) => void
   onClose: () => void
 }) {
-  // 失败归类：用官方默认安装方式装不上 = 插件仓库的问题，一律引导提 Issue
+  // 失败归类：当前安装通道（npm/git）装不上 = 插件分发/依赖的问题，一律引导提 Issue
   const failureKind = classifyFailure(message)
   return h('div', {
     className: styles.overlay,
@@ -320,14 +323,14 @@ export function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }: {
           // 插件问题（prepare 构建失败 / 原生依赖构建被拦截 / git 分发缺产物）：都是插件打包分发问题 —— 先说明原因，按钮在下方引导提 Issue
           failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
             ? h('div', null, [
-              // [packaging]（预检/装后校验拦截：git 分发缺产物，不支持官方默认安装方式）与
+              // [packaging]（预检/装后校验拦截：git 分发缺产物）与
               // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
               h('div', { className: styles.failPrepareHint }, failureKind === 'pnpmIgnoredBuild'
                 ? t('failIgnoredBuild')
                 : /\[packaging\]/i.test(message) ? t('failPackagingHint') : t('failPrepareHint')),
               repo ? h('a', {
                 className: styles.failBigIssue,
-                href: pluginIssueUrl(repo, message, env),
+                href: pluginIssueUrl(repo, message, env, command, attempts),
                 target: '_blank',
                 rel: 'noopener noreferrer',
                 title: t('failIssueHint'),
@@ -335,7 +338,7 @@ export function ErrorModal({ message, repo, kind, t, env, onCopy, onClose }: {
             ])
             : repo ? h('a', {
               className: styles.failBigIssue,
-              href: pluginIssueUrl(repo, message, env),
+              href: pluginIssueUrl(repo, message, env, command, attempts),
               target: '_blank',
               rel: 'noopener noreferrer',
               title: t('failIssueHint'),

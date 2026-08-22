@@ -2,11 +2,11 @@
 # Smart dev sync for the local dsh web instance.
 #
 # Rebuilds the plugin, then decides what actually needs to happen:
-#   - server bundle (lib/) changed  → full reload (stop + sync + restart), the
-#     same as `npm run reload` — ESM modules can't be hot-swapped in the booted
-#     process, so a restart is unavoidable.
-#   - only the client bundle changed → re-sync the browser bundle and exit.
-#     The running server stays up; just refresh the page to see the change.
+#   - server bundle (lib/) changed  -> full reload (stop + sync + restart); the
+#     ESM modules can't be hot-swapped in the booted process, so a restart is
+#     unavoidable.
+#   - only the client bundle changed -> re-sync the browser bundle and check
+#     whether the daemon is still up; boot it when the port is not listening.
 #
 # Usage:
 #   ./scripts/run/dev-dsh.sh                 # smart sync (build + decide)
@@ -33,16 +33,29 @@ echo "[dev] building plugin (server + client)…"
   || { echo "[dev] build failed — aborting" >&2; exit 1; }
 
 # No plugin copy yet — fall back to a normal full reload.
-[[ -d "$TARGET" ]] || {
+if [[ ! -d "$TARGET" ]]; then
   echo "[dev] plugin copy missing — doing a full reload instead."
   exec bash "$REPO_DIR/scripts/run/reload-dsh.sh" --port="$PORT" --profile="$PROFILE"
-}
+fi
 
 if diff -rq "$REPO_DIR/lib" "$TARGET/lib" >/dev/null 2>&1; then
-  echo "[dev] server bundle unchanged — only syncing the client bundle."
-  rsync -a --delete "$REPO_DIR/client/" "$TARGET/client/"
-  cp -f "$REPO_DIR/package.json" "$TARGET/package.json"
-  echo "[dev] client synced. Refresh http://localhost:$PORT — server NOT restarted."
+  echo "[dev] server bundle unchanged — syncing the client bundle."
+  rsync -a --delete "$REPO_DIR/client/" "$TARGET/client/" \
+    || { echo "[dev] error: failed to sync client/ — aborting" >&2; exit 1; }
+  # Use rsync (not cp) for package.json: some shells alias `cp` to -n, which
+  # exits non-zero on an identical existing target and would abort here.
+  rsync -a "$REPO_DIR/package.json" "$TARGET/package.json" \
+    || { echo "[dev] error: failed to copy package.json — aborting" >&2; exit 1; }
+  # Server code may be current while the daemon itself is not running
+  # (killed manually, crashed, or a previous reload stopped it without a
+  # successful restart). Only report "refresh" when the port is actually
+  # listening; otherwise fall through to a full reload that boots it.
+  if lsof -ti "tcp:$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "[dev] client synced. dsh web is running on http://localhost:$PORT — refresh the page."
+  else
+    echo "[dev] dsh web is not running on :$PORT — starting it."
+    exec bash "$REPO_DIR/scripts/run/reload-dsh.sh" --skip-build --port="$PORT" --profile="$PROFILE"
+  fi
 else
   echo "[dev] server bundle changed — full reload (build already done)."
   exec bash "$REPO_DIR/scripts/run/reload-dsh.sh" --skip-build --port="$PORT" --profile="$PROFILE"

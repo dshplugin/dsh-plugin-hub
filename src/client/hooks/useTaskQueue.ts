@@ -7,6 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { HubPlugin, Translate } from '../types.ts'
+import { installCommandOf, installTargetOf } from '../lib/catalog.ts'
 
 /** 客户端任务队列项：镜像服务端 active 任务（running 在前、pending 在后）。 */
 export interface QueueTask {
@@ -28,6 +29,10 @@ export interface QueueTask {
   /** 乐观入队条目：点击安装后立即显示「正在安装中」，等 POST 响应回来再换成真实任务 id。
    *  服务端还没登记（preflight 中），轮询合并/消失检测都必须跳过，避免被当作已结束任务收尾。 */
   optimistic?: boolean
+  /** 实际执行的安装命令（npm/git 通道随插件数据决定）：失败时 issue 预填如实展示 */
+  command?: string
+  /** 尝试过的安装方式（npm registry 反查 + 实际执行命令，按先后顺序）：失败时 issue 预填一并贴给作者 */
+  attempts?: string[]
 }
 
 /** 客户端待重启项：镜像服务端内存列表 + 本地补齐的展示信息（简介/版本）。 */
@@ -47,8 +52,8 @@ export interface TaskQueueOptions {
   /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录。 */
   onInstallDone: (viaModal: boolean, repo: string | null) => void
   onUninstallDone: (viaModal: boolean, repo: string | null) => void
-  /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）。 */
-  onError: (message: string, repo: string | null, kind: 'install' | 'uninstall') => void
+  /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 尝试过的安装方式（npm 反查/执行命令，可缺省）。 */
+  onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[]) => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
   installPlugin: HubPlugin | null
   uninstallPlugin: HubPlugin | null
@@ -74,6 +79,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   resolvePendingRef.current = resolvePending
   /** 当前打开弹窗所对应的任务 id：该任务完成时弹窗切换为结果视图 */
   const modalTaskRef = useRef<number | null>(null)
+  /** 已开始收尾但尚未结束的任务 id（服务端 /active 已消失 → 查 /status 中）：并发轮询时跳过，避免重复收尾 */
+  const settlingRef = useRef<Set<number>>(new Set())
   /** 轮询定时器句柄（队列清空/组件卸载时清理） */
   const pollRef = useRef<number | null>(null)
   /** 请求在途的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
@@ -174,7 +181,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       const detail = lines.length > 0
         ? [...lines].reverse().join('\n')
         : q.kind === 'uninstall' ? t('uninstallFail') : t('installFail')
-      onError(detail, q.repo, q.kind)
+      onError(detail, q.repo, q.kind, q.command, q.attempts)
     }
     maybeStopPoll()
   }
@@ -209,12 +216,14 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   const settleTask = async (q: QueueTask) => {
     let status = 'failed'
     let lines: string[] = []
+    let attempts: string[] | undefined
     try {
       const res = await fetch(`/dsh-plugin-hub/status?task=${q.id}`, { cache: 'no-store' })
       if (res.ok) {
-        const data = await res.json() as { task?: { status?: string; lines?: string[] } }
+        const data = await res.json() as { task?: { status?: string; lines?: string[]; attempts?: string[] } }
         status = data.task?.status ?? 'failed'
         lines = data.task?.lines ?? []
+        attempts = Array.isArray(data.task?.attempts) ? data.task.attempts : undefined
       }
     } catch { /* 服务端不可达：按失败处理 */ }
     if (status === 'done') {
@@ -222,7 +231,10 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       if (q.kind === 'uninstall') settleDone(q, lines)
       else finishQueueTask(true, q, lines)
     }
-    else if (status === 'failed') finishQueueTask(false, q, lines)
+    else if (status === 'failed') {
+      // 服务端终态带出的尝试记录覆盖本地：以实际执行为准
+      finishQueueTask(false, { ...q, attempts }, lines)
+    }
     else {
       applyQueue((prev) => prev.filter((x) => x.id !== q.id)) // cancelled / 未知
       maybeStopPoll()
@@ -238,7 +250,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         const res = await fetch('/dsh-plugin-hub/active', { cache: 'no-store' })
         if (!res.ok) throw new Error(`active ${res.status}`)
         const data = await res.json() as {
-          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown }[]
+          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown }[]
           pendingRestarts?: unknown
         }
         const active = (data.tasks ?? []).filter((a) => typeof a.id === 'number')
@@ -266,18 +278,32 @@ export function useTaskQueue(opts: TaskQueueOptions) {
                 status: a.status === 'running' ? 'running' : 'pending',
                 progress: typeof a.progress === 'number' ? a.progress : prevTask?.progress ?? 0,
                 lines: Array.isArray(a.lines) ? (a.lines as string[]) : (prevTask?.lines ?? []),
+                attempts: Array.isArray(a.attempts) ? (a.attempts as string[]) : (prevTask?.attempts ?? []),
               })
             }
             // 保留乐观条目：服务端尚未登记（preflight 中），无真实 id，不能因 active 缺它就被合并吞掉
             const keepOpt = prev.filter((q) => q.optimistic && !next.some((x) => x.id === q.id))
             if (keepOpt.length > 0) next.push(...keepOpt)
+            // 保留「已从服务端消失、但尚未收尾」的任务：收尾（settleTask）负责移除。
+            // 若在这里提前摘除，卸载/安装完成的那一瞬队列会先变空，弹窗闪回「确认」态
+            // （busy=false 且未 done），表现为「卸载中 → 卸载 → 卸载完成」的中间回退。
+            const keepGone = prev.filter((q) =>
+              !byId.has(q.id) && !next.some((x) => x.id === q.id) && q.status !== 'cancelling' && !q.optimistic)
+            if (keepGone.length > 0) next.push(...keepGone)
             return next
           })
           // 本地有、服务端已消失 → 已结束：逐个查终态收尾
           // （cancelling 是客户端乐观过渡态，交给 cancelTask 的定时移除，不在轮询里提前收敛；
-          //   optimistic 是点击后尚未登记的占位，服务端 /status 查不到，跳过免误判成失败）
-          const gone = prevQueue.filter((q) => !byId.has(q.id) && q.status !== 'cancelling' && !q.optimistic)
-        for (const q of gone) await settleTask(q)
+          //   optimistic 是点击后尚未登记的占位，服务端 /status 查不到，跳过免误判成失败；
+          //   settling 是上一轮已开始收尾的任务，并发轮询直接跳过，避免重复收尾）
+          const gone = prevQueue.filter((q) =>
+            !byId.has(q.id) && q.status !== 'cancelling' && !q.optimistic && !settlingRef.current.has(q.id))
+        for (const q of gone) {
+          // 防御：同 id 任务可能已被上一轮收尾移除（极端时序下轮询合并出的重复条目），跳过避免重复收尾
+          if (!queueRef.current.some((x) => x.id === q.id)) continue
+          settlingRef.current.add(q.id)
+          try { await settleTask(q) } finally { settlingRef.current.delete(q.id) }
+        }
       } catch {
         // 服务端暂不可达：静默等待下一轮
       }
@@ -293,7 +319,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         const res = await fetch('/dsh-plugin-hub/active', { cache: 'no-store' })
         if (!res.ok) return
         const data = await res.json() as {
-          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown }[]
+          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown }[]
           pendingRestarts?: unknown
         }
         if (cancelled) return
@@ -303,14 +329,20 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           .filter((a) => typeof a.id === 'number')
           .map((a) => {
             const isRemove = a.action === 'remove'
+            // 服务端任务的 target：github:repo（git 安装）/ npm 包名（npm 安装/卸载）。
+            // 恢复展示统一用 displayTarget（owner/repo，服务端固定传）：npm 安装时 target 是包名，
+            // 直接展示会让用户看到「安装方式」的内部细节，违背无感知原则；卸载保持包名（匹配已装表）。
+            const display = typeof (a as { displayTarget?: unknown }).displayTarget === 'string' ? (a as { displayTarget: string }).displayTarget.replace(/^github:/, '') : ''
+            const fallback = typeof a.target === 'string' ? a.target.replace(/^github:/, '') : ''
             return {
               id: a.id as number,
               kind: (isRemove ? 'uninstall' : 'install') as 'install' | 'uninstall',
-              target: typeof a.target === 'string' ? a.target.replace(/^github:/, '') : '',
-              repo: isRemove ? null : (typeof a.target === 'string' ? a.target.replace(/^github:/, '') : null),
+              target: isRemove ? fallback : (display || fallback),
+              repo: isRemove ? null : (display || fallback),
               status: a.status === 'running' ? 'running' : 'pending',
               progress: typeof a.progress === 'number' ? a.progress : 0,
               lines: Array.isArray(a.lines) ? (a.lines as string[]) : [],
+              attempts: Array.isArray((a as { attempts?: unknown }).attempts) ? ((a as { attempts: string[] }).attempts) : [],
             }
           })
         if (items.length > 0 || pendingRef.current.length > 0) {
@@ -328,6 +360,10 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   const installNow = async (p: HubPlugin, opts?: { update?: boolean }) => {
     const repo = p.source?.repo ?? ''
     if (!repo) return
+    // 安装通道决策（用户无感知）：有 npm 包名 → 走 npm；否则 git 直装。
+    // 队列条目一律用仓库名展示/防重，只有发给后端的实际安装目标随通道变化。
+    const { target } = installTargetOf(p)
+    if (!target) return
     // 防重复入队：同一目标已在排队/执行中则忽略
     if (queueRef.current.some((q) => q.kind === 'install' && q.target === repo)) return
     // 请求在途防重：任务要等响应回来才进本地队列，这之前再次点击（双击）直接忽略
@@ -344,19 +380,23 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       id: tempId, kind: 'install', target: repo, repo, desc: p.description,
       version: p.version, updatedAt: p.dates?.repoUpdatedAt,
       status: 'running', progress: 0, lines: [], optimistic: true,
+      command: installCommandOf(p, true),
+      // 服务端登记后 /active 会带回真实尝试记录（npm 反查 + 执行命令），先占位空列表
+      attempts: [],
     }])
     setSubmitting(true)
     try {
       const res = await fetch('/dsh-plugin-hub/install', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ repo, mode: opts?.update ? 'update' : undefined }),
+        body: JSON.stringify({ repo: target, display: repo, mode: opts?.update ? 'update' : undefined }),
       })
-      const data = await res.json() as { ok?: boolean; task?: number; error?: string }
+      const data = await res.json() as { ok?: boolean; task?: number; error?: string; attempts?: string[] }
       if (!data.ok || typeof data.task !== 'number') {
         // 请求层失败（重复安装 409 / 参数错误等）：移除乐观条目 + 完整错误弹窗
         applyQueue((prev) => prev.filter((x) => x.id !== tempId))
-        onError(data.error ?? `HTTP ${res.status}`, repo, 'install')
+        // 同步 400（如预检拦截）服务端会附上已尝试的安装方式，issue 预填一并展示
+        onError(data.error ?? `HTTP ${res.status}`, repo, 'install', installCommandOf(p, true), data.attempts)
         return
       }
       const taskId = data.task
@@ -372,7 +412,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     } catch {
       // 网络异常：移除乐观条目 + 兜底错误弹窗
       applyQueue((prev) => prev.filter((x) => x.id !== tempId))
-      onError(t('installFail'), repo, 'install')
+      onError(t('installFail'), repo, 'install', installCommandOf(p, true))
     } finally {
       submittingRef.current.delete(repo)
       setSubmitting(false)

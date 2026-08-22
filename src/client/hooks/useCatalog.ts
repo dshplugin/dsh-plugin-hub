@@ -27,8 +27,9 @@ export function useCatalog(lang: LocaleId) {
   const [installedFilter, setInstalledFilter] = useState<'all' | 'installed' | 'notInstalled'>('all')
   /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
   const [installed, setInstalled] = useState<Record<string, string>>({})
-  /** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由） */
-  const [versions, setVersions] = useState<Record<string, { version: string; updatedAt: string }>>({})
+  /** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由）；
+   *  npmPackage 为 npm 优先通道反查命中的包名映射（目录数据未下发时客户端靠它把依赖 key 匹配回仓库） */
+  const [versions, setVersions] = useState<Record<string, { version: string; updatedAt: string; npmPackage?: string }>>({})
 
   // 拉取目录 + 统计。在线 API 已只返回 verified；再过滤一次，保证只展示人工验证通过的插件。
   useEffect(() => {
@@ -64,7 +65,7 @@ export function useCatalog(lang: LocaleId) {
     try {
       const res = await fetch('/dsh-plugin-hub/installed', { cache: 'no-store' })
       if (!res.ok) return
-      const data = await res.json() as { installed?: Record<string, string>; versions?: Record<string, { version: string; updatedAt: string }> }
+      const data = await res.json() as { installed?: Record<string, string>; versions?: Record<string, { version: string; updatedAt: string; npmPackage?: string }> }
       setInstalled(data.installed ?? {})
       setVersions(data.versions ?? {})
     } catch {
@@ -75,13 +76,22 @@ export function useCatalog(lang: LocaleId) {
   // 首次进入拉取已安装表（依赖宿主 webServer 服务）
   useEffect(() => { refreshInstalled() }, [])
 
-  /** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`；命中返回 npm 包名。 */
+  /** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
   const installedName = (p: HubPlugin): string | null => {
     const repo = p.source?.repo
     if (!repo) return null
     const needle = `github:${repo.toLowerCase()}`
     for (const [name, spec] of Object.entries(installed)) {
       if (spec.toLowerCase().includes(needle)) return name
+    }
+    // npm 通道安装：profile 依赖 key 直接是 npm 包名。包名来源两处——目录数据（npmPackage），
+    // 或服务端 npm 优先反查持久化的映射（versions[repo].npmPackage，覆盖组织 scope 与 GitHub
+    // 用户名不一致、目录未下发包名的场景）；命中任一并依赖 key 真实存在即视为已安装
+    const pkg = ((p.source?.npmPackage || versions[repo.toLowerCase()]?.npmPackage) ?? '').toLowerCase()
+    if (pkg) {
+      for (const name of Object.keys(installed)) {
+        if (name.toLowerCase() === pkg) return name
+      }
     }
     return null
   }

@@ -195,7 +195,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                   !r.ok && (() => {
                     const kind = classifyFailure(r.message)
                     if (kind === 'pluginPrepare' || kind === 'pnpmIgnoredBuild') {
-                      // [packaging]（预检/装后校验拦截：git 分发缺产物，不支持官方默认安装方式）与
+                      // [packaging]（预检/装后校验拦截：git 分发缺产物）与
                       // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
                       return h('div', null, [
                         h('div', { className: styles.failPrepareHint }, kind === 'pnpmIgnoredBuild'
@@ -203,7 +203,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                           : /\[packaging\]/i.test(r.message) ? t('failPackagingHint') : t('failPrepareHint')),
                         r.repo ? h('a', {
                           className: styles.failBigIssue,
-                          href: pluginIssueUrl(r.repo, r.message, env),
+                          href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
                           target: '_blank',
                           rel: 'noopener noreferrer',
                           title: t('failIssueHint'),
@@ -212,7 +212,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     }
                     return r.repo ? h('a', {
                       className: styles.failBigIssue,
-                      href: pluginIssueUrl(r.repo, r.message, env),
+                      href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
                       target: '_blank',
                       rel: 'noopener noreferrer',
                       title: t('failIssueHint'),
