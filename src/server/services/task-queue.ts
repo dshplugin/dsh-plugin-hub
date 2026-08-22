@@ -170,7 +170,7 @@ export function startPluginMutation(options: {
   /** 入队前已尝试的安装方式（npm registry 反查等）：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
   attempts?: string[]
 }): InstallTask {
-  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [] }
+  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
   tasks.set(task.id, task)
   if (tasks.size > MAX_TASKS) {
@@ -348,11 +348,13 @@ function spawnMutation(options: {
                 // 卸载成功 → 主动从运行中 loader 移除该包条目，立即生效、无需重启；
                 // 移除失败（或从未加载过但 loader 不可用）才登记「待重启清理」兜底
                 const removed = await removeLoadedEntry(uninstallLoader, target)
+                task.needsRestart = !removed
                 if (removed) clearPendingRestart(displayTarget ?? target)
                 else addPendingRestart(displayTarget ?? target, 'uninstall')
               } else {
                 // 安装成功（或卸载但无 loader 引用）→ 登记待重启：
                 // 插件要宿主重启才会挂载/卸载干净，重启前一直提醒；展示目标用 displayTarget（owner/repo）
+                task.needsRestart = true
                 addPendingRestart(displayTarget ?? target, action === 'add' ? 'install' : 'uninstall')
               }
             }

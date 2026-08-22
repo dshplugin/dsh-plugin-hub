@@ -33,6 +33,10 @@ export interface QueueTask {
   command?: string
   /** 尝试过的安装方式（npm registry 反查 + 实际执行命令，按先后顺序）：失败时 issue 预填一并贴给作者 */
   attempts?: string[]
+  /** 完成结果是否需要重启才生效（服务端任务终态带出；默认 true 保持老行为：弹窗给重启选项）。
+   *  卸载时 loader 已即时移除 → false，结果视图只显示「完成」；true 时弹窗给「稍后重启/立即重启」，
+   *  通知中心待重启条目（服务端登记）同步常驻，直到用户点「立即重启」。 */
+  needsRestart: boolean
 }
 
 /** 客户端待重启项：镜像服务端内存列表 + 本地补齐的展示信息（简介/版本）。 */
@@ -49,9 +53,10 @@ export interface PendingRestart {
 export interface TaskQueueOptions {
   t: Translate
   refreshInstalled: () => void
-  /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录。 */
-  onInstallDone: (viaModal: boolean, repo: string | null) => void
-  onUninstallDone: (viaModal: boolean, repo: string | null) => void
+  /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录；
+   *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）。 */
+  onInstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean) => void
+  onUninstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean) => void
   /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 尝试过的安装方式（npm 反查/执行命令，可缺省）。 */
   onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[]) => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
@@ -168,13 +173,13 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       if (q.kind === 'uninstall') {
         // 卸载成功：清掉本地版本记录
         void syncInstalledVersion(q.repo, undefined, undefined)
-        onUninstallDone(modalTaskRef.current === q.id, q.repo)
+        onUninstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart)
       } else {
         // 安装成功：记录安装时的目录信号（版本 + 仓库更新时间），供「有更新」比对；
         // 同时缓存展示信息，待重启列表（服务端已登记）合并时直接补齐简介/版本
         void syncInstalledVersion(q.repo, q.version, q.updatedAt)
         pendingInfoRef.current.set(q.target, { desc: q.desc, version: q.version })
-        onInstallDone(modalTaskRef.current === q.id, q.repo)
+        onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart)
       }
     } else {
       // 失败：完整展示全部输出行（最新在前，逆序为日志阅读顺序），不裁剪
@@ -220,25 +225,31 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     try {
       const res = await fetch(`/dsh-plugin-hub/status?task=${q.id}`, { cache: 'no-store' })
       if (res.ok) {
-        const data = await res.json() as { task?: { status?: string; lines?: string[]; attempts?: string[] } }
-        status = data.task?.status ?? 'failed'
-        lines = data.task?.lines ?? []
-        attempts = Array.isArray(data.task?.attempts) ? data.task.attempts : undefined
+        const data = await res.json() as { task?: { status?: string; lines?: string[]; attempts?: string[]; needsRestart?: unknown } }
+        const task = data.task
+        if (task !== undefined) {
+          status = task.status ?? 'failed'
+          lines = task.lines ?? []
+          attempts = Array.isArray(task.attempts) ? task.attempts : undefined
+          // 终态带出的「是否需要重启」覆盖本地（服务端 done 时按 loader 即时移除情况设置）
+          const needsRestart = typeof task.needsRestart === 'boolean' ? task.needsRestart : q.needsRestart
+          if (status === 'done') {
+            const settled = { ...q, needsRestart }
+            // 卸载成功走进度过渡动画；安装成功直接收尾
+            if (q.kind === 'uninstall') settleDone(settled, lines)
+            else finishQueueTask(true, settled, lines)
+            return
+          }
+          if (status === 'failed') {
+            // 服务端终态带出的尝试记录覆盖本地：以实际执行为准
+            finishQueueTask(false, { ...q, attempts }, lines)
+            return
+          }
+        }
       }
     } catch { /* 服务端不可达：按失败处理 */ }
-    if (status === 'done') {
-      // 卸载成功走进度过渡动画；安装成功直接收尾
-      if (q.kind === 'uninstall') settleDone(q, lines)
-      else finishQueueTask(true, q, lines)
-    }
-    else if (status === 'failed') {
-      // 服务端终态带出的尝试记录覆盖本地：以实际执行为准
-      finishQueueTask(false, { ...q, attempts }, lines)
-    }
-    else {
-      applyQueue((prev) => prev.filter((x) => x.id !== q.id)) // cancelled / 未知
-      maybeStopPoll()
-    }
+    applyQueue((prev) => prev.filter((x) => x.id !== q.id)) // cancelled / 未知
+    maybeStopPoll()
   }
 
   /** 轮询整个队列：合并服务端 /active（running 在前、pending 在后），
@@ -250,7 +261,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         const res = await fetch('/dsh-plugin-hub/active', { cache: 'no-store' })
         if (!res.ok) throw new Error(`active ${res.status}`)
         const data = await res.json() as {
-          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown }[]
+          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown; needsRestart?: unknown }[]
           pendingRestarts?: unknown
         }
         const active = (data.tasks ?? []).filter((a) => typeof a.id === 'number')
@@ -279,6 +290,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
                 progress: typeof a.progress === 'number' ? a.progress : prevTask?.progress ?? 0,
                 lines: Array.isArray(a.lines) ? (a.lines as string[]) : (prevTask?.lines ?? []),
                 attempts: Array.isArray(a.attempts) ? (a.attempts as string[]) : (prevTask?.attempts ?? []),
+                needsRestart: typeof a.needsRestart === 'boolean' ? a.needsRestart : (prevTask?.needsRestart ?? true),
               })
             }
             // 保留乐观条目：服务端尚未登记（preflight 中），无真实 id，不能因 active 缺它就被合并吞掉
@@ -319,7 +331,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         const res = await fetch('/dsh-plugin-hub/active', { cache: 'no-store' })
         if (!res.ok) return
         const data = await res.json() as {
-          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown }[]
+          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown; needsRestart?: unknown }[]
           pendingRestarts?: unknown
         }
         if (cancelled) return
@@ -343,6 +355,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
               progress: typeof a.progress === 'number' ? a.progress : 0,
               lines: Array.isArray(a.lines) ? (a.lines as string[]) : [],
               attempts: Array.isArray((a as { attempts?: unknown }).attempts) ? ((a as { attempts: string[] }).attempts) : [],
+              needsRestart: typeof (a as { needsRestart?: unknown }).needsRestart === 'boolean' ? (a as { needsRestart: boolean }).needsRestart : true,
             }
           })
         if (items.length > 0 || pendingRef.current.length > 0) {
@@ -382,7 +395,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       status: 'running', progress: 0, lines: [], optimistic: true,
       command: installCommandOf(p, true),
       // 服务端登记后 /active 会带回真实尝试记录（npm 反查 + 执行命令），先占位空列表
-      attempts: [],
+      attempts: [], needsRestart: true,
     }])
     setSubmitting(true)
     try {
@@ -442,7 +455,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       }
       const taskId = data.task
       modalTaskRef.current = taskId
-      applyQueue((prev) => [...prev, { id: taskId, kind: 'uninstall', target: name, desc: p.description, repo, status: 'pending', progress: 0, lines: [] }])
+      applyQueue((prev) => [...prev, { id: taskId, kind: 'uninstall', target: name, desc: p.description, repo, status: 'pending', progress: 0, lines: [], needsRestart: true }])
       // 摘要条常驻顶部（含实时进度），明细面板保持折叠，想看时再点开
       pollQueue()
     } catch {

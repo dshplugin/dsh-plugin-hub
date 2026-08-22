@@ -28,6 +28,8 @@ export interface InstallTask {
   progress: number
   /** Newest output lines first (consumer shows the tail). */
   lines: string[]
+  /** 完成后是否仍需宿主重启才生效：卸载时 loader 已即时移除 → false；否则 true（弹窗据此给重启选项） */
+  needsRestart: boolean
 }
 
 /** 子进程启动参数（复用宿主 dsh 入口，或回退到 PATH 上的 `dsh`）。 */

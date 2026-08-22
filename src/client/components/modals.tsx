@@ -13,14 +13,18 @@ import { ProgressView } from './ProgressView.tsx'
 import { installCommandOf, pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../lib/catalog.ts'
 import { classifyFailure } from '../lib/failures.ts'
 
-/** 完成结果视图：绿色对勾 + 标题/描述 + 「稍后重启 / 立即重启」按钮对（部分插件需重启后才会挂载） */
+/** 完成结果视图：绿色对勾 + 标题/描述；
+ *  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
+ *  通知中心待重启条目常驻（服务端登记，内存态），直到用户点「立即重启」真正重启后才消失；
+ *  needsRestart=false（卸载已即时生效）→ 仅「完成」关闭。 */
 function ResultView({
-  title, desc, t, restarting, onRestart, onClose,
+  title, desc, t, restarting, needsRestart, onRestart, onClose,
 }: {
   title: string
   desc: string
   t: Translate
   restarting: boolean
+  needsRestart: boolean
   onRestart: () => void
   onClose: () => void
 }) {
@@ -43,12 +47,17 @@ function ResultView({
     ),
     h('div', { className: styles.resultTitle }, title),
     desc ? h('div', { className: styles.resultDesc }, desc) : null,
-    h('div', { className: styles.resultRestarting }, restarting ? t('restarting') : t('restartHint')),
-    h('div', { className: styles.modalActions },
-      h('button', { className: styles.restartLater, onClick: onClose, disabled: restarting }, t('restartLater')),
-      h('button', { className: styles.restartNow, onClick: onRestart, disabled: restarting },
-        restarting ? t('restarting') : t('restartNow')),
-    ),
+    needsRestart
+      ? h('div', null, [
+        h('div', { className: styles.resultRestarting }, restarting ? t('restarting') : t('restartHint')),
+        h('div', { className: styles.modalActions },
+          h('button', { className: styles.restartLater, onClick: onClose, disabled: restarting }, t('restartLater')),
+          h('button', { className: styles.restartNow, onClick: onRestart, disabled: restarting },
+            restarting ? t('restarting') : t('restartNow')),
+        ),
+      ])
+      : h('div', { className: styles.modalActions },
+        h('button', { className: styles.restartNow, onClick: onClose }, t('done'))),
   )
 }
 
@@ -63,6 +72,8 @@ export interface InstallModalProps {
   update: boolean
   /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
+  /** 完成结果是否需重启才生效：true → 「稍后重启 / 立即重启」；false → 仅「完成」 */
+  needsRestart: boolean
   onClose: () => void
   onCopy: () => void
   onInstall: () => void
@@ -74,7 +85,7 @@ export interface InstallModalProps {
  * 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, submitting, update, onClose, onCopy, onInstall, onRestart } = props
+  const { plugin, done, task, t, langPath, restarting, submitting, update, needsRestart, onClose, onCopy, onInstall, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分
   const name = plugin.displayName ?? plugin.slug
@@ -112,6 +123,7 @@ export function InstallModal(props: InstallModalProps) {
           desc: update ? t('updateResultDesc') : t('installResultDesc'),
           t,
           restarting,
+          needsRestart,
           onRestart,
           onClose,
         })
@@ -177,6 +189,8 @@ export interface UninstallModalProps {
   restarting: boolean
   /** 卸载请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
+  /** 完成结果是否需重启才生效：true → 「稍后重启 / 立即重启」；false（loader 已即时移除）→ 仅「完成」 */
+  needsRestart: boolean
   onClose: () => void
   onCancel: () => void
   onCopyCommand: () => void
@@ -186,7 +200,7 @@ export interface UninstallModalProps {
 
 /** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 export function UninstallModal(props: UninstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, submitting, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
+  const { plugin, done, task, t, langPath, restarting, submitting, needsRestart, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名，与安装弹窗一致，并用状态色区分
   const name = plugin.displayName ?? plugin.slug
@@ -221,6 +235,7 @@ export function UninstallModal(props: UninstallModalProps) {
           desc: t('uninstallResultDesc'),
           t,
           restarting,
+          needsRestart,
           onRestart,
           onClose,
         })

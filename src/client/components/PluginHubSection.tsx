@@ -8,11 +8,13 @@ import { createElement as h, useEffect, useState } from 'react'
 import styles from '../styles/Header.module.css'
 import { en, zh } from '../locales.ts'
 import type { EnvInfo, HubPlugin, LocaleId, SectionProps, ToastState } from '../types.ts'
-import { langPathOf, installCommandOf } from '../lib/catalog.ts'
+import { langPathOf, installCommandOf, HUB_REPO, PLUGIN_VERSION } from '../lib/catalog.ts'
 import { getEnv } from '../lib/env.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
 import { useTaskQueue } from '../hooks/useTaskQueue.ts'
 import { ErrorModal, InstallModal, UninstallModal, Toast } from './modals.tsx'
+import { AboutModal } from './AboutModal.tsx'
+import { HubUpdateModal } from './HubUpdateModal.tsx'
 import { NotificationsModal } from './NotificationsModal.tsx'
 import { addFailure, addSuccess, clearNotifications, loadNotifications, removeNotification } from '../lib/failures.ts'
 import type { NotificationRecord } from '../lib/failures.ts'
@@ -48,11 +50,19 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
   const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
+  /** Hub 自我更新说明弹窗：点「可更新」徽标先展示版本 + Markdown 变更记录，确认后再进安装弹窗 */
+  const [showHubUpdate, setShowHubUpdate] = useState(false)
+  /** 「关注我们」弹窗：GitHub 图标后按钮点击打开，展示平台介绍 + 用户反馈群二维码（Worker /about 推送） */
+  const [showAbout, setShowAbout] = useState(false)
   /** 卸载确认弹窗：记录待卸载的插件 */
   const [uninstallPlugin, setUninstallPlugin] = useState<HubPlugin | null>(null)
   /** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
   const [installDone, setInstallDone] = useState(false)
   const [uninstallDone, setUninstallDone] = useState(false)
+  /** 结果视图是否给「立即重启」：服务端任务终态带出（卸载时 loader 已即时移除 → false 只给「完成」；
+   *  true 时通知中心待重启条目同步常驻，直到用户点「立即重启」真正重启后才消失） */
+  const [installNeedsRestart, setInstallNeedsRestart] = useState(true)
+  const [uninstallNeedsRestart, setUninstallNeedsRestart] = useState(true)
   /** 结果视图「立即重启」：请求宿主重启后进入等待，服务回来后整页刷新 */
   const [restarting, setRestarting] = useState(false)
   /** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
@@ -71,13 +81,15 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const queue = useTaskQueue({
     t,
     refreshInstalled: catalog.refreshInstalled,
-    onInstallDone: (viaModal, repo) => {
+    onInstallDone: (viaModal, repo, needsRestart) => {
+      setInstallNeedsRestart(needsRestart)
       if (viaModal) setInstallDone(true)
       else setToast({ id: Date.now(), kind: 'done' })
       // 安装成功也写入通知记录：通知中心里成功与失败都能看到
       setNotifications(addSuccess({ kind: 'install', repo: repo ?? '' }))
     },
-    onUninstallDone: (viaModal, repo) => {
+    onUninstallDone: (viaModal, repo, needsRestart) => {
+      setUninstallNeedsRestart(needsRestart)
       if (viaModal) setUninstallDone(true)
       else setToast({ id: Date.now(), kind: 'removed' })
       setNotifications(addSuccess({ kind: 'uninstall', repo: repo ?? '' }))
@@ -97,20 +109,22 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     },
   })
 
-  // 信任/卸载/通知记录弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
+  // 信任/卸载/更新说明/通知记录弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
   useEffect(() => {
-    if (!confirmPlugin && !uninstallPlugin && !showNotifications) return
+    if (!confirmPlugin && !uninstallPlugin && !showNotifications && !showHubUpdate && !showAbout) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
         setUninstallPlugin(null)
         setUninstallDone(false)
+        setShowHubUpdate(false)
+        setShowAbout(false)
         setShowNotifications(false)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [confirmPlugin, uninstallPlugin, showNotifications])
+  }, [confirmPlugin, uninstallPlugin, showNotifications, showHubUpdate, showAbout])
 
   // Toast 统一自动消失
   useEffect(() => {
@@ -204,6 +218,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
 
   const count = catalog.visible.length
 
+  // Hub 自身条目（目录数据里的 dshplugin/dsh-plugin-hub）：头部「可更新」徽标的更新目标。
+  // 目录可能尚未加载（此时 hubEntry 为 null，徽标不渲染，加载完成后自然出现）。
+  const hubEntry = catalog.plugins?.find((p) => p.source?.repo === HUB_REPO) ?? null
+
   return h('div', { className: styles.root },
     h(CatalogHeader, {
       t,
@@ -211,6 +229,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       statsTotal,
       statsVerified,
       onToggleLang: () => setManualLang(lang === 'en' ? 'zh' : 'en'),
+      // Hub 自身版本信息入口：版本号常驻可点（无更新也看得到当前版本更新内容），
+      // 有可用更新时版本号后紧跟红色「可更新」徽标（同一入口），点击都打开同一个更新说明弹窗。
+      // 有更新弹窗显示新版本 + Markdown 变更记录，点「直接更新」进安装弹窗覆盖重装。
+      hubUpdate: catalog.hubHasUpdate,
+      onVersionClick: () => setShowHubUpdate(true),
+      onAboutClick: () => setShowAbout(true),
     }),
     h(CategoryTabs, {
       category: catalog.category,
@@ -270,6 +294,34 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setUninstallPlugin(p)
       },
     }),
+    // Hub 版本信息弹窗：版本号/徽标点击打开 —— 有更新显示新版本 + 变更记录 + 「直接更新」，
+    // 无更新显示当前版本 + 记录 + 「已是最新」。Worker 拉取失败时兜底展示当前版本号。
+    showHubUpdate && h(HubUpdateModal, {
+      info: catalog.hubUpdateInfo ?? { version: PLUGIN_VERSION },
+      lang,
+      t,
+      hasUpdate: catalog.hubHasUpdate,
+      onClose: () => setShowHubUpdate(false),
+      onProceed: () => {
+        setShowHubUpdate(false)
+        // 与列表内更新同一流程：覆盖重装 dsh-plugin + 结果视图「立即重启」
+        if (hubEntry) {
+          setInstallDone(false)
+          setConfirmIsUpdate(true)
+          queue.clearModalTask()
+          setConfirmPlugin(hubEntry)
+        }
+      },
+    }),
+    // 「关注我们」弹窗：GitHub 图标后按钮点击打开 —— 平台介绍 + 用户反馈群二维码，
+    // 内容由 dsh-update Worker 的 /about 接口以 Markdown 形式推送，作者随时可改，非写死。
+    // Worker 未推送（info 为 null）时弹窗仍能打开并展示兜底文案，不影响其他功能。
+    showAbout && h(AboutModal, {
+      info: catalog.hubAboutInfo ?? null,
+      lang,
+      t,
+      onClose: () => setShowAbout(false),
+    }),
     // 安装确认弹窗：锁定/进度/结果视图逻辑收敛在 modals.tsx；更新与安装同入口，仅标记 update
     confirmPlugin && h(InstallModal, {
       plugin: confirmPlugin,
@@ -280,6 +332,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       restarting,
       update: confirmIsUpdate,
       submitting: queue.submitting,
+      needsRestart: installNeedsRestart,
       onClose: () => setConfirmPlugin(null),
       onCopy: () => copyCommand(confirmPlugin),
       onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : undefined),
@@ -294,6 +347,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       langPath,
       restarting,
       submitting: queue.submitting,
+      needsRestart: uninstallNeedsRestart,
       onClose: () => {
         setUninstallDone(false)
         setUninstallPlugin(null)
