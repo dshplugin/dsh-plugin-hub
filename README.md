@@ -6,7 +6,7 @@
 
 # DSH-Plugin Hub for DeepSeek Harness
 
-**DeepSeek Harness 社区插件市场：收录 4,315 个 DSH plugin，人工精选验证 2,526**
+**DeepSeek Harness 社区插件市场：收录 4,310 个 DSH plugin，人工精选验证 3,112**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -48,7 +48,7 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 **资源丰富 · 人工精选**
 
-- 收录 **4,315** 个社区插件，其中 **2,526** 已人工精选验证，由 [dsh-plugin.org](https://dsh-plugin.org) 每日收录、人工审核并发布
+- 收录 **4,310** 个社区插件，其中 **3,112** 已人工精选验证，由 [dsh-plugin.org](https://dsh-plugin.org) 每日收录、人工审核并发布
 - 涵盖界面与体验、会话与消息、记忆与上下文、工具能力等分类，按分类浏览、搜索直达
 - 每个插件标注人工验证状态（verified）、Star / Fork 评分、版本号与最近更新时间，来源可溯
 
