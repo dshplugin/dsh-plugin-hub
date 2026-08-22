@@ -938,6 +938,17 @@
   background: var(--hub-danger-tint);
 }
 
+/* 成功通知卡片（时间戳已并入头部行）：删除按钮不再用 auto margin 顶到最右，
+   由时间戳的 margin-left:auto 把「时间 + 删除」整体推到行尾 —— 图标文字与
+   时间垂直居中，卡片只有一行内容，整体居中不顶头 */
+.noticeRowOk .noticeRemove {
+  margin-left: 0;
+}
+
+.noticeRowOk .noticeTime {
+  margin-left: auto;
+}
+
 /* 记录内的复制按钮：纯灰文字、无边框，低调隐蔽，点击即可复制该条完整错误日志 */
 .failCopy {
   flex-shrink: 0;
@@ -1025,4 +1036,245 @@
   background: var(--hub-warning-tint);
   border: 1px solid var(--hub-warning-border);
   border-radius: 6px;
+}
+
+/* —— 「关注我们」弹窗 —— */
+
+/* 关注弹窗：比普通弹窗略宽，给 Markdown 介绍 + 反馈群二维码留出阅读空间；
+   max-width 覆盖普通弹窗的 calc(100vw - 32px)，窄屏时仍不贴边 */
+.aboutModal {
+  width: 460px;
+  max-width: calc(100vw - 48px);
+}
+
+/* Markdown 内容区：固定最大高度内滚动，介绍文字 + 二维码不把弹窗撑爆；
+   样式沿用 hubUpdateNotes 的 12px 基线，仅二维码图片单独约束最大尺寸 */
+.aboutContent {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-secondary);
+  background: var(--hub-bg-2);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.aboutContent > *:first-child {
+  margin-top: 0;
+}
+
+.aboutContent > *:last-child {
+  margin-bottom: 0;
+}
+
+.aboutContent h2,
+.aboutContent h3,
+.aboutContent h4,
+.aboutContent h5 {
+  margin: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--hub-text-primary);
+}
+
+.aboutContent h2 {
+  font-size: 14px;
+}
+
+.aboutContent p {
+  margin: 4px 0;
+}
+
+.aboutContent ul,
+.aboutContent ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.aboutContent li {
+  margin: 2px 0;
+}
+
+.aboutContent code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  background: var(--hub-bg-hover);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: var(--hub-text-primary);
+}
+
+.aboutContent pre {
+  margin: 6px 0;
+  background: var(--hub-bg-1);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+}
+
+.aboutContent pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.aboutContent blockquote {
+  margin: 6px 0;
+  padding: 2px 10px;
+  border-left: 3px solid var(--hub-brand);
+  background: var(--hub-bg-hover);
+  border-radius: 0 6px 6px 0;
+  color: var(--hub-text-tertiary);
+}
+
+.aboutContent a {
+  color: var(--hub-brand);
+  text-decoration: none;
+}
+
+.aboutContent a:hover {
+  color: var(--hub-brand-hover);
+  text-decoration: underline;
+}
+
+/* 内容里的图片（反馈群二维码）：居中、最大高度受控，不撑破弹窗：
+   当图片自身更窄时收缩到实际宽度（不强行拉满铺平） */
+.aboutContent img {
+  display: block;
+  margin: 8px auto;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* 更新时间小字：弱化展示在内容区下方 */
+.aboutMeta {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+/* —— Hub 自我更新说明弹窗 —— */
+
+/* 更新说明弹窗：比普通弹窗略宽，给变更记录留出阅读空间 */
+.hubUpdateModal {
+  width: 520px;
+  max-width: calc(100vw - 48px);
+}
+
+/* 版本 / 发布时间元信息行：小号标签并排，弱化但可读 */
+.hubUpdateMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.hubUpdateMetaItem {
+  color: var(--hub-text-tertiary);
+}
+
+/* Markdown 变更记录区：固定最大高度内滚动，长更新记录不把弹窗撑爆；
+   子元素（标题/列表/代码块/引用）继承 12px 基线，仅标题加大加粗 */
+.hubUpdateNotes {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-secondary);
+  background: var(--hub-bg-2);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.hubUpdateNotes > *:first-child {
+  margin-top: 0;
+}
+
+.hubUpdateNotes > *:last-child {
+  margin-bottom: 0;
+}
+
+.hubUpdateNotes h2,
+.hubUpdateNotes h3,
+.hubUpdateNotes h4,
+.hubUpdateNotes h5 {
+  margin: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--hub-text-primary);
+}
+
+.hubUpdateNotes h2 {
+  font-size: 14px;
+}
+
+.hubUpdateNotes p {
+  margin: 4px 0;
+}
+
+.hubUpdateNotes ul,
+.hubUpdateNotes ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.hubUpdateNotes li {
+  margin: 2px 0;
+}
+
+.hubUpdateNotes code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  background: var(--hub-bg-hover);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: var(--hub-text-primary);
+}
+
+.hubUpdateNotes pre {
+  margin: 6px 0;
+  background: var(--hub-bg-1);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+}
+
+.hubUpdateNotes pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.hubUpdateNotes blockquote {
+  margin: 6px 0;
+  padding: 2px 10px;
+  border-left: 3px solid var(--hub-brand);
+  background: var(--hub-bg-hover);
+  border-radius: 0 6px 6px 0;
+  color: var(--hub-text-tertiary);
+}
+
+.hubUpdateNotes a {
+  color: var(--hub-brand);
+  text-decoration: none;
+}
+
+.hubUpdateNotes a:hover {
+  color: var(--hub-brand-hover);
+  text-decoration: underline;
 }

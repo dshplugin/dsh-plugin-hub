@@ -156,7 +156,10 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
           ? h('div', { className: styles.failEmpty }, t('notificationsEmpty'))
           : h('div', { className: styles.noticeList },
             records.map((r) => {
-              return h('div', { key: r.id, className: styles.noticeRow },
+              return h('div', {
+                key: r.id,
+                className: r.ok ? `${styles.noticeRow} ${styles.noticeRowOk}` : styles.noticeRow,
+              },
               h('div', { className: styles.noticeRowMain },
                 h('div', {
                   className: r.ok ? styles.noticeBadgeOk : styles.noticeBadgeFail,
@@ -182,6 +185,14 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       className: styles.failCopy,
                       onClick: () => onCopy(r.message),
                     }, t('failCopy')),
+                    // 成功通知：时间戳并入本行右侧，与图标/文字垂直居中 ——
+                    // 不再单独占底部一行，卡片只有一行内容，图标文字整体居中不顶头
+                    r.ok
+                      ? h('span', {
+                        className: styles.noticeTime,
+                        title: new Date(r.at).toLocaleString(),
+                      }, fmtTime(r.at))
+                      : null,
                     // 每条通知右侧的删除按钮：单独移除这一条
                     h('button', {
                       className: styles.noticeRemove,
@@ -220,13 +231,15 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                   })(),
                 ),
               ),
-              // 每条通知右下角：完整年月日时分秒时间戳（独立一行，不参与徽标垂直居中）
-              h('div', { className: styles.noticeFoot },
-                h('span', {
-                  className: styles.noticeTime,
-                  title: new Date(r.at).toLocaleString(),
-                }, fmtTime(r.at)),
-              ),
+              // 失败通知：时间戳保留独立底部行（右下角）；成功通知已并入头部行右侧
+              !r.ok
+                ? h('div', { className: styles.noticeFoot },
+                  h('span', {
+                    className: styles.noticeTime,
+                    title: new Date(r.at).toLocaleString(),
+                  }, fmtTime(r.at)),
+                )
+                : null,
             )
             }),
           ),

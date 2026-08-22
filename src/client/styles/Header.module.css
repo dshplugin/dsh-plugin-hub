@@ -20,12 +20,13 @@
   padding: 2px 2px 0;
 }
 
-/* 头部右上角控件组：语言切换 + GitHub 源码图标，右侧一列对齐 */
+/* 头部右上角控件组：语言切换 + GitHub 源码图标，右侧一列对齐，auto 把它顶到标题行最右 */
 .headerRight {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  margin-left: auto;
 }
 
 /* 语言切换按钮：与 GitHub 图标同风格（次级灰低调、悬浮品牌紫），文字显示目标语言 */
@@ -75,11 +76,36 @@
   display: block;
 }
 
-/* 头部第一行：logo + 标题（官网链接）与 GitHub 图标同行，space-between 把 GitHub 顶到标题行末尾 */
+/* 「关注我们」入口：GitHub 图标后，与语言切换按钮同风格 —— 普通文字、无边框，
+   悬浮才转品牌紫 + 浅紫底，提示可点（打开平台介绍 + 用户反馈群二维码弹窗） */
+.aboutBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--hub-text-tertiary);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.aboutBtn:hover {
+  color: var(--hub-purple-1);
+  background-color: var(--hub-purple-tint);
+}
+
+/* 头部第一行：logo + 标题（官网链接）紧接着版本号入口，右侧控件组靠 auto 顶到最右 */
 .headerTitleRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   min-width: 0;
 }
@@ -115,6 +141,60 @@
 /* 标题里的版本号：非标题主内容，颜色弱化为次级灰 */
 .version {
   color: var(--hub-text-secondary);
+}
+
+/* 版本号入口按钮：常驻可点（打开版本信息/更新记录弹窗），无边框、字号与标题协调，
+   hover 加品牌色下划线提示可点 —— 无论有无更新都可查看更新内容；
+   有更新时版本号后紧跟红色「可更新」徽标（同一按钮内的 span，不分开成两个元素） */
+.versionBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease;
+}
+
+/* 悬浮只提示整组可点，但版本号本身颜色保持不变；交互反馈交给「可更新」徽标单独变深红 */
+.versionBtn:hover {
+  color: var(--hub-text-secondary);
+}
+
+/* 版本号旁的「可更新」徽标：默认红底白字（醒目），悬浮轻微加深 + 投影提升一点反馈感，
+   紧跟版本号，提示可查看并直接升级。作为同一按钮内文字，点击由外层按钮统一处理，本身无需独立事件。 */
+.hubUpdateBadge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background: var(--hub-danger);
+  box-shadow: 0 1px 4px rgba(209, 36, 47, 0.4);
+  user-select: none;
+  transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+/* 悬浮：轻微变深红 + 一点投影提升，只动徽标本身，版本号不动 */
+.hubUpdateBadge:hover {
+  background: var(--hub-danger-hover);
+  box-shadow: 0 2px 8px rgba(209, 36, 47, 0.5);
+  transform: translateY(-1px);
 }
 
 /* 品牌 logo 图标：与标题文字垂直居中对齐 */

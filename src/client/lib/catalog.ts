@@ -11,6 +11,36 @@ export const SITE_URL = 'https://dsh-plugin.org/'
 /** 插件中心源码仓库：头部右上角 GitHub 图标的跳转地址 */
 export const GITHUB_URL = 'https://github.com/dshplugin/dsh-plugin-hub'
 
+/** Hub 自身在目录数据里的仓库标识：头部版本号旁的「可更新」徽标按它定位自己。 */
+export const HUB_REPO = 'dshplugin/dsh-plugin-hub'
+
+/**
+ * Hub 自我更新版本控制中心（Cloudflare Worker：dsh-update）。
+ * 发新版后向 Worker 管理接口写入最新版本 + Markdown 变更记录（见
+ * dsh-update-worker 的 POST /admin/hub），所有已装用户的「可更新」徽标即时出现，
+ * 不再依赖主站目录数据管道（每日刷新 + 重建站点）。
+ * 响应：{ version: string | null, publishedAt: string | null, notes: string | {zh,en} | null }
+ */
+export const HUB_UPDATE_URL = 'https://hub.dsh-plugin.org/hub'
+
+/** Worker 版本控制中心返回的 Hub 自我更新信息（notes 为 Markdown 变更记录）。 */
+export interface HubUpdateInfo {
+  version: string
+  publishedAt?: string | null
+  /** Markdown 变更记录；可传字符串，或 { zh, en } 双语言对象按界面语言取 */
+  notes?: string | Record<string, string> | null
+}
+
+/** Worker「关注我们」内容接口（同款 Worker，key = hub:about，Markdown 推送非写死）。 */
+export const HUB_ABOUT_URL = 'https://hub.dsh-plugin.org/about'
+
+/** Worker 返回的「关注我们」内容（content 为 Markdown，可字符串或 {zh,en} 双语言对象）。 */
+export interface HubAboutInfo {
+  /** Markdown 平台介绍 + 反馈群二维码；可传字符串，或 { zh, en } 双语言对象按界面语言取 */
+  content?: string | Record<string, string> | null
+  updatedAt?: string | null
+}
+
 /** 构建时由 tsdown 从 package.json 注入的插件版本号（见 tsdown.config.ts define）。 */
 declare const __PLUGIN_VERSION__: string
 
