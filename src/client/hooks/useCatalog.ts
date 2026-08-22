@@ -13,6 +13,8 @@ import type { SortKey } from '../lib/catalog.ts'
 
 const PLUGINS_URL = (lang: LocaleId) => `https://dsh-plugin.org/api/plugins.${lang}.json`
 const STATS_URL = 'https://dsh-plugin.org/api/stats.json'
+/** 插件市场自身仓库：DSH-Plugin Hub 不显示在目录里（自己不进自己的插件列表） */
+const SELF_REPO = 'dshplugin/dsh-plugin-hub'
 
 export function useCatalog(lang: LocaleId) {
   /** 目录插件（仅保留人工验证通过的条目） */
@@ -55,10 +57,16 @@ export function useCatalog(lang: LocaleId) {
       .then(([data, s]) => {
         if (cancelled) return
         const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
-        setPlugins(list.filter((p) => p.compatibility?.status === 'verified'))
+        // 插件市场不显示自己：DSH-Plugin Hub 从目录里排除自身条目，
+        // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
+        // 主站数据构建侧已同步防止（registry/API 不再含自身），此处为已发布旧数据/CDN 缓存期的兜底。
+        const hadSelf = list.some((p) => p.source?.repo === SELF_REPO)
+        setPlugins(list.filter((p) => p.compatibility?.status === 'verified' && p.source?.repo !== SELF_REPO))
         const stats = s as { total?: number; verified?: number }
         if (stats && typeof stats.total === 'number' && typeof stats.verified === 'number') {
-          setStats({ total: stats.total, verified: stats.verified })
+          setStats(hadSelf
+            ? { total: stats.total - 1, verified: stats.verified - 1 }
+            : { total: stats.total, verified: stats.verified })
         }
       })
       .catch(() => {
