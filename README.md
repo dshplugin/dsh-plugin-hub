@@ -29,7 +29,7 @@
 DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方插件开发规范构建的开源插件，安装进「设置 → 插件中心」后，无需离开应用即可浏览、搜索并一键安装社区插件。本项目为独立社区项目，与 DeepSeek Harness 官方无隶属关系。
 
 <p align="center">
-  <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-dark-zh.png" alt="DSH-Plugin Hub in DeepSeek Harness" width="840">
+  <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-home-zh.png" alt="DSH-Plugin Hub in DeepSeek Harness" width="840">
 </p>
 
 ## 插件中心特性
@@ -65,10 +65,15 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 ## 功能一览
 
-| 可视化安装 · 卸载 | 可视化消息通知 |
+| 一键安装 | 一键卸载 |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-uninstall.png" alt="可视化安装与卸载" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications.png" alt="可视化消息通知" width="400"> |
-| 安装、更新、卸载全程可视化：实时进度一目了然，可随时取消 | 进行中任务、待重启项与成功/失败历史集中管理，失败可一键提交 Issue |
+| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-zh.png" alt="一键安装" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-uninstall-zh.png" alt="一键卸载" width="400"> |
+| 后台队列串行执行，弹窗实时显示安装进度，可随时取消 | 卸载全程可视化，实时进度一目了然，成功即生效 |
+
+| 一键更新 | 通知中心 |
+| :---: | :---: |
+| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-update-zh.png" alt="一键更新" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications-zh.png" alt="可视化消息通知" width="400"> |
+| 检测到新版本自动提示「更新」，一键覆盖安装完成升级 | 进行中任务、待重启项与成功/失败历史集中管理，失败可一键提交 Issue |
 
 ## 官网一览
 

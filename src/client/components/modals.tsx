@@ -42,7 +42,7 @@ function ResultView({
       })),
     ),
     h('div', { className: styles.resultTitle }, title),
-    h('div', { className: styles.resultDesc }, desc),
+    desc ? h('div', { className: styles.resultDesc }, desc) : null,
     h('div', { className: styles.resultRestarting }, restarting ? t('restarting') : t('restartHint')),
     h('div', { className: styles.modalActions },
       h('button', { className: styles.restartLater, onClick: onClose, disabled: restarting }, t('restartLater')),

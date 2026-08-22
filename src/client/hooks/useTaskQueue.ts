@@ -25,6 +25,9 @@ export interface QueueTask {
   status: 'pending' | 'running' | 'cancelling'
   progress: number
   lines: string[]
+  /** 乐观入队条目：点击安装后立即显示「正在安装中」，等 POST 响应回来再换成真实任务 id。
+   *  服务端还没登记（preflight 中），轮询合并/消失检测都必须跳过，避免被当作已结束任务收尾。 */
+  optimistic?: boolean
 }
 
 /** 客户端待重启项：镜像服务端内存列表 + 本地补齐的展示信息（简介/版本）。 */
@@ -76,6 +79,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   /** 请求在途的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
    *  本地队列任务要等 fetch 返回后才入队，仅靠 queueRef 检查拦不住请求窗口内的重复点击。 */
   const submittingRef = useRef<Set<string>>(new Set())
+  /** 乐观入队临时 id 计数器：递减产生唯一负数，与服务端自增正数 id 永不冲突。 */
+  const tempIdRef = useRef(0)
   /** 请求在途标记：弹窗据此禁用确认按钮，避免等待响应期间被再次点击。 */
   const [submitting, setSubmitting] = useState(false)
 
@@ -174,6 +179,32 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     maybeStopPoll()
   }
 
+  /** 卸载成功收尾前的进度过渡：任务已在服务端结束，但保留本地展示，
+   *  让进度条在 ~2.4s 内缓缓跑到 100% 再切结果/Toast，给用户一个交互过程，
+   *  而不是命令一执行进度条就一闪消失。 */
+  const settleDone = (q: QueueTask, lines: string[]) => {
+    // 收尾动画期间停止轮询：任务已从服务端 /active 消失，无需再查；
+    // 停掉可避免 pollQueue 的 gone 检测把它当「再消失一次」而重复收尾
+    stopPoll()
+    const from = Math.min(q.progress, 90) // 起点最多 90，给进度条留出跑满的缓冲空间
+    const steps = 20
+    const stepMs = 120 // 20 步 × 120ms = 2.4s
+    let step = 0
+    // 动画期间固定显示「卸载中」：任务实已结束，但进度在跑，与「排队中」文案更协调
+    applyQueue((prev) => prev.map((x) => (x.id === q.id ? { ...x, status: 'running' as const } : x)))
+    const timer = window.setInterval(() => {
+      step += 1
+      const progress = Math.round(from + (100 - from) * (step / steps))
+      applyQueue((prev) => prev.map((x) => (x.id === q.id ? { ...x, progress } : x)))
+      if (step >= steps) {
+        window.clearInterval(timer)
+        finishQueueTask(true, q, lines)
+        // 队列若还有其它已在排队/执行的任务，恢复轮询继续盯；已清空则自然停住
+        if (queueRef.current.length > 0) pollQueue()
+      }
+    }, stepMs)
+  }
+
   /** 任务在 /active 中消失 = 已结束：查 /status 拿终态并收尾（cancelled 静默移除）。 */
   const settleTask = async (q: QueueTask) => {
     let status = 'failed'
@@ -186,7 +217,11 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         lines = data.task?.lines ?? []
       }
     } catch { /* 服务端不可达：按失败处理 */ }
-    if (status === 'done') finishQueueTask(true, q, lines)
+    if (status === 'done') {
+      // 卸载成功走进度过渡动画；安装成功直接收尾
+      if (q.kind === 'uninstall') settleDone(q, lines)
+      else finishQueueTask(true, q, lines)
+    }
     else if (status === 'failed') finishQueueTask(false, q, lines)
     else {
       applyQueue((prev) => prev.filter((x) => x.id !== q.id)) // cancelled / 未知
@@ -213,31 +248,35 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         // 待重启列表同步（服务端内存态：宿主重启后自然变空，这里随之清空 UI）
         applyPending(parsePendingRestarts(data.pendingRestarts))
         // 合并：running 在前、pending 在后（与服务端一致），新出现任务补入队列
-        applyQueue((prev) => {
-          const next: QueueTask[] = []
-          for (const a of active) {
-            const id = a.id as number
-            const prevTask = prev.find((q) => q.id === id)
-            const isRemove = a.action === 'remove'
-            next.push({
-              id,
-              kind: isRemove ? 'uninstall' : 'install',
-              target: typeof a.target === 'string' ? a.target.replace(/^github:/, '') : (prevTask?.target ?? ''),
-              desc: prevTask?.desc,
-              repo: prevTask?.repo ?? (isRemove ? null : (typeof a.target === 'string' ? a.target.replace(/^github:/, '') : null)),
-              // 安装时快照的目录信号：轮询合并时保留，任务成功后记录到本地
-              version: prevTask?.version,
-              updatedAt: prevTask?.updatedAt,
-              status: a.status === 'running' ? 'running' : 'pending',
-              progress: typeof a.progress === 'number' ? a.progress : prevTask?.progress ?? 0,
-              lines: Array.isArray(a.lines) ? (a.lines as string[]) : (prevTask?.lines ?? []),
-            })
-          }
-          return next
-        })
-        // 本地有、服务端已消失 → 已结束：逐个查终态收尾
-        // （cancelling 是客户端乐观过渡态，交给 cancelTask 的定时移除，不在轮询里提前收敛）
-        const gone = prevQueue.filter((q) => !byId.has(q.id) && q.status !== 'cancelling')
+          applyQueue((prev) => {
+            const next: QueueTask[] = []
+            for (const a of active) {
+              const id = a.id as number
+              const prevTask = prev.find((q) => q.id === id)
+              const isRemove = a.action === 'remove'
+              next.push({
+                id,
+                kind: isRemove ? 'uninstall' : 'install',
+                target: typeof a.target === 'string' ? a.target.replace(/^github:/, '') : (prevTask?.target ?? ''),
+                desc: prevTask?.desc,
+                repo: prevTask?.repo ?? (isRemove ? null : (typeof a.target === 'string' ? a.target.replace(/^github:/, '') : null)),
+                // 安装时快照的目录信号：轮询合并时保留，任务成功后记录到本地
+                version: prevTask?.version,
+                updatedAt: prevTask?.updatedAt,
+                status: a.status === 'running' ? 'running' : 'pending',
+                progress: typeof a.progress === 'number' ? a.progress : prevTask?.progress ?? 0,
+                lines: Array.isArray(a.lines) ? (a.lines as string[]) : (prevTask?.lines ?? []),
+              })
+            }
+            // 保留乐观条目：服务端尚未登记（preflight 中），无真实 id，不能因 active 缺它就被合并吞掉
+            const keepOpt = prev.filter((q) => q.optimistic && !next.some((x) => x.id === q.id))
+            if (keepOpt.length > 0) next.push(...keepOpt)
+            return next
+          })
+          // 本地有、服务端已消失 → 已结束：逐个查终态收尾
+          // （cancelling 是客户端乐观过渡态，交给 cancelTask 的定时移除，不在轮询里提前收敛；
+          //   optimistic 是点击后尚未登记的占位，服务端 /status 查不到，跳过免误判成失败）
+          const gone = prevQueue.filter((q) => !byId.has(q.id) && q.status !== 'cancelling' && !q.optimistic)
         for (const q of gone) await settleTask(q)
       } catch {
         // 服务端暂不可达：静默等待下一轮
@@ -294,6 +333,18 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     // 请求在途防重：任务要等响应回来才进本地队列，这之前再次点击（双击）直接忽略
     if (submittingRef.current.has(repo)) return
     submittingRef.current.add(repo)
+    // 乐观入队：点击安装立即显示「正在安装中」，不等 POST 响应。
+    // 服务端 /install 会先跑预检（preflight，可能耗时数秒）再入队，若等响应才入队列，
+    // 用户点完安装立刻去通知中心会看不到任务 —— 只有刷新后 restore 才拉回来。
+    // 用负临时 id 占位，响应回来换成真实 task id；失败/出错则移除该占位。
+    tempIdRef.current -= 1
+    const tempId = tempIdRef.current
+    modalTaskRef.current = tempId
+    applyQueue((prev) => [...prev, {
+      id: tempId, kind: 'install', target: repo, repo, desc: p.description,
+      version: p.version, updatedAt: p.dates?.repoUpdatedAt,
+      status: 'running', progress: 0, lines: [], optimistic: true,
+    }])
     setSubmitting(true)
     try {
       const res = await fetch('/dsh-plugin-hub/install', {
@@ -303,18 +354,24 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       })
       const data = await res.json() as { ok?: boolean; task?: number; error?: string }
       if (!data.ok || typeof data.task !== 'number') {
-        // 请求层失败（重复安装 409 / 参数错误等）：完整错误弹窗
+        // 请求层失败（重复安装 409 / 参数错误等）：移除乐观条目 + 完整错误弹窗
+        applyQueue((prev) => prev.filter((x) => x.id !== tempId))
         onError(data.error ?? `HTTP ${res.status}`, repo, 'install')
         return
       }
       const taskId = data.task
       modalTaskRef.current = taskId
-      applyQueue((prev) => [...prev, { id: taskId, kind: 'install', target: repo, repo, desc: p.description, version: p.version, updatedAt: p.dates?.repoUpdatedAt, status: 'pending', progress: 0, lines: [] }])
+      // 用真实任务 id 替换乐观占位，解除 optimistic 标记（此后归正常收尾/轮询处理）
+      applyQueue((prev) => prev.map((x) => (x.id === tempId
+        ? { ...x, id: taskId, optimistic: undefined }
+        : x)))
       // 提前缓存展示信息：安装成功后服务端登记待重启，轮询合并时不用等目录解析
       pendingInfoRef.current.set(repo, { desc: p.description, version: p.version })
       // 摘要条常驻顶部（含实时进度），明细面板保持折叠，想看时再点开
       pollQueue()
     } catch {
+      // 网络异常：移除乐观条目 + 兜底错误弹窗
+      applyQueue((prev) => prev.filter((x) => x.id !== tempId))
       onError(t('installFail'), repo, 'install')
     } finally {
       submittingRef.current.delete(repo)

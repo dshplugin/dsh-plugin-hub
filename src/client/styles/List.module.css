@@ -184,7 +184,7 @@
   user-select: none;
 }
 
-/* 可更新：琥珀警示色实底按钮（与 star / 有更新徽标同族），点击直接覆盖安装更新 */
+/* 可更新：琥珀警示色实底按钮（与 star / 有更新徽标同族，与安装绿、卸载红区分），点击直接覆盖安装更新 */
 .installBtnUpdate {
   color: #fff;
   background: var(--hub-warn);
@@ -197,17 +197,17 @@
   background: var(--hub-warn-strong);
 }
 
-/* 卸载：危险色文字按钮，默认无底，悬浮转鲜红实底白字 */
+/* 卸载：危险色按钮 —— 默认浅红底红字（危险但克制），悬浮转深红实底白字 */
 .uninstallBtn {
   color: var(--hub-danger);
-  background: transparent;
+  background: var(--hub-danger-tint);
   border: none;
   user-select: none;
 }
 
 .uninstallBtn:hover {
   color: #ffffff;
-  background: var(--hub-danger);
+  background: var(--hub-danger-hover);
 }
 
 .installBtn {

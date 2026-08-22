@@ -29,7 +29,7 @@
 DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-dark-en.png" alt="DSH-Plugin Hub inside DeepSeek Harness" width="840">
+  <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-home-en.png" alt="DSH-Plugin Hub inside DeepSeek Harness" width="840">
 </p>
 
 ## Plugin Hub Features
@@ -65,10 +65,15 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 ## Feature Highlights
 
-| Visual install & uninstall | Visual notifications |
+| One-click install | One-click uninstall |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-uninstall.png" alt="Visual install and uninstall" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications.png" alt="Visual notifications" width="400"> |
-| Install, update and remove are fully visualized: live progress at a glance, cancellable anytime | Running tasks, pending restarts and full success/failure history in one place; failed installs can be filed as a GitHub Issue in one click |
+| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-en.png" alt="One-click install with live progress" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-uninstall-en.png" alt="One-click uninstall with live progress" width="400"> |
+| A serial background queue with live progress in the dialog, cancellable anytime | Fully visualized with live progress; changes take effect immediately |
+
+| One-click update | Notification center |
+| :---: | :---: |
+| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-update-en.png" alt="One-click update with overwrite install" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications-en.png" alt="Visual notifications" width="400"> |
+| New versions detected automatically; the card turns into "Update" and overwrite-installs in one click | Running tasks, pending restarts and full success / failure history in one place; failed installs can be filed as a GitHub Issue in one click |
 
 ## Website Overview
 

@@ -19,12 +19,11 @@ import type { PendingRestart, QueueTask } from '../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../lib/catalog.ts'
 import { CloseIcon } from './icons.tsx'
 
-/** 记录时间紧凑展示：今年内 MM-DD HH:mm，跨年补年份前缀。 */
+/** 记录时间完整展示：YYYY-MM-DD HH:mm:ss（每条通知都带精确到秒的时间戳）。 */
 function fmtTime(at: number): string {
   const d = new Date(at)
   const pad = (n: number) => String(n).padStart(2, '0')
-  const mmdd = `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-  return d.getFullYear() === new Date().getFullYear() ? mmdd : `${d.getFullYear()}-${mmdd}`
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
 /** 圆形状态徽标内的白色图形：成功为对勾、失败为叉。 */
@@ -52,7 +51,7 @@ function BadgeGlyph({ ok }: { ok: boolean }) {
     }))
 }
 
-export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, cancelTask, restarting, onRestart }: {
+export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, cancelTask, restarting, onRestart }: {
   records: NotificationRecord[]
   /** 进行中的安装/卸载任务（实时进度，与队列弹窗同一数据源） */
   tasks: QueueTask[]
@@ -63,6 +62,8 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
   onClose: () => void
   onCopy: (text: string) => void
   onClear: () => void
+  /** 删除单条通知记录 */
+  onRemove: (id: number) => void
   cancelTask: (id: number) => void
   restarting: boolean
   onRestart: () => void
@@ -156,63 +157,75 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
           : h('div', { className: styles.noticeList },
             records.map((r) => {
               return h('div', { key: r.id, className: styles.noticeRow },
-              h('div', {
-                className: r.ok ? styles.noticeBadgeOk : styles.noticeBadgeFail,
-              }, h(BadgeGlyph, { ok: r.ok })),
-              h('div', { className: styles.noticeMain },
-                h('div', { className: styles.noticeHead },
-                  h('span', {
-                    className: r.ok ? styles.noticeTextOk : styles.noticeTextFail,
-                  }, r.ok
-                    ? (r.kind === 'install' ? t('installDone') : t('uninstallDone'))
-                    : (r.kind === 'install' ? t('errorTitleInstall') : t('errorTitleUninstall'))),
-                  r.repo
-                    ? h('a', {
-                      className: styles.failRepo,
-                      // 跳转到官网详情页（含插件收录信息），不在通知弹窗直接跳 GitHub
-                      href: pluginSiteUrl(r.repo),
-                      target: '_blank',
-                      rel: 'noopener noreferrer',
-                      title: r.repo,
-                    }, r.repo)
-                    : null,
-                  h('span', {
-                    className: styles.failTime,
-                    title: new Date(r.at).toLocaleString(),
-                  }, fmtTime(r.at)),
-                  !r.ok && h('button', {
-                    className: styles.failCopy,
-                    onClick: () => onCopy(r.message),
-                  }, t('failCopy')),
-                ),
-                // 每条失败记录是一个独立卡片：头部（状态/仓库/时间/复制完整日志）→ 修复或提 Issue 动作。
-                // 卡片不展示错误日志预览，完整日志靠「复制完整日志」按钮带走，避免每条卡片被日志撑高
-                !r.ok && (() => {
-                  const kind = classifyFailure(r.message)
-                  if (kind === 'pluginPrepare' || kind === 'pnpmIgnoredBuild') {
-                    // [packaging]（预检/装后校验拦截：git 分发缺产物，不支持官方默认安装方式）与
-                    // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
-                    return h('div', null, [
-                      h('div', { className: styles.failPrepareHint }, kind === 'pnpmIgnoredBuild'
-                        ? t('failIgnoredBuild')
-                        : /\[packaging\]/i.test(r.message) ? t('failPackagingHint') : t('failPrepareHint')),
-                      r.repo ? h('a', {
-                        className: styles.failBigIssue,
-                        href: pluginIssueUrl(r.repo, r.message, env),
+              h('div', { className: styles.noticeRowMain },
+                h('div', {
+                  className: r.ok ? styles.noticeBadgeOk : styles.noticeBadgeFail,
+                }, h(BadgeGlyph, { ok: r.ok })),
+                h('div', { className: styles.noticeMain },
+                  h('div', { className: styles.noticeHead },
+                    h('span', {
+                      className: r.ok ? styles.noticeTextOk : styles.noticeTextFail,
+                    }, r.ok
+                      ? (r.kind === 'install' ? t('installDone') : t('uninstallDone'))
+                      : (r.kind === 'install' ? t('errorTitleInstall') : t('errorTitleUninstall'))),
+                    r.repo
+                      ? h('a', {
+                        className: styles.failRepo,
+                        // 跳转到官网详情页（含插件收录信息），不在通知弹窗直接跳 GitHub
+                        href: pluginSiteUrl(r.repo),
                         target: '_blank',
                         rel: 'noopener noreferrer',
-                        title: t('failIssueHint'),
-                      }, t('failIssueBig')) : null,
-                    ])
-                  }
-                  return r.repo ? h('a', {
-                    className: styles.failBigIssue,
-                    href: pluginIssueUrl(r.repo, r.message, env),
-                    target: '_blank',
-                    rel: 'noopener noreferrer',
-                    title: t('failIssueHint'),
-                  }, t('failIssueBig')) : null
-                })(),
+                        title: r.repo,
+                      }, r.repo)
+                      : null,
+                    !r.ok && h('button', {
+                      className: styles.failCopy,
+                      onClick: () => onCopy(r.message),
+                    }, t('failCopy')),
+                    // 每条通知右侧的删除按钮：单独移除这一条
+                    h('button', {
+                      className: styles.noticeRemove,
+                      'aria-label': t('removeNotification'),
+                      title: t('removeNotification'),
+                      onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onRemove(r.id) },
+                    }, h(CloseIcon)),
+                  ),
+                  // 每条失败记录是一个独立卡片：头部（状态/仓库/时间/复制完整日志）→ 修复或提 Issue 动作。
+                  // 卡片不展示错误日志预览，完整日志靠「复制完整日志」按钮带走，避免每条卡片被日志撑高
+                  !r.ok && (() => {
+                    const kind = classifyFailure(r.message)
+                    if (kind === 'pluginPrepare' || kind === 'pnpmIgnoredBuild') {
+                      // [packaging]（预检/装后校验拦截：git 分发缺产物，不支持官方默认安装方式）与
+                      // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
+                      return h('div', null, [
+                        h('div', { className: styles.failPrepareHint }, kind === 'pnpmIgnoredBuild'
+                          ? t('failIgnoredBuild')
+                          : /\[packaging\]/i.test(r.message) ? t('failPackagingHint') : t('failPrepareHint')),
+                        r.repo ? h('a', {
+                          className: styles.failBigIssue,
+                          href: pluginIssueUrl(r.repo, r.message, env),
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                          title: t('failIssueHint'),
+                        }, t('failIssueBig')) : null,
+                      ])
+                    }
+                    return r.repo ? h('a', {
+                      className: styles.failBigIssue,
+                      href: pluginIssueUrl(r.repo, r.message, env),
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                      title: t('failIssueHint'),
+                    }, t('failIssueBig')) : null
+                  })(),
+                ),
+              ),
+              // 每条通知右下角：完整年月日时分秒时间戳（独立一行，不参与徽标垂直居中）
+              h('div', { className: styles.noticeFoot },
+                h('span', {
+                  className: styles.noticeTime,
+                  title: new Date(r.at).toLocaleString(),
+                }, fmtTime(r.at)),
               ),
             )
             }),

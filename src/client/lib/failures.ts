@@ -151,3 +151,10 @@ export function clearNotifications(): NotificationRecord[] {
   save([])
   return []
 }
+
+/** 按 id 删除单条通知记录，返回更新后的列表（仅移除该条，不影响其余记录）。 */
+export function removeNotification(id: number): NotificationRecord[] {
+  const next = loadNotifications().filter((r) => r.id !== id)
+  save(next)
+  return next
+}

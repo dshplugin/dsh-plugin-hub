@@ -723,16 +723,27 @@
   padding-right: 2px;
 }
 
-/* 每条通知 = 一张独立卡片：左侧圆形状态徽标 + 右侧内容列，
-   徽标垂直居中于整条（失败条目下方还有修复/提 Issue 动作，比成功条目高） */
+/* 每条通知 = 一张独立卡片：纵向布局 —— 上(徽标+内容)行、下(时间戳)行；
+   徽标与文字在 .noticeRowMain 里水平垂直居中，时间戳独立一行不参与居中 */
 .noticeRow {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
   padding: 10px 12px;
   border: 1px solid var(--hub-border-2);
   border-radius: 8px;
   background: var(--hub-bg-2);
+}
+
+/* 徽标 + 内容列一行：徽标与文字垂直居中（失败条目下方还有修复/提 Issue 动作，
+   徽标仍与该行文字对齐，而非被下方动作拉偏） */
+.noticeRowMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* 圆形状态徽标：成功 = 绿底白勾；失败 = 红底白叉（用户要求的「红色圆形 + 白色图形」语义） */
@@ -867,12 +878,42 @@
   text-decoration: underline;
 }
 
-.failTime {
+/* 每条通知底部的完整时间戳：YYYY-MM-DD HH:mm:ss，靠右下角展示 */
+.noticeFoot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.noticeTime {
   flex-shrink: 0;
   font-size: 11px;
   line-height: 16px;
   color: var(--hub-text-tertiary);
   font-variant-numeric: tabular-nums;
+}
+
+/* 每条通知右侧的单条删除按钮：小号透明 X，靠右对齐，hover 变红提示可删，可单独移除该条 */
+.noticeRemove {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--hub-text-tertiary);
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.noticeRemove:hover {
+  color: var(--hub-danger-text);
+  background: var(--hub-danger-tint);
 }
 
 /* 记录内的复制按钮：纯灰文字、无边框，低调隐蔽，点击即可复制该条完整错误日志 */

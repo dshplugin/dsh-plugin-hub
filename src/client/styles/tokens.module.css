@@ -53,9 +53,9 @@ body[data-ds-dark-theme] {
   --hub-btn-hover: var(--dsw-alias-button-primary-hover, #43454a);
 
   /* success */
-  --hub-success: var(--dsw-alias-state-success-primary, #1a7f37);
-  --hub-success-tint: rgba(34, 197, 94, 0.14);
-  --hub-success-border: var(--dsw-alias-state-success-secondary, rgba(26, 127, 55, 0.3));
+  --hub-success: #16a34a;
+  --hub-success-tint: rgba(22, 163, 74, 0.12);
+  --hub-success-border: rgba(22, 163, 74, 0.3);
 
   /* warning (amber) */
   --hub-warn: var(--dsw-alias-state-warn-primary, #b8860b);
@@ -83,4 +83,9 @@ body[data-ds-dark-theme] {
 /* 暗色下的计数胶囊底色：白半透明，深色底上更可辨 */
 body[data-ds-dark-theme] {
   --hub-bg-btn: rgba(255, 255, 255, 0.12);
+
+  /* 暗色下的成功绿：提亮一档，对勾在深底上清晰且不刺眼 */
+  --hub-success: #22c55e;
+  --hub-success-tint: rgba(34, 197, 94, 0.16);
+  --hub-success-border: rgba(34, 197, 94, 0.35);
 }

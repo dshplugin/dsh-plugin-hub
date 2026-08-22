@@ -14,7 +14,7 @@ import { useCatalog } from '../hooks/useCatalog.ts'
 import { useTaskQueue } from '../hooks/useTaskQueue.ts'
 import { ErrorModal, InstallModal, UninstallModal, Toast } from './modals.tsx'
 import { NotificationsModal } from './NotificationsModal.tsx'
-import { addFailure, addSuccess, clearNotifications, loadNotifications } from '../lib/failures.ts'
+import { addFailure, addSuccess, clearNotifications, loadNotifications, removeNotification } from '../lib/failures.ts'
 import type { NotificationRecord } from '../lib/failures.ts'
 import { CatalogHeader } from './CatalogHeader.tsx'
 import { CategoryTabs } from './CategoryTabs.tsx'
@@ -331,6 +331,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setToast({ id: Date.now(), kind: 'errCopied' })
       },
       onClear: () => setNotifications(clearNotifications()),
+      onRemove: (id: number) => setNotifications(removeNotification(id)),
       cancelTask: queue.cancelTask,
       restarting,
       onRestart: () => { void requestRestart() },
