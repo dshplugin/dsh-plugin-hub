@@ -1,4 +1,8 @@
-/* Plugin Hub design tokens.
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Plugin Hub design tokens.
  *
  * Semantic aliases over the host's --dsw-alias-* theme tokens, each with the
  * original light-mode literal as fallback for hosts that do not define the

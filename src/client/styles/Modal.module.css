@@ -1,4 +1,8 @@
-/* Plugin Hub dialogs and overlays: install / uninstall modals, error dialog,
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Plugin Hub dialogs and overlays: install / uninstall modals, error dialog,
  * failure-record dialog, task-queue dialog, progress strip, inline progress
  * and the global toast. Colors resolve through the --hub-* design tokens. */
 

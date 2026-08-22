@@ -1,4 +1,8 @@
-/* 自绘下拉（替换原生 <select>）。颜色跟随宿主主题：经 --hub-* 设计令牌解析，
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * 自绘下拉（替换原生 <select>）。颜色跟随宿主主题：经 --hub-* 设计令牌解析，
  * 与 Header 的控件（排序/分段）保持一致的无边框 + 圆角语言。 */
 .dropdown {
   position: relative;

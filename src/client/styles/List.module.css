@@ -1,4 +1,8 @@
-/* Plugin Hub catalog list: the scrollable body, plugin cards (name, badges,
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Plugin Hub catalog list: the scrollable body, plugin cards (name, badges,
  * description, topics, stats, actions), loading / empty states and the
  * browse-all footer. Colors resolve through the --hub-* design tokens. */
 
