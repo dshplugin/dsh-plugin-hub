@@ -70,6 +70,8 @@ export interface InstallModalProps {
   restarting: boolean
   /** 已安装插件的覆盖更新（走同一条 add 命令原位重装，文案区分安装/更新） */
   update: boolean
+  /** 仅命令行插件（webInstallable=false）：不提供一键安装，只展示命令供复制到 dsh 终端 */
+  cliOnly: boolean
   /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
   /** 完成结果是否需重启才生效：true → 「稍后重启 / 立即重启」；false → 仅「完成」 */
@@ -85,7 +87,7 @@ export interface InstallModalProps {
  * 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, submitting, update, needsRestart, onClose, onCopy, onInstall, onRestart } = props
+  const { plugin, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分
   const name = plugin.displayName ?? plugin.slug
@@ -157,8 +159,12 @@ export function InstallModal(props: InstallModalProps) {
             h('span', { className: styles.modalCmdText }, installCommandOf(plugin)),
             h('span', { className: styles.modalCmdCopy }, h(CopyIcon), t('copyCmdLabel')),
           ),
+          // AI 识别可能需要命令行辅助的插件（webInstallable=false）：提示但不拦截，仍允许尝试一键安装
+          cliOnly ? h('div', { className: styles.cliOnlyHint }, t('cliOnlyHint')) : null,
           task && task.status === 'pending' ? h('div', { className: styles.queuedHint }, t('queuedHint')) : null,
           task ? h(ProgressView, { task }) : null,
+          // 安装失败：引导用户复制上方命令到 dsh 终端手动安装（如 node-pty 等原生依赖构建脚本需人工放行）
+          task && task.status === 'failed' ? h('div', { className: styles.failedCopyHint }, t('failedCopyHint')) : null,
           h('div', { className: styles.modalActions },
             h('button', {
               className: styles.modalCopy,

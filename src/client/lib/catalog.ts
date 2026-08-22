@@ -173,6 +173,8 @@ export function normalize(raw: Record<string, unknown>): HubPlugin {
             npmPackage: typeof (raw.r as { npmPackage?: unknown }).npmPackage === 'string' ? (raw.r as { npmPackage: string }).npmPackage : undefined,
           }
           : undefined,
+      // 能否网页一键安装：API 仅在 false 时下发 wi（缺省视为 true），据此禁用一键安装、只提示命令行
+      install: raw.wi === false ? { webInstallable: false } : undefined,
       compatibility: typeof raw.v === 'string' ? { status: raw.v } : undefined,
       dates: {
         repoUpdatedAt: typeof raw.u === 'string' ? raw.u : undefined,

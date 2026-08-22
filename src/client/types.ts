@@ -47,6 +47,8 @@ export interface HubPlugin {
   features?: string[]
   description?: string
   source?: { repo?: string; npmPackage?: string }
+  /** 能否网页一键安装：false = 仅支持命令行/git/本地构建安装（缺省视为 true 可安装） */
+  install?: { webInstallable?: boolean }
   compatibility?: { status?: string }
   dates?: { repoUpdatedAt?: string; addedAt?: string }
   stats?: { stargazers_count?: number; forks_count?: number }

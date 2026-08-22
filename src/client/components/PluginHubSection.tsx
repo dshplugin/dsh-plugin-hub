@@ -331,6 +331,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       langPath,
       restarting,
       update: confirmIsUpdate,
+      // 仅命令行插件（webInstallable=false）：弹窗只展示命令供复制，不提供一键安装
+      cliOnly: confirmPlugin.install?.webInstallable === false,
       submitting: queue.submitting,
       needsRestart: installNeedsRestart,
       onClose: () => setConfirmPlugin(null),

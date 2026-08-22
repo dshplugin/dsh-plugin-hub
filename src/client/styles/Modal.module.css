@@ -113,6 +113,28 @@
   padding: 6px 10px;
 }
 
+/* 可能需要命令行辅助的插件提示（webInstallable=false）：中性说明，仍允许尝试一键安装 */
+.cliOnlyHint {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-secondary);
+  background: var(--hub-bg-hover);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+/* 安装失败引导：红色醒目，提示复制命令到 dsh 终端手动执行（原生依赖构建脚本需人工放行） */
+.failedCopyHint {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--hub-danger-text);
+  background: var(--hub-danger-tint);
+  border: 1px solid var(--hub-danger-border-soft);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
 .modalRow {
   display: flex;
   align-items: baseline;

@@ -21,6 +21,9 @@ export const zh = {
   failedDesc: '请稍后重试，或点击右上角按钮在浏览器中打开插件中心。',
   retry: '重试',
   install: '安装',
+  // AI 识别可能需要命令行辅助的插件（webInstallable=false）：仍可尝试一键安装，失败时复制命令去 dsh 终端
+  cliOnlyHint: '此插件可能需命令行辅助，失败时复制上方命令到 dsh 终端',
+  failedCopyHint: '安装失败。请复制上方安装命令到 dsh 终端手动执行（原生依赖构建脚本可能需要人工放行，如 pnpm approve-builds）',
   toastCopied: '安装命令已复制，去 dsh 终端粘贴即可安装',
   installed: '已安装',
   notInstalled: '未安装',
@@ -163,6 +166,10 @@ export const en = {
   failedDesc: 'Please retry, or open the hub in your browser with the button above.',
   retry: 'Retry',
   install: 'Install',
+  // AI-flagged plugins that may need command-line help (webInstallable=false): one-click install still allowed,
+  // on failure the user is guided to copy the command into the dsh terminal
+  cliOnlyHint: 'This plugin may need command-line help; if it fails, copy the command above and run it in your dsh terminal',
+  failedCopyHint: 'Install failed. Copy the command above and run it manually in your dsh terminal (native build scripts may need manual approval, e.g. pnpm approve-builds)',
   toastCopied: 'Install command copied — paste it in your dsh terminal',
   installed: 'Installed',
   notInstalled: 'Not installed',

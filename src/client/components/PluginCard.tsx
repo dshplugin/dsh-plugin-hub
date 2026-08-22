@@ -84,6 +84,9 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
                 disabled: true,
                 title: t('installed'),
               }, t('installed')))
+            // 未安装：按钮恒为「安装」，点击先弹信任确认；AI 识别为「可能需要命令行辅助」
+            // 的插件（webInstallable=false）不拦截，允许尝试一键安装，弹窗内会给出提示与
+            // 复制命令通道，安装失败时引导去 dsh 终端手动执行
             : h('button', {
               className: isCopied ? styles.installBtnCopied : styles.installBtn,
               // 文字恒定避免按钮宽度变化导致卡片跳动；点击先弹信任确认，
