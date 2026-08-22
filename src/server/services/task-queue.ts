@@ -345,8 +345,11 @@ function spawnMutation(options: {
             if (task.status === 'done') {
               task.progress = 100
               if (action === 'remove' && uninstallLoader) {
-                // 卸载成功 → 主动从运行中 loader 移除该包条目，立即生效、无需重启；
-                // 移除失败（或从未加载过但 loader 不可用）才登记「待重启清理」兜底
+                // 卸载成功 → 主动从运行中 loader 停用该包条目；
+                // 仅当宿主从未加载过它（磁盘已干净）才判「无需重启」；
+                // 只要曾在 loader 中存活（停用过 live entry）就仍要求重启——
+                // 带 UI 的插件（侧边栏面板等宿主启动时渲染的槽位）disable 后不会
+                // 主动消失，重启才能立即摘除面板
                 const removed = await removeLoadedEntry(uninstallLoader, target)
                 task.needsRestart = !removed
                 if (removed) clearPendingRestart(displayTarget ?? target)

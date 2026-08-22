@@ -32,12 +32,14 @@ export declare function dumpLoaderEntries(loader: LoaderHandle | undefined): Arr
     name?: string;
 }>;
 /**
- * 卸载成功后从运行中 loader 停用指定包的条目，使卸载立即生效（刷新页面不再
- * 加载已卸载的 client bundle，也无需重启）。做法：按 name 扫描
+ * 卸载成功后从运行中 loader 停用指定包的条目。做法：按 name 扫描
  * `loader.entries()`（含嵌套子树），对每个匹配条目
  * `entry.update({ disabled: true })` 做 live-disable —— fiber 被 dispose，
  * client-modules 对账后不再把它写进 `__DSH_BOOT__`，页面刷新即恢复。
- * 返回 true = 无需重启（条目已停用，或本就没加载过）；false = 未能停用，
- * 需登记「待重启清理」兜底。宿主关键包（@deepseek-ai/* 与本插件自身）一律跳过。
+ * 返回 true = 无需重启（仅当宿主从未加载过它：磁盘已干净）；
+ * 其余一律 false = 需要重启：要么 disable 失败需「待重启清理」兜底，
+ * 要么 disable 成功但该插件曾在 loader 中存活——带 UI 的插件（侧边栏面板等
+ * 宿主启动时渲染的槽位）disable 后不会主动摘除，不重启面板一直残留。
+ * 宿主关键包（@deepseek-ai/* 与本插件自身）一律跳过。
  */
 export declare function removeLoadedEntry(loader: LoaderHandle, name: string): Promise<boolean>;
