@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Validates the plugin-count figures (indexed / verified) in the README and
  * release notes against an authoritative source before publishing, so the
  * numbers on the website, in the README and in the release notes never drift.

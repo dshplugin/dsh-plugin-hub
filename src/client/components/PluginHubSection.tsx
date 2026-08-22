@@ -1,8 +1,12 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Plugin Hub section: wires the catalog data pipeline, the background task
  * queue and the feedback state together. Data/queue logic lives in hooks/,
  * rendering is delegated to the small presentational components in this
- * folder; only the dialogs/toast and the section-level copy actions remain.
+ * folder; it hosts the dialogs/toast and the section-level copy actions.
  */
 import { createElement as h, useEffect, useState } from 'react'
 import styles from '../styles/Header.module.css'

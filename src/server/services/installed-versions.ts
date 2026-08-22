@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Installed-plugin version tracking.
  *
  * The installed table (`readInstalled` in routes.ts) only knows the manifest

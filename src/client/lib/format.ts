@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Presentation formatters shared across the catalog list and the cards.
  */
 import type { Translate } from '../types.ts'

@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Unit tests for the catalog normalizer (src/client/lib/catalog.ts), focusing
  * on the short-key payload from dsh-plugin.org/api/plugins.{lang}.json — in
  * particular the `vr` version key added for update detection.

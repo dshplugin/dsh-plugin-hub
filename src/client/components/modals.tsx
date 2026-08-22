@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Dialog layer for the Plugin Hub: the install-confirm dialog, the uninstall
  * dialog and the global toast. Both dialogs lock themselves while a mutation
  * or restart is running, then switch to a result view offering an immediate

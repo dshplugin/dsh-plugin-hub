@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Catalog list: the scrollable container with the loading / failed / empty
  * states, the plugin cards, and the count footer. Resets scroll position when
  * the category or install-status filter changes so the replaced content is

@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Unit tests for the install progress estimation helpers (src/server/progress.ts).
  *
  * Run with the Node built-in test runner: `npm test` (Node >= 22.6 with
@@ -31,7 +35,7 @@ test('estimateProgress parses pnpm Progress lines into a low fetch range', () =>
 })
 
 test('estimateProgress keeps the fetch phase well below the middle', () => {
-  // resolved 与 handled 几乎总相等，旧算法会瞬间贴满 90%；fetch 只占安装的一小段
+  // resolved 与 handled 几乎总相等，fetch 只占安装的一小段，进度不应贴顶
   assert.equal(estimateProgress('Progress: resolved 10, reused 10, downloaded 10, added 10'), 30)
 })
 

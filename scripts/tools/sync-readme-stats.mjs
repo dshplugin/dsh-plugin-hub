@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * 将 README 中的插件统计数字与官网在线 API 的真实值保持同步。
  *
  * 用法：npm run readme:stats

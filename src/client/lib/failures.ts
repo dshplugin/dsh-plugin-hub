@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Persistent install/remove notifications.
  *
  * Every settled task — success or failure — is appended to localStorage the
@@ -114,7 +118,7 @@ export function loadNotifications(): NotificationRecord[] {
     return list
       .filter((r): r is NotificationRecord =>
         !!r && typeof r === 'object' && typeof (r as { message?: unknown }).message === 'string')
-      // 历史失败记录没有 ok 字段：缺省按失败渲染，保证旧数据照常可查
+      // ok 字段缺省时按失败渲染
       .map((r) => ({ ...r, ok: r.ok === true }))
   } catch {
     return []

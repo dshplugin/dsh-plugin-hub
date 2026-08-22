@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Toolbar above the list: search input + sort dropdown + installed / not
  * installed filter buttons + the notifications entry. All buttons share the
  * same size (24px high, like the notification entry button).

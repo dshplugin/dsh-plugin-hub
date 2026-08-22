@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * 安装前预检：对 `github:` 源的插件，检查其分发（codeload tarball）里是否
  * 真的包含 package.json 声明的入口文件（main / exports["."].default）。
  * git 分发常不提交构建产物（lib/ 等），这类残缺包装完会让宿主重启加载插件树时

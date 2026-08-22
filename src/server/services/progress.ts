@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Pure progress-estimation helpers shared by the install runner.
  *
  * The dsh CLI wraps pnpm, which refreshes its `Progress: …` line in place

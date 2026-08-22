@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * One plugin card in the catalog list: name/category/verified badge,
  * description + topics, star/fork/date stats, and the detail/install/
  * uninstall actions.
@@ -65,7 +69,7 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
           // 查看详情：未安装/已安装都始终显示，跳转官网详情页
           h('a', {
             className: styles.detailBtn,
-            // 两级路径：/plugins/{ownerSlug}/{slug}；旧数据缺 ownerSlug 时从 repo 推导
+            // 两级路径：/plugins/{ownerSlug}/{slug}；缺 ownerSlug 时从 repo 推导
             href: pluginDetailUrl(p, langPath),
             target: '_blank',
             rel: 'noopener noreferrer',

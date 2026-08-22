@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Hub 版本信息 / 自我更新说明弹窗：
  *  - 有更新（hasUpdate=true）：标题「有新版本」，展示新版本号、发布时间与 Worker 下发的
  *    Markdown 变更记录（renderMarkdown 渲染，双语言按界面语言取 {zh,en} 对象），

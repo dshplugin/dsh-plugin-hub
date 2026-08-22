@@ -1,11 +1,16 @@
-// 发布前版本规范校验（挂在 package.json 的 prepublishOnly，publish 前自动执行）。
-//
-// 规范约定：
-//   1. 包名必须保持 "dsh-plugin" —— 客户端按包名记录并展示插件，
-//      改名会改变已安装用户的依赖名与列表显示（dsh-plugin-hub 只作仓库名）。
-//   2. 版本号必须符合语义化版本（semver）。
-//   3. 待发布版本不得等于或低于 npm 上已发布的版本，发布前必须递增。
-//   4. 有网络时才会校验远端版本；离线时仅做本地校验。
+/**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * 发布前版本规范校验（挂在 package.json 的 prepublishOnly，publish 前自动执行）。
+ * 规范约定：
+ *   1. 包名必须保持 "dsh-plugin" —— 客户端按包名记录并展示插件，
+ *      改名会改变已安装用户的依赖名与列表显示（dsh-plugin-hub 只作仓库名）。
+ *   2. 版本号必须符合语义化版本（semver）。
+ *   3. 待发布版本不得等于或低于 npm 上已发布的版本，发布前必须递增。
+ *   4. 有网络时才会校验远端版本；离线时仅做本地校验。
+ */
 import { readFile } from "node:fs/promises";
 
 const pkg = JSON.parse(

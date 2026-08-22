@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Section header: brand title row (H1 + open-site button) + tagline, followed
  * by the purple ad banner that promotes the catalog stats.
  */

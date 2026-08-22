@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * 轻量 Markdown 渲染器：仅用于 Hub 自我更新的变更记录（Worker 下发的 notes）。
  *
  * 内容由插件作者自己编写、属可信内容，但渲染端仍先整体 HTML 转义，再按

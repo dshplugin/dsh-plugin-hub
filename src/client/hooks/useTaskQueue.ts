@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Background install/remove task queue for the Plugin Hub.
  *
  * Mirrors the server-side FIFO active queue by polling /active, settles

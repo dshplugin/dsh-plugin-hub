@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * dsh-plugin host entry: mounts the Plugin Hub HTTP routes once the host
  * web server service is available. The browser bundle (src/client) talks to
  * these same-origin routes to perform real installs from inside the app.

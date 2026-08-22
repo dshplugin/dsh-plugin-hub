@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Category tabs: an "all" chip followed by one chip per catalog category.
  * The "all" chip carries the total plugin count; the per-category chips
  * carry no counts so their widths stay uniform.

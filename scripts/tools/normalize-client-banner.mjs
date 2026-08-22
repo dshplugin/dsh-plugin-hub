@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Post-build normalization of client/client.js, which is a COMMITTED and
  * PUBLISHED artifact — so it must be byte-identical no matter whose machine
  * built it.

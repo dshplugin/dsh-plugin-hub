@@ -1,4 +1,10 @@
-/** zh/en dictionaries for the DSH-Plugin Hub settings section. */
+/**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * zh/en dictionaries for the DSH-Plugin Hub settings section.
+ */
 export const zh = {
   nav: '插件中心',
   title: 'DSH-Plugin Hub',

@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Inline progress block shared by the install and uninstall dialogs:
  * a real percentage bar (server-estimated, client-polled). No live terminal
  * window — pnpm emits nothing during git clone/build, so a log pane would be

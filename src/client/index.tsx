@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * dsh-plugin client entry: wires the Plugin Hub into the host settings via
  * the module-loader bundle (see tsdown.config.ts). All UI logic lives in
  * PluginHubSection; this file only performs the cordis apply wiring.

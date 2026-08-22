@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Catalog constants and normalizers: site URLs, category metadata, sort keys
  * and the mapping from the online API's short-key payloads to HubPlugin.
  */
@@ -59,7 +63,7 @@ export function langPathOf(lang: LocaleId): string {
 
 /**
  * 官网详情页两级路径：/plugins/{ownerSlug}/{slug}；
- * 旧数据缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
+ * 缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
  */
 export function pluginDetailUrl(plugin: HubPlugin, langPath: string): string {
   const repo = plugin.source?.repo ?? ''
@@ -194,7 +198,7 @@ export function normalize(raw: Record<string, unknown>): HubPlugin {
       topics: Array.isArray(raw.t) ? (raw.t as string[]) : undefined,
       features: Array.isArray(raw.f) ? (raw.f as string[]) : undefined,
       description: typeof raw.d === 'string' ? raw.d : undefined,
-      // 投影输出两种形态：老数据 source 是 repo 字符串；新数据是 { repo, npmPackage }
+      // source 双形态：字符串 repo，或 { repo, npmPackage } 对象
       source: typeof raw.r === 'string'
         ? { repo: raw.r }
         : raw.r !== null && typeof raw.r === 'object'

@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Unit tests for the lightweight Markdown renderer used by the Hub self-update
  * dialog (src/client/lib/renderMarkdown.ts). The renderer escapes all HTML
  * first and only whitelists http(s) links — these tests pin that contract.

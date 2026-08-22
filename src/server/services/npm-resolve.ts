@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * npm 包反查：git 分发不完整（缺构建产物/子模块）导致安装失败时，用 npm
  * registry 的搜索接口按 repository 地址反查该仓库对应的官方 npm 包。
  *

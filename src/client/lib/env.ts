@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * One-shot host environment snapshot for bug reports. Fetched lazily and
  * cached at module level: issue URLs embed this info, and the environment
  * does not change during a session. A failed fetch degrades to null so the

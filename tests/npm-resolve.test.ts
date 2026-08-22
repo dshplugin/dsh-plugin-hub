@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * npm 包反查（resolveNpmPackage）的单元测试。
  *
  * 反查走真实 npm registry 搜索接口（网络相关），断言尽量宽松：

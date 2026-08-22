@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Catalog data + view state for the Plugin Hub section.
  *
  * Owns the online-data pipeline (live fetch from dsh-plugin.org), the local
@@ -59,7 +63,7 @@ export function useCatalog(lang: LocaleId) {
         const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
         // 插件市场不显示自己：DSH-Plugin Hub 从目录里排除自身条目，
         // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
-        // 主站数据构建侧已同步防止（registry/API 不再含自身），此处为已发布旧数据/CDN 缓存期的兜底。
+        // 主站数据已同步排除自身，此处为 CDN 缓存期的兜底。
         const hadSelf = list.some((p) => p.source?.repo === SELF_REPO)
         setPlugins(list.filter((p) => p.compatibility?.status === 'verified' && p.source?.repo !== SELF_REPO))
         const stats = s as { total?: number; verified?: number }

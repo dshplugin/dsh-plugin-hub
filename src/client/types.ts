@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Shared types for the dsh-plugin browser client. Kept dependency-free so
  * any client module can import them without pulling in components or styles.
  */
@@ -36,7 +40,7 @@ export interface SectionProps {
 
 /** Slim projection of the site's DirectoryPlugin entries. */
 export interface HubPlugin {
-  /** 作者小写 key，与 slug 共同构成唯一身份（两级路径 /plugins/{ownerSlug}/{slug}）；旧数据可能缺省 */
+  /** 作者小写 key，与 slug 共同构成唯一身份（两级路径 /plugins/{ownerSlug}/{slug}）；可能缺省 */
   ownerSlug?: string
   slug: string
   displayName?: string

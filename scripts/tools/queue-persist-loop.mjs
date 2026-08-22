@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Feedback loop for "queue disappears after refresh".
  * Simulates: enqueue install -> read /active (server truth) ->
  * "page reload" by re-fetching /active and asserting tasks still present.
