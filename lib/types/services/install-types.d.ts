@@ -1,4 +1,10 @@
-/** 安装/卸载运行时的公共类型与常量（无依赖，供各服务模块复用）。 */
+/**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * 安装/卸载运行时的公共类型与常量（无依赖，供各服务模块复用）。
+ */
 /** 一个 pnpm 安装子进程的结果快照。 */
 export interface InstallResult {
     exitCode: number | null;

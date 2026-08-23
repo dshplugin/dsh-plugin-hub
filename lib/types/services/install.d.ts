@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * Install runner 的统一出口：执行真实插件变更（spawn 官方 dsh CLI 子进程）。
  * 实现按职责拆分在同目录子模块，本文件只做公共 API 的 re-export，保持外部
  * import 面稳定（routes.ts / index.ts 仍从 `services/install.ts` 引入）。

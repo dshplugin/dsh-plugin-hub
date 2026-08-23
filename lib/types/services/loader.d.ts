@@ -1,4 +1,8 @@
 /**
+ * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
  * 运行中 loader 的读取与停用：卸载成功后对匹配条目做 live-disable，
  * 使卸载立即生效（刷新页面不再加载已卸载的 client bundle，也无需重启）。
  */

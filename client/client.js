@@ -6,7 +6,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 		let react = require("react");
 		//#region src/client/locales.ts
-		/** zh/en dictionaries for the DSH-Plugin Hub settings section. */
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* zh/en dictionaries for the DSH-Plugin Hub settings section.
+		*/
 		const zh = {
 			nav: "插件中心",
 			title: "DSH-Plugin Hub",
@@ -278,43 +284,43 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Header_module_css_default = {
-			"githubIcon": "qikqja_githubIcon",
-			"installedBtnActive": "qikqja_installedBtnActive",
-			"taglineLink": "qikqja_taglineLink",
 			"tagline": "qikqja_tagline",
-			"installedBtn": "qikqja_installedBtn",
-			"installedBtnDisabled": "qikqja_installedBtnDisabled",
-			"searchRow": "qikqja_searchRow",
-			"segCount": "qikqja_segCount",
-			"resultCount": "qikqja_resultCount",
-			"title": "qikqja_title",
-			"segCountActive": "qikqja_segCountActive",
-			"githubLink": "qikqja_githubLink",
-			"tabActive": "qikqja_tabActive",
-			"failBadge": "qikqja_failBadge",
-			"header": "qikqja_header",
-			"tab": "qikqja_tab",
-			"search": "qikqja_search",
-			"tabCount": "qikqja_tabCount",
-			"headerRight": "qikqja_headerRight",
-			"brandTitle": "qikqja_brandTitle",
+			"taglineLink": "qikqja_taglineLink",
 			"controls": "qikqja_controls",
-			"filterResults": "qikqja_filterResults",
-			"adArrow": "qikqja_adArrow",
-			"root": "qikqja_root",
-			"adBanner": "qikqja_adBanner",
-			"adBadge": "qikqja_adBadge",
-			"logoIcon": "qikqja_logoIcon",
-			"version": "qikqja_version",
 			"versionBtn": "qikqja_versionBtn",
-			"failBtn": "qikqja_failBtn",
-			"adText": "qikqja_adText",
+			"searchRow": "qikqja_searchRow",
+			"tab": "qikqja_tab",
+			"failBadge": "qikqja_failBadge",
+			"segCount": "qikqja_segCount",
 			"aboutBtn": "qikqja_aboutBtn",
-			"headerTitleRow": "qikqja_headerTitleRow",
+			"githubLink": "qikqja_githubLink",
 			"hubUpdateBadge": "qikqja_hubUpdateBadge",
-			"copyIcon": "qikqja_copyIcon",
 			"tabs": "qikqja_tabs",
-			"langBtn": "qikqja_langBtn"
+			"resultCount": "qikqja_resultCount",
+			"version": "qikqja_version",
+			"segCountActive": "qikqja_segCountActive",
+			"header": "qikqja_header",
+			"logoIcon": "qikqja_logoIcon",
+			"brandTitle": "qikqja_brandTitle",
+			"copyIcon": "qikqja_copyIcon",
+			"adBanner": "qikqja_adBanner",
+			"langBtn": "qikqja_langBtn",
+			"filterResults": "qikqja_filterResults",
+			"adBadge": "qikqja_adBadge",
+			"headerRight": "qikqja_headerRight",
+			"githubIcon": "qikqja_githubIcon",
+			"search": "qikqja_search",
+			"failBtn": "qikqja_failBtn",
+			"title": "qikqja_title",
+			"installedBtnDisabled": "qikqja_installedBtnDisabled",
+			"headerTitleRow": "qikqja_headerTitleRow",
+			"installedBtnActive": "qikqja_installedBtnActive",
+			"adText": "qikqja_adText",
+			"tabActive": "qikqja_tabActive",
+			"tabCount": "qikqja_tabCount",
+			"adArrow": "qikqja_adArrow",
+			"installedBtn": "qikqja_installedBtn",
+			"root": "qikqja_root"
 		};
 		//#endregion
 		//#region src/client/lib/failures.ts
@@ -469,7 +475,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/**
 		* 官网详情页两级路径：/plugins/{ownerSlug}/{slug}；
-		* 旧数据缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
+		* 缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
 		*/
 		function pluginDetailUrl(plugin, langPath) {
 			const repo = plugin.source?.repo ?? "";
@@ -733,6 +739,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/hooks/useCatalog.ts
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Catalog data + view state for the Plugin Hub section.
 		*
 		* Owns the online-data pipeline (live fetch from dsh-plugin.org), the local
@@ -970,6 +980,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/hooks/useTaskQueue.ts
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Background install/remove task queue for the Plugin Hub.
 		*
 		* Mirrors the server-side FIFO active queue by polling /active, settles
@@ -1402,107 +1416,111 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Modal_module_css_default = {
-			"modalTitle": "BiQ1zG_modalTitle",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"failCopy": "BiQ1zG_failCopy",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"failClear": "BiQ1zG_failClear",
+			"aboutModal": "BiQ1zG_aboutModal",
+			"failRow": "BiQ1zG_failRow",
+			"progressText": "BiQ1zG_progressText",
+			"modalClose": "BiQ1zG_modalClose",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"noticeList": "BiQ1zG_noticeList",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"toast": "BiQ1zG_toast",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"trustHint": "BiQ1zG_trustHint",
+			"aboutMeta": "BiQ1zG_aboutMeta",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"result": "BiQ1zG_result",
 			"errorHint": "BiQ1zG_errorHint",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"queueSection": "BiQ1zG_queueSection",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
+			"failKind": "BiQ1zG_failKind",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"modalLink": "BiQ1zG_modalLink",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"modalIn": "BiQ1zG_modalIn",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"progressHead": "BiQ1zG_progressHead",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"modalBody": "BiQ1zG_modalBody",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
 			"resultCheck": "BiQ1zG_resultCheck",
 			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"toastIn": "BiQ1zG_toastIn",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"resultDesc": "BiQ1zG_resultDesc",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"modalLink": "BiQ1zG_modalLink",
-			"overlay": "BiQ1zG_overlay",
-			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"failHead": "BiQ1zG_failHead",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
-			"progress": "BiQ1zG_progress",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"restartNow": "BiQ1zG_restartNow",
-			"result": "BiQ1zG_result",
-			"modalRow": "BiQ1zG_modalRow",
-			"queueRowBody": "BiQ1zG_queueRowBody",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"noticeMain": "BiQ1zG_noticeMain",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"queueSection": "BiQ1zG_queueSection",
-			"noticeRowOk": "BiQ1zG_noticeRowOk",
-			"errorModal": "BiQ1zG_errorModal",
-			"aboutMeta": "BiQ1zG_aboutMeta",
-			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"modalClose": "BiQ1zG_modalClose",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"overlayIn": "BiQ1zG_overlayIn",
 			"aboutContent": "BiQ1zG_aboutContent",
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"failList": "BiQ1zG_failList",
-			"toastFail": "BiQ1zG_toastFail",
-			"modalActions": "BiQ1zG_modalActions",
-			"progressText": "BiQ1zG_progressText",
-			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"modalBody": "BiQ1zG_modalBody",
-			"failKind": "BiQ1zG_failKind",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"failCopy": "BiQ1zG_failCopy",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"failRepo": "BiQ1zG_failRepo",
-			"progressFill": "BiQ1zG_progressFill",
-			"aboutModal": "BiQ1zG_aboutModal",
-			"failedCopyHint": "BiQ1zG_failedCopyHint",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"modalHead": "BiQ1zG_modalHead",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"modal": "BiQ1zG_modal",
-			"modalValue": "BiQ1zG_modalValue",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"failClear": "BiQ1zG_failClear",
-			"queueRow": "BiQ1zG_queueRow",
-			"toast": "BiQ1zG_toast",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"trustHint": "BiQ1zG_trustHint",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"progressHead": "BiQ1zG_progressHead",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"failRow": "BiQ1zG_failRow",
-			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"restartLater": "BiQ1zG_restartLater",
-			"modalIn": "BiQ1zG_modalIn",
-			"errorBox": "BiQ1zG_errorBox",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"noticeList": "BiQ1zG_noticeList",
-			"errorTitle": "BiQ1zG_errorTitle",
 			"modalCmdText": "BiQ1zG_modalCmdText",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"progressFill": "BiQ1zG_progressFill",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
+			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"modalHead": "BiQ1zG_modalHead",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"queueRow": "BiQ1zG_queueRow",
+			"overlay": "BiQ1zG_overlay",
+			"errorModal": "BiQ1zG_errorModal",
+			"modalTitle": "BiQ1zG_modalTitle",
 			"failEmpty": "BiQ1zG_failEmpty",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail"
+			"modalActions": "BiQ1zG_modalActions",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"failHead": "BiQ1zG_failHead",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"modal": "BiQ1zG_modal",
+			"modalRow": "BiQ1zG_modalRow",
+			"failedCopyHint": "BiQ1zG_failedCopyHint",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"failRepo": "BiQ1zG_failRepo",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"toastIn": "BiQ1zG_toastIn",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"modalValue": "BiQ1zG_modalValue",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"errorBox": "BiQ1zG_errorBox",
+			"restartLater": "BiQ1zG_restartLater",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"restartNow": "BiQ1zG_restartNow",
+			"failList": "BiQ1zG_failList",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"progress": "BiQ1zG_progress",
+			"toastFail": "BiQ1zG_toastFail",
+			"queueRowHead": "BiQ1zG_queueRowHead"
 		};
 		//#endregion
 		//#region src/client/components/icons.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Inline SVG icons used across the client. Icons inherit currentColor so
 		* they adapt to themes and disabled states automatically.
 		*/
@@ -1658,6 +1676,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/ProgressView.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Inline progress block shared by the install and uninstall dialogs:
 		* a real percentage bar (server-estimated, client-polled). No live terminal
 		* window — pnpm emits nothing during git clone/build, so a log pane would be
@@ -1672,6 +1694,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/modals.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Dialog layer for the Plugin Hub: the install-confirm dialog, the uninstall
 		* dialog and the global toast. Both dialogs lock themselves while a mutation
 		* or restart is running, then switch to a result view offering an immediate
@@ -1869,6 +1895,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/lib/renderMarkdown.ts
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* 轻量 Markdown 渲染器：仅用于 Hub 自我更新的变更记录（Worker 下发的 notes）。
 		*
 		* 内容由插件作者自己编写、属可信内容，但渲染端仍先整体 HTML 转义，再按
@@ -1956,6 +1986,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/AboutModal.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* 头部「关注我们」弹窗：介绍 DSH-Plugin Hub 是干什么的 + 用户反馈群二维码。
 		* 内容以 Markdown 形式由 dsh-update Worker 的 /about 接口下发（key = hub:about），
 		* 作者想怎么写就怎么写、随写随推，客户端只负责渲染 —— 非写死。
@@ -1993,6 +2027,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/HubUpdateModal.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Hub 版本信息 / 自我更新说明弹窗：
 		*  - 有更新（hasUpdate=true）：标题「有新版本」，展示新版本号、发布时间与 Worker 下发的
 		*    Markdown 变更记录（renderMarkdown 渲染，双语言按界面语言取 {zh,en} 对象），
@@ -2038,6 +2076,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/NotificationsModal.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Notification-center dialog: a persistent log of every settled install /
 		* remove task — successes and failures alike.
 		*
@@ -2181,6 +2223,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/CatalogHeader.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Section header: brand title row (H1 + open-site button) + tagline, followed
 		* by the purple ad banner that promotes the catalog stats.
 		*/
@@ -2239,6 +2285,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/CategoryTabs.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Category tabs: an "all" chip followed by one chip per catalog category.
 		* The "all" chip carries the total plugin count; the per-category chips
 		* carry no counts so their widths stay uniform.
@@ -2266,21 +2316,25 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Dropdown_module_css_default = {
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
-			"dropdownCount": "B_Gxsq_dropdownCount",
 			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
+			"dropdownLabel": "B_Gxsq_dropdownLabel",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
 			"dropdownPanel": "B_Gxsq_dropdownPanel",
 			"dropdownItem": "B_Gxsq_dropdownItem",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownCount": "B_Gxsq_dropdownCount",
 			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
 			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdown": "B_Gxsq_dropdown"
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownArrow": "B_Gxsq_dropdownArrow"
 		};
 		//#endregion
 		//#region src/client/components/Dropdown.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Custom dropdown (native <select> replacement).
 		*
 		* macOS/浏览器原生下拉无法跟随宿主主题，这里自绘：触发器按钮 + 绝对定位面板，
@@ -2333,6 +2387,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/CatalogControls.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Toolbar above the list: search input + sort dropdown + installed / not
 		* installed filter buttons + the notifications entry. All buttons share the
 		* same size (24px high, like the notification entry button).
@@ -2391,37 +2449,37 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var List_module_css_default = {
-			"star": "_3XaZHa_star",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"actions": "_3XaZHa_actions",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"body": "_3XaZHa_body",
+			"footLink": "_3XaZHa_footLink",
 			"installBtn": "_3XaZHa_installBtn",
-			"desc": "_3XaZHa_desc",
+			"date": "_3XaZHa_date",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"stateTitle": "_3XaZHa_stateTitle",
 			"footer": "_3XaZHa_footer",
+			"cardHead": "_3XaZHa_cardHead",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"star": "_3XaZHa_star",
+			"desc": "_3XaZHa_desc",
+			"topics": "_3XaZHa_topics",
+			"state": "_3XaZHa_state",
+			"verified": "_3XaZHa_verified",
+			"cardMain": "_3XaZHa_cardMain",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"stats": "_3XaZHa_stats",
+			"body": "_3XaZHa_body",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"fork": "_3XaZHa_fork",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"actions": "_3XaZHa_actions",
+			"stateDesc": "_3XaZHa_stateDesc",
 			"topic": "_3XaZHa_topic",
 			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"verified": "_3XaZHa_verified",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"state": "_3XaZHa_state",
-			"stats": "_3XaZHa_stats",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"footLink": "_3XaZHa_footLink",
-			"retryBtn": "_3XaZHa_retryBtn",
 			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"detailBtn": "_3XaZHa_detailBtn",
-			"date": "_3XaZHa_date",
-			"cardMain": "_3XaZHa_cardMain",
-			"topics": "_3XaZHa_topics",
 			"list": "_3XaZHa_list",
-			"fork": "_3XaZHa_fork",
-			"cardHead": "_3XaZHa_cardHead",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"card": "_3XaZHa_card",
 			"cardSide": "_3XaZHa_cardSide",
-			"card": "_3XaZHa_card"
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled"
 		};
 		//#endregion
 		//#region src/client/lib/format.ts
@@ -2444,6 +2502,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/PluginCard.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* One plugin card in the catalog list: name/category/verified badge,
 		* description + topics, star/fork/date stats, and the detail/install/
 		* uninstall actions.
@@ -2491,6 +2553,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/CatalogList.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Catalog list: the scrollable container with the loading / failed / empty
 		* states, the plugin cards, and the count footer. Resets scroll position when
 		* the category or install-status filter changes so the replaced content is
@@ -2530,10 +2596,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/components/PluginHubSection.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* Plugin Hub section: wires the catalog data pipeline, the background task
 		* queue and the feedback state together. Data/queue logic lives in hooks/,
 		* rendering is delegated to the small presentational components in this
-		* folder; only the dialogs/toast and the section-level copy actions remain.
+		* folder; it hosts the dialogs/toast and the section-level copy actions.
 		*/
 		function PluginHubSection({ t: _hostT, locale }) {
 			/** 界面语言：默认跟随宿主（系统）语言；右上角按钮可手动切换，切换后以手动选择为准 */
@@ -2911,6 +2981,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		//#endregion
 		//#region src/client/index.tsx
 		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
 		* dsh-plugin client entry: wires the Plugin Hub into the host settings via
 		* the module-loader bundle (see tsdown.config.ts). All UI logic lives in
 		* PluginHubSection; this file only performs the cordis apply wiring.
