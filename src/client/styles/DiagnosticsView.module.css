@@ -1,0 +1,231 @@
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * System diagnostics list: every connectivity probe is one row — name,
+ * target address, latency and a live status badge (200 OK / Unreachable /
+ * Checking…). The list runs automatically when the page opens; each row is
+ * a button — click to re-probe just that channel with a visible
+ * running→result feedback loop. Colors resolve through the --hub-* tokens. */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* —— 系统版本（最顶部）—— */
+
+/* 版本行：左侧标题+说明，右侧「复制」按钮；与设置行同构，置顶展示 */
+.envRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.envLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.envTitle {
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--hub-text-primary);
+}
+
+.envDesc {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+.envCopyBtn {
+  flex: none;
+  height: 24px;
+  padding: 0 12px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--hub-text-secondary);
+  background: var(--hub-bg-hover);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.envCopyBtn:hover:not(:disabled) {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-2);
+}
+
+.envCopyBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 头部行：左侧说明文字，右侧「立即诊断」品牌色按钮 */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.headHint {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+.runBtn {
+  flex: none;
+  height: 24px;
+  padding: 0 12px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.runBtn:hover:not(:disabled) {
+  color: #ffffff;
+  background: var(--hub-brand);
+  border-color: var(--hub-brand);
+}
+
+.runBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 一行一个通道：整行可点击重测，悬浮高亮，检测中置灰不可点 */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: none;
+  border-bottom: 1px solid var(--hub-border-1);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.12s ease;
+}
+
+.row:last-of-type {
+  border-bottom: none;
+}
+
+.row:hover:not(:disabled) {
+  background: var(--hub-bg-hover);
+}
+
+.row:disabled {
+  cursor: default;
+}
+
+.name {
+  flex: none;
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--hub-text-primary);
+  white-space: nowrap;
+}
+
+/* 目标地址（registry 地址 / github.com / dsh-plugin.org）：次级灰，过长省略 */
+.display {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 耗时：成功时显示，如 42ms，等宽数字 */
+.meta {
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 状态徽章：成功绿 / 失败红 / 检测中灰底闪烁 / 待检空 */
+.badge {
+  flex: none;
+  padding: 0 8px;
+  height: 17px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  line-height: 17px;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.badgeOk {
+  color: var(--hub-success);
+  background: var(--hub-success-tint);
+}
+
+.badgeFail {
+  color: var(--hub-danger-text);
+  background: var(--hub-danger-tint);
+}
+
+.badgeRunning {
+  color: var(--hub-text-secondary);
+  background: var(--hub-bg-hover);
+  animation: diagPulse 1s ease-in-out infinite;
+}
+
+.badgeIdle {
+  color: var(--hub-text-disabled);
+  background: var(--hub-bg-hover);
+}
+
+@keyframes diagPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 底部总览：全部通过 / 存在异常 / 检测中，与列表行左对齐 */
+.summary {
+  padding: 8px 12px 10px;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.summaryOk {
+  color: var(--hub-success);
+}
+
+.summaryFail {
+  color: var(--hub-danger-text);
+}
+
+.summaryRunning {
+  color: var(--hub-text-tertiary);
+}

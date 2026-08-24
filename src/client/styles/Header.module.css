@@ -223,23 +223,15 @@
   text-overflow: ellipsis;
 }
 
+/* 工具栏第二行：左侧筛选结果数 + 右侧排序按钮组（排序组靠 auto 顶到行尾）；
+   分隔线收在行底，与插件列表之间一条横线 */
 .controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex-shrink: 0;
-  /* 左右分区：左侧操作控件靠左，通知入口经 margin-left:auto 独立顶到最右 */
-}
-
-/* 列表头部筛选结果数：位于排序下拉之前，弱化灰字提示「筛选出 N 条插件」，字号与相邻按钮一致 */
-.filterResults {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: baseline;
-  font-size: 12px;
-  line-height: 18px;
-  color: var(--hub-text-tertiary);
-  white-space: nowrap;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid var(--hub-border-1);
 }
 
 /* 结果数里的数字：等宽数字 + 固定 5 位宽度；数字在预留位中始终居中，两侧位置都固定不跳动 */
@@ -247,6 +239,89 @@
   font-variant-numeric: tabular-nums;
   min-width: 5ch;
   text-align: center;
+}
+
+/* —— result count —— */
+
+/* 筛选结果数：弱化灰字信息「结果 N 条插件」，位于工具栏行最左侧 */
+.resultSeg {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* —— 排序按钮组（与已安装视图同款 segmented control）——
+   组前小标签 + 按钮组，靠 margin-left:auto 顶到结果数右侧行尾 */
+
+/* 排序组容器：整体右对齐，独立一行内容不换行 */
+.sortGroup {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 组前小标签：灰字，标注这组按钮的作用 */
+.segLabel {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+.segGroup {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segBtn {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 24px;
+  height: 24px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+/* 激活排序按钮上的方向箭头：随文字色着色、不可被压缩 */
+.segBtn svg {
+  flex-shrink: 0;
+  display: block;
+}
+
+.segBtn + .segBtn {
+  border-left: 1px solid var(--hub-border-2);
+}
+
+.segBtn:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+}
+
+.segBtnActive,
+.segBtnActive:hover {
+  color: #fff;
+  background: var(--hub-brand);
 }
 
 /* —— ad banner —— */
@@ -307,19 +382,23 @@
 
 .searchRow {
   display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 0 2px;
 }
 
-/* 搜索框：用户指定只占整行一半宽，右侧留白给排序/筛选/通知控件组 */
+/* 搜索框：整行占满（排序已移出到结果数下方的按钮组行，搜索框独占整行） */
 .search {
-  width: 50%;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 9px;
   font-size: 12px;
-  line-height: 18px;
+  line-height: 26px;
   color: inherit;
   background: transparent;
   border: 1px solid var(--hub-border-2);
   border-radius: 6px;
-  padding: 4px 9px;
   outline: none;
   transition: border-color 120ms ease;
 }
@@ -330,79 +409,6 @@
 
 .search:focus {
   border-color: var(--hub-brand);
-}
-
-/* —— install-state filter —— */
-
-/* 已安装 / 未安装：两个独立按钮，外观尺寸与「安装失败记录」按钮一致（高 24px）；
-   各自点击筛选对应安装状态，再点一次恢复全部。公共规则统一无边框，
-   避免激活态回落到浏览器默认 2px 边框导致点击时按钮变粗跳动。 */
-.installedBtn,
-.installedBtnActive,
-.installedBtnDisabled {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 24px;
-  padding: 0 8px;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  line-height: 22px;
-  cursor: pointer;
-  user-select: none;
-  transition: color 120ms ease, background 120ms ease;
-}
-
-.installedBtn {
-  color: var(--hub-text-primary);
-  background: transparent;
-}
-
-/* 悬浮：明显加重底色，保证「看得见、点得准」。 */
-.installedBtn:hover {
-  color: var(--hub-text-primary);
-  background: var(--hub-bg-hover);
-}
-
-/* 置灰：当前分类下无对应安装状态的插件时不可点；尺寸保持 24px 不塌陷，
-   文字弱化，配合 disabled 属性天然屏蔽 hover/点击。 */
-.installedBtnDisabled,
-.installedBtnDisabled:hover {
-  color: var(--hub-text-disabled);
-  background: transparent;
-  cursor: not-allowed;
-}
-
-.installedBtnDisabled .segCount {
-  color: var(--hub-text-disabled);
-  background: rgba(128, 128, 128, 0.06);
-}
-
-.installedBtnActive {
-  color: var(--hub-text-on-fill);
-  background: var(--hub-btn-fill);
-}
-
-.segCount,
-.segCountActive {
-  font-size: 10px;
-  line-height: 14px;
-  border-radius: 999px;
-  padding: 0 4px;
-  min-width: 14px;
-  text-align: center;
-}
-
-.segCount {
-  color: var(--hub-text-tertiary);
-  background: var(--hub-bg-btn);
-}
-
-.installedBtnActive .segCountActive {
-  color: var(--hub-text-on-fill);
-  background: var(--hub-bg-on-fill);
 }
 
 /* —— category chips —— */
@@ -464,53 +470,15 @@
   background: var(--hub-bg-on-fill);
 }
 
-/* —— notifications entry —— */
-
-/* 通知中心入口：中性次级按钮（浅灰底 + 细边框），与左侧操作按钮区分、常态可辨；
-   box-sizing: border-box 让 1px 边框包含在 24px 高度内，与「已安装/未安装」无边框按钮外尺寸一致；
-   有通知时右上角悬浮的红圈白字徽标成为提醒焦点 */
-.failBtn {
-  position: relative;
-  flex-shrink: 0;
-  /* 与左侧操作按钮分开：自动吃掉剩余空间，把按钮顶到控件行最右 */
-  margin-left: auto;
-  display: inline-flex;
+/* 一级导航行：tab 占满左侧 */
+.tabsRow {
+  display: flex;
   align-items: center;
-  box-sizing: border-box;
-  height: 24px;
-  padding: 0 10px;
-  border: 1px solid var(--hub-border-2);
-  border-radius: 6px;
-  font-size: 12px;
-  line-height: 22px;
-  color: var(--hub-text-primary);
-  background: var(--hub-bg-hover);
-  cursor: pointer;
-  user-select: none;
-  transition: color 120ms ease, background 120ms ease;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.failBtn:hover {
-  color: var(--hub-text-primary);
-  background: rgba(128, 128, 128, 0.28);
-}
-
-/* 计数徽标：红色圆形 + 白色数字，整体浮在按钮右上角上沿之外（16px 徽章 + top:-16px
-   完全悬于按钮灰底之上，不遮盖灰底），只在通知数 >0 时出现 */
-.failBadge {
-  position: absolute;
-  top: -16px;
-  right: -7px;
-  z-index: 1;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 5px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 16px;
-  text-align: center;
-  color: #ffffff;
-  background: var(--hub-danger);
-  box-shadow: 0 1px 4px rgba(209, 36, 47, 0.4);
+.tabsRow > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
 }

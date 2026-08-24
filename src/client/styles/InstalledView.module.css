@@ -1,0 +1,447 @@
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Installed view: searchable, sortable list of installed plugins mixing
+ * catalog plugins (full metadata) and custom installs (runtime info only,
+ * amber custom badge). The toolbar holds a search box plus two segmented
+ * radio-button groups (source filter + sort). Each row has three tidy
+ * lines: title line (running-status dot + name + version/update badges +
+ * fixed action buttons on the right), meta line (repo · category), and a
+ * one-line description. Colors resolve through the --hub-* tokens. */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* —— 工具栏：「已安装插件」列表上方 ——
+   第一行搜索框（撑满整行），第二行来源筛选按钮组 + 排序按钮组；
+   hairline 与下方列表区隔 */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 0 2px 10px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+/* 搜索框容器：撑满整行宽度，与按钮组等视觉高度 */
+.searchWrap {
+  width: 100%;
+  height: 28px;
+  min-width: 0;
+}
+
+/* 搜索输入：28px 与下拉触发器等高 */
+.searchInput {
+  width: 100%;
+  height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+  line-height: 26px;
+  color: var(--hub-text-primary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.searchInput::placeholder {
+  color: var(--hub-text-tertiary);
+}
+
+.searchInput:focus {
+  border-color: var(--hub-brand);
+}
+
+/* —— 单选按钮组（segmented control）：来源筛选 / 排序 ——
+   一组一个描边容器，按钮间竖线分隔，选中项品牌色实底 */
+
+.segRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 组前小标签：灰字，标注这组按钮的作用 */
+.segLabel {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+.segGroup {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segBtn {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 24px;
+  height: 24px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+/* 激活排序按钮上的方向箭头：随文字色着色、不可被压缩 */
+.segBtn svg {
+  flex-shrink: 0;
+  display: block;
+}
+
+.segBtn + .segBtn {
+  border-left: 1px solid var(--hub-border-2);
+}
+
+.segBtn:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+}
+
+.segBtnActive,
+.segBtnActive:hover {
+  color: #fff;
+  background: var(--hub-brand);
+}
+
+/* —— 空态 / 搜索无结果 —— */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 36px 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-tertiary);
+  text-align: center;
+  border: 1px dashed var(--hub-border-2);
+  border-radius: 8px;
+}
+
+.emptyTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hub-text-secondary);
+}
+
+.emptyDesc {
+  color: var(--hub-text-tertiary);
+}
+
+/* —— 行列表 —— */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--hub-border-1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--hub-bg-1);
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.row + .row {
+  border-top: 1px solid var(--hub-border-1);
+}
+
+.row:hover {
+  background: var(--hub-bg-2);
+}
+
+/* 第一行：状态点 + 名称/版本/更新徽标 + 右侧固定操作按钮组 */
+.rowTitleLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* 第三行（仅目录插件）：简介单独一行，超长省略号收尾；
+   左缩进对齐名称（8 状态点 + 8 间隔 = 16px） */
+.rowDesc {
+  padding-left: 16px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* 运行状态点：绿 = 已加载进 loader（运行中）；琥珀 = 已安装未挂载（装完未重启） */
+.statusDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hub-success);
+}
+
+.statusDot.statusPending {
+  background: var(--hub-warning);
+}
+
+/* 非 dsh 插件（如官方示例项目）：宿主不加载，灰色点表示「未启用」而非「待重启」 */
+.statusDot.statusInactive {
+  background: var(--hub-text-tertiary);
+}
+
+/* 主信息：名称 + 已装版本 + 有更新徽标 */
+.rowMain {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.rowTitle {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--hub-text-primary);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 已装版本：等宽弱化小字 */
+.versionBadge {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  background: var(--hub-bg-hover);
+  border-radius: 4px;
+  padding: 0 5px;
+}
+
+/* 有更新徽标：品牌色实底小圆标 */
+.updateBadge {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint-strong);
+  border-radius: 4px;
+  padding: 0 5px;
+}
+
+/* 来源标签列（行尾、操作按钮前）：固定宽度等宽，所有条目标签在同一列右对齐（整齐不乱）。
+   「插件中心」= 目录插件（品牌蓝描边），「手动安装」= 命令行安装（琥珀描边）。
+   两词等宽（各 4 字），宽度固定后标签列严格对齐 */
+.rowSourceTag {
+  flex-shrink: 0;
+  width: 60px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowSourceTagHub {
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border: 1px solid var(--hub-brand-border-soft);
+}
+
+.rowSourceTagManual {
+  color: var(--hub-warning);
+  background: var(--hub-warning-tint);
+  border: 1px solid var(--hub-warning-border);
+}
+
+/* 示例项目徽标（非 dsh 插件，如官方示例仓库）：品牌蓝描边 + 浅蓝底，
+   与「有更新」实底区分，表达「这是示例项目，宿主不加载」 */
+.exampleBadge {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border: 1px solid var(--hub-brand-border-soft);
+  border-radius: 4px;
+  padding: 0 5px;
+}
+
+/* 示例项目徽标行：独立一行，左缩进对齐名称（8 状态点 + 8 间隔 = 16px），
+   标签可完整显示不换行，不受名称行宽度挤压 */
+.exampleRow {
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  min-width: 0;
+}
+
+/* 第二行元信息：仓库 · 分类 —— 独立成行，左缩进与名称对齐，不再挤压名称 */
+.rowMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.rowRepo {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowCategory {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  background: var(--hub-bg-hover);
+  border-radius: 4px;
+  padding: 0 6px;
+}
+
+/* —— 行操作：详情 / 更新 / 卸载 —— */
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* 详情：中性细边框按钮，与卸载同款描边样式（视觉成组） */
+.rowDetail {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  padding: 2px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.rowDetail:hover {
+  color: var(--hub-text-primary);
+  border-color: var(--hub-border-ghost);
+  background: var(--hub-bg-hover);
+}
+
+/* 重启：琥珀警告色描边小按钮，仅在「待重启」时出现 —— 装完未挂载，点了宿主重启后即生效。
+   重启属于「提醒/待办」语义，用警告色而非品牌蓝，与状态点的琥珀点呼应 */
+.rowRestart {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--hub-warning);
+  background: var(--hub-warning-tint);
+  border: 1px solid var(--hub-warning-border);
+  border-radius: 6px;
+  padding: 2px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.rowRestart:hover {
+  color: #fff;
+  background: var(--hub-warning);
+  border-color: var(--hub-warning);
+}
+
+/* 更新：品牌色实底小按钮，仅在「有更新」时出现 */
+.rowUpdate {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--hub-brand);
+  border: none;
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.rowUpdate:hover {
+  background: var(--hub-brand-hover);
+}
+
+/* 卸载：危险色描边小按钮 */
+.rowUninstall {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-danger);
+  background: transparent;
+  border: 1px solid var(--hub-danger-border-soft);
+  border-radius: 6px;
+  padding: 2px 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.rowUninstall:hover {
+  color: #fff;
+  background: var(--hub-danger);
+  border-color: var(--hub-danger);
+}

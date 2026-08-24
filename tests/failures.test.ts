@@ -4,14 +4,14 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * Unit tests for the failure classifier and the core-error collector
- * (src/client/lib/failures.ts).
+ * (src/client/logic/failures.ts).
  *
  * Run with the Node built-in test runner: `npm test` (Node >= 22.6 with
  * type stripping). No extra test dependencies required.
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyFailure, coreErrorCode, summarizeError } from '../src/client/lib/failures.ts'
+import { classifyFailure, coreErrorCode, summarizeError } from '../src/client/logic/failures.ts'
 
 const dshTailHint = 'dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in /Users/x/.dsh/profiles/web/pnpm-workspace.yaml, then re-run'
 

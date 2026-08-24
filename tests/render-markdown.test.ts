@@ -4,7 +4,7 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * Unit tests for the lightweight Markdown renderer used by the Hub self-update
- * dialog (src/client/lib/renderMarkdown.ts). The renderer escapes all HTML
+ * dialog (src/client/logic/renderMarkdown.ts). The renderer escapes all HTML
  * first and only whitelists http(s) links — these tests pin that contract.
  *
  * Run with the Node built-in test runner: `npm test` (Node >= 22.6 with
@@ -12,7 +12,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { renderMarkdown } from '../src/client/lib/renderMarkdown.ts'
+import { renderMarkdown } from '../src/client/logic/renderMarkdown.ts'
 
 test('renderMarkdown: headings map #~#### to h2~h5', () => {
   const out = renderMarkdown('# One\n## Two\n### Three\n#### Four\n')

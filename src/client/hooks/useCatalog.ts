@@ -11,14 +11,24 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { HubPlugin, LocaleId } from '../types.ts'
-import { HUB_ABOUT_URL, HUB_REPO, HUB_UPDATE_URL, normalize, PLUGIN_VERSION, repoFromInstallTarget } from '../lib/catalog.ts'
-import type { HubAboutInfo, HubUpdateInfo } from '../lib/catalog.ts'
-import type { SortKey } from '../lib/catalog.ts'
+import { HUB_REPO, PLUGIN_VERSION } from '../logic/constants.ts'
+import type { HubAboutInfo, HubUpdateInfo } from '../types.ts'
+import type { SortKey } from '../logic/constants.ts'
+import { fetchCatalog, fetchStats } from '../data/catalog.ts'
+import { fetchHubAbout, fetchHubUpdate } from '../data/hub.ts'
+import { fetchInstalled } from '../data/host.ts'
+import {
+  hasUpdateOf, installedItemsOf, installedNameOf, installedVersionOf,
+} from '../logic/installed.ts'
+import type { InstalledItem, InstalledVersionSignal } from '../logic/installed.ts'
 
-const PLUGINS_URL = (lang: LocaleId) => `https://dsh-plugin.org/api/plugins.${lang}.json`
-const STATS_URL = 'https://dsh-plugin.org/api/stats.json'
 /** 插件市场自身仓库：DSH-Plugin Hub 不显示在目录里（自己不进自己的插件列表） */
 const SELF_REPO = 'dshplugin/dsh-plugin-hub'
+
+/** 市场各排序的默认方向：全部按倒序（Star/Fork 多、更新/收录近的在前） */
+const SORT_DEFAULT_DIR: Record<SortKey, 'asc' | 'desc'> = {
+  sortStars: 'desc', sortForks: 'desc', sortUpdated: 'desc', sortNewest: 'desc',
+}
 
 export function useCatalog(lang: LocaleId) {
   /** 目录插件（仅保留人工验证通过的条目） */
@@ -30,13 +40,25 @@ export function useCatalog(lang: LocaleId) {
   const [category, setCategory] = useState('all')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortKey>('sortStars')
-  /** 列表安装状态筛选：全部 / 已安装 / 未安装（分段按钮，单列表内切换，不引入第二个列表） */
-  const [installedFilter, setInstalledFilter] = useState<'all' | 'installed' | 'notInstalled'>('all')
+  /** 当前排序方向：点同一个排序按钮切换 正序/倒序；点新排序用该排序的默认方向（与已安装视图一致） */
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  /** 点击排序按钮：同一按钮切换正/倒序，新按钮用默认方向 */
+  function toggleSort(key: SortKey) {
+    if (key === sort) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    else { setSort(key); setSortDir(SORT_DEFAULT_DIR[key]) }
+  }
   /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
   const [installed, setInstalled] = useState<Record<string, string>>({})
   /** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由）；
    *  npmPackage 为 npm 优先通道反查命中的包名映射（目录数据未下发时客户端靠它把依赖 key 匹配回仓库） */
-  const [versions, setVersions] = useState<Record<string, { version: string; updatedAt: string; npmPackage?: string }>>({})
+  const [versions, setVersions] = useState<Record<string, InstalledVersionSignal>>({})
+  /** 每个依赖在系统上的安装目录（profile/node_modules/<包名>），详情视图展示用 */
+  const [installPaths, setInstallPaths] = useState<Record<string, string> | null>(null)
+  /** 已加载进运行中 loader 的包名（官方 ctx.loader 对账）：装完未重启的新插件不在其中 */
+  const [loadedNames, setLoadedNames] = useState<string[] | null>(null)
+  /** 真正的 dsh 插件包名（包内声明 dsh 配置 / 在 profile bundles 清单）：非 dsh 插件不提示「待重启」 */
+  const [dshCapableNames, setDshCapableNames] = useState<string[] | null>(null)
   /** Hub 自我更新信息：来自 CF Worker 版本控制中心（hub.dsh-plugin.org），与目录数据解耦 */
   const [hubUpdateInfo, setHubUpdateInfo] = useState<HubUpdateInfo | null>(null)
   /** 头部「关注我们」弹窗内容（平台介绍 + 反馈群二维码）：来自同款 Worker /about，Markdown 推送非写死 */
@@ -48,26 +70,18 @@ export function useCatalog(lang: LocaleId) {
     setPlugins(null)
     setStats(null)
     setFailed(false)
-    const fetchData = (url: string): Promise<unknown> =>
-      fetch(url, { cache: 'no-store' }).then((res) => {
-        if (!res.ok) throw new Error(String(res.status))
-        return res.json()
-      })
     // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口；
     // 数据接口 CDN 缓存 1 小时，发布新数据后最长 1 小时全网生效。
-    const load = () =>
-      Promise.all([fetchData(PLUGINS_URL(lang)), fetchData(STATS_URL)])
+    const load = () => Promise.all([fetchCatalog(lang), fetchStats()])
     load()
-      .then(([data, s]) => {
+      .then(([list, stats]) => {
         if (cancelled) return
-        const list = (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
         // 插件市场不显示自己：DSH-Plugin Hub 从目录里排除自身条目，
         // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
         // 主站数据已同步排除自身，此处为 CDN 缓存期的兜底。
         const hadSelf = list.some((p) => p.source?.repo === SELF_REPO)
         setPlugins(list.filter((p) => p.compatibility?.status === 'verified' && p.source?.repo !== SELF_REPO))
-        const stats = s as { total?: number; verified?: number }
-        if (stats && typeof stats.total === 'number' && typeof stats.verified === 'number') {
+        if (stats) {
           setStats(hadSelf
             ? { total: stats.total - 1, verified: stats.verified - 1 }
             : { total: stats.total, verified: stats.verified })
@@ -83,15 +97,13 @@ export function useCatalog(lang: LocaleId) {
 
   /** 刷新当前 profile 已安装插件表；宿主未挂本地路由时静默降级为空表。 */
   const refreshInstalled = async () => {
-    try {
-      const res = await fetch('/dsh-plugin-hub/installed', { cache: 'no-store' })
-      if (!res.ok) return
-      const data = await res.json() as { installed?: Record<string, string>; versions?: Record<string, { version: string; updatedAt: string; npmPackage?: string }> }
-      setInstalled(data.installed ?? {})
-      setVersions(data.versions ?? {})
-    } catch {
-      // host without the plugin's server routes — keep the empty table
-    }
+    const data = await fetchInstalled()
+    if (data === null) return
+    setInstalled(data.installed)
+    setVersions(data.versions)
+    setInstallPaths(data.paths)
+    setLoadedNames(data.loaded)
+    setDshCapableNames(data.dshCapable)
   }
 
   // 首次进入拉取已安装表（依赖宿主 webServer 服务）
@@ -102,16 +114,7 @@ export function useCatalog(lang: LocaleId) {
   // 失败静默降级为 null（徽标不出现，不影响目录本身加载）。
   useEffect(() => {
     let cancelled = false
-    fetch(HUB_UPDATE_URL, { cache: 'no-store' })
-      .then((res): Promise<HubUpdateInfo | null> => (res.ok ? res.json() : Promise.resolve(null)))
-      .then((data) => {
-        if (cancelled || !data) { if (!cancelled) setHubUpdateInfo(null); return }
-        const version = typeof data.version === 'string' && data.version.length > 0 ? data.version : null
-        setHubUpdateInfo(version === null
-          ? null
-          : { version, publishedAt: data.publishedAt ?? null, notes: data.notes ?? null })
-      })
-      .catch(() => { if (!cancelled) setHubUpdateInfo(null) })
+    void fetchHubUpdate().then((info) => { if (!cancelled) setHubUpdateInfo(info) })
     return () => { cancelled = true }
   }, [reloadKey])
 
@@ -119,62 +122,28 @@ export function useCatalog(lang: LocaleId) {
   // 客户端下次进入拉 /about 即可看到最新，非写死。失败静默为 null（弹窗展示兜底文案，不阻塞）。
   useEffect(() => {
     let cancelled = false
-    fetch(HUB_ABOUT_URL, { cache: 'no-store' })
-      .then((res): Promise<HubAboutInfo | null> => (res.ok ? res.json() : Promise.resolve(null)))
-      .then((data) => {
-        if (cancelled) return
-        if (!data || data.content === null || data.content === undefined) { setHubAboutInfo(null); return }
-        const content = typeof data.content === 'string' || typeof data.content === 'object' ? data.content : null
-        setHubAboutInfo(content === null
-          ? null
-          : { content, updatedAt: data.updatedAt ?? null })
-      })
-      .catch(() => { if (!cancelled) setHubAboutInfo(null) })
+    void fetchHubAbout().then((info) => { if (!cancelled) setHubAboutInfo(info) })
     return () => { cancelled = true }
   }, [reloadKey])
 
   /** 插件是否已安装：匹配 Git spec 中的 owner/repo，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
-  const installedName = (p: HubPlugin): string | null => {
-    const repo = p.source?.repo
-    if (!repo) return null
-    const needle = repo.toLowerCase()
-    for (const [name, spec] of Object.entries(installed)) {
-      if (repoFromInstallTarget(spec).toLowerCase() === needle) return name
-    }
-    // npm 通道安装：profile 依赖 key 直接是 npm 包名。包名来源两处——目录数据（npmPackage），
-    // 或服务端 npm 优先反查持久化的映射（versions[repo].npmPackage，覆盖组织 scope 与 GitHub
-    // 用户名不一致、目录未下发包名的场景）；命中任一并依赖 key 真实存在即视为已安装
-    const pkg = ((p.source?.npmPackage || versions[repo.toLowerCase()]?.npmPackage) ?? '').toLowerCase()
-    if (pkg) {
-      for (const name of Object.keys(installed)) {
-        if (name.toLowerCase() === pkg) return name
-      }
-    }
-    return null
-  }
+  const installedName = (p: HubPlugin): string | null => installedNameOf(p, installed, versions)
 
   /** 该插件安装时记录的目录版本（无记录/未安装 → null）。 */
-  const installedVersion = (p: HubPlugin): string | null => {
-    const repo = p.source?.repo
-    if (!repo) return null
-    return versions[repo.toLowerCase()]?.version ?? null
-  }
+  const installedVersion = (p: HubPlugin): string | null => installedVersionOf(p, versions)
 
   /**
    * 是否有更新：仅对已安装插件有意义。
    * 双信号判定——有 release 版本的比版本；无版本（repo 不打 tag）的比仓库最近更新时间
    * （repoUpdatedAt，ISO 字符串字典序 = 时间序），更新时间变新说明有新提交。
    */
-  const hasUpdate = (p: HubPlugin): boolean => {
-    if (installedName(p) === null) return false
-    const repo = p.source?.repo
-    if (!repo) return false
-    const rec = versions[repo.toLowerCase()]
-    if (!rec) return false
-    if (p.version) return p.version !== rec.version
-    const current = p.dates?.repoUpdatedAt
-    return Boolean(current && rec.updatedAt && current > rec.updatedAt)
-  }
+  const hasUpdate = (p: HubPlugin): boolean => hasUpdateOf(p, installed, versions)
+
+  /** 已安装项统一列表（目录元数据 + 运行时信息合并）：驱动「已安装」tab。 */
+  const installedItems = useMemo<InstalledItem[]>(
+    () => installedItemsOf(plugins, installed, versions, installPaths, loadedNames, dshCapableNames),
+    [plugins, installed, versions, installPaths, loadedNames, dshCapableNames],
+  )
 
   /**
    * Hub 自身是否有可用更新：Hub 就是当前运行的应用（始终已安装，无需 installedName 命中）。
@@ -195,31 +164,11 @@ export function useCatalog(lang: LocaleId) {
     return plugins.filter((p) => p.category === category)
   }, [plugins, category])
 
-  /** 当前分类下已安装插件数：已安装/未安装按钮上的计数跟随分类，不再用全局口径。 */
-  const installedCountInCategory = useMemo(() => {
-    return categoryPlugins.reduce((n, p) => n + (installedName(p) !== null ? 1 : 0), 0)
-  }, [categoryPlugins, installed])
-
-  /** 当前分类下未安装插件数。 */
-  const notInstalledCountInCategory = Math.max(0, categoryPlugins.length - installedCountInCategory)
-
-  // 自动重置：切换分类（或已安装表变化）后，若当前安装状态筛选在新分类下无结果，
-  // 自动退回「全部」，避免列表空置死胡同、也避免 0 计数按钮被误触。
-  useEffect(() => {
-    if (installedFilter === 'all') return
-    const count = installedFilter === 'installed'
-      ? installedCountInCategory
-      : notInstalledCountInCategory
-    if (count === 0) setInstalledFilter('all')
-  }, [installedFilter, installedCountInCategory, notInstalledCountInCategory])
-
   const visible = useMemo(() => {
     if (!plugins) return []
     const q = query.trim().toLowerCase()
     const list = plugins.filter((p) => {
       if (category !== 'all' && p.category !== category) return false
-      if (installedFilter === 'installed' && installedName(p) === null) return false
-      if (installedFilter === 'notInstalled' && installedName(p) !== null) return false
       if (!q) return true
       return (
         (p.displayName ?? '').toLowerCase().includes(q) ||
@@ -227,13 +176,14 @@ export function useCatalog(lang: LocaleId) {
         (p.topics ?? []).some((topic) => topic.toLowerCase().includes(q))
       )
     })
+    const dir = sortDir === 'asc' ? 1 : -1
     return [...list].sort((a, b) => {
-      if (sort === 'sortStars') return (b.stats?.stargazers_count ?? 0) - (a.stats?.stargazers_count ?? 0)
-      if (sort === 'sortForks') return (b.stats?.forks_count ?? 0) - (a.stats?.forks_count ?? 0)
-      if (sort === 'sortNewest') return (b.dates?.addedAt ?? '').localeCompare(a.dates?.addedAt ?? '')
-      return (b.dates?.repoUpdatedAt ?? '').localeCompare(a.dates?.repoUpdatedAt ?? '')
+      if (sort === 'sortStars') return ((b.stats?.stargazers_count ?? 0) - (a.stats?.stargazers_count ?? 0)) * dir
+      if (sort === 'sortForks') return ((b.stats?.forks_count ?? 0) - (a.stats?.forks_count ?? 0)) * dir
+      if (sort === 'sortNewest') return (b.dates?.addedAt ?? '').localeCompare(a.dates?.addedAt ?? '') * dir
+      return (b.dates?.repoUpdatedAt ?? '').localeCompare(a.dates?.repoUpdatedAt ?? '') * dir
     })
-  }, [plugins, category, query, sort, installed, installedFilter])
+  }, [plugins, category, query, sort, sortDir, installed])
 
   /** Per-category plugin counts shown on the category chips. */
   const categoryCounts = useMemo(() => {
@@ -250,6 +200,7 @@ export function useCatalog(lang: LocaleId) {
     failed,
     reload: () => setReloadKey((k) => k + 1),
     installed,
+    installedItems,
     installedName,
     installedVersion,
     hasUpdate,
@@ -262,13 +213,10 @@ export function useCatalog(lang: LocaleId) {
     query,
     setQuery,
     sort,
-    setSort,
-    installedFilter,
-    setInstalledFilter,
+    sortDir,
+    toggleSort,
     visible,
     total: plugins?.length ?? 0,
-    installedCountInCategory,
-    notInstalledCountInCategory,
     categoryCounts,
   }
 }

@@ -10,7 +10,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { cleanLine, estimateProgress } from '../src/server/services/progress.ts'
+import { cleanLine, estimateProgress } from '../src/server/services/profile/progress.ts'
 
 test('cleanLine strips the source prefix', () => {
   assert.equal(cleanLine('[out] add foo'), 'add foo')

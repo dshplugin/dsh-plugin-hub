@@ -16,7 +16,7 @@ import {
   recordInstalledVersion,
   recordResolvedNpmPackage,
   removeInstalledVersion,
-} from '../src/server/services/installed-versions.ts'
+} from '../src/server/services/profile/installed-versions.ts'
 
 /** 每个测试用独立临时 DSH_HOME，互不污染、也不碰真实 ~/.dsh */
 function withTempHome(run: () => void): void {

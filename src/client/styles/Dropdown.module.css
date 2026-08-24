@@ -2,69 +2,71 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 自绘下拉（替换原生 <select>）。颜色跟随宿主主题：经 --hub-* 设计令牌解析，
- * 与 Header 的控件（排序/分段）保持一致的无边框 + 圆角语言。 */
+ * Button-style dropdown: the trigger reads as a compact toolbar button
+ * (hairline border + subtle fill + current value + chevron), the panel is
+ * a floating menu with hover fills and a brand-highlighted active option.
+ * Colors resolve through the --hub-* design tokens. */
+
 .dropdown {
   position: relative;
-  display: inline-flex;
   flex-shrink: 0;
 }
 
+/* 触发器：工具栏按钮风格 —— 细边框 + 次级灰底，与通知入口按钮同一视觉语言，
+   只占一个按钮位，给工具栏后续新增按钮留空间 */
 .dropdownBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 24px;
-  padding: 0 8px;
-  font-size: 12px;
-  line-height: 22px;
-  color: var(--hub-text-primary);
-  background: transparent;
-  border: none;
+  box-sizing: border-box;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--hub-border-2);
   border-radius: 6px;
+  font-size: 12px;
+  line-height: 26px;
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
   cursor: pointer;
   user-select: none;
-  white-space: nowrap;
-  transition: background 120ms ease;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
 }
 
 .dropdownBtn:hover {
-  background: var(--hub-bg-hover);
+  background: rgba(128, 128, 128, 0.28);
 }
 
 .dropdownLabel {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* 箭头：弱化灰，展开时 180° 翻转并加深，提示可收起 */
 .dropdownArrow,
 .dropdownArrowOpen {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   color: var(--hub-text-tertiary);
-  transition: transform 120ms ease;
+  transition: transform 120ms ease, color 120ms ease;
 }
 
 .dropdownArrowOpen {
+  color: var(--hub-text-secondary);
   transform: rotate(180deg);
 }
 
+/* 浮层：跟随按钮左对齐（left:0），浅底 + 细边框，不加模糊背景投影，克制不抢内容 */
 .dropdownPanel {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  z-index: 50;
   min-width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  z-index: 20;
   padding: 4px;
-  background: var(--hub-bg-1);
   border: 1px solid var(--hub-border-2);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  background: var(--hub-bg-1);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .dropdownItem,
@@ -72,38 +74,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: 12px;
+  width: 100%;
+  padding: 5px 8px;
   border: none;
   border-radius: 6px;
-  padding: 4px 9px;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: left;
   cursor: pointer;
   user-select: none;
-  white-space: nowrap;
-  text-align: left;
-  transition: background 120ms ease, color 120ms ease;
+  transition: color 120ms ease, background 120ms ease;
 }
 
 .dropdownItem {
-  color: var(--hub-text-primary);
+  color: var(--hub-text-secondary);
   background: transparent;
 }
 
-/* 悬浮选项：明显加重底色，保证「看得见、点得准」。 */
 .dropdownItem:hover {
+  color: var(--hub-text-primary);
   background: var(--hub-bg-hover);
 }
 
 .dropdownItemActive {
-  color: var(--hub-text-on-fill);
-  background: var(--hub-btn-fill);
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  font-weight: 600;
 }
 
 .dropdownItemLabel {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dropdownCount,
@@ -111,7 +112,7 @@
   font-size: 10px;
   line-height: 14px;
   border-radius: 999px;
-  padding: 0 6px;
+  padding: 0 5px;
   min-width: 16px;
   text-align: center;
 }
@@ -121,7 +122,7 @@
   background: var(--hub-bg-btn);
 }
 
-.dropdownItemActive .dropdownCountActive {
+.dropdownCountActive {
   color: var(--hub-text-on-fill);
-  background: var(--hub-bg-on-fill);
+  background: var(--hub-btn-fill);
 }

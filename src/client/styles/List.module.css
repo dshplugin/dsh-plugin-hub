@@ -23,6 +23,12 @@
   padding: 2px 4px 4px 2px;
 }
 
+/* 滚动加载哨兵：透明 1px 元素，进入视口即触发下一批渲染（无可见外观，不占排版空间） */
+.moreSentinel {
+  flex-shrink: 0;
+  height: 1px;
+}
+
 .card {
   display: flex;
   align-items: stretch;

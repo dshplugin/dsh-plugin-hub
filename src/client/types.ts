@@ -67,11 +67,13 @@ export interface TaskState {
   lines: string[]
 }
 
-export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail'
+export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail' | 'updates' | 'updatesAuto'
 
 export interface ToastState {
   id: number
   kind: ToastKind
+  /** 「发现更新」类提示的插件数量（按 kind 语义使用） */
+  n?: number
 }
 
 /** 宿主机器环境快照（后端 /dsh-plugin-hub/env）：提交 bug 时拼进 issue 正文，便于作者复现。 */
@@ -83,4 +85,19 @@ export interface EnvInfo {
   release: string
   profile: string
   dshHome: string
+}
+
+/** Worker 版本控制中心返回的 Hub 自我更新信息（notes 为 Markdown 变更记录）。 */
+export interface HubUpdateInfo {
+  version: string
+  publishedAt?: string | null
+  /** Markdown 变更记录；可传字符串，或 { zh, en } 双语言对象按界面语言取 */
+  notes?: string | Record<string, string> | null
+}
+
+/** Worker 返回的「关注我们」内容（content 为 Markdown，可字符串或 {zh,en} 双语言对象）。 */
+export interface HubAboutInfo {
+  /** Markdown 平台介绍 + 反馈群二维码；可传字符串，或 { zh, en } 双语言对象按界面语言取 */
+  content?: string | Record<string, string> | null
+  updatedAt?: string | null
 }

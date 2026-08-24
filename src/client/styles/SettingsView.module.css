@@ -1,0 +1,243 @@
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Settings view: desktop-settings navigation — a fixed left sidebar lists
+ * the sections (icon + label, click to switch), the right pane shows one
+ * card per active section (rows: label left, control right, hairline
+ * separators). High density, no whitespace waste: rows are 12px padding,
+ * 28px controls, 11px descriptions. */
+
+/* 整体：占满剩余高度，左导航右内容两栏 */
+.root {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+/* —— 左侧导航：宽度自适应文字，不加背景，仅用右侧细边框与内容区分 ——
+   导航独立滚动，内容区域可独立滚动 */
+
+.sidebar {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  border-right: 1px solid var(--hub-border-1);
+  overflow-y: auto;
+}
+
+.navItem,
+.navItemActive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 7px;
+  font-size: 12.5px;
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.navItem {
+  color: var(--hub-text-secondary);
+  background: transparent;
+}
+
+.navItem:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+}
+
+.navItemActive {
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  font-weight: 600;
+}
+
+.navIcon {
+  flex: none;
+  display: inline-flex;
+}
+
+/* —— 右侧内容：只渲染当前分组，独立滚动 —— */
+
+.content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px 18px;
+  overflow-y: auto;
+}
+
+/* 页面标题 + 副标题：桌面设置质感的一行说明 */
+.pageHeader {
+  margin-bottom: 12px;
+}
+
+.pageTitle {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--hub-text-primary);
+}
+
+.pageDesc {
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+/* 设置卡片：一页一个，内部一行一设置 */
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--hub-border-1);
+  border-radius: 8px;
+  background: var(--hub-bg-1);
+  /* 不裁切：镜像源下拉浮层绝对定位在卡片内，overflow:hidden 会把浮层截掉 */
+}
+
+/* 设置行：标签（标题 + 说明）左、控件右，hairline 分隔，最后一行无分隔线 */
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  min-width: 0;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.settingRow:last-child {
+  border-bottom: none;
+}
+
+.settingLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.settingTitle {
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--hub-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settingDesc {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--hub-text-tertiary);
+}
+
+.settingControl {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+/* 文本框独占一行的变体：标签在上、输入框在下整行展开（代理地址、自定义镜像源） */
+.settingRowStack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px 12px;
+  min-width: 0;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.settingRowStack:last-child {
+  border-bottom: none;
+}
+
+.settingControlStack {
+  display: flex;
+  align-items: center;
+}
+
+.settingControlStack .textInput {
+  width: 100%;
+}
+
+/* 下拉控件：行内固定宽度，与输入框等高 */
+.controlDropdown {
+  min-width: 180px;
+}
+
+/* 文本输入（镜像源 / 代理）：28px 高，与全局搜索框一致，右边距紧凑 */
+.textInput {
+  width: 240px;
+  height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-1);
+  border: 1px solid var(--hub-border-input);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.textInput:focus {
+  border-color: var(--hub-brand-border);
+}
+
+.textInput::placeholder {
+  color: var(--hub-text-disabled);
+}
+
+/* —— 恢复默认：独立设置卡片内的危险按钮 —— */
+
+/* 默认态：红字描边次级按钮；确认态：红底白字实心，醒目提示这是破坏性操作 */
+.resetBtn,
+.resetBtnArmed {
+  flex: none;
+  height: 28px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.resetBtn {
+  color: var(--hub-danger-text);
+  background: transparent;
+  border: 1px solid var(--hub-danger-border);
+}
+
+.resetBtn:hover {
+  background: var(--hub-danger-tint);
+  border-color: var(--hub-danger-text);
+}
+
+.resetBtnArmed {
+  color: #ffffff;
+  background: var(--hub-danger);
+  border: 1px solid var(--hub-danger);
+}
+
+.resetBtnArmed:hover {
+  background: var(--hub-danger-hover);
+}

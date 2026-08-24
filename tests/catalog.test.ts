@@ -3,7 +3,7 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * Unit tests for the catalog normalizer (src/client/lib/catalog.ts), focusing
+ * Unit tests for the catalog normalizer (src/client/logic/normalize.ts), focusing
  * on the short-key payload from dsh-plugin.org/api/plugins.{lang}.json — in
  * particular the `vr` version key added for update detection.
  *
@@ -12,7 +12,9 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { installCommandOf, normalize, pluginIssueUrl, repoFromInstallTarget } from '../src/client/lib/catalog.ts'
+import { installCommandOf, repoFromInstallTarget } from '../src/client/logic/install-command.ts'
+import { normalize } from '../src/client/logic/normalize.ts'
+import { pluginIssueUrl } from '../src/client/logic/urls.ts'
 
 test('normalize: parses the vr short key into version', () => {
   const p = normalize({

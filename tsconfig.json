@@ -13,5 +13,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["tsdown.config.ts", "scripts", "src/client"]
+  "include": ["tsdown.config.ts", "scripts", "src/client", "src/server", "tests"]
 }

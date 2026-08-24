@@ -21,10 +21,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			ad: "DSH-Plugin 插件中心：收录 {total} 款插件，{verified} 款人工精选验证，每日更新",
 			search: "搜索插件名称、描述、标签…",
 			all: "全部",
-			sortStars: "Star 最多",
-			sortForks: "Fork 最多",
+			sortStars: "Star",
+			sortForks: "Fork",
 			sortUpdated: "最近更新",
 			sortNewest: "最新收录",
+			sortAria: "插件排序方式",
 			openHint: "打开 dsh-plugin.org",
 			toggleLangHint: "切换界面语言",
 			fork: "Fork",
@@ -37,15 +38,156 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			failedCopyHint: "安装失败。请复制上方安装命令到 dsh 终端手动执行（原生依赖构建脚本可能需要人工放行，如 pnpm approve-builds）",
 			toastCopied: "安装命令已复制，去 dsh 终端粘贴即可安装",
 			installed: "已安装",
-			notInstalled: "未安装",
-			filterAllHint: "显示全部插件",
-			filterInstalledHint: "筛选当前分类下的已安装插件",
-			filterNotInstalledHint: "筛选当前分类下的未安装插件",
-			filterInstalledNone: "当前分类下没有已安装插件",
-			filterNotInstalledNone: "当前分类下没有未安装插件",
+			viewMarket: "插件中心",
+			viewInstalled: "已安装",
+			viewCustom: "自定义安装",
+			viewSettings: "设置",
+			viewMarketHint: "浏览与发现插件",
+			viewInstalledHint: "管理已安装插件",
+			viewCustomHint: "手动安装 NPM 包或 GitHub 源码",
+			viewSettingsHint: "网络通道与偏好设置",
+			installedEmpty: "还没有安装插件",
+			installedEmptyDesc: "可以去「自定义安装」，手动安装 NPM 包或 GitHub 源码",
+			npmInstallLabel: "NPM 包",
+			npmInstallPlaceholder: "输入 npm 包名",
+			npmInstallExample: "例如：lodash、@scope/pkg",
+			npmInstallInvalid: "请输入 npm 包名，例如：lodash、@scope/pkg",
+			gitInstallLabel: "GitHub 源码",
+			gitInstallPlaceholder: "输入仓库地址",
+			gitInstallExample: "例如：owner/repo 或 https://github.com/owner/repo",
+			gitInstallInvalid: "请输入 GitHub 仓库地址，例如：owner/repo 或 https://github.com/owner/repo",
+			dshCmdLabel: "DeepSeek Harness 命令",
+			dshCmdPlaceholder: "粘贴 dsh plugin 命令",
+			dshCmdExample: "例如：dsh plugin --profile web add github:owner/repo",
+			dshCmdInvalid: "请输入完整的 dsh plugin 命令，例如：dsh plugin --profile web add github:owner/repo",
+			installCliBtn: "安装",
+			customViewDesc: "手动安装目录外的 NPM 包或 GitHub 源码。装完的条目会出现在「已安装」列表，并标记为自定义安装。",
+			customLabel: "自定义安装",
+			installedSearch: "搜索已安装的插件…",
+			installedFilterCatalog: "目录插件",
+			hubInstall: "插件中心",
+			hubInstallHint: "来自插件中心收录的目录插件",
+			manualInstall: "手动安装",
+			manualInstallHint: "非目录收录，通过命令行手动安装",
+			filterByLabel: "来源",
+			sortByLabel: "排序",
+			sortName: "名称",
+			sortInstalledAt: "最近",
+			detailTitle: "插件详情",
+			detailCategory: "分类",
+			detailStats: "仓库统计",
+			statusLabel: "安装状态",
+			statusRunning: "运行中",
+			statusPending: "待重启",
+			exampleLabel: "DeepSeek Harness 内置示例项目",
+			exampleHint: "DeepSeek Harness 内置示例项目：不是插件市场的 dsh 插件，宿主不会加载它，无需重启",
+			restart: "重启",
+			installedVersionLabel: "已安装版本",
+			catalogLatest: "目录最新",
+			installPath: "安装路径",
+			copyPath: "复制路径",
+			openFolder: "在文件夹中显示",
+			openFolderFail: "无法打开文件夹，请复制路径手动打开",
+			revealFolder: "在 Finder 中显示",
+			installedAtLabel: "安装时间",
+			lastUpdatedLabel: "最后更新",
+			detailCatalog: "查看详情",
+			packageName: "包名",
+			versionUpHint: "发现新版本 v{from} → v{to}，点击「更新」原位覆盖重装",
+			settingsUpdate: "更新设置",
+			settingsUpdateDesc: "更新检查方式与安装走到的网络通道",
+			settingsCheckOnStart: "启动时检查更新",
+			settingsCheckOnStartDesc: "打开插件中心时检查已安装插件是否有新版，发现更新会提示",
+			settingsAutoInstall: "有更新时自动安装",
+			settingsAutoInstallDesc: "检查到更新后直接后台安装，无需逐个确认（装完需重启宿主生效）",
+			settingsMirror: "npm 镜像源",
+			settingsMirrorDesc: "npm 安装与版本反查走自定义镜像，网络不佳时更稳定；留空使用官方源",
+			mirrorOfficial: "官方源 registry.npmjs.org",
+			mirrorNpmmirror: "阿里云 npmmirror",
+			mirrorTencent: "腾讯云镜像",
+			mirrorCustom: "自定义镜像源",
+			settingsProxy: "HTTP 代理",
+			settingsProxyDesc: "npm / git / 目录数据请求统一走该代理；留空直连",
+			settingsSecurity: "安全信任",
+			settingsSecurityDesc: "命令行安装的两个通道开关：NPM 包与 GitHub 源码",
+			settingsEnableNpm: "启用 NPM 安装",
+			settingsEnableNpmDesc: "允许通过命令行安装 npm 包；关闭后输入包名安装会被拦截",
+			settingsEnableGit: "启用 GitHub 源码安装",
+			settingsEnableGitDesc: "允许通过命令行安装 GitHub 源码；关闭后输入仓库地址安装会被拦截",
+			settingsDiagnostics: "系统诊断",
+			settingsDiagnosticsDesc: "检测 npm 源 / GitHub / 目录站点等安装通道的连通状态",
+			settingsLogs: "系统日志",
+			settingsLogsDesc: "本地记录的安装 / 卸载 / 设置变更与诊断结果，可导出全文排查问题",
+			logsHeadHint: "记录安装、卸载、设置变更与诊断结果，保留最近 2000 条",
+			logsRefresh: "刷新",
+			logsCopy: "复制全文",
+			logsExport: "导出日志",
+			logsLoading: "正在读取日志…",
+			logsEmpty: "暂无日志记录",
+			logsLoadFail: "读取日志失败，请稍后重试",
+			logModalTitle: "日志查看器",
+			logViewerOpen: "打开日志查看器",
+			logViewerDesc: "内置窗口直接查看本地日志，按类型与级别筛选，可定位安装 / 卸载 / 更新时的不兼容点",
+			logPathLabel: "日志文件",
+			logOpenFile: "打开文件",
+			logOpenFileTip: "在系统文件管理器中定位日志文件",
+			logOpenFileFail: "打开失败，请在文件管理器中手动定位",
+			logPathSettingTitle: "日志存放位置",
+			logPathSettingDesc: "默认存于宿主配置目录，可填目录或 .log 文件路径改存别处",
+			logPathPlaceholder: "留空恢复默认",
+			logPathReset: "恢复默认",
+			logPathResetHint: "文本框显示当前生效位置",
+			logPathSave: "保存",
+			logPathSaving: "保存中…",
+			logPathSaved: "已保存，新日志将写入该位置",
+			logPathSaveFail: "保存失败：该位置不可写或不可用",
+			logPathChange: "修改",
+			logPathBrowse: "选择目录…",
+			logPathBrowseFail: "选择目录不可用，请手动输入路径",
+			logCatAll: "全部类型",
+			logCatInstall: "安装",
+			logCatUninstall: "卸载",
+			logCatUpdate: "更新",
+			logCatDiagnostics: "诊断",
+			logCatSettings: "设置",
+			logCatSystem: "系统",
+			logLvAll: "全部级别",
+			logLvError: "错误",
+			logLvWarn: "警告",
+			logLvSuccess: "成功",
+			logLvInfo: "信息",
+			logLvDebug: "调试",
+			logSearchPlaceholder: "搜索事件或描述…",
+			logLoadMore: "加载更多",
+			logNoMore: "已加载全部，共 {n} 条",
+			logCount: "共 {n} 条",
+			logEmptyFilter: "没有符合条件的日志",
+			settingsDiagFail: "不可达",
+			diagNpm: "npm 源",
+			diagGithub: "GitHub",
+			diagCatalog: "目录站点",
+			diagOk: "OK",
+			diagChecking: "检测中…",
+			diagIdle: "未检测",
+			diagRecheck: "点击重测该通道",
+			diagRunAll: "立即诊断",
+			diagHeadHint: "共 {n} 个通道，点击任意一行可单独重测",
+			diagSummaryRunning: "正在检测通道…",
+			diagSummaryOk: "全部通道正常",
+			diagSummaryFail: "存在不可达通道，点击对应行可重测",
+			settingsEnvSnapshot: "系统版本",
+			settingsEnvSnapshotDesc: "复制宿主版本与系统信息，提交 Issue 时粘贴到正文便于复现",
+			settingsEnvCopy: "复制",
+			settingsReset: "恢复默认",
+			settingsResetDesc: "更新策略、镜像源、代理与安全限制一次性恢复为出厂默认值",
+			settingsResetDetail: "恢复更新策略、镜像源、代理与安全限制为出厂默认值",
+			settingsResetRun: "恢复默认",
+			settingsResetConfirm: "确认恢复？",
+			updatesFound: "发现 {n} 个插件可更新，去「已安装」查看",
+			updatesAutoQueued: "有 {n} 个插件可更新，已开始自动更新（装完重启宿主生效）",
 			uninstall: "卸载",
 			uninstalling: "卸载中…",
-			uninstallTitle: "确认卸载",
+			uninstallTitle: "确认卸载？",
 			uninstallDesc: "将从当前环境卸载该插件。",
 			uninstallDone: "卸载成功",
 			uninstallFail: "卸载失败，请稍后重试",
@@ -59,6 +201,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			copyInstallCommand: "复制安装命令",
 			copyCmdLabel: "复制",
 			copyUninstallCommand: "复制卸载命令",
+			cancelUninstall: "取消卸载",
+			uninstallConfirm: "确认卸载",
 			installNow: "直接安装",
 			installing: "安装中…",
 			installDone: "安装成功",
@@ -71,6 +215,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			updateResultTitle: "更新完成",
 			updateResultDesc: "插件已更新到最新版本。",
 			installFail: "安装失败",
+			requestTimeout: "请求超时：无法访问 GitHub 或网络不稳定，请稍后重试",
 			confirmCancel: "取消",
 			doneBtn: "完成",
 			restartNow: "立即重启",
@@ -82,6 +227,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			restartPendingHintUninstall: "卸载成功，重启后移除",
 			sectionPendingRestart: "待重启",
 			sectionInProgress: "进行中",
+			notifications: "通知",
+			notificationsHint: "查看安装/卸载通知（含失败记录）",
+			notificationsDesc: "安装、卸载任务的成败都会记录在这里，即使错过提示也能随时回来查看。",
+			notificationsEmpty: "暂无通知记录",
+			notificationsClear: "清空通知",
+			removeNotification: "删除这条通知",
 			queuedTitle: "已加入安装排队",
 			queuedUninstallTitle: "已加入卸载排队",
 			queuedHint: "已加入排队，前序任务完成后将自动开始，可关闭本窗口继续浏览。",
@@ -94,13 +245,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			errorClose: "知道了",
 			errorCopy: "复制错误信息",
 			errCopied: "错误信息已复制",
-			notifications: "通知",
-			notificationsBtn: "通知",
-			notificationsHint: "查看安装/卸载通知（含失败记录）",
-			notificationsDesc: "安装、卸载任务的成败都会记录在这里，即使错过提示也能随时回来查看。",
-			notificationsEmpty: "暂无通知记录",
-			notificationsClear: "清空通知",
-			removeNotification: "删除这条通知",
 			failCopy: "复制完整错误信息",
 			failIssueHint: "带着错误日志去作者仓库一键提交 Issue（正文含官网收录链接）",
 			failIssueBig: "一键提交 BUG 到 GitHub Issue 为开源作贡献",
@@ -150,10 +294,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			ad: "DSH-Plugin Hub: {total} plugins indexed, {verified} human-verified, updated daily",
 			search: "Search plugins by name, description, tags…",
 			all: "All",
-			sortStars: "Most stars",
-			sortForks: "Most forks",
+			sortStars: "Stars",
+			sortForks: "Forks",
 			sortUpdated: "Recently updated",
 			sortNewest: "Newest added",
+			sortAria: "Plugin sort order",
 			openHint: "Open dsh-plugin.org",
 			toggleLangHint: "Switch language",
 			githubHint: "View source on GitHub",
@@ -167,15 +312,156 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			failedCopyHint: "Install failed. Copy the command above and run it manually in your dsh terminal (native build scripts may need manual approval, e.g. pnpm approve-builds)",
 			toastCopied: "Install command copied — paste it in your dsh terminal",
 			installed: "Installed",
-			notInstalled: "Not installed",
-			filterAllHint: "Show all plugins",
-			filterInstalledHint: "Filter to installed plugins in this category",
-			filterNotInstalledHint: "Filter to uninstalled plugins in this category",
-			filterInstalledNone: "No installed plugins in this category",
-			filterNotInstalledNone: "No uninstalled plugins in this category",
+			viewMarket: "Market",
+			viewInstalled: "Installed",
+			viewCustom: "Custom",
+			viewSettings: "Settings",
+			viewMarketHint: "Browse and discover plugins",
+			viewInstalledHint: "Manage installed plugins",
+			viewCustomHint: "Install npm packages or GitHub sources manually",
+			viewSettingsHint: "Network sources and preferences",
+			installedEmpty: "No plugins installed yet",
+			installedEmptyDesc: "Go to Custom to add an npm package or GitHub source manually",
+			npmInstallLabel: "npm package",
+			npmInstallPlaceholder: "npm package name",
+			npmInstallExample: "e.g. lodash or @scope/pkg",
+			npmInstallInvalid: "Enter an npm package name, e.g. lodash or @scope/pkg",
+			gitInstallLabel: "GitHub source",
+			gitInstallPlaceholder: "Repository address",
+			gitInstallExample: "e.g. owner/repo or https://github.com/owner/repo",
+			gitInstallInvalid: "Enter a GitHub repository address, e.g. owner/repo or https://github.com/owner/repo",
+			dshCmdLabel: "DeepSeek Harness command",
+			dshCmdPlaceholder: "Paste a dsh plugin command",
+			dshCmdExample: "e.g. dsh plugin --profile web add github:owner/repo",
+			dshCmdInvalid: "Enter a full dsh plugin command, e.g. dsh plugin --profile web add github:owner/repo",
+			installCliBtn: "Install",
+			customViewDesc: "Manually install an npm package or a GitHub source outside the catalog. Finished installs appear in Installed, marked as custom.",
+			customLabel: "Custom install",
+			installedSearch: "Search installed plugins…",
+			installedFilterCatalog: "Catalog",
+			hubInstall: "Hub",
+			hubInstallHint: "From the plugin hub catalog",
+			manualInstall: "Manual",
+			manualInstallHint: "Not from the catalog — installed via the command line",
+			filterByLabel: "Source",
+			sortByLabel: "Sort",
+			sortName: "Name",
+			sortInstalledAt: "Recent",
+			detailTitle: "Plugin details",
+			detailCategory: "Category",
+			detailStats: "Repo stats",
+			statusLabel: "Status",
+			statusRunning: "Running",
+			statusPending: "Restart pending",
+			exampleLabel: "DeepSeek Harness built-in example",
+			exampleHint: "DeepSeek Harness built-in example — not a marketplace dsh plugin, the host does not load it, no restart needed",
+			restart: "Restart",
+			installedVersionLabel: "Installed version",
+			catalogLatest: "latest in catalog",
+			installPath: "Install path",
+			copyPath: "Copy path",
+			openFolder: "Show in folder",
+			openFolderFail: "Could not open the folder — copy the path instead",
+			revealFolder: "Show in Finder",
+			installedAtLabel: "Installed at",
+			lastUpdatedLabel: "Last updated",
+			detailCatalog: "View details",
+			packageName: "Package",
+			versionUpHint: "v{from} → v{to} available — Update reinstalls in place",
+			settingsUpdate: "Update Settings",
+			settingsUpdateDesc: "Update checks and the network channels used for installs",
+			settingsCheckOnStart: "Check for updates on startup",
+			settingsCheckOnStartDesc: "Check installed plugins for new versions when the hub opens; you will be notified when updates are found",
+			settingsAutoInstall: "Auto-install updates",
+			settingsAutoInstallDesc: "Install detected updates in the background without asking (a host restart applies them)",
+			settingsMirror: "npm registry mirror",
+			settingsMirrorDesc: "Route npm installs and lookups through a mirror for unstable networks; leave empty for the official registry",
+			mirrorOfficial: "Official registry.npmjs.org",
+			mirrorNpmmirror: "Alibaba npmmirror",
+			mirrorTencent: "Tencent Cloud mirror",
+			mirrorCustom: "Custom mirror",
+			settingsProxy: "HTTP proxy",
+			settingsProxyDesc: "Route npm, git and catalog requests through this proxy; leave empty to connect directly",
+			settingsSecurity: "Security & Trust",
+			settingsSecurityDesc: "Toggles for the two command-line install channels: npm packages and GitHub sources",
+			settingsEnableNpm: "Enable npm installs",
+			settingsEnableNpmDesc: "Allow installing npm packages from the command line; turning this off rejects package-name installs",
+			settingsEnableGit: "Enable GitHub source installs",
+			settingsEnableGitDesc: "Allow installing from GitHub sources on the command line; turning this off rejects repository-address installs",
+			settingsDiagnostics: "System Diagnostics",
+			settingsDiagnosticsDesc: "Check the connectivity of install channels: npm registry, GitHub and the catalog site",
+			settingsLogs: "System Logs",
+			settingsLogsDesc: "Local record of installs / uninstalls, settings changes and diagnostics — export the full log to troubleshoot",
+			logsHeadHint: "Records installs, uninstalls, settings changes and diagnostics; keeps the latest 2,000 entries",
+			logsRefresh: "Refresh",
+			logsCopy: "Copy all",
+			logsExport: "Export log",
+			logsLoading: "Reading log…",
+			logsEmpty: "No log entries yet",
+			logsLoadFail: "Failed to read the log; try again later",
+			logModalTitle: "Log viewer",
+			logViewerOpen: "Open log viewer",
+			logViewerDesc: "View the local log in a built-in window; filter by type and level to pinpoint install / uninstall / update incompatibilities",
+			logPathLabel: "Log file",
+			logOpenFile: "Reveal",
+			logOpenFileTip: "Reveal the log file in your system file manager",
+			logOpenFileFail: "Could not open; locate the file manually",
+			logPathSettingTitle: "Log Location",
+			logPathSettingDesc: "Stored in the host config directory by default — set a directory or a .log file path to store elsewhere",
+			logPathPlaceholder: "Leave empty for default",
+			logPathReset: "Reset to default",
+			logPathResetHint: "The field shows the location currently in use",
+			logPathSave: "Save",
+			logPathSaving: "Saving…",
+			logPathSaved: "Saved — new logs will be written there",
+			logPathSaveFail: "Could not save: the location is not writable",
+			logPathChange: "Change",
+			logPathBrowse: "Browse…",
+			logPathBrowseFail: "Folder picker unavailable — type the path manually",
+			logCatAll: "All types",
+			logCatInstall: "Install",
+			logCatUninstall: "Uninstall",
+			logCatUpdate: "Update",
+			logCatDiagnostics: "Diagnostics",
+			logCatSettings: "Settings",
+			logCatSystem: "System",
+			logLvAll: "All levels",
+			logLvError: "Error",
+			logLvWarn: "Warn",
+			logLvSuccess: "Success",
+			logLvInfo: "Info",
+			logLvDebug: "Debug",
+			logSearchPlaceholder: "Search event or message…",
+			logLoadMore: "Load more",
+			logNoMore: "All loaded · {n} total",
+			logCount: "{n} entries",
+			logEmptyFilter: "No matching log entries",
+			settingsDiagFail: "Unreachable",
+			diagNpm: "npm registry",
+			diagGithub: "GitHub",
+			diagCatalog: "Catalog site",
+			diagOk: "OK",
+			diagChecking: "Checking…",
+			diagIdle: "Not checked",
+			diagRecheck: "Click to re-check this channel",
+			diagRunAll: "Run diagnostics",
+			diagHeadHint: "{n} channels — click any row to re-check it alone",
+			diagSummaryRunning: "Checking channels…",
+			diagSummaryOk: "All channels reachable",
+			diagSummaryFail: "Unreachable channel(s) — click a row to re-check",
+			settingsEnvSnapshot: "System version",
+			settingsEnvSnapshotDesc: "Copy host version and system info for pasting into issue reports",
+			settingsEnvCopy: "Copy",
+			settingsReset: "Restore Defaults",
+			settingsResetDesc: "Restore update policy, npm mirror, proxy and security restrictions to factory defaults in one go",
+			settingsResetDetail: "Reset update policy, npm mirror, proxy and security restrictions to factory defaults",
+			settingsResetRun: "Restore Defaults",
+			settingsResetConfirm: "Confirm restore?",
+			updatesFound: "{n} plugin(s) have updates — check the Installed tab",
+			updatesAutoQueued: "{n} plugin(s) can update — auto-update started (restart the host to apply)",
 			uninstall: "Uninstall",
 			uninstalling: "Removing…",
-			uninstallTitle: "Confirm uninstall",
+			uninstallTitle: "Confirm uninstall?",
 			uninstallDesc: "The plugin will be removed from this environment.",
 			uninstallDone: "Uninstalled",
 			uninstallFail: "Removal failed — try again",
@@ -189,6 +475,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			copyInstallCommand: "Copy install command",
 			copyCmdLabel: "Copy",
 			copyUninstallCommand: "Copy uninstall command",
+			cancelUninstall: "Cancel uninstall",
+			uninstallConfirm: "Confirm uninstall",
 			installNow: "Install",
 			installing: "Installing…",
 			installDone: "Installed",
@@ -201,6 +489,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			updateResultTitle: "Updated",
 			updateResultDesc: "The plugin has been updated to the latest version.",
 			installFail: "Install failed — copy the command instead",
+			requestTimeout: "Request timed out: GitHub may be unreachable or the network is unstable — try again later",
 			confirmCancel: "Cancel",
 			doneBtn: "Done",
 			restartNow: "Restart now",
@@ -212,6 +501,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			restartPendingHintUninstall: "Removed — cleaned up after restart",
 			sectionPendingRestart: "Pending restart",
 			sectionInProgress: "In progress",
+			notifications: "Notifications",
+			notificationsHint: "View install/remove notifications (including failures)",
+			notificationsDesc: "Every install and remove result is logged here — even if you missed the prompt, you can always check back.",
+			notificationsEmpty: "No notifications yet",
+			notificationsClear: "Clear notifications",
+			removeNotification: "Remove this notification",
 			queuedTitle: "Queued…",
 			queuedUninstallTitle: "Queued for removal…",
 			queuedHint: "Queued — starts automatically after earlier tasks finish. You may close this window.",
@@ -224,13 +519,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			errorClose: "Got it",
 			errorCopy: "Copy error",
 			errCopied: "Error copied",
-			notifications: "Notifications",
-			notificationsBtn: "Notice",
-			notificationsHint: "View install/remove notifications (including failures)",
-			notificationsDesc: "Every install and remove result is logged here — even if you missed the prompt, you can always check back.",
-			notificationsEmpty: "No notifications yet",
-			notificationsClear: "Clear notifications",
-			removeNotification: "Remove this notification",
 			failCopy: "Copy full log",
 			failIssueHint: "Open a pre-filled issue on the author repo with this error log (includes catalog links)",
 			failIssueBig: "Report this bug to GitHub — contribute to open source",
@@ -274,181 +562,94 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Header.module.css.mjs
-		const css$4 = ".qikqja_root{min-width:0;height:100%;color:var(--hub-text-primary);flex-direction:column;gap:8px;display:flex}.qikqja_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.qikqja_headerRight{flex-shrink:0;align-items:center;gap:2px;margin-left:auto;display:inline-flex}.qikqja_langBtn{height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;padding:0 8px;font-size:12px;font-weight:600;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_langBtn:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubLink{color:var(--hub-text-tertiary);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_githubLink:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubIcon{flex-shrink:0;display:block}.qikqja_aboutBtn{height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;padding:0 8px;font-size:12px;font-weight:600;line-height:1;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_aboutBtn:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_headerTitleRow{align-items:center;gap:8px;min-width:0;display:flex}.qikqja_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.qikqja_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.qikqja_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.qikqja_version{color:var(--hub-text-secondary)}.qikqja_versionBtn{height:20px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:5px;flex-shrink:0;align-items:center;gap:5px;padding:0 6px;font-size:12px;font-weight:600;line-height:1;transition:color .12s;display:inline-flex}.qikqja_versionBtn:hover{color:var(--hub-text-secondary)}.qikqja_hubUpdateBadge{letter-spacing:.02em;color:#fff;background:var(--hub-danger);-webkit-user-select:none;user-select:none;border-radius:999px;flex-shrink:0;align-items:center;height:18px;padding:0 7px;font-size:11px;font-weight:700;line-height:1;transition:background .12s,box-shadow .12s,transform .12s;display:inline-flex;box-shadow:0 1px 4px #d1242f66}.qikqja_hubUpdateBadge:hover{background:var(--hub-danger-hover);transform:translateY(-1px);box-shadow:0 2px 8px #d1242f80}.qikqja_logoIcon{flex-shrink:0;display:block}.qikqja_copyIcon{flex-shrink:0}.qikqja_tagline{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;margin:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_controls{flex-shrink:0;align-items:center;gap:4px;display:flex}.qikqja_filterResults{color:var(--hub-text-tertiary);white-space:nowrap;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.qikqja_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.qikqja_adBanner{border:1px solid var(--hub-purple-border);background:linear-gradient(90deg, var(--hub-purple-1) 0%, var(--hub-purple-2) 100%);color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;box-shadow:0 2px 10px var(--hub-purple-shadow);border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex}.qikqja_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px var(--hub-purple-shadow-strong)}.qikqja_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.qikqja_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.qikqja_searchRow{padding:0 2px;display:flex}.qikqja_search{width:50%;color:inherit;border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:4px 9px;font-size:12px;line-height:18px;transition:border-color .12s}.qikqja_search::placeholder{color:var(--hub-text-tertiary)}.qikqja_search:focus{border-color:var(--hub-brand)}.qikqja_installedBtn,.qikqja_installedBtnActive,.qikqja_installedBtnDisabled{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;align-items:center;gap:5px;height:24px;padding:0 8px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex}.qikqja_installedBtn{color:var(--hub-text-primary);background:0 0}.qikqja_installedBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_installedBtnDisabled,.qikqja_installedBtnDisabled:hover{color:var(--hub-text-disabled);cursor:not-allowed;background:0 0}.qikqja_installedBtnDisabled .qikqja_segCount{color:var(--hub-text-disabled);background:#8080800f}.qikqja_installedBtnActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_segCount,.qikqja_segCountActive{text-align:center;border-radius:999px;min-width:14px;padding:0 4px;font-size:10px;line-height:14px}.qikqja_segCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.qikqja_installedBtnActive .qikqja_segCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_tabs{border-bottom:1px solid var(--hub-border-1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.qikqja_tab,.qikqja_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s;display:inline-flex}.qikqja_tab{color:var(--hub-text-secondary);background:0 0}.qikqja_tab:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_tabActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_tabCount{text-align:center;min-width:16px;color:var(--hub-text-tertiary);background:var(--hub-bg-btn);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_tabActive .qikqja_tabCount{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_failBtn{box-sizing:border-box;border:1px solid var(--hub-border-2);height:24px;color:var(--hub-text-primary);background:var(--hub-bg-hover);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex-shrink:0;align-items:center;margin-left:auto;padding:0 10px;font-size:12px;line-height:22px;transition:color .12s,background .12s;display:inline-flex;position:relative}.qikqja_failBtn:hover{color:var(--hub-text-primary);background:#80808047}.qikqja_failBadge{z-index:1;text-align:center;color:#fff;background:var(--hub-danger);border-radius:999px;min-width:16px;height:16px;padding:0 5px;font-size:10px;font-weight:600;line-height:16px;position:absolute;top:-16px;right:-7px;box-shadow:0 1px 4px #d1242f66}";
-		const tagId$4 = "dsh-plugin/Header.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$4) + "]") === null) {
+		const css$11 = ".qikqja_root{min-width:0;height:100%;color:var(--hub-text-primary);flex-direction:column;gap:8px;display:flex}.qikqja_header{flex-direction:column;gap:2px;padding:2px 2px 0;display:flex}.qikqja_headerRight{flex-shrink:0;align-items:center;gap:2px;margin-left:auto;display:inline-flex}.qikqja_langBtn{height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;padding:0 8px;font-size:12px;font-weight:600;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_langBtn:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubLink{color:var(--hub-text-tertiary);cursor:pointer;border-radius:6px;flex-shrink:0;align-items:center;padding:3px;text-decoration:none;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_githubLink:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_githubIcon{flex-shrink:0;display:block}.qikqja_aboutBtn{height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;padding:0 8px;font-size:12px;font-weight:600;line-height:1;transition:color .15s,background-color .15s;display:inline-flex}.qikqja_aboutBtn:hover{color:var(--hub-purple-1);background-color:var(--hub-purple-tint)}.qikqja_headerTitleRow{align-items:center;gap:8px;min-width:0;display:flex}.qikqja_brandTitle{min-width:0;color:inherit;cursor:pointer;align-items:center;gap:10px;text-decoration:none;display:flex}.qikqja_taglineLink{min-width:0;max-width:100%;color:inherit;cursor:pointer;align-self:flex-start;text-decoration:none}.qikqja_title{margin:0;font-size:14px;font-weight:600;line-height:20px}.qikqja_version{color:var(--hub-text-secondary)}.qikqja_versionBtn{height:20px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:5px;flex-shrink:0;align-items:center;gap:5px;padding:0 6px;font-size:12px;font-weight:600;line-height:1;transition:color .12s;display:inline-flex}.qikqja_versionBtn:hover{color:var(--hub-text-secondary)}.qikqja_hubUpdateBadge{letter-spacing:.02em;color:#fff;background:var(--hub-danger);-webkit-user-select:none;user-select:none;border-radius:999px;flex-shrink:0;align-items:center;height:18px;padding:0 7px;font-size:11px;font-weight:700;line-height:1;transition:background .12s,box-shadow .12s,transform .12s;display:inline-flex;box-shadow:0 1px 4px #d1242f66}.qikqja_hubUpdateBadge:hover{background:var(--hub-danger-hover);transform:translateY(-1px);box-shadow:0 2px 8px #d1242f80}.qikqja_logoIcon{flex-shrink:0;display:block}.qikqja_copyIcon{flex-shrink:0}.qikqja_tagline{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;margin:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_controls{border-bottom:1px solid var(--hub-border-1);flex-shrink:0;align-items:center;gap:8px;padding:0 2px 8px;display:flex}.qikqja_resultCount{font-variant-numeric:tabular-nums;text-align:center;min-width:5ch}.qikqja_resultSeg{color:var(--hub-text-tertiary);white-space:nowrap;-webkit-user-select:none;user-select:none;flex-shrink:0;align-items:baseline;font-size:12px;line-height:18px;display:inline-flex}.qikqja_sortGroup{flex-shrink:0;align-items:center;gap:8px;margin-left:auto;display:inline-flex}.qikqja_segLabel{color:var(--hub-text-tertiary);flex-shrink:0;font-size:11px;line-height:16px}.qikqja_segGroup{border:1px solid var(--hub-border-2);border-radius:6px;flex-shrink:0;align-items:center;display:inline-flex;overflow:hidden}.qikqja_segBtn{height:24px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;justify-content:center;align-items:center;gap:4px;padding:0 10px;font-family:inherit;font-size:12px;line-height:24px;transition:color .12s,background .12s;display:inline-flex}.qikqja_segBtn svg{flex-shrink:0;display:block}.qikqja_segBtn+.qikqja_segBtn{border-left:1px solid var(--hub-border-2)}.qikqja_segBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_segBtnActive,.qikqja_segBtnActive:hover{color:#fff;background:var(--hub-brand)}.qikqja_adBanner{border:1px solid var(--hub-purple-border);background:linear-gradient(90deg, var(--hub-purple-1) 0%, var(--hub-purple-2) 100%);color:#fff;cursor:pointer;-webkit-user-select:none;user-select:none;box-shadow:0 2px 10px var(--hub-purple-shadow);border-radius:8px;align-items:center;gap:8px;padding:7px 12px;text-decoration:none;transition:filter .15s,box-shadow .15s;display:flex}.qikqja_adBanner:hover{filter:brightness(1.1);box-shadow:0 4px 16px var(--hub-purple-shadow-strong)}.qikqja_adBadge{letter-spacing:.04em;color:#fff;white-space:nowrap;background:#ffffff29;border:1px solid #ffffff8c;border-radius:4px;flex-shrink:0;padding:3px 6px;font-size:10px;font-weight:700;line-height:1}.qikqja_adText{text-overflow:ellipsis;white-space:nowrap;color:#fff;min-width:0;font-size:12px;line-height:18px;overflow:hidden}.qikqja_adArrow{color:#fff;flex-shrink:0;margin-left:auto;font-size:13px}.qikqja_searchRow{align-items:center;gap:6px;padding:0 2px;display:flex}.qikqja_search{min-width:0;height:28px;color:inherit;border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;flex:auto;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}.qikqja_search::placeholder{color:var(--hub-text-tertiary)}.qikqja_search:focus{border-color:var(--hub-brand)}.qikqja_tabs{border-bottom:1px solid var(--hub-border-1);flex-wrap:wrap;align-items:center;gap:6px;padding:2px 2px 8px;display:flex}.qikqja_tab,.qikqja_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:999px;flex-shrink:0;align-items:center;gap:6px;padding:3px 10px;font-size:12px;line-height:18px;transition:color .12s,background .12s;display:inline-flex}.qikqja_tab{color:var(--hub-text-secondary);background:0 0}.qikqja_tab:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.qikqja_tabActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.qikqja_tabCount{text-align:center;min-width:16px;color:var(--hub-text-tertiary);background:var(--hub-bg-btn);border-radius:999px;padding:0 5px;font-size:10px;line-height:14px}.qikqja_tabActive .qikqja_tabCount{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}.qikqja_tabsRow{flex-shrink:0;align-items:center;gap:10px;display:flex}.qikqja_tabsRow>:first-child{flex:auto;min-width:0}";
+		const tagId$11 = "dsh-plugin/Header.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$11) + "]") === null) {
 			const tag = document.createElement("style");
 			tag.dataset.plugin = "dsh-plugin";
-			tag.dataset.pluginCss = tagId$4;
-			tag.textContent = css$4;
+			tag.dataset.pluginCss = tagId$11;
+			tag.textContent = css$11;
 			document.head.appendChild(tag);
 		}
 		var Header_module_css_default = {
-			"tagline": "qikqja_tagline",
-			"filterResults": "qikqja_filterResults",
-			"adBanner": "qikqja_adBanner",
-			"installedBtn": "qikqja_installedBtn",
-			"version": "qikqja_version",
-			"brandTitle": "qikqja_brandTitle",
-			"hubUpdateBadge": "qikqja_hubUpdateBadge",
-			"title": "qikqja_title",
-			"segCount": "qikqja_segCount",
-			"headerTitleRow": "qikqja_headerTitleRow",
-			"githubLink": "qikqja_githubLink",
-			"headerRight": "qikqja_headerRight",
-			"adArrow": "qikqja_adArrow",
-			"tabActive": "qikqja_tabActive",
-			"copyIcon": "qikqja_copyIcon",
-			"tab": "qikqja_tab",
-			"controls": "qikqja_controls",
-			"installedBtnDisabled": "qikqja_installedBtnDisabled",
-			"failBadge": "qikqja_failBadge",
-			"taglineLink": "qikqja_taglineLink",
 			"search": "qikqja_search",
-			"header": "qikqja_header",
-			"githubIcon": "qikqja_githubIcon",
-			"tabCount": "qikqja_tabCount",
-			"failBtn": "qikqja_failBtn",
-			"adBadge": "qikqja_adBadge",
-			"logoIcon": "qikqja_logoIcon",
-			"searchRow": "qikqja_searchRow",
-			"installedBtnActive": "qikqja_installedBtnActive",
+			"tagline": "qikqja_tagline",
+			"githubLink": "qikqja_githubLink",
+			"headerTitleRow": "qikqja_headerTitleRow",
 			"adText": "qikqja_adText",
-			"root": "qikqja_root",
-			"tabs": "qikqja_tabs",
-			"aboutBtn": "qikqja_aboutBtn",
-			"segCountActive": "qikqja_segCountActive",
-			"langBtn": "qikqja_langBtn",
+			"headerRight": "qikqja_headerRight",
 			"resultCount": "qikqja_resultCount",
-			"versionBtn": "qikqja_versionBtn"
+			"tab": "qikqja_tab",
+			"langBtn": "qikqja_langBtn",
+			"segLabel": "qikqja_segLabel",
+			"version": "qikqja_version",
+			"adArrow": "qikqja_adArrow",
+			"adBanner": "qikqja_adBanner",
+			"versionBtn": "qikqja_versionBtn",
+			"copyIcon": "qikqja_copyIcon",
+			"sortGroup": "qikqja_sortGroup",
+			"tabCount": "qikqja_tabCount",
+			"segBtn": "qikqja_segBtn",
+			"title": "qikqja_title",
+			"tabsRow": "qikqja_tabsRow",
+			"brandTitle": "qikqja_brandTitle",
+			"githubIcon": "qikqja_githubIcon",
+			"resultSeg": "qikqja_resultSeg",
+			"searchRow": "qikqja_searchRow",
+			"tabActive": "qikqja_tabActive",
+			"adBadge": "qikqja_adBadge",
+			"segGroup": "qikqja_segGroup",
+			"root": "qikqja_root",
+			"aboutBtn": "qikqja_aboutBtn",
+			"tabs": "qikqja_tabs",
+			"header": "qikqja_header",
+			"controls": "qikqja_controls",
+			"segBtnActive": "qikqja_segBtnActive",
+			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"logoIcon": "qikqja_logoIcon",
+			"taglineLink": "qikqja_taglineLink"
 		};
 		//#endregion
-		//#region src/client/lib/failures.ts
-		const KEY = "gro.ngilp-hsd.failure-records";
-		const MAX = 50;
+		//#region src/client/logic/install-command.ts
 		/**
-		* 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
-		* 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
-		* 一律引导提 Issue：
-		* - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
-		*   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
-		*   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
-		* - pluginPrepare：插件的 prepare/构建脚本实际执行失败（git tarball 常因缺失子模块或
-		*   构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
-		* - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
+		* 安装通道决策（用户无感知）：目录探测到 npm 包名 → 用 npm 包名安装
+		* （走 npm registry tarball，更快、与 GitHub 网络无关）；无 npm 包名 → git 直装。
+		* 返回值 target 即传给后端 /install 的安装目标（npm 包名 或 owner/repo）。
 		*/
-		function classifyFailure(message) {
-			if (/\[packaging\]|entry file missing/i.test(message)) return "pluginPrepare";
-			if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return "pnpmIgnoredBuild";
-			if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return "pluginPrepare";
-			return "repo";
+		function installTargetOf$1(p) {
+			const pkg = (p.source?.npmPackage ?? "").trim();
+			const repo = (p.source?.repo ?? "").trim();
+			if (pkg && repo) return {
+				target: pkg,
+				via: "npm"
+			};
+			return {
+				target: repo,
+				via: "github"
+			};
 		}
-		/** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */
-		const CORE_LINE_RE = /ERR_[A-Z_]+|ELIFECYCLE|Command failed|prepare-guard|Failed to prepare|exit code|\bprepare\b|pnpm failed in profile|git-hosted plugins build|submodule|not found|cannot find|no such|unable to|fatal|missing|error/i;
-		/** 提交 issue 时正文里错误摘要的上限字符数。GitHub 请求行上限 8192 字节，
-		* 固定模板与 URL 编码开销约 1~2K，核心错误（以 ASCII 日志为主）可安全带到 ~5K；
-		* 仍超长时 pluginIssueUrl 会逐档缩小核心预算，最终 URL 不会超限。 */
-		const MAX_CORE_CHARS = 5e3;
-		/** 摘要里单行上限：允许构建 key 等长行也被截短。 */
-		const MAX_LINE_CHARS = 400;
-		/**
-		* 核心错误收集器：从完整安装输出里挑出真正说明问题的行（错误代码、构建脚本失败、
-		* 退出与宿主提示），去重后拼接，单行与总量都截断 —— 只把「重点 + 原因」带进 issue 正文，
-		* 避免完整日志塞进 URL 导致请求过长。无关键行时退化为「头部 + 尾部」快照。
-		* maxChars 可由调用方按最终 URL 长度收紧（pluginIssueUrl 超限时逐档缩小）。
-		*/
-		function summarizeError(message, maxChars = MAX_CORE_CHARS) {
-			const seen = /* @__PURE__ */ new Set();
-			const core = [];
-			for (const raw of message.split(/\r?\n/)) {
-				const line = raw.trim();
-				if (!line || !CORE_LINE_RE.test(line)) continue;
-				const short = line.length > MAX_LINE_CHARS ? `${line.slice(0, MAX_LINE_CHARS)}…` : line;
-				if (!seen.has(short)) {
-					seen.add(short);
-					core.push(short);
-				}
+		/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示显式 HTTPS URL。 */
+		function installCommandOf(p, withProfile = false) {
+			const { target, via } = installTargetOf$1(p);
+			return via === "npm" ? `dsh plugin${withProfile ? " --profile web" : ""} add ${target}` : `dsh plugin${withProfile ? " --profile web" : ""} add git+https://github.com/${target}.git`;
+		}
+		/** Normalize a task/install target to its owner/repo display identity. */
+		function repoFromInstallTarget(value) {
+			const input = value.trim();
+			if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(input)) return input;
+			for (const pattern of [
+				/^github:([^/]+)\/([^/]+)$/i,
+				/^(?:git\+)?https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+				/^(?:git\+)?ssh:\/\/(?:git@)?github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+				/^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i
+			]) {
+				const match = pattern.exec(input);
+				if (match !== null) return `${match[1]}/${match[2]}`;
 			}
-			let out;
-			if (core.length === 0) {
-				const tail = message.trimEnd().slice(-1e3);
-				const sep = "\n…\n";
-				const headBudget = Math.max(maxChars - tail.length - 3, 0);
-				const head = message.slice(0, 500).trim();
-				out = `${head.length > headBudget ? head.slice(0, headBudget) : head}${sep}${tail}`;
-			} else out = core.join("\n");
-			return out.length > maxChars ? `${out.slice(0, maxChars)}\n… (truncated)` : out;
-		}
-		/** 提取首个错误代码（如 ERR_PNPM_PREPARE_PACKAGE），无则 null。 */
-		function coreErrorCode(message) {
-			const m = message.match(/\[?ERR_[A-Z_]+\]?/);
-			return m ? m[0].replace(/^\[|\]$/g, "") : null;
-		}
-		/** 运行时 localStorage 访问：类型上不依赖 DOM lib（Node 测试环境也能编译），浏览器里取 window。 */
-		const storage = () => globalThis.localStorage;
-		/** 读取本地通知记录（损坏/不可用时返回空列表，不抛错）。列表最新在前，全部保留，只由「清空」按钮手动移除。 */
-		function loadNotifications() {
-			try {
-				const raw = storage()?.getItem(KEY);
-				if (!raw) return [];
-				const list = JSON.parse(raw);
-				if (!Array.isArray(list)) return [];
-				return list.filter((r) => !!r && typeof r === "object" && typeof r.message === "string").map((r) => ({
-					...r,
-					ok: r.ok === true
-				}));
-			} catch {
-				return [];
-			}
-		}
-		function save(list) {
-			try {
-				storage()?.setItem(KEY, JSON.stringify(list));
-			} catch {}
-		}
-		/** 追加一条通知记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。
-		*  每次成功/失败都各自留痕：同一插件的安装/卸载记录都完整保留、只由「清空」按钮手动移除，
-		*  不会因后续操作被自动覆盖清除。 */
-		function addNotification(record) {
-			const prev = loadNotifications();
-			let id = Date.now();
-			while (prev.some((r) => r.id === id)) id += 1;
-			const next = [{
-				...record,
-				id,
-				at: id
-			}, ...prev].slice(0, MAX);
-			save(next);
-			return next;
-		}
-		/** 记录一次失败：携带完整错误日志，供通知中心查看/复制/提 Issue。 */
-		function addFailure(record) {
-			return addNotification({
-				...record,
-				ok: false
-			});
-		}
-		/** 记录一次成功：轻量记录，不带日志。 */
-		function addSuccess(record) {
-			return addNotification({
-				...record,
-				ok: true,
-				message: ""
-			});
-		}
-		/** 清空全部通知记录，返回空列表。 */
-		function clearNotifications() {
-			save([]);
-			return [];
-		}
-		/** 按 id 删除单条通知记录，返回更新后的列表（仅移除该条，不影响其余记录）。 */
-		function removeNotification(id) {
-			const next = loadNotifications().filter((r) => r.id !== id);
-			save(next);
-			return next;
+			return value;
 		}
 		//#endregion
-		//#region src/client/lib/catalog.ts
+		//#region src/client/logic/constants.ts
 		/** 插件中心官网地址。 */
 		const SITE_URL = "https://dsh-plugin.org/";
 		/** 插件中心源码仓库：头部右上角 GitHub 图标的跳转地址 */
@@ -469,97 +670,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
 		*/
 		const PLUGIN_VERSION = "1.1.2";
-		/** dsh-plugin.org 中文页挂在 /zh/ 前缀下，英文在根路径。 */
-		function langPathOf(lang) {
-			return lang === "zh" ? "zh/" : "";
-		}
-		/**
-		* 官网详情页两级路径：/plugins/{ownerSlug}/{slug}；
-		* 缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
-		*/
-		function pluginDetailUrl(plugin, langPath) {
-			const repo = plugin.source?.repo ?? "";
-			return `${SITE_URL}${langPath}plugins/${plugin.ownerSlug ?? repo.split("/")[0]?.toLowerCase() ?? ""}/${plugin.slug}`;
-		}
-		/**
-		* 失败弹窗里仓库地址的跳转目标：官网详情页（含插件收录信息），
-		* 与 issue 正文的 Catalog 链接同一形式（单级 /plugins/{repo}）。
-		*/
-		function pluginSiteUrl(repo) {
-			return `${SITE_URL}plugins/${repo}`;
-		}
-		/**
-		* 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
-		* 核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
-		* 错误核心摘要（完整日志太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，
-		* 故只收集重点）。错误弹窗、失败记录共用此逻辑。
-		* env 取不到时为 null，链接照常生成、只是少环境段。
-		* attempts（尝试过的安装方式，npm 反查 + 实际执行命令）：作者看到我们查过/试过的命令，
-		* 组织 scope 与 GitHub 用户名不一致时也能直接指认正确的 npm 包名。
-		*/
-		function pluginIssueUrl(repo, message, env, command, attempts) {
-			const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`;
-			const kind = classifyFailure(message);
-			const reason = /\[packaging\]/i.test(message) ? "plugin distribution is incomplete — the entry file declared in package.json is missing from the published package (github tarball or npm package); please commit build output or publish a complete package" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
-			const code = coreErrorCode(message);
-			const build = (coreChars) => {
-				const body = [
-					"## Summary",
-					`- Cause: ${reason}`,
-					...code ? [`- Key error: \`${code}\``] : [],
-					"",
-					`## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
-					`本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
-					`- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ""} add git+https://github.com/${repo}.git`}\``,
-					`- 执行结果：安装失败，未能安装该插件。`,
-					...attempts && attempts.length > 0 ? [
-						"",
-						"## Attempted install channels（已尝试的安装方式）",
-						...attempts.map((a) => `- ${a}`)
-					] : [],
-					.../\[packaging\]/i.test(message) ? [
-						"",
-						"## 安装方式说明",
-						"DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add git+https://github.com/owner/repo.git`（Git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。"
-					] : [],
-					"",
-					"## Environment",
-					`- Plugin: \`${repo}\``,
-					...env ? [
-						`- DSH: ${env.dshVersion ? `v${env.dshVersion}` : "unknown"}`,
-						`- Plugin Hub: v${PLUGIN_VERSION}`,
-						`- Node: ${env.nodeVersion}`,
-						`- OS: ${env.platform} ${env.arch} (${env.release})`,
-						`- Profile: \`${env.profile}\``,
-						`- DSH Home: \`${env.dshHome}\``
-					] : [],
-					`- Catalog: [${pluginSiteUrl(repo)}](${pluginSiteUrl(repo)})`,
-					"",
-					"## Error (core)",
-					"",
-					"```",
-					summarizeError(message, coreChars),
-					"```",
-					"",
-					"---",
-					`This error was produced by the [dsh-plugin-hub](${GITHUB_URL}) installer bundled with DeepSeek Harness.`
-				].join("\n");
-				return `https://github.com/${repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-			};
-			const MAX_URL_CHARS = 7600;
-			let url = build(MAX_CORE_CHARS);
-			if (url.length > MAX_URL_CHARS) for (const budget of [
-				4e3,
-				2500,
-				1400,
-				800,
-				400
-			]) {
-				url = build(budget);
-				if (url.length <= MAX_URL_CHARS) break;
-			}
-			return url;
-		}
 		const CATEGORY_ORDER = [
 			"interface",
 			"session",
@@ -576,74 +686,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** 分类标签按界面语言取词；未知 key 原样返回。 */
 		function categoryLabel(map, key, lang) {
 			return map[key]?.[lang] ?? key;
-		}
-		/**
-		* 归一化在线 API（dsh-plugin.org/api/plugins.{lang}.json）返回的短 key 结构
-		* （s/o/n/vr/c/t/f/d/r/v/u/a/sg/fk），统一为 HubPlugin，保证渲染逻辑只认一种结构。
-		*/
-		function normalize(raw) {
-			if (typeof raw.s === "string") return {
-				slug: raw.s,
-				ownerSlug: typeof raw.o === "string" ? raw.o : void 0,
-				displayName: typeof raw.n === "string" ? raw.n : void 0,
-				version: typeof raw.vr === "string" ? raw.vr : void 0,
-				category: typeof raw.c === "string" ? raw.c : void 0,
-				topics: Array.isArray(raw.t) ? raw.t : void 0,
-				features: Array.isArray(raw.f) ? raw.f : void 0,
-				description: typeof raw.d === "string" ? raw.d : void 0,
-				source: typeof raw.r === "string" ? { repo: raw.r } : raw.r !== null && typeof raw.r === "object" ? {
-					repo: typeof raw.r.repo === "string" ? raw.r.repo : void 0,
-					npmPackage: typeof raw.r.npmPackage === "string" ? raw.r.npmPackage : void 0
-				} : void 0,
-				install: raw.wi === false ? { webInstallable: false } : void 0,
-				compatibility: typeof raw.v === "string" ? { status: raw.v } : void 0,
-				dates: {
-					repoUpdatedAt: typeof raw.u === "string" ? raw.u : void 0,
-					addedAt: typeof raw.a === "string" ? raw.a : void 0
-				},
-				stats: {
-					stargazers_count: typeof raw.sg === "number" ? raw.sg : void 0,
-					forks_count: typeof raw.fk === "number" ? raw.fk : void 0
-				}
-			};
-			return raw;
-		}
-		/**
-		* 安装通道决策（用户无感知）：目录探测到 npm 包名 → 用 npm 包名安装
-		* （走 npm registry tarball，更快、与 GitHub 网络无关）；无 npm 包名 → git 直装。
-		* 返回值 target 即传给后端 /install 的安装目标（npm 包名 或 owner/repo）。
-		*/
-		function installTargetOf(p) {
-			const pkg = (p.source?.npmPackage ?? "").trim();
-			const repo = (p.source?.repo ?? "").trim();
-			if (pkg && repo) return {
-				target: pkg,
-				via: "npm"
-			};
-			return {
-				target: repo,
-				via: "github"
-			};
-		}
-		/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示显式 HTTPS URL。 */
-		function installCommandOf(p, withProfile = false) {
-			const { target, via } = installTargetOf(p);
-			return via === "npm" ? `dsh plugin${withProfile ? " --profile web" : ""} add ${target}` : `dsh plugin${withProfile ? " --profile web" : ""} add git+https://github.com/${target}.git`;
-		}
-		/** Normalize a task/install target to its owner/repo display identity. */
-		function repoFromInstallTarget(value) {
-			const input = value.trim();
-			if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(input)) return input;
-			for (const pattern of [
-				/^github:([^/]+)\/([^/]+)$/i,
-				/^(?:git\+)?https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
-				/^(?:git\+)?ssh:\/\/(?:git@)?github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
-				/^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i
-			]) {
-				const match = pattern.exec(input);
-				if (match !== null) return `${match[1]}/${match[2]}`;
-			}
-			return value;
 		}
 		const CATEGORY_LABELS = {
 			interface: {
@@ -745,11 +787,282 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			"sortNewest"
 		];
 		//#endregion
-		//#region src/client/lib/env.ts
+		//#region src/client/data/host.ts
+		/** 当前 profile 已安装插件表（npm 包名 -> manifest spec）+ 安装时记录的目录信号 + 安装路径 + 运行状态。 */
+		async function fetchInstalled() {
+			try {
+				const res = await fetch("/dsh-plugin-hub/installed", { cache: "no-store" });
+				if (!res.ok) return null;
+				const data = await res.json();
+				return {
+					installed: data.installed ?? {},
+					versions: data.versions ?? {},
+					paths: data.paths ?? null,
+					loaded: data.loaded ?? null,
+					dshCapable: data.dshCapable ?? null
+				};
+			} catch {
+				return null;
+			}
+		}
 		let envPromise = null;
+		/** 在系统文件管理器里定位并打开已安装插件的目录（服务端 spawn open，跨平台）；失败返回 false。 */
+		async function revealInstallFolder(name) {
+			try {
+				return (await fetch("/dsh-plugin-hub/open-path", {
+					method: "POST",
+					headers: { "content-type": "application/json" },
+					body: JSON.stringify({ name }),
+					cache: "no-store"
+				})).ok;
+			} catch {
+				return false;
+			}
+		}
+		/** 在系统文件管理器里定位日志文件（服务端 spawn open，跨平台）；失败返回 false。 */
+		async function openLogFile() {
+			try {
+				return (await fetch("/dsh-plugin-hub/open-log", {
+					method: "POST",
+					cache: "no-store"
+				})).ok;
+			} catch {
+				return false;
+			}
+		}
+		/**
+		* 系统目录选择器：弹原生文件夹对话框让用户挑日志存放目录（服务端 spawn
+		* osascript / FolderBrowserDialog / zenity）；选中返回绝对路径，取消或
+		* 平台不支持（无 osascript / zenity）时返回 null。
+		*/
+		async function chooseLogDir() {
+			try {
+				const res = await fetch("/dsh-plugin-hub/choose-log-dir", {
+					method: "POST",
+					cache: "no-store"
+				});
+				if (!res.ok) return null;
+				const data = await res.json();
+				return typeof data.path === "string" && data.path !== "" ? data.path : null;
+			} catch {
+				return null;
+			}
+		}
+		/**
+		* 宿主机器环境快照（/dsh-plugin-hub/env）：提交 bug 时拼进 issue 正文。
+		* 懒加载 + 模块级缓存：环境在会话期间不会变化；拉取失败降级为 null
+		* （issue 链接照常生成，只是少环境段）。
+		*/
 		function getEnv() {
 			envPromise ??= fetch("/dsh-plugin-hub/env", { cache: "no-store" }).then((res) => res.ok ? res.json() : null).catch(() => null);
 			return envPromise;
+		}
+		//#endregion
+		//#region src/client/logic/normalize.ts
+		function normalize(raw) {
+			if (typeof raw.s === "string") return {
+				slug: raw.s,
+				ownerSlug: typeof raw.o === "string" ? raw.o : void 0,
+				displayName: typeof raw.n === "string" ? raw.n : void 0,
+				version: typeof raw.vr === "string" ? raw.vr : void 0,
+				category: typeof raw.c === "string" ? raw.c : void 0,
+				topics: Array.isArray(raw.t) ? raw.t : void 0,
+				features: Array.isArray(raw.f) ? raw.f : void 0,
+				description: typeof raw.d === "string" ? raw.d : void 0,
+				source: typeof raw.r === "string" ? { repo: raw.r } : raw.r !== null && typeof raw.r === "object" ? {
+					repo: typeof raw.r.repo === "string" ? raw.r.repo : void 0,
+					npmPackage: typeof raw.r.npmPackage === "string" ? raw.r.npmPackage : void 0
+				} : void 0,
+				install: raw.wi === false ? { webInstallable: false } : void 0,
+				compatibility: typeof raw.v === "string" ? { status: raw.v } : void 0,
+				dates: {
+					repoUpdatedAt: typeof raw.u === "string" ? raw.u : void 0,
+					addedAt: typeof raw.a === "string" ? raw.a : void 0
+				},
+				stats: {
+					stargazers_count: typeof raw.sg === "number" ? raw.sg : void 0,
+					forks_count: typeof raw.fk === "number" ? raw.fk : void 0
+				}
+			};
+			return raw;
+		}
+		//#endregion
+		//#region src/client/data/catalog.ts
+		const PLUGINS_URL = (lang) => `https://dsh-plugin.org/api/plugins.${lang}.json`;
+		const STATS_URL = "https://dsh-plugin.org/api/stats.json";
+		async function fetchJson(url) {
+			const res = await fetch(url, { cache: "no-store" });
+			if (!res.ok) throw new Error(String(res.status));
+			return res.json();
+		}
+		/** 目录插件列表（在线 API 已只返回 verified；过滤与排序由上层负责）。 */
+		async function fetchCatalog(lang) {
+			const data = await fetchJson(PLUGINS_URL(lang));
+			return (Array.isArray(data) ? data : []).map((item) => normalize(item));
+		}
+		/** 收录/精选统计（/api/stats.json）；字段不完整返回 null。 */
+		async function fetchStats() {
+			const s = await fetchJson(STATS_URL);
+			if (s && typeof s.total === "number" && typeof s.verified === "number") return {
+				total: s.total,
+				verified: s.verified
+			};
+			return null;
+		}
+		//#endregion
+		//#region src/client/data/hub.ts
+		/** Worker 版本控制中心：最新版本 + Markdown 变更记录；不可用返回 null。 */
+		async function fetchHubUpdate() {
+			try {
+				const res = await fetch(HUB_UPDATE_URL, { cache: "no-store" });
+				if (!res.ok) return null;
+				const data = await res.json();
+				if (!data) return null;
+				const version = typeof data.version === "string" && data.version.length > 0 ? data.version : null;
+				if (version === null) return null;
+				return {
+					version,
+					publishedAt: data.publishedAt ?? null,
+					notes: data.notes ?? null
+				};
+			} catch {
+				return null;
+			}
+		}
+		/** Worker「关注我们」内容（平台介绍 + 反馈群二维码，Markdown）；未推送返回 null。 */
+		async function fetchHubAbout() {
+			try {
+				const res = await fetch(HUB_ABOUT_URL, { cache: "no-store" });
+				if (!res.ok) return null;
+				const data = await res.json();
+				if (!data || data.content === null || data.content === void 0) return null;
+				const content = typeof data.content === "string" || typeof data.content === "object" ? data.content : null;
+				if (content === null) return null;
+				return {
+					content,
+					updatedAt: data.updatedAt ?? null
+				};
+			} catch {
+				return null;
+			}
+		}
+		//#endregion
+		//#region src/client/logic/installed.ts
+		/** 安装时记录的目录信号（按仓库小写 key 查表）。 */
+		function signalOf(repo, versions) {
+			if (!repo) return null;
+			return versions[repo.toLowerCase()] ?? null;
+		}
+		/** 插件是否已安装：匹配 Git spec 中的 owner/repo，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
+		function installedNameOf(plugin, installed, versions) {
+			const repo = plugin.source?.repo;
+			if (!repo) return null;
+			const needle = repo.toLowerCase();
+			for (const [name, spec] of Object.entries(installed)) if (repoFromInstallTarget(spec).toLowerCase() === needle) return name;
+			const pkg = ((plugin.source?.npmPackage || versions[repo.toLowerCase()]?.npmPackage) ?? "").toLowerCase();
+			if (pkg) for (const [name, spec] of Object.entries(installed)) {
+				if (isRepoLike(repoFromInstallTarget(spec))) continue;
+				if (name.toLowerCase() === pkg) return name;
+			}
+			return null;
+		}
+		/** 该插件安装时记录的目录版本（无记录/未安装 → null）。 */
+		function installedVersionOf(plugin, versions) {
+			const repo = plugin.source?.repo;
+			if (!repo) return null;
+			return versions[repo.toLowerCase()]?.version ?? null;
+		}
+		/**
+		* 是否有更新：仅对已安装插件有意义。
+		* 双信号判定——有 release 版本的比版本；无版本（repo 不打 tag）的比仓库最近更新时间
+		* （repoUpdatedAt，ISO 字符串字典序 = 时间序），更新时间变新说明有新提交。
+		*/
+		function hasUpdateOf(plugin, installed, versions) {
+			if (installedNameOf(plugin, installed, versions) === null) return false;
+			const repo = plugin.source?.repo;
+			if (!repo) return false;
+			const rec = versions[repo.toLowerCase()];
+			if (!rec) return false;
+			if (plugin.version) return plugin.version !== rec.version;
+			const current = plugin.dates?.repoUpdatedAt;
+			return Boolean(current && rec.updatedAt && current > rec.updatedAt);
+		}
+		/** 依赖 spec 能否解析出仓库身份（owner/repo 形态才算）。 */
+		function isRepoLike(value) {
+			return /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(value);
+		}
+		/** 已安装项 → 弹窗可用的伪插件对象：卸载确认弹窗只读名称/来源行，
+		*  自定义安装（目录外）没有完整目录数据，用它把 InstalledItem 适配成 HubPlugin。 */
+		function pluginOfItem(item) {
+			return {
+				slug: item.name,
+				displayName: item.plugin?.displayName ?? item.name,
+				source: item.repo ? { repo: item.repo } : void 0,
+				description: item.plugin?.description
+			};
+		}
+		/**
+		* Hub 自身（本插件 dsh-plugin）的识别：三维互证，杜绝误伤同名第三方包。
+		*  1) 依赖 key 固定为 `dsh-plugin`（本插件 npm 包名）；
+		*  2) spec 为 `file:`/`link:` 本地链接（hub 以 file: 安装进宿主）；
+		*  3) 或 spec 解析出的仓库身份就是自营仓库 `dshplugin/dsh-plugin-hub`。
+		* 命中即视为宿主内置本体：永不出现在「自定义安装」里，卸载接口也早已对
+		* 它 400 拒绝（服务端多维防线之一）——显示出来只会让用户误点卸载。
+		*/
+		function isHubSelf(name, spec) {
+			if (name !== "dsh-plugin") return false;
+			if (spec.startsWith("file:") || spec.startsWith("link:")) return true;
+			const repo = repoFromInstallTarget(spec);
+			return isRepoLike(repo) && repo.toLowerCase() === "dshplugin/dsh-plugin-hub".toLowerCase();
+		}
+		/**
+		* 构建已安装项列表：目录插件按命中关系合并（拥有完整元数据），
+		* 剩余未认领的依赖 key 归为自定义安装（目录外，仅运行时信息）。
+		*/
+		function installedItemsOf(plugins, installed, versions, paths, loadedNames, dshCapableNames) {
+			const items = [];
+			const claimed = /* @__PURE__ */ new Set();
+			for (const p of plugins ?? []) {
+				const name = installedNameOf(p, installed, versions);
+				if (name === null || claimed.has(name)) continue;
+				claimed.add(name);
+				const repo = p.source?.repo ?? null;
+				const rec = signalOf(repo, versions);
+				items.push({
+					name,
+					spec: installed[name],
+					plugin: p,
+					repo,
+					installPath: paths?.[name] ?? null,
+					installedVersion: rec?.version ?? null,
+					installedAt: rec?.installedAt ?? null,
+					catalogVersion: p.version ?? null,
+					hasUpdate: hasUpdateOf(p, installed, versions),
+					loaded: loadedNames?.includes(name) ?? false,
+					dshCapable: dshCapableNames?.includes(name) ?? false
+				});
+			}
+			for (const [name, spec] of Object.entries(installed)) {
+				if (claimed.has(name)) continue;
+				if (isHubSelf(name, spec)) continue;
+				const parsed = repoFromInstallTarget(spec);
+				const repo = isRepoLike(parsed) ? parsed : null;
+				const rec = signalOf(repo, versions);
+				items.push({
+					name,
+					spec,
+					plugin: null,
+					repo,
+					installPath: paths?.[name] ?? null,
+					installedVersion: rec?.version ?? null,
+					installedAt: rec?.installedAt ?? null,
+					catalogVersion: null,
+					hasUpdate: false,
+					loaded: loadedNames?.includes(name) ?? false,
+					dshCapable: dshCapableNames?.includes(name) ?? false
+				});
+			}
+			return items;
 		}
 		//#endregion
 		//#region src/client/hooks/useCatalog.ts
@@ -764,10 +1077,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* installed-plugin table, and the filter/search/sort/install-status view
 		* state, exposing the derived visible list and per-category counts.
 		*/
-		const PLUGINS_URL = (lang) => `https://dsh-plugin.org/api/plugins.${lang}.json`;
-		const STATS_URL = "https://dsh-plugin.org/api/stats.json";
 		/** 插件市场自身仓库：DSH-Plugin Hub 不显示在目录里（自己不进自己的插件列表） */
 		const SELF_REPO = "dshplugin/dsh-plugin-hub";
+		/** 市场各排序的默认方向：全部按倒序（Star/Fork 多、更新/收录近的在前） */
+		const SORT_DEFAULT_DIR$1 = {
+			sortStars: "desc",
+			sortForks: "desc",
+			sortUpdated: "desc",
+			sortNewest: "desc"
+		};
 		function useCatalog(lang) {
 			/** 目录插件（仅保留人工验证通过的条目） */
 			const [plugins, setPlugins] = (0, react.useState)(null);
@@ -778,13 +1096,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [category, setCategory] = (0, react.useState)("all");
 			const [query, setQuery] = (0, react.useState)("");
 			const [sort, setSort] = (0, react.useState)("sortStars");
-			/** 列表安装状态筛选：全部 / 已安装 / 未安装（分段按钮，单列表内切换，不引入第二个列表） */
-			const [installedFilter, setInstalledFilter] = (0, react.useState)("all");
+			/** 当前排序方向：点同一个排序按钮切换 正序/倒序；点新排序用该排序的默认方向（与已安装视图一致） */
+			const [sortDir, setSortDir] = (0, react.useState)("desc");
+			/** 点击排序按钮：同一按钮切换正/倒序，新按钮用默认方向 */
+			function toggleSort(key) {
+				if (key === sort) setSortDir((d) => d === "asc" ? "desc" : "asc");
+				else {
+					setSort(key);
+					setSortDir(SORT_DEFAULT_DIR$1[key]);
+				}
+			}
 			/** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
 			const [installed, setInstalled] = (0, react.useState)({});
 			/** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由）；
 			*  npmPackage 为 npm 优先通道反查命中的包名映射（目录数据未下发时客户端靠它把依赖 key 匹配回仓库） */
 			const [versions, setVersions] = (0, react.useState)({});
+			/** 每个依赖在系统上的安装目录（profile/node_modules/<包名>），详情视图展示用 */
+			const [installPaths, setInstallPaths] = (0, react.useState)(null);
+			/** 已加载进运行中 loader 的包名（官方 ctx.loader 对账）：装完未重启的新插件不在其中 */
+			const [loadedNames, setLoadedNames] = (0, react.useState)(null);
+			/** 真正的 dsh 插件包名（包内声明 dsh 配置 / 在 profile bundles 清单）：非 dsh 插件不提示「待重启」 */
+			const [dshCapableNames, setDshCapableNames] = (0, react.useState)(null);
 			/** Hub 自我更新信息：来自 CF Worker 版本控制中心（hub.dsh-plugin.org），与目录数据解耦 */
 			const [hubUpdateInfo, setHubUpdateInfo] = (0, react.useState)(null);
 			/** 头部「关注我们」弹窗内容（平台介绍 + 反馈群二维码）：来自同款 Worker /about，Markdown 推送非写死 */
@@ -794,18 +1126,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				setPlugins(null);
 				setStats(null);
 				setFailed(false);
-				const fetchData = (url) => fetch(url, { cache: "no-store" }).then((res) => {
-					if (!res.ok) throw new Error(String(res.status));
-					return res.json();
-				});
-				const load = () => Promise.all([fetchData(PLUGINS_URL(lang)), fetchData(STATS_URL)]);
-				load().then(([data, s]) => {
+				const load = () => Promise.all([fetchCatalog(lang), fetchStats()]);
+				load().then(([list, stats]) => {
 					if (cancelled) return;
-					const list = (Array.isArray(data) ? data : []).map((item) => normalize(item));
 					const hadSelf = list.some((p) => p.source?.repo === SELF_REPO);
 					setPlugins(list.filter((p) => p.compatibility?.status === "verified" && p.source?.repo !== SELF_REPO));
-					const stats = s;
-					if (stats && typeof stats.total === "number" && typeof stats.verified === "number") setStats(hadSelf ? {
+					if (stats) setStats(hadSelf ? {
 						total: stats.total - 1,
 						verified: stats.verified - 1
 					} : {
@@ -821,32 +1147,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, [reloadKey, lang]);
 			/** 刷新当前 profile 已安装插件表；宿主未挂本地路由时静默降级为空表。 */
 			const refreshInstalled = async () => {
-				try {
-					const res = await fetch("/dsh-plugin-hub/installed", { cache: "no-store" });
-					if (!res.ok) return;
-					const data = await res.json();
-					setInstalled(data.installed ?? {});
-					setVersions(data.versions ?? {});
-				} catch {}
+				const data = await fetchInstalled();
+				if (data === null) return;
+				setInstalled(data.installed);
+				setVersions(data.versions);
+				setInstallPaths(data.paths);
+				setLoadedNames(data.loaded);
+				setDshCapableNames(data.dshCapable);
 			};
 			(0, react.useEffect)(() => {
 				refreshInstalled();
 			}, []);
 			(0, react.useEffect)(() => {
 				let cancelled = false;
-				fetch(HUB_UPDATE_URL, { cache: "no-store" }).then((res) => res.ok ? res.json() : Promise.resolve(null)).then((data) => {
-					if (cancelled || !data) {
-						if (!cancelled) setHubUpdateInfo(null);
-						return;
-					}
-					const version = typeof data.version === "string" && data.version.length > 0 ? data.version : null;
-					setHubUpdateInfo(version === null ? null : {
-						version,
-						publishedAt: data.publishedAt ?? null,
-						notes: data.notes ?? null
-					});
-				}).catch(() => {
-					if (!cancelled) setHubUpdateInfo(null);
+				fetchHubUpdate().then((info) => {
+					if (!cancelled) setHubUpdateInfo(info);
 				});
 				return () => {
 					cancelled = true;
@@ -854,57 +1169,32 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, [reloadKey]);
 			(0, react.useEffect)(() => {
 				let cancelled = false;
-				fetch(HUB_ABOUT_URL, { cache: "no-store" }).then((res) => res.ok ? res.json() : Promise.resolve(null)).then((data) => {
-					if (cancelled) return;
-					if (!data || data.content === null || data.content === void 0) {
-						setHubAboutInfo(null);
-						return;
-					}
-					const content = typeof data.content === "string" || typeof data.content === "object" ? data.content : null;
-					setHubAboutInfo(content === null ? null : {
-						content,
-						updatedAt: data.updatedAt ?? null
-					});
-				}).catch(() => {
-					if (!cancelled) setHubAboutInfo(null);
+				fetchHubAbout().then((info) => {
+					if (!cancelled) setHubAboutInfo(info);
 				});
 				return () => {
 					cancelled = true;
 				};
 			}, [reloadKey]);
 			/** 插件是否已安装：匹配 Git spec 中的 owner/repo，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
-			const installedName = (p) => {
-				const repo = p.source?.repo;
-				if (!repo) return null;
-				const needle = repo.toLowerCase();
-				for (const [name, spec] of Object.entries(installed)) if (repoFromInstallTarget(spec).toLowerCase() === needle) return name;
-				const pkg = ((p.source?.npmPackage || versions[repo.toLowerCase()]?.npmPackage) ?? "").toLowerCase();
-				if (pkg) {
-					for (const name of Object.keys(installed)) if (name.toLowerCase() === pkg) return name;
-				}
-				return null;
-			};
+			const installedName = (p) => installedNameOf(p, installed, versions);
 			/** 该插件安装时记录的目录版本（无记录/未安装 → null）。 */
-			const installedVersion = (p) => {
-				const repo = p.source?.repo;
-				if (!repo) return null;
-				return versions[repo.toLowerCase()]?.version ?? null;
-			};
+			const installedVersion = (p) => installedVersionOf(p, versions);
 			/**
 			* 是否有更新：仅对已安装插件有意义。
 			* 双信号判定——有 release 版本的比版本；无版本（repo 不打 tag）的比仓库最近更新时间
 			* （repoUpdatedAt，ISO 字符串字典序 = 时间序），更新时间变新说明有新提交。
 			*/
-			const hasUpdate = (p) => {
-				if (installedName(p) === null) return false;
-				const repo = p.source?.repo;
-				if (!repo) return false;
-				const rec = versions[repo.toLowerCase()];
-				if (!rec) return false;
-				if (p.version) return p.version !== rec.version;
-				const current = p.dates?.repoUpdatedAt;
-				return Boolean(current && rec.updatedAt && current > rec.updatedAt);
-			};
+			const hasUpdate = (p) => hasUpdateOf(p, installed, versions);
+			/** 已安装项统一列表（目录元数据 + 运行时信息合并）：驱动「已安装」tab。 */
+			const installedItems = (0, react.useMemo)(() => installedItemsOf(plugins, installed, versions, installPaths, loadedNames, dshCapableNames), [
+				plugins,
+				installed,
+				versions,
+				installPaths,
+				loadedNames,
+				dshCapableNames
+			]);
 			/**
 			* Hub 自身是否有可用更新：Hub 就是当前运行的应用（始终已安装，无需 installedName 命中）。
 			* 以 Worker 版本控制中心返回的「最新版本」为准，与当前运行的版本号比对——
@@ -915,48 +1205,33 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				if (!hubUpdateInfo) return false;
 				return hubUpdateInfo.version !== "1.1.2";
 			})();
-			/** 当前分类下的插件（「全部」时为整个目录）。 */
-			const categoryPlugins = (0, react.useMemo)(() => {
+			(0, react.useMemo)(() => {
 				if (!plugins) return [];
 				if (category === "all") return plugins;
 				return plugins.filter((p) => p.category === category);
 			}, [plugins, category]);
-			/** 当前分类下已安装插件数：已安装/未安装按钮上的计数跟随分类，不再用全局口径。 */
-			const installedCountInCategory = (0, react.useMemo)(() => {
-				return categoryPlugins.reduce((n, p) => n + (installedName(p) !== null ? 1 : 0), 0);
-			}, [categoryPlugins, installed]);
-			/** 当前分类下未安装插件数。 */
-			const notInstalledCountInCategory = Math.max(0, categoryPlugins.length - installedCountInCategory);
-			(0, react.useEffect)(() => {
-				if (installedFilter === "all") return;
-				if ((installedFilter === "installed" ? installedCountInCategory : notInstalledCountInCategory) === 0) setInstalledFilter("all");
-			}, [
-				installedFilter,
-				installedCountInCategory,
-				notInstalledCountInCategory
-			]);
 			const visible = (0, react.useMemo)(() => {
 				if (!plugins) return [];
 				const q = query.trim().toLowerCase();
-				return [...plugins.filter((p) => {
+				const list = plugins.filter((p) => {
 					if (category !== "all" && p.category !== category) return false;
-					if (installedFilter === "installed" && installedName(p) === null) return false;
-					if (installedFilter === "notInstalled" && installedName(p) !== null) return false;
 					if (!q) return true;
 					return (p.displayName ?? "").toLowerCase().includes(q) || (p.description ?? "").toLowerCase().includes(q) || (p.topics ?? []).some((topic) => topic.toLowerCase().includes(q));
-				})].sort((a, b) => {
-					if (sort === "sortStars") return (b.stats?.stargazers_count ?? 0) - (a.stats?.stargazers_count ?? 0);
-					if (sort === "sortForks") return (b.stats?.forks_count ?? 0) - (a.stats?.forks_count ?? 0);
-					if (sort === "sortNewest") return (b.dates?.addedAt ?? "").localeCompare(a.dates?.addedAt ?? "");
-					return (b.dates?.repoUpdatedAt ?? "").localeCompare(a.dates?.repoUpdatedAt ?? "");
+				});
+				const dir = sortDir === "asc" ? 1 : -1;
+				return [...list].sort((a, b) => {
+					if (sort === "sortStars") return ((b.stats?.stargazers_count ?? 0) - (a.stats?.stargazers_count ?? 0)) * dir;
+					if (sort === "sortForks") return ((b.stats?.forks_count ?? 0) - (a.stats?.forks_count ?? 0)) * dir;
+					if (sort === "sortNewest") return (b.dates?.addedAt ?? "").localeCompare(a.dates?.addedAt ?? "") * dir;
+					return (b.dates?.repoUpdatedAt ?? "").localeCompare(a.dates?.repoUpdatedAt ?? "") * dir;
 				});
 			}, [
 				plugins,
 				category,
 				query,
 				sort,
-				installed,
-				installedFilter
+				sortDir,
+				installed
 			]);
 			/** Per-category plugin counts shown on the category chips. */
 			const categoryCounts = (0, react.useMemo)(() => {
@@ -970,6 +1245,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				failed,
 				reload: () => setReloadKey((k) => k + 1),
 				installed,
+				installedItems,
 				installedName,
 				installedVersion,
 				hasUpdate,
@@ -982,14 +1258,336 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				query,
 				setQuery,
 				sort,
-				setSort,
-				installedFilter,
-				setInstalledFilter,
+				sortDir,
+				toggleSort,
 				visible,
 				total: plugins?.length ?? 0,
-				installedCountInCategory,
-				notInstalledCountInCategory,
 				categoryCounts
+			};
+		}
+		//#endregion
+		//#region src/client/logic/failures.ts
+		const KEY = "gro.ngilp-hsd.failure-records";
+		const MAX = 50;
+		/** 运行时 localStorage 访问：类型上不依赖 DOM lib（Node 测试环境也能编译），浏览器里取 window。 */
+		const storage = () => globalThis.localStorage;
+		/** 读取本地通知记录（损坏/不可用时返回空列表，不抛错）。列表最新在前，全部保留，只由「清空」按钮手动移除。 */
+		function loadNotifications() {
+			try {
+				const raw = storage()?.getItem(KEY);
+				if (!raw) return [];
+				const list = JSON.parse(raw);
+				if (!Array.isArray(list)) return [];
+				return list.filter((r) => !!r && typeof r === "object" && typeof r.message === "string").map((r) => ({
+					...r,
+					ok: r.ok === true
+				}));
+			} catch {
+				return [];
+			}
+		}
+		function save(list) {
+			try {
+				storage()?.setItem(KEY, JSON.stringify(list));
+			} catch {}
+		}
+		/** 追加一条通知记录并持久化，返回更新后的完整列表（最新在前，超上限裁剪）。
+		*  每次成功/失败都各自留痕：同一插件的安装/卸载记录都完整保留、只由「清空」按钮手动移除，
+		*  不会因后续操作被自动覆盖清除。 */
+		function addNotification(record) {
+			const prev = loadNotifications();
+			let id = Date.now();
+			while (prev.some((r) => r.id === id)) id += 1;
+			const next = [{
+				...record,
+				id,
+				at: id
+			}, ...prev].slice(0, MAX);
+			save(next);
+			return next;
+		}
+		/** 记录一次失败：携带完整错误日志，供通知中心查看/复制/提 Issue。 */
+		function addFailure(record) {
+			return addNotification({
+				...record,
+				ok: false
+			});
+		}
+		/** 记录一次成功：轻量记录，不带日志。 */
+		function addSuccess(record) {
+			return addNotification({
+				...record,
+				ok: true,
+				message: ""
+			});
+		}
+		/** 清空全部通知记录，返回空列表。 */
+		function clearNotifications() {
+			save([]);
+			return [];
+		}
+		/** 按 id 删除单条通知记录，返回更新后的列表（仅移除该条，不影响其余记录）。 */
+		function removeNotification(id) {
+			const next = loadNotifications().filter((r) => r.id !== id);
+			save(next);
+			return next;
+		}
+		/**
+		* 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+		* 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
+		* 一律引导提 Issue：
+		* - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
+		*   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
+		*   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
+		* - pluginPrepare：插件的 prepare/构建脚本实际执行失败（git tarball 常因缺失子模块或
+		*   构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
+		* - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
+		*/
+		function classifyFailure(message) {
+			if (/\[packaging\]|entry file missing/i.test(message)) return "pluginPrepare";
+			if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return "pnpmIgnoredBuild";
+			if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return "pluginPrepare";
+			return "repo";
+		}
+		/** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */
+		const CORE_LINE_RE = /ERR_[A-Z_]+|ELIFECYCLE|Command failed|prepare-guard|Failed to prepare|exit code|\bprepare\b|pnpm failed in profile|git-hosted plugins build|submodule|not found|cannot find|no such|unable to|fatal|missing|error/i;
+		/** 提交 issue 时正文里错误摘要的上限字符数。GitHub 请求行上限 8192 字节，
+		* 固定模板与 URL 编码开销约 1~2K，核心错误（以 ASCII 日志为主）可安全带到 ~5K；
+		* 仍超长时 pluginIssueUrl 会逐档缩小核心预算，最终 URL 不会超限。 */
+		const MAX_CORE_CHARS = 5e3;
+		/** 摘要里单行上限：允许构建 key 等长行也被截短。 */
+		const MAX_LINE_CHARS = 400;
+		/**
+		* 核心错误收集器：从完整安装输出里挑出真正说明问题的行（错误代码、构建脚本失败、
+		* 退出与宿主提示），去重后拼接，单行与总量都截断 —— 只把「重点 + 原因」带进 issue 正文，
+		* 避免完整日志塞进 URL 导致请求过长。无关键行时退化为「头部 + 尾部」快照。
+		* maxChars 可由调用方按最终 URL 长度收紧（pluginIssueUrl 超限时逐档缩小）。
+		*/
+		function summarizeError(message, maxChars = MAX_CORE_CHARS) {
+			const seen = /* @__PURE__ */ new Set();
+			const core = [];
+			for (const raw of message.split(/\r?\n/)) {
+				const line = raw.trim();
+				if (!line || !CORE_LINE_RE.test(line)) continue;
+				const short = line.length > MAX_LINE_CHARS ? `${line.slice(0, MAX_LINE_CHARS)}…` : line;
+				if (!seen.has(short)) {
+					seen.add(short);
+					core.push(short);
+				}
+			}
+			let out;
+			if (core.length === 0) {
+				const tail = message.trimEnd().slice(-1e3);
+				const sep = "\n…\n";
+				const headBudget = Math.max(maxChars - tail.length - 3, 0);
+				const head = message.slice(0, 500).trim();
+				out = `${head.length > headBudget ? head.slice(0, headBudget) : head}${sep}${tail}`;
+			} else out = core.join("\n");
+			return out.length > maxChars ? `${out.slice(0, maxChars)}\n… (truncated)` : out;
+		}
+		/** 提取首个错误代码（如 ERR_PNPM_PREPARE_PACKAGE），无则 null。 */
+		function coreErrorCode(message) {
+			const m = message.match(/\[?ERR_[A-Z_]+\]?/);
+			return m ? m[0].replace(/^\[|\]$/g, "") : null;
+		}
+		//#endregion
+		//#region src/client/logic/urls.ts
+		/** dsh-plugin.org 中文页挂在 /zh/ 前缀下，英文在根路径。 */
+		function langPathOf(lang) {
+			return lang === "zh" ? "zh/" : "";
+		}
+		/**
+		* 官网详情页两级路径：/plugins/{ownerSlug}/{slug}；
+		* 缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
+		*/
+		function pluginDetailUrl(plugin, langPath) {
+			const repo = plugin.source?.repo ?? "";
+			return `${SITE_URL}${langPath}plugins/${plugin.ownerSlug ?? repo.split("/")[0]?.toLowerCase() ?? ""}/${plugin.slug}`;
+		}
+		/**
+		* 失败弹窗里仓库地址的跳转目标：官网详情页（含插件收录信息），
+		* 与 issue 正文的 Catalog 链接同一形式（单级 /plugins/{repo}）。
+		*/
+		function pluginSiteUrl(repo) {
+			return `${SITE_URL}plugins/${repo}`;
+		}
+		/**
+		* 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
+		* 核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
+		* 错误核心摘要（完整日志太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，
+		* 故只收集重点）。错误弹窗、失败记录共用此逻辑。
+		* env 取不到时为 null，链接照常生成、只是少环境段。
+		* attempts（尝试过的安装方式，npm 反查 + 实际执行命令）：作者看到我们查过/试过的命令，
+		* 组织 scope 与 GitHub 用户名不一致时也能直接指认正确的 npm 包名。
+		*/
+		function pluginIssueUrl(repo, message, env, command, attempts) {
+			const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`;
+			const kind = classifyFailure(message);
+			const reason = /\[packaging\]/i.test(message) ? "plugin distribution is incomplete — the entry file declared in package.json is missing from the published package (github tarball or npm package); please commit build output or publish a complete package" : kind === "pluginPrepare" ? "plugin prepare/build script failed during install (packaging/distribution issue)" : kind === "pnpmIgnoredBuild" ? "plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)" : "plugin-side install failure";
+			const code = coreErrorCode(message);
+			const build = (coreChars) => {
+				const body = [
+					"## Summary",
+					`- Cause: ${reason}`,
+					...code ? [`- Key error: \`${code}\``] : [],
+					"",
+					`## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
+					`本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
+					`- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ""} add git+https://github.com/${repo}.git`}\``,
+					`- 执行结果：安装失败，未能安装该插件。`,
+					...attempts && attempts.length > 0 ? [
+						"",
+						"## Attempted install channels（已尝试的安装方式）",
+						...attempts.map((a) => `- ${a}`)
+					] : [],
+					.../\[packaging\]/i.test(message) ? [
+						"",
+						"## 安装方式说明",
+						"DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add git+https://github.com/owner/repo.git`（Git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。"
+					] : [],
+					"",
+					"## Environment",
+					`- Plugin: \`${repo}\``,
+					...env ? [
+						`- DSH: ${env.dshVersion ? `v${env.dshVersion}` : "unknown"}`,
+						`- Plugin Hub: v${PLUGIN_VERSION}`,
+						`- Node: ${env.nodeVersion}`,
+						`- OS: ${env.platform} ${env.arch} (${env.release})`,
+						`- Profile: \`${env.profile}\``,
+						`- DSH Home: \`${env.dshHome}\``
+					] : [],
+					`- Catalog: [${pluginSiteUrl(repo)}](${pluginSiteUrl(repo)})`,
+					"",
+					"## Error (core)",
+					"",
+					"```",
+					summarizeError(message, coreChars),
+					"```",
+					"",
+					"---",
+					`This error was produced by the [dsh-plugin-hub](${GITHUB_URL}) installer bundled with DeepSeek Harness.`
+				].join("\n");
+				return `https://github.com/${repo}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+			};
+			const MAX_URL_CHARS = 7600;
+			let url = build(MAX_CORE_CHARS);
+			if (url.length > MAX_URL_CHARS) for (const budget of [
+				4e3,
+				2500,
+				1400,
+				800,
+				400
+			]) {
+				url = build(budget);
+				if (url.length <= MAX_URL_CHARS) break;
+			}
+			return url;
+		}
+		//#endregion
+		//#region src/client/hooks/useLanguage.ts
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Language state for the section: follows the host (system) locale by
+		* default, with an optional manual toggle that wins until the user changes
+		* it back. Exposes the localized dictionary lookup `t()` plus the zh/en
+		* language flag and the /zh/ URL path prefix.
+		*/
+		function useLanguage(locale) {
+			/** 界面语言：默认跟随宿主（系统）语言；右上角按钮可手动切换，切换后以手动选择为准 */
+			const [manualLang, setManualLang] = (0, react.useState)(null);
+			const lang = manualLang ?? locale.getSnapshot().active;
+			const langKey = lang === "en" ? "en" : "zh";
+			const langPath = langPathOf(lang);
+			const dict = langKey === "en" ? en : zh;
+			const t = (key, params) => {
+				const raw = dict[key] ?? key;
+				return params ? raw.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? "")) : raw;
+			};
+			return {
+				lang,
+				langKey,
+				langPath,
+				t,
+				toggleLang: () => setManualLang(lang === "en" ? "zh" : "en")
+			};
+		}
+		//#endregion
+		//#region src/client/hooks/useSettings.ts
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Hub settings state: loaded once from the host's local /settings route
+		* (persisted at ~/.dsh/profiles/<profile>/hub-settings.json), updated
+		* optimistically. Every change POSTs the patch immediately so a toggled
+		* switch survives a reload; a host without the server routes falls back to
+		* the defaults and keeps working (settings simply do not persist).
+		*/
+		const DEFAULT_SETTINGS = {
+			checkUpdatesOnStart: true,
+			autoInstallUpdates: false,
+			npmRegistry: "",
+			proxy: "",
+			enableNpmInstall: true,
+			enableGitInstall: true,
+			logPath: ""
+		};
+		async function loadRemote() {
+			try {
+				const res = await fetch("/dsh-plugin-hub/settings", { cache: "no-store" });
+				if (!res.ok) throw new Error(`settings ${res.status}`);
+				const data = await res.json();
+				return {
+					...DEFAULT_SETTINGS,
+					...data
+				};
+			} catch {
+				return DEFAULT_SETTINGS;
+			}
+		}
+		function useSettings() {
+			const [settings, setSettings] = (0, react.useState)(DEFAULT_SETTINGS);
+			/** 服务端配置是否已加载：更新策略等启动期逻辑须等真实值，避免用默认值误触发 */
+			const [ready, setReady] = (0, react.useState)(false);
+			(0, react.useEffect)(() => {
+				let alive = true;
+				loadRemote().then((s) => {
+					if (!alive) return;
+					setSettings(s);
+					setReady(true);
+				});
+				return () => {
+					alive = false;
+				};
+			}, []);
+			return {
+				settings,
+				ready,
+				update: (0, react.useCallback)((patch) => {
+					setSettings((prev) => ({
+						...prev,
+						...patch
+					}));
+					fetch("/dsh-plugin-hub/settings", {
+						method: "POST",
+						headers: { "content-type": "application/json" },
+						body: JSON.stringify(patch),
+						cache: "no-store"
+					}).catch(() => {});
+				}, []),
+				reset: (0, react.useCallback)(() => {
+					setSettings({ ...DEFAULT_SETTINGS });
+					fetch("/dsh-plugin-hub/settings/reset", {
+						method: "POST",
+						headers: { "content-type": "application/json" },
+						body: "{}",
+						cache: "no-store"
+					}).catch(() => {});
+				}, [])
 			};
 		}
 		//#endregion
@@ -1005,8 +1603,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* vanished tasks against /status, and exposes the queue actions (install,
 		* uninstall, cancel) plus the modal task lookups used by the dialogs.
 		*/
+		/** 安装/卸载请求超时（ms）：服务端 preflight + npm 反查可能耗时（各自都有超时，合计约 20~30s），
+		*  给足余量；超时主动中止，避免服务端 preflight 网络挂起时前端永久卡「安装中 0%」。 */
+		const REQUEST_TIMEOUT_MS = 6e4;
 		function useTaskQueue(opts) {
-			const { t, refreshInstalled, onInstallDone, onUninstallDone, onError, installPlugin, uninstallPlugin, installedName, resolvePending } = opts;
+			const { t, refreshInstalled, onInstallDone, onUninstallDone, onError, installPlugin, installCustomTarget, uninstallPlugin, uninstallName, installedName, resolvePending } = opts;
 			const [queue, setQueue] = (0, react.useState)([]);
 			const queueRef = (0, react.useRef)([]);
 			/** 待重启列表（服务端内存态 + 本地展示信息补齐）；与 queue 一样以 ref 为唯一事实来源。 */
@@ -1276,48 +1877,51 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				};
 			}, []);
 			/** 弹窗动作：直接安装。请求宿主本地路由，任务进入服务端队列（FIFO），弹窗内实时显示进度。 */
-			const installNow = async (p, opts) => {
-				const repo = p.source?.repo ?? "";
-				if (!repo) return;
-				const { target } = installTargetOf(p);
-				if (!target) return;
-				if (queueRef.current.some((q) => q.kind === "install" && q.target === repo)) return;
-				if (submittingRef.current.has(repo)) return;
-				submittingRef.current.add(repo);
+			/** 安装入队核心：目录插件（catalog，后端走目录白名单）与命令行安装（custom，
+			*  受安全开关控制）共用。队列条目一律用仓库名（repo）展示/防重，只有发给后端的
+			*  实际安装目标（target）随通道变化（npm 包名 / github: 源）。 */
+			const submitInstall = async (input) => {
+				if (queueRef.current.some((q) => q.kind === "install" && q.target === input.repo)) return;
+				if (submittingRef.current.has(input.repo)) return;
+				submittingRef.current.add(input.repo);
 				tempIdRef.current -= 1;
 				const tempId = tempIdRef.current;
 				modalTaskRef.current = tempId;
 				applyQueue((prev) => [...prev, {
 					id: tempId,
 					kind: "install",
-					target: repo,
-					repo,
-					desc: p.description,
-					version: p.version,
-					updatedAt: p.dates?.repoUpdatedAt,
+					target: input.repo,
+					repo: input.repo,
+					desc: input.desc,
+					version: input.version,
+					updatedAt: input.updatedAt,
 					status: "running",
 					progress: 0,
 					lines: [],
 					optimistic: true,
-					command: installCommandOf(p, true),
+					command: input.command,
 					attempts: [],
 					needsRestart: true
 				}]);
 				setSubmitting(true);
+				const controller = new AbortController();
+				const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 				try {
 					const res = await fetch("/dsh-plugin-hub/install", {
 						method: "POST",
 						headers: { "content-type": "application/json" },
 						body: JSON.stringify({
-							repo: target,
-							display: repo,
-							mode: opts?.update ? "update" : void 0
-						})
+							repo: input.target,
+							display: input.repo,
+							source: input.source,
+							mode: input.update ? "update" : void 0
+						}),
+						signal: controller.signal
 					});
 					const data = await res.json();
 					if (!data.ok || typeof data.task !== "number") {
 						applyQueue((prev) => prev.filter((x) => x.id !== tempId));
-						onError(data.error ?? `HTTP ${res.status}`, repo, "install", installCommandOf(p, true), data.attempts);
+						onError(data.error || `HTTP ${res.status}`, input.repo, "install", input.command, data.attempts);
 						return;
 					}
 					const taskId = data.task;
@@ -1327,28 +1931,63 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						id: taskId,
 						optimistic: void 0
 					} : x));
-					pendingInfoRef.current.set(repo, {
-						desc: p.description,
-						version: p.version
+					pendingInfoRef.current.set(input.repo, {
+						desc: input.desc,
+						version: input.version
 					});
 					pollQueue();
-				} catch {
+				} catch (err) {
 					applyQueue((prev) => prev.filter((x) => x.id !== tempId));
-					onError(t("installFail"), repo, "install", installCommandOf(p, true));
+					const reason = err?.name === "AbortError" ? t("requestTimeout") : err instanceof Error && err.message ? err.message : String(err ?? "");
+					onError(reason ? `${t("installFail")} — ${reason}` : t("installFail"), input.repo, "install", input.command);
 				} finally {
-					submittingRef.current.delete(repo);
+					window.clearTimeout(timeout);
+					submittingRef.current.delete(input.repo);
 					setSubmitting(false);
 				}
 			};
-			/** 弹窗动作：直接卸载。与安装同一队列机制，弹窗内实时显示进度。 */
-			const uninstallNow = async (p) => {
-				const name = installedName(p);
+			/** 目录插件安装：通道由目录数据（npmPackage）决定，走 catalog 白名单。 */
+			const installNow = async (p, opts) => {
+				const repo = p.source?.repo ?? "";
+				if (!repo) return;
+				const { target } = installTargetOf$1(p);
+				if (!target) return;
+				await submitInstall({
+					target,
+					repo,
+					desc: p.description,
+					version: p.version,
+					updatedAt: p.dates?.repoUpdatedAt,
+					command: installCommandOf(p, true),
+					source: "catalog",
+					update: opts?.update
+				});
+			};
+			/** 命令行安装：用户手输 npm 包名或 GitHub 地址，走 custom 源（受安全开关控制）。
+			*  update=true 时对已安装目标放行覆盖重装（与目录插件「更新」同一语义）。
+			*  队列展示/防重一律用归一化身份（owner/repo 或 npm 包名）：与服务端 /active 合并、
+			*  弹窗目标匹配同口径，npm 包名透传不受影响。 */
+			const installCustom = async (raw, opts) => {
+				const target = raw.trim();
+				if (!target) return;
+				const repo = repoFromInstallTarget(target);
+				await submitInstall({
+					target,
+					repo,
+					command: `pnpm add ${target}`,
+					source: "custom",
+					update: opts?.update
+				});
+			};
+			/** 卸载入队核心：按 npm 包名直卸（目录插件与自定义安装共用，弹窗进度匹配同源）。 */
+			const enqueueUninstall = async (name, repo, desc) => {
 				if (!name) return;
-				const repo = p.source?.repo ?? null;
 				if (queueRef.current.some((q) => q.kind === "uninstall" && q.target === name)) return;
 				if (submittingRef.current.has(name)) return;
 				submittingRef.current.add(name);
 				setSubmitting(true);
+				const controller = new AbortController();
+				const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 				try {
 					const res = await fetch("/dsh-plugin-hub/uninstall", {
 						method: "POST",
@@ -1356,11 +1995,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						body: JSON.stringify({
 							name,
 							repo: repo ?? void 0
-						})
+						}),
+						signal: controller.signal
 					});
 					const data = await res.json();
 					if (!data.ok || typeof data.task !== "number") {
-						onError(data.error ?? `HTTP ${res.status}`, repo, "uninstall");
+						onError(data.error || `HTTP ${res.status}`, repo, "uninstall");
 						return;
 					}
 					const taskId = data.task;
@@ -1369,7 +2009,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						id: taskId,
 						kind: "uninstall",
 						target: name,
-						desc: p.description,
+						desc,
 						repo,
 						status: "pending",
 						progress: 0,
@@ -1377,12 +2017,24 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 						needsRestart: true
 					}]);
 					pollQueue();
-				} catch {
-					onError(t("uninstallFail"), repo, "uninstall");
+				} catch (err) {
+					const reason = err?.name === "AbortError" ? t("requestTimeout") : err instanceof Error && err.message ? err.message : String(err ?? "");
+					onError(reason ? `${t("uninstallFail")} — ${reason}` : t("uninstallFail"), repo, "uninstall");
 				} finally {
+					window.clearTimeout(timeout);
 					submittingRef.current.delete(name);
 					setSubmitting(false);
 				}
+			};
+			/** 弹窗动作：直接卸载（目录插件入口）。与安装同一队列机制，弹窗内实时显示进度。 */
+			const uninstallNow = async (p) => {
+				const name = installedName(p);
+				if (!name) return;
+				await enqueueUninstall(name, p.source?.repo ?? null, p.description);
+			};
+			/** 已安装视图动作：按已安装项卸载（覆盖目录外自定义安装，无目录数据也能卸）。 */
+			const uninstallItem = async (item) => {
+				await enqueueUninstall(item.name, item.repo, item.plugin?.description);
 			};
 			/** 取消任务：排队中立即出队，执行中终止子进程；先标记「正在取消」短暂过渡后再移除。 */
 			const cancelTask = async (id) => {
@@ -1407,130 +2059,154 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const clearModalTask = () => {
 				modalTaskRef.current = null;
 			};
+			const installModalTarget = installPlugin?.source?.repo ?? (installCustomTarget ? repoFromInstallTarget(installCustomTarget) : null);
 			return {
 				queue,
 				pendingRestarts,
-				installModalTask: installPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === (installPlugin.source?.repo ?? "") && q.status !== "cancelling") ?? null : null,
-				uninstallModalTask: uninstallPlugin ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "uninstall" && q.target === (installedName(uninstallPlugin) ?? "") && q.status !== "cancelling") ?? null : null,
+				installModalTask: installPlugin || installCustomTarget ? queue.find((q) => q.id === modalTaskRef.current && q.kind === "install" && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === installModalTarget && q.status !== "cancelling") ?? null : null,
+				uninstallModalTask: uninstallPlugin || uninstallName ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "uninstall" && q.target === (uninstallName ?? installedName(uninstallPlugin) ?? "") && q.status !== "cancelling") ?? null : null,
 				submitting,
 				installNow,
+				installCustom,
 				uninstallNow,
+				uninstallItem,
 				cancelTask,
 				clearModalTask
 			};
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
-		const css$3 = ".BiQ1zG_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out BiQ1zG_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.BiQ1zG_modal,.BiQ1zG_errorModal{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out BiQ1zG_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.BiQ1zG_errorModal{width:640px;max-width:calc(100vw - 48px)}.BiQ1zG_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.BiQ1zG_modalTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_modalTitleBusy{color:var(--hub-brand)}.BiQ1zG_modalTitleQueued{color:var(--hub-warning)}.BiQ1zG_modalClose{width:24px;height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.BiQ1zG_modalClose:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.BiQ1zG_modalDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_trustHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_cliOnlyHint{color:var(--hub-text-secondary);background:var(--hub-bg-hover);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_failedCopyHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.BiQ1zG_modalLabel{min-width:64px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);font-weight:500;overflow:hidden}.BiQ1zG_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.BiQ1zG_modalLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_linkIcon{flex-shrink:0}.BiQ1zG_modalCmd{color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_modalCmd:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.BiQ1zG_modalCmdCopy{color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_modalCmdCopy:hover{color:var(--hub-brand-hover);background:var(--hub-bg-2)}.BiQ1zG_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.BiQ1zG_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.BiQ1zG_toast{z-index:1000;background:var(--hub-btn-fill);color:var(--hub-text-on-fill);pointer-events:none;white-space:nowrap;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out BiQ1zG_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes BiQ1zG_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.BiQ1zG_toastFail{background:var(--hub-danger);color:#fff;border-color:#ffffff3d}.BiQ1zG_queueSection{flex-direction:column;gap:6px;display:flex}.BiQ1zG_queueSectionTitle{color:var(--hub-text-secondary);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_pendingRowStatus{color:var(--hub-warn);flex-shrink:0;font-weight:500}.BiQ1zG_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.BiQ1zG_queueRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.BiQ1zG_queueRow:hover{background:var(--hub-brand-tint)}.BiQ1zG_queueRowHead{align-items:center;gap:10px;display:flex}.BiQ1zG_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.BiQ1zG_queueRowDesc{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.BiQ1zG_queueRowBody{align-items:center;gap:8px;display:flex}.BiQ1zG_queueRowStatus{color:var(--hub-brand);flex-shrink:0;font-weight:500}.BiQ1zG_queueRowTrack{flex:1;min-width:0}.BiQ1zG_queueRowPct{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0}.BiQ1zG_stripCancel{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,color .12s}.BiQ1zG_stripCancel:hover{background:var(--hub-danger-tint);color:var(--hub-danger-text)}.BiQ1zG_stripCancel:disabled{opacity:.45;cursor:default}.BiQ1zG_queuedHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.BiQ1zG_errorTitle{color:var(--hub-danger-text);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_errorBox{border:1px solid var(--hub-danger-border);background:var(--hub-danger-tint-weak);max-height:240px;color:var(--hub-text-primary);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.BiQ1zG_errorCopySoft{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_errorCopySoft:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_errorHint{color:var(--hub-text-tertiary);font-size:12px;line-height:18px}.BiQ1zG_modalCancel,.BiQ1zG_modalCopy{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_modalCancel:hover,.BiQ1zG_modalCopy:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalInstall{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_modalInstall:hover{background:var(--hub-btn-hover)}.BiQ1zG_modalCopy:disabled,.BiQ1zG_modalInstall:disabled,.BiQ1zG_modalCancel:disabled,.BiQ1zG_modalClose:disabled,.BiQ1zG_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_uninstallConfirm{color:#fff;background:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_uninstallConfirm:hover{background:var(--hub-danger-hover)}.BiQ1zG_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.BiQ1zG_resultCheck{background:var(--hub-success-tint);width:40px;height:40px;color:var(--hub-success);border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.BiQ1zG_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.BiQ1zG_resultTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_resultDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_resultRestarting{color:var(--hub-text-tertiary);padding:12px 0 6px;font-size:12px;line-height:18px}.BiQ1zG_restartLater{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_restartLater:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_restartNow{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNow:hover{background:var(--hub-btn-hover)}.BiQ1zG_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_result .BiQ1zG_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartLater,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNow{min-width:100px}.BiQ1zG_progress{margin:10px 0 2px}.BiQ1zG_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.BiQ1zG_progressText{color:var(--hub-text-secondary);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.BiQ1zG_progressTrack{background:var(--hub-border-2);border-radius:2px;height:4px;overflow:hidden}.BiQ1zG_progressFill{background:var(--hub-brand);border-radius:2px;height:100%;transition:width .32s}.BiQ1zG_progressFillFail{background:var(--hub-danger)}@keyframes BiQ1zG_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes BiQ1zG_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.BiQ1zG_noticeList{flex-direction:column;gap:10px;padding-right:2px;display:flex}.BiQ1zG_noticeRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;display:flex}.BiQ1zG_noticeRowMain{align-items:center;gap:10px;width:100%;min-width:0;display:flex}.BiQ1zG_noticeBadgeOk,.BiQ1zG_noticeBadgeFail{border-radius:50%;flex-shrink:0;justify-content:center;align-items:center;width:28px;height:28px;display:inline-flex;box-shadow:0 2px 6px #0000002e}.BiQ1zG_noticeBadgeOk{background:var(--hub-success)}.BiQ1zG_noticeBadgeFail{background:var(--hub-danger)}.BiQ1zG_noticeBadgeIcon{flex-shrink:0;width:12px;height:12px}.BiQ1zG_noticeMain{flex-direction:column;flex:1;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeTextOk{color:var(--hub-success);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeTextFail{color:var(--hub-danger-text);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.BiQ1zG_failRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.BiQ1zG_failHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.BiQ1zG_failKindInstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}.BiQ1zG_failKindUninstall{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}.BiQ1zG_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.BiQ1zG_failRepo:hover{text-decoration:underline}.BiQ1zG_noticeFoot{justify-content:flex-end;align-items:center;display:flex}.BiQ1zG_noticeTime{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.BiQ1zG_noticeRemove{width:22px;height:22px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:5px;flex-shrink:0;justify-content:center;align-items:center;margin-left:auto;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_noticeRemove:hover{color:var(--hub-danger-text);background:var(--hub-danger-tint)}.BiQ1zG_noticeRowOk .BiQ1zG_noticeRemove{margin-left:0}.BiQ1zG_noticeRowOk .BiQ1zG_noticeTime{margin-left:auto}.BiQ1zG_failCopy{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_failCopy:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_failEmpty{text-align:center;color:var(--hub-text-tertiary);padding:24px 0;font-size:12px;line-height:18px}.BiQ1zG_failClear{color:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_failClear:hover{color:#fff;background:var(--hub-danger)}.BiQ1zG_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.BiQ1zG_failBigIssue:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover);box-shadow:0 3px 10px #d1242f59}.BiQ1zG_failPrepareHint{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}.BiQ1zG_aboutModal{width:460px;max-width:calc(100vw - 48px)}.BiQ1zG_aboutContent{min-height:0;max-height:340px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_aboutContent>:first-child{margin-top:0}.BiQ1zG_aboutContent>:last-child{margin-bottom:0}.BiQ1zG_aboutContent h2,.BiQ1zG_aboutContent h3,.BiQ1zG_aboutContent h4,.BiQ1zG_aboutContent h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_aboutContent h2{font-size:14px}.BiQ1zG_aboutContent p{margin:4px 0}.BiQ1zG_aboutContent ul,.BiQ1zG_aboutContent ol{margin:4px 0;padding-left:18px}.BiQ1zG_aboutContent li{margin:2px 0}.BiQ1zG_aboutContent code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_aboutContent pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_aboutContent pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_aboutContent blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_aboutContent a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_aboutContent a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_aboutContent img{border-radius:8px;max-width:100%;max-height:220px;margin:8px auto;display:block;box-shadow:0 2px 8px #0000001f}.BiQ1zG_aboutMeta{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}.BiQ1zG_hubUpdateModal{width:520px;max-width:calc(100vw - 48px)}.BiQ1zG_hubUpdateMeta{flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:12px;line-height:18px;display:flex}.BiQ1zG_hubUpdateMetaItem{color:var(--hub-text-tertiary)}.BiQ1zG_hubUpdateNotes{min-height:0;max-height:300px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_hubUpdateNotes>:first-child{margin-top:0}.BiQ1zG_hubUpdateNotes>:last-child{margin-bottom:0}.BiQ1zG_hubUpdateNotes h2,.BiQ1zG_hubUpdateNotes h3,.BiQ1zG_hubUpdateNotes h4,.BiQ1zG_hubUpdateNotes h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_hubUpdateNotes h2{font-size:14px}.BiQ1zG_hubUpdateNotes p{margin:4px 0}.BiQ1zG_hubUpdateNotes ul,.BiQ1zG_hubUpdateNotes ol{margin:4px 0;padding-left:18px}.BiQ1zG_hubUpdateNotes li{margin:2px 0}.BiQ1zG_hubUpdateNotes code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_hubUpdateNotes pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_hubUpdateNotes pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_hubUpdateNotes blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_hubUpdateNotes a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_hubUpdateNotes a:hover{color:var(--hub-brand-hover);text-decoration:underline}";
-		const tagId$3 = "dsh-plugin/Modal.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$3) + "]") === null) {
+		const css$10 = ".BiQ1zG_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out BiQ1zG_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.BiQ1zG_modal,.BiQ1zG_errorModal{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out BiQ1zG_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.BiQ1zG_errorModal{width:640px;max-width:calc(100vw - 48px)}.BiQ1zG_modalWide{width:560px;max-width:calc(100vw - 48px)}.BiQ1zG_logModal{width:780px;max-width:calc(100vw - 48px)}.BiQ1zG_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.BiQ1zG_modalTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_modalTitleBusy{color:var(--hub-brand)}.BiQ1zG_modalTitleQueued{color:var(--hub-warning)}.BiQ1zG_modalClose{width:24px;height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.BiQ1zG_modalClose:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.BiQ1zG_modalDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_trustHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_cliOnlyHint{color:var(--hub-text-secondary);background:var(--hub-bg-hover);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_failedCopyHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.BiQ1zG_modalLabel{min-width:64px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);font-weight:500;overflow:hidden}.BiQ1zG_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.BiQ1zG_modalLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_linkIcon{flex-shrink:0}.BiQ1zG_modalCmd{color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_modalCmd:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.BiQ1zG_modalCmdCopy{color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_modalCmdCopy:hover{color:var(--hub-brand-hover);background:var(--hub-bg-2)}.BiQ1zG_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.BiQ1zG_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.BiQ1zG_toast{z-index:1000;background:var(--hub-btn-fill);color:var(--hub-text-on-fill);pointer-events:none;white-space:nowrap;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out BiQ1zG_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes BiQ1zG_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.BiQ1zG_toastFail{background:var(--hub-danger);color:#fff;border-color:#ffffff3d}.BiQ1zG_queueSection{flex-direction:column;gap:6px;display:flex}.BiQ1zG_queueSectionTitle{color:var(--hub-text-secondary);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_pendingRowStatus{color:var(--hub-warn);flex-shrink:0;font-weight:500}.BiQ1zG_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.BiQ1zG_queueRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.BiQ1zG_queueRow:hover{background:var(--hub-brand-tint)}.BiQ1zG_queueRowHead{align-items:center;gap:10px;display:flex}.BiQ1zG_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.BiQ1zG_queueRowDesc{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.BiQ1zG_queueRowBody{align-items:center;gap:8px;display:flex}.BiQ1zG_queueRowStatus{color:var(--hub-brand);flex-shrink:0;font-weight:500}.BiQ1zG_queueRowTrack{flex:1;min-width:0}.BiQ1zG_queueRowPct{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0}.BiQ1zG_stripCancel{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,color .12s}.BiQ1zG_stripCancel:hover{background:var(--hub-danger-tint);color:var(--hub-danger-text)}.BiQ1zG_stripCancel:disabled{opacity:.45;cursor:default}.BiQ1zG_queuedHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.BiQ1zG_errorTitle{color:var(--hub-danger-text);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_errorBox{border:1px solid var(--hub-danger-border);background:var(--hub-danger-tint-weak);max-height:240px;color:var(--hub-text-primary);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.BiQ1zG_errorCopySoft{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_errorCopySoft:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_errorHint{color:var(--hub-text-tertiary);font-size:12px;line-height:18px}.BiQ1zG_modalCancel,.BiQ1zG_modalCopy{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_modalCancel:hover,.BiQ1zG_modalCopy:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalInstall{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_modalInstall:hover{background:var(--hub-btn-hover)}.BiQ1zG_modalCopy:disabled,.BiQ1zG_modalInstall:disabled,.BiQ1zG_modalCancel:disabled,.BiQ1zG_modalClose:disabled,.BiQ1zG_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_uninstallConfirm{color:#fff;background:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_uninstallConfirm:hover{background:var(--hub-danger-hover)}.BiQ1zG_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.BiQ1zG_resultCheck{background:var(--hub-success-tint);width:40px;height:40px;color:var(--hub-success);border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.BiQ1zG_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.BiQ1zG_resultTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_resultDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_resultRestarting{color:var(--hub-text-tertiary);padding:12px 0 6px;font-size:12px;line-height:18px}.BiQ1zG_restartLater{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_restartLater:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_restartNow{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNow:hover{background:var(--hub-btn-hover)}.BiQ1zG_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_restartNowWarning{color:#fff;background:var(--hub-warning);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNowWarning:hover{background:var(--hub-warning-hover)}.BiQ1zG_restartNowWarning:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_result .BiQ1zG_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartLater,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNow,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNowWarning{min-width:100px}.BiQ1zG_progress{margin:10px 0 2px}.BiQ1zG_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.BiQ1zG_progressText{color:var(--hub-text-secondary);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.BiQ1zG_progressTrack{background:var(--hub-border-2);border-radius:2px;height:4px;overflow:hidden}.BiQ1zG_progressFill{background:var(--hub-brand);border-radius:2px;height:100%;transition:width .32s}.BiQ1zG_progressFillFail{background:var(--hub-danger)}@keyframes BiQ1zG_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes BiQ1zG_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.BiQ1zG_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.BiQ1zG_failRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.BiQ1zG_failHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeList{flex-direction:column;gap:10px;padding-right:2px;display:flex}.BiQ1zG_noticeRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;display:flex}.BiQ1zG_noticeRowMain{align-items:center;gap:10px;width:100%;min-width:0;display:flex}.BiQ1zG_noticeBadgeOk,.BiQ1zG_noticeBadgeFail{border-radius:50%;flex-shrink:0;justify-content:center;align-items:center;width:28px;height:28px;display:inline-flex;box-shadow:0 2px 6px #0000002e}.BiQ1zG_noticeBadgeOk{background:var(--hub-success)}.BiQ1zG_noticeBadgeFail{background:var(--hub-danger)}.BiQ1zG_noticeBadgeIcon{flex-shrink:0;width:12px;height:12px}.BiQ1zG_noticeMain{flex-direction:column;flex:1;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeTextOk{color:var(--hub-success);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeTextFail{color:var(--hub-danger-text);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeFoot{justify-content:flex-end;align-items:center;display:flex}.BiQ1zG_noticeTime{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.BiQ1zG_noticeRemove{width:22px;height:22px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:5px;flex-shrink:0;justify-content:center;align-items:center;margin-left:auto;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_noticeRemove:hover{color:var(--hub-danger-text);background:var(--hub-danger-tint)}.BiQ1zG_noticeRowOk .BiQ1zG_noticeRemove{margin-left:0}.BiQ1zG_noticeRowOk .BiQ1zG_noticeTime{margin-left:auto}.BiQ1zG_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.BiQ1zG_failKindInstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}.BiQ1zG_failKindUninstall{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}.BiQ1zG_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.BiQ1zG_failRepo:hover{text-decoration:underline}.BiQ1zG_failCopy{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_failCopy:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_failEmpty{text-align:center;color:var(--hub-text-tertiary);padding:24px 0;font-size:12px;line-height:18px}.BiQ1zG_failClear{color:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_failClear:hover{color:#fff;background:var(--hub-danger)}.BiQ1zG_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.BiQ1zG_failBigIssue:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover);box-shadow:0 3px 10px #d1242f59}.BiQ1zG_failPrepareHint{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}.BiQ1zG_aboutModal{width:460px;max-width:calc(100vw - 48px)}.BiQ1zG_aboutContent{min-height:0;max-height:340px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_aboutContent>:first-child{margin-top:0}.BiQ1zG_aboutContent>:last-child{margin-bottom:0}.BiQ1zG_aboutContent h2,.BiQ1zG_aboutContent h3,.BiQ1zG_aboutContent h4,.BiQ1zG_aboutContent h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_aboutContent h2{font-size:14px}.BiQ1zG_aboutContent p{margin:4px 0}.BiQ1zG_aboutContent ul,.BiQ1zG_aboutContent ol{margin:4px 0;padding-left:18px}.BiQ1zG_aboutContent li{margin:2px 0}.BiQ1zG_aboutContent code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_aboutContent pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_aboutContent pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_aboutContent blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_aboutContent a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_aboutContent a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_aboutContent img{border-radius:8px;max-width:100%;max-height:220px;margin:8px auto;display:block;box-shadow:0 2px 8px #0000001f}.BiQ1zG_aboutMeta{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}.BiQ1zG_hubUpdateModal{width:520px;max-width:calc(100vw - 48px)}.BiQ1zG_hubUpdateMeta{flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:12px;line-height:18px;display:flex}.BiQ1zG_hubUpdateMetaItem{color:var(--hub-text-tertiary)}.BiQ1zG_hubUpdateNotes{min-height:0;max-height:300px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_hubUpdateNotes>:first-child{margin-top:0}.BiQ1zG_hubUpdateNotes>:last-child{margin-bottom:0}.BiQ1zG_hubUpdateNotes h2,.BiQ1zG_hubUpdateNotes h3,.BiQ1zG_hubUpdateNotes h4,.BiQ1zG_hubUpdateNotes h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_hubUpdateNotes h2{font-size:14px}.BiQ1zG_hubUpdateNotes p{margin:4px 0}.BiQ1zG_hubUpdateNotes ul,.BiQ1zG_hubUpdateNotes ol{margin:4px 0;padding-left:18px}.BiQ1zG_hubUpdateNotes li{margin:2px 0}.BiQ1zG_hubUpdateNotes code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_hubUpdateNotes pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_hubUpdateNotes pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_hubUpdateNotes blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_hubUpdateNotes a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_hubUpdateNotes a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_detailModal{width:480px;max-width:calc(100vw - 48px)}.BiQ1zG_detailUpdateHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_detailGrid{flex-direction:column;gap:6px;display:flex}.BiQ1zG_detailRow{align-items:baseline;gap:10px;min-width:0;font-size:12px;line-height:20px;display:flex}.BiQ1zG_detailLabel{text-align:right;width:76px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_detailValue{min-width:0;color:var(--hub-text-primary);flex-wrap:wrap;flex:auto;align-items:baseline;gap:4px 6px;font-weight:500;display:flex}.BiQ1zG_detailMono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:500}.BiQ1zG_detailArrow{color:var(--hub-text-tertiary);align-items:baseline;gap:4px;display:inline-flex}.BiQ1zG_detailDim{color:var(--hub-text-tertiary);font-size:11px;font-weight:400}.BiQ1zG_detailLink{min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex}.BiQ1zG_detailLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_detailStars{color:#b45309;font-weight:600}.BiQ1zG_detailPath{min-width:0;color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:6px;flex:auto;justify-content:space-between;align-items:center;gap:6px;padding:3px 3px 3px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_detailPath:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_detailPathText{text-overflow:ellipsis;white-space:nowrap;cursor:pointer;-webkit-user-select:none;user-select:none;min-width:0;overflow:hidden}.BiQ1zG_detailPathActions{flex-shrink:0;align-items:center;gap:4px;display:inline-flex}.BiQ1zG_detailPathBtn{width:28px;height:28px;color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:center;align-items:center;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.BiQ1zG_detailPathBtn svg{width:15px;height:15px}.BiQ1zG_detailPathBtn:hover{color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}.BiQ1zG_detailStatusRunning,.BiQ1zG_detailStatusPending{border-radius:50%;flex-shrink:0;align-self:center;width:8px;height:8px}.BiQ1zG_detailStatusRunning{background:var(--hub-success)}.BiQ1zG_detailStatusPending{background:var(--hub-warning)}.BiQ1zG_detailStatusText{font-weight:500}";
+		const tagId$10 = "dsh-plugin/Modal.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$10) + "]") === null) {
 			const tag = document.createElement("style");
 			tag.dataset.plugin = "dsh-plugin";
-			tag.dataset.pluginCss = tagId$3;
-			tag.textContent = css$3;
+			tag.dataset.pluginCss = tagId$10;
+			tag.textContent = css$10;
 			document.head.appendChild(tag);
 		}
 		var Modal_module_css_default = {
-			"resultDesc": "BiQ1zG_resultDesc",
-			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
-			"modalBody": "BiQ1zG_modalBody",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"trustHint": "BiQ1zG_trustHint",
-			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"progressText": "BiQ1zG_progressText",
-			"noticeList": "BiQ1zG_noticeList",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"result": "BiQ1zG_result",
-			"restartNow": "BiQ1zG_restartNow",
-			"modalIn": "BiQ1zG_modalIn",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"errorBox": "BiQ1zG_errorBox",
-			"toastIn": "BiQ1zG_toastIn",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"progressHead": "BiQ1zG_progressHead",
-			"modal": "BiQ1zG_modal",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"progressFill": "BiQ1zG_progressFill",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"aboutModal": "BiQ1zG_aboutModal",
-			"failList": "BiQ1zG_failList",
-			"modalHead": "BiQ1zG_modalHead",
 			"noticeRow": "BiQ1zG_noticeRow",
-			"toast": "BiQ1zG_toast",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"noticeRowOk": "BiQ1zG_noticeRowOk",
-			"aboutMeta": "BiQ1zG_aboutMeta",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"restartLater": "BiQ1zG_restartLater",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"queueSection": "BiQ1zG_queueSection",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"modalRow": "BiQ1zG_modalRow",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"modalClose": "BiQ1zG_modalClose",
-			"failRow": "BiQ1zG_failRow",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"failRepo": "BiQ1zG_failRepo",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"aboutContent": "BiQ1zG_aboutContent",
+			"modalCmdText": "BiQ1zG_modalCmdText",
 			"errorModal": "BiQ1zG_errorModal",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"progress": "BiQ1zG_progress",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"toastFail": "BiQ1zG_toastFail",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"queueRow": "BiQ1zG_queueRow",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"failCopy": "BiQ1zG_failCopy",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"overlay": "BiQ1zG_overlay",
-			"modalActions": "BiQ1zG_modalActions",
-			"queueRowBody": "BiQ1zG_queueRowBody",
-			"modalLink": "BiQ1zG_modalLink",
+			"detailRow": "BiQ1zG_detailRow",
+			"failList": "BiQ1zG_failList",
+			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"queueRowHead": "BiQ1zG_queueRowHead",
 			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"errorTitle": "BiQ1zG_errorTitle",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
+			"toast": "BiQ1zG_toast",
+			"modalIn": "BiQ1zG_modalIn",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
 			"failedCopyHint": "BiQ1zG_failedCopyHint",
-			"modalValue": "BiQ1zG_modalValue",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"errorHint": "BiQ1zG_errorHint",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"failClear": "BiQ1zG_failClear",
+			"aboutMeta": "BiQ1zG_aboutMeta",
+			"restartLater": "BiQ1zG_restartLater",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"modalWide": "BiQ1zG_modalWide",
+			"failRepo": "BiQ1zG_failRepo",
 			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
-			"noticeMain": "BiQ1zG_noticeMain",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"trustHint": "BiQ1zG_trustHint",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"progressText": "BiQ1zG_progressText",
+			"progressHead": "BiQ1zG_progressHead",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"restartNow": "BiQ1zG_restartNow",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"failCopy": "BiQ1zG_failCopy",
+			"detailMono": "BiQ1zG_detailMono",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"modalRow": "BiQ1zG_modalRow",
+			"modalClose": "BiQ1zG_modalClose",
+			"noticeList": "BiQ1zG_noticeList",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"progress": "BiQ1zG_progress",
+			"detailLink": "BiQ1zG_detailLink",
+			"errorHint": "BiQ1zG_errorHint",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"queueRow": "BiQ1zG_queueRow",
+			"detailArrow": "BiQ1zG_detailArrow",
+			"detailStars": "BiQ1zG_detailStars",
+			"failRow": "BiQ1zG_failRow",
+			"detailPathBtn": "BiQ1zG_detailPathBtn",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"detailDim": "BiQ1zG_detailDim",
+			"detailModal": "BiQ1zG_detailModal",
+			"logModal": "BiQ1zG_logModal",
+			"aboutModal": "BiQ1zG_aboutModal",
+			"overlay": "BiQ1zG_overlay",
+			"overlayIn": "BiQ1zG_overlayIn",
 			"progressFillFail": "BiQ1zG_progressFillFail",
-			"modalTitle": "BiQ1zG_modalTitle",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"errorBox": "BiQ1zG_errorBox",
 			"failHead": "BiQ1zG_failHead",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"modalBody": "BiQ1zG_modalBody",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
+			"detailStatusPending": "BiQ1zG_detailStatusPending",
+			"progressFill": "BiQ1zG_progressFill",
+			"modalValue": "BiQ1zG_modalValue",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"aboutContent": "BiQ1zG_aboutContent",
+			"detailLabel": "BiQ1zG_detailLabel",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"detailPathText": "BiQ1zG_detailPathText",
+			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
+			"result": "BiQ1zG_result",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"toastIn": "BiQ1zG_toastIn",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"detailPathActions": "BiQ1zG_detailPathActions",
 			"failKind": "BiQ1zG_failKind",
-			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes"
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"modalLink": "BiQ1zG_modalLink",
+			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"queueSection": "BiQ1zG_queueSection",
+			"detailGrid": "BiQ1zG_detailGrid",
+			"detailPath": "BiQ1zG_detailPath",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"toastFail": "BiQ1zG_toastFail",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"detailStatusText": "BiQ1zG_detailStatusText",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"modal": "BiQ1zG_modal",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"modalHead": "BiQ1zG_modalHead",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"detailValue": "BiQ1zG_detailValue",
+			"failClear": "BiQ1zG_failClear",
+			"modalActions": "BiQ1zG_modalActions"
 		};
 		//#endregion
-		//#region src/client/components/icons.tsx
+		//#region src/client/components/ui/icons.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -1672,7 +2348,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeLinecap: "round"
 			}));
 		}
-		/** 下拉箭头图标：向下 V 形（stroke 继承 currentColor），下拉框触发器右侧提示可展开。 */
+		/** 文件夹图标（Material folder）：「在文件夹中显示」按钮用，fill 继承 currentColor。 */
+		function FolderIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 13,
+				height: 13,
+				fill: "currentColor",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", { d: "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" }));
+		}
+		/** 下拉箭头图标：向下 V 形（stroke 继承 currentColor），下拉按钮触发器右侧提示可展开。 */
 		function ChevronDownIcon() {
 			return (0, react.createElement)("svg", {
 				viewBox: "0 0 16 16",
@@ -1688,8 +2374,226 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeLinejoin: "round"
 			}));
 		}
+		/** 排序方向小箭头：正序(up) 朝上 / 倒序(down) 朝下，随 currentColor 着色，仅当前排序按钮显示 */
+		function SortArrowIcon({ up }) {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 16 16",
+				width: 10,
+				height: 10,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: up ? "M4 9.5L8 5.5l4 4" : "M4 6.5L8 10.5l4-4",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
+		/** 插件中心图标：店面货架（stroke 继承 currentColor），一级导航「插件中心」tab 用。 */
+		function MarketIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 16,
+				height: 16,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: "M4 10L5.6 4.5h12.8L20 10",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M4 10a2.2 2.2 0 0 0 4.4 0 2.2 2.2 0 0 0 4.4 0 2.2 2.2 0 0 0 4.4 0",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M5 13v6.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V13",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
+		/** 自定义安装图标：终端窗口 + 提示符（stroke 继承 currentColor），一级导航「自定义安装」tab 用。 */
+		function TerminalIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 16,
+				height: 16,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("rect", {
+				x: 3,
+				y: 4.5,
+				width: 18,
+				height: 15,
+				rx: 2.5,
+				stroke: "currentColor",
+				strokeWidth: 1.8
+			}), (0, react.createElement)("path", {
+				d: "M6.8 9.2l3.4 2.8-3.4 2.8",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M12.5 14.8h4.5",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round"
+			}));
+		}
+		/** 已安装图标：插件包（圆角方盒 + 盒盖线）+ 对勾（stroke 继承 currentColor），一级导航「已安装」tab 用。 */
+		function InstalledIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 16,
+				height: 16,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("rect", {
+				x: 4.5,
+				y: 6.5,
+				width: 15,
+				height: 13,
+				rx: 2.5,
+				stroke: "currentColor",
+				strokeWidth: 1.8
+			}), (0, react.createElement)("path", {
+				d: "M4.5 11h15",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round"
+			}), (0, react.createElement)("path", {
+				d: "M9.2 15.2l2.1 2.1 3.6-4",
+				stroke: "currentColor",
+				strokeWidth: 1.8,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
+		/** 通知铃铛图标：实心铃铛（fill 继承 currentColor），采用 Material 官方 notifications 路径，一级导航通知中心入口用。 */
+		function BellIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 15,
+				height: 15,
+				fill: "currentColor",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", { d: "M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" }));
+		}
+		/** 设置图标：实心齿轮（fill 继承 currentColor），采用 Material 官方 settings 路径，齿形清晰、辨识度高。 */
+		function SettingsIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 16,
+				height: 16,
+				fill: "currentColor",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", { d: "M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61L19.14 12.94zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" }));
+		}
+		/** 更新与通道图标：循环同步箭头（fill 继承 currentColor），采用 Material 官方 sync 路径，设置左侧导航「更新与通道」用。 */
+		function UpdatesIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 24 24",
+				width: 15,
+				height: 15,
+				fill: "currentColor",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", { d: "M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" }));
+		}
+		/** 安全与信任图标：盾牌 + 对勾（stroke 继承 currentColor），设置左侧导航「安全与信任」用。 */
+		function SecurityIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 16 16",
+				width: 15,
+				height: 15,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: "M8 1.8L13.8 3.8v4.3c0 3.5-2.2 6.3-5.8 7.6-3.6-1.3-5.8-4.1-5.8-7.6V3.8L8 1.8z",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M5.6 8.1l1.7 1.7 3.2-3.4",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
+		/** 诊断图标：心跳脉冲线（stroke 继承 currentColor），设置左侧导航「诊断」用。 */
+		function DiagnosticsIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 16 16",
+				width: 15,
+				height: 15,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: "M1.6 8h3l1.9-4.2 2.9 8.4 1.9-4.2h3.1",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
+		/** 恢复默认图标：逆时针还原箭头（stroke 继承 currentColor），设置左侧导航「恢复默认」用。 */
+		function ResetIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 16 16",
+				width: 15,
+				height: 15,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: "M3 5.2A5.6 5.6 0 1 1 2.4 9.6",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M2.6 2.6v2.6h2.6",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}));
+		}
+		/** 系统日志图标：文档纸 + 三行文字（stroke 继承 currentColor），设置左侧导航「系统日志」用。 */
+		function LogsIcon() {
+			return (0, react.createElement)("svg", {
+				viewBox: "0 0 16 16",
+				width: 15,
+				height: 15,
+				fill: "none",
+				"aria-hidden": "true"
+			}, (0, react.createElement)("path", {
+				d: "M4.2 1.8h4.8l2.8 2.8v9.6H4.2z",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M9 1.8v2.8h2.8",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round",
+				strokeLinejoin: "round"
+			}), (0, react.createElement)("path", {
+				d: "M5.6 9.2h4.8M5.6 11.2h4.8",
+				stroke: "currentColor",
+				strokeWidth: 1.5,
+				strokeLinecap: "round"
+			}));
+		}
 		//#endregion
-		//#region src/client/components/ProgressView.tsx
+		//#region src/client/components/modals/ProgressView.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -1707,7 +2611,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			})));
 		}
 		//#endregion
-		//#region src/client/components/modals.tsx
+		//#region src/client/components/modals/modals.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -1741,7 +2645,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onClick: onClose,
 				disabled: restarting
 			}, t("restartLater")), (0, react.createElement)("button", {
-				className: Modal_module_css_default.restartNow,
+				className: Modal_module_css_default.restartNowWarning,
 				onClick: onRestart,
 				disabled: restarting
 			}, restarting ? t("restarting") : t("restartNow")))]) : (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
@@ -1752,11 +2656,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/**
 		* 信任确认弹窗：安装进入后台队列后弹窗仍可关闭（任务继续），
 		* 只在本任务执行中展示实时进度；完成后切换为结果视图，与卸载一致。
+		* 目录插件与命令行安装（customTarget 模式）共用同一套确认/进度/结果流程。
 		*/
 		function InstallModal(props) {
-			const { plugin, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props;
+			const { plugin, customTarget, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props;
 			const busy = submitting || task !== null && (task.status === "pending" || task.status === "running");
-			const name = plugin.displayName ?? plugin.slug;
+			const name = customTarget ?? plugin?.displayName ?? plugin?.slug ?? "";
 			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
 			const title = busy ? task && task.status === "pending" ? busyTitle(update ? t("queuedUpdateTitle") : t("queuedTitle")) : busyTitle(update ? t("updating") : t("installing")) : done ? update ? t("updateResultTitle") : t("installResultTitle") : update ? t("confirmUpdateTitle") : t("confirmTitle");
 			return (0, react.createElement)("div", {
@@ -1782,8 +2687,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onClose
 			}) : (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.trustHint }, t("confirmDesc")), (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
 				className: Modal_module_css_default.modalValue,
-				title: plugin.displayName ?? plugin.slug
-			}, plugin.displayName ?? plugin.slug)), plugin.source?.repo ? (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmSource")), (0, react.createElement)("a", {
+				title: name
+			}, name)), plugin?.source?.repo ? (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmSource")), (0, react.createElement)("a", {
 				className: Modal_module_css_default.modalLink,
 				href: pluginDetailUrl(plugin, langPath),
 				target: "_blank",
@@ -1795,7 +2700,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("copyInstallCommand"),
 				role: "button",
 				tabIndex: 0
-			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, installCommandOf(plugin)), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), cliOnly ? (0, react.createElement)("div", { className: Modal_module_css_default.cliOnlyHint }, t("cliOnlyHint")) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, task && task.status === "failed" ? (0, react.createElement)("div", { className: Modal_module_css_default.failedCopyHint }, t("failedCopyHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin)), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), cliOnly ? (0, react.createElement)("div", { className: Modal_module_css_default.cliOnlyHint }, t("cliOnlyHint")) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, task && task.status === "failed" ? (0, react.createElement)("div", { className: Modal_module_css_default.failedCopyHint }, t("failedCopyHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
 				className: Modal_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopy
@@ -1843,22 +2748,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				rel: "noopener noreferrer",
 				title: plugin.source.repo
 			}, (0, react.createElement)(LinkIcon), plugin.source.repo)) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Modal_module_css_default.modalCancel,
-				onClick: onCancel
-			}, t("confirmCancel")), (0, react.createElement)("button", {
 				className: Modal_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopyCommand
 			}, t("copyUninstallCommand")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalCancel,
+				onClick: onCancel
+			}, t("cancelUninstall")), (0, react.createElement)("button", {
 				className: Modal_module_css_default.uninstallConfirm,
 				disabled: busy,
 				onClick: onConfirm
-			}, busy ? task && task.status === "pending" ? t("queuedUninstallTitle") : t("uninstalling") : t("uninstall"))))));
+			}, busy ? task && task.status === "pending" ? t("queuedUninstallTitle") : t("uninstalling") : t("uninstallConfirm"))))));
 		}
 		/** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 		/** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
 		function ErrorModal({ message, repo, kind, command, attempts, t, env, onCopy, onClose }) {
 			const failureKind = classifyFailure(message);
+			const copyText = [
+				...command ? [command] : [],
+				...attempts ?? [],
+				message
+			].join("\n");
 			return (0, react.createElement)("div", {
 				className: Modal_module_css_default.overlay,
 				onClick: (e) => {
@@ -1880,7 +2790,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: repo
 			}, repo) : null, (0, react.createElement)("button", {
 				className: Modal_module_css_default.errorCopySoft,
-				onClick: () => onCopy(message)
+				onClick: () => onCopy(copyText)
 			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Modal_module_css_default.errorBox }, message), failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(message) ? t("failPackagingHint") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
 				className: Modal_module_css_default.failBigIssue,
 				href: pluginIssueUrl(repo, message, env, command, attempts),
@@ -1900,15 +2810,45 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 全局反馈 Toast：复制成功（反色）/ 安装完成（反色）/ 安装失败（红色）/ 卸载结果 */
 		function Toast({ toast, t }) {
-			const text = toast.kind === "copied" ? t("toastCopied") : toast.kind === "errCopied" ? t("errCopied") : toast.kind === "done" ? t("installDone") : toast.kind === "fail" ? t("installFail") : toast.kind === "removed" ? t("uninstallDone") : t("uninstallFail");
-			const fail = toast.kind === "fail" || toast.kind === "removeFail";
+			const text = toast.kind === "copied" ? t("toastCopied") : toast.kind === "errCopied" ? t("errCopied") : toast.kind === "done" ? t("installDone") : toast.kind === "fail" ? t("installFail") : toast.kind === "removed" ? t("uninstallDone") : toast.kind === "revealFail" ? t("openFolderFail") : toast.kind === "updates" ? t("updatesFound", { n: toast.n ?? 0 }) : toast.kind === "updatesAuto" ? t("updatesAutoQueued", { n: toast.n ?? 0 }) : t("uninstallFail");
+			const fail = toast.kind === "fail" || toast.kind === "removeFail" || toast.kind === "revealFail";
 			return (0, react.createElement)("div", {
 				key: toast.id,
 				className: fail ? `${Modal_module_css_default.toast} ${Modal_module_css_default.toastFail}` : Modal_module_css_default.toast
 			}, text);
 		}
+		/** 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出，
+		*  与通知中心待重启条目同一交互（说明 + 稍后重启 / 立即重启），
+		*  避免行内按钮误触直接触发宿主重启。 */
+		function RestartConfirmModal({ t, restarting, onClose, onRestartNow }) {
+			return (0, react.createElement)("div", {
+				className: Modal_module_css_default.overlay,
+				onClick: (e) => {
+					if (e.target === e.currentTarget) onClose();
+				}
+			}, (0, react.createElement)("div", {
+				className: Modal_module_css_default.modal,
+				role: "dialog",
+				"aria-modal": "true"
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.modalTitle }, t("sectionPendingRestart")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
+				type: "button",
+				"aria-label": t("errorClose"),
+				onClick: onClose
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, t("restartHint")), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartLater,
+				type: "button",
+				disabled: restarting,
+				onClick: onClose
+			}, t("restartLater")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartNowWarning,
+				type: "button",
+				disabled: restarting,
+				onClick: onRestartNow
+			}, restarting ? t("restarting") : t("restartNow"))))));
+		}
 		//#endregion
-		//#region src/client/lib/renderMarkdown.ts
+		//#region src/client/logic/renderMarkdown.ts
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -1999,15 +2939,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			return blocks.join("");
 		}
 		//#endregion
-		//#region src/client/components/AboutModal.tsx
+		//#region src/client/components/modals/AboutModal.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
 		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
 		*
-		* 头部「关注我们」弹窗：介绍 DSH-Plugin Hub 是干什么的 + 用户反馈群二维码。
+		* 头部「关注我们」弹窗：介绍 DSH-Plugin Hub 的功能定位 + 用户反馈群二维码。
 		* 内容以 Markdown 形式由 dsh-update Worker 的 /about 接口下发（key = hub:about），
-		* 作者想怎么写就怎么写、随写随推，客户端只负责渲染 —— 非写死。
+		* 客户端按接口返回渲染，不内置固定文案。
 		* 图片（反馈群二维码）经 renderMarkdown 的 ![](url) 语法嵌入，居中、最大高度受控。
 		*/
 		function AboutModal({ info, lang, t, onClose }) {
@@ -2040,7 +2980,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("doneBtn")))));
 		}
 		//#endregion
-		//#region src/client/components/HubUpdateModal.tsx
+		//#region src/client/components/modals/HubUpdateModal.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -2089,7 +3029,107 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("hubUpToDate")))));
 		}
 		//#endregion
-		//#region src/client/components/NotificationsModal.tsx
+		//#region src/client/logic/format.ts
+		/** 星数/分支数的紧凑展示：<1k 原样；千级 1.2k；十万级取整。 */
+		function fmtStars(count) {
+			if (!count || count <= 0) return "0";
+			if (count < 1e3) return String(count);
+			const k = count / 1e3;
+			return `${k >= 100 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}k`;
+		}
+		/** 相对时间：今天 / N 天前 / N 个月前 / N 年前。 */
+		function relTime(iso, t) {
+			if (!iso) return "";
+			const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
+			if (days <= 0) return t("today");
+			if (days < 30) return t("daysAgo", { days });
+			if (days < 365) return t("monthsAgo", { months: Math.floor(days / 30) });
+			return t("yearsAgo", { years: Math.floor(days / 365) });
+		}
+		//#endregion
+		//#region src/client/components/modals/InstalledDetailModal.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Installed-plugin detail dialog: opens from the Installed view (row click
+		* or the detail button) and shows everything we know about an installed
+		* entry — the catalog metadata (category, catalog entry, stars/forks,
+		* latest version) merged with the host runtime facts (install path, installed
+		* version, install time, last update). Update / uninstall actions are
+		* offered from here too, mirroring the row actions.
+		*/
+		/** ISO 安装时间 → 本地可读；非法值返回 null（行内不显示）。 */
+		function fmtDate(iso, lang) {
+			if (!iso) return null;
+			const d = new Date(iso);
+			return Number.isNaN(d.getTime()) ? null : d.toLocaleString(lang === "en" ? "en-US" : "zh-CN");
+		}
+		function InstalledDetailModal({ item, t, lang, langPath, onClose, onUpdate, onUninstall, onCopyPath, onReveal }) {
+			const p = item.plugin;
+			const name = p?.displayName ?? item.name;
+			const installedAt = fmtDate(item.installedAt, lang);
+			const lastUpdated = fmtDate(p?.dates?.repoUpdatedAt ?? null, lang);
+			const hasUpdate = item.hasUpdate && item.plugin !== null;
+			return (0, react.createElement)("div", {
+				className: Modal_module_css_default.overlay,
+				onClick: (e) => {
+					if (e.target === e.currentTarget) onClose();
+				}
+			}, (0, react.createElement)("div", {
+				className: `${Modal_module_css_default.modal} ${Modal_module_css_default.detailModal}`,
+				role: "dialog",
+				"aria-modal": "true"
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.modalTitle }, name), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
+				"aria-label": t("confirmCancel"),
+				onClick: onClose
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, p?.description ? (0, react.createElement)("div", { className: Modal_module_css_default.modalDesc }, p.description) : null, hasUpdate ? (0, react.createElement)("div", { className: Modal_module_css_default.detailUpdateHint }, item.installedVersion && item.catalogVersion ? t("versionUpHint", {
+				from: item.installedVersion,
+				to: item.catalogVersion
+			}) : t("updateAvailableHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.detailGrid }, p?.category ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("detailCategory")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, categoryLabel(CATEGORY_LABELS, p.category, lang))) : null, (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("statusLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", {
+				className: item.loaded ? Modal_module_css_default.detailStatusRunning : Modal_module_css_default.detailStatusPending,
+				"aria-hidden": "true"
+			}), (0, react.createElement)("span", { className: Modal_module_css_default.detailStatusText }, item.loaded ? t("statusRunning") : t("statusPending")))), item.installedVersion ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("installedVersionLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", { className: Modal_module_css_default.detailMono }, item.installedVersion), item.catalogVersion && item.catalogVersion !== item.installedVersion ? (0, react.createElement)("span", { className: Modal_module_css_default.detailArrow }, "→", (0, react.createElement)("span", { className: Modal_module_css_default.detailMono }, item.catalogVersion), (0, react.createElement)("span", { className: Modal_module_css_default.detailDim }, t("catalogLatest"))) : null)) : null, item.repo ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("detailCatalog")), (0, react.createElement)("a", {
+				className: Modal_module_css_default.detailLink,
+				href: p ? pluginDetailUrl(p, langPath) : `https://github.com/${item.repo}`,
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: item.repo
+			}, (0, react.createElement)(LinkIcon), item.repo)) : null, item.plugin?.source?.npmPackage ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("packageName")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", { className: Modal_module_css_default.detailMono }, item.plugin.source.npmPackage))) : null, p?.stats && (p.stats.stargazers_count ?? 0) > 0 ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("detailStats")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", { className: Modal_module_css_default.detailStars }, "★ ", fmtStars(p.stats.stargazers_count)), (0, react.createElement)("span", { className: Modal_module_css_default.detailDim }, t("fork"), " ", fmtStars(p.stats.forks_count)))) : null, item.installPath ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("installPath")), (0, react.createElement)("div", { className: Modal_module_css_default.detailPath }, (0, react.createElement)("span", {
+				className: Modal_module_css_default.detailPathText,
+				title: t("copyPath"),
+				onClick: () => onCopyPath(item.installPath)
+			}, item.installPath), (0, react.createElement)("span", { className: Modal_module_css_default.detailPathActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.detailPathBtn,
+				type: "button",
+				title: t("copyPath"),
+				onClick: (e) => {
+					e.stopPropagation();
+					onCopyPath(item.installPath);
+				}
+			}, (0, react.createElement)(CopyIcon)), (0, react.createElement)("button", {
+				className: Modal_module_css_default.detailPathBtn,
+				type: "button",
+				title: t("openFolder"),
+				onClick: (e) => {
+					e.stopPropagation();
+					onReveal(item);
+				}
+			}, (0, react.createElement)(FolderIcon))))) : null, installedAt ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("installedAtLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, installedAt)) : null, lastUpdated ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("lastUpdatedLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, lastUpdated)) : null)), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartLater,
+				onClick: onClose
+			}, t("done")), hasUpdate ? (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalInstall,
+				onClick: () => onUpdate(item)
+			}, t("update")) : null, (0, react.createElement)("button", {
+				className: Modal_module_css_default.uninstallConfirm,
+				onClick: () => onUninstall(item)
+			}, t("uninstall")))));
+		}
+		//#endregion
+		//#region src/client/components/modals/NotificationsModal.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -2098,12 +3138,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* Notification-center dialog: a persistent log of every settled install /
 		* remove task — successes and failures alike.
 		*
-		* Records are written to localStorage at settle time (see lib/failures.ts),
+		* Records are written to localStorage at settle time (see logic/failures.ts),
 		* so a result is never lost even when the dialog was dismissed or the user
 		* was away. Each entry carries a circular status badge (green check for
 		* success, red cross for failure) with white glyph and message text;
 		* failures keep their copy / fix / file-an-issue actions. Opened from the
-		* header entry button.
+		* header entry button (after the Settings tab).
 		*/
 		/** 记录时间完整展示：YYYY-MM-DD HH:mm:ss（每条通知都带精确到秒的时间戳）。 */
 		function fmtTime(at) {
@@ -2236,7 +3276,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("errorClose"))))));
 		}
 		//#endregion
-		//#region src/client/components/CatalogHeader.tsx
+		//#region src/client/components/layout/CatalogHeader.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -2298,7 +3338,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			})), (0, react.createElement)("span", { className: Header_module_css_default.adArrow }, "↗")));
 		}
 		//#endregion
-		//#region src/client/components/CategoryTabs.tsx
+		//#region src/client/components/layout/CategoryTabs.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -2320,97 +3360,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, categoryLabel(CATEGORY_SHORT_LABELS, id, langKey))));
 		}
 		//#endregion
-		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
-		const css$2 = ".B_Gxsq_dropdown{flex-shrink:0;display:inline-flex;position:relative}.B_Gxsq_dropdownBtn{height:24px;color:var(--hub-text-primary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;border-radius:6px;align-items:center;gap:6px;padding:0 8px;font-size:12px;line-height:22px;transition:background .12s;display:inline-flex}.B_Gxsq_dropdownBtn:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownArrow,.B_Gxsq_dropdownArrowOpen{color:var(--hub-text-tertiary);justify-content:center;align-items:center;transition:transform .12s;display:inline-flex}.B_Gxsq_dropdownArrowOpen{transform:rotate(180deg)}.B_Gxsq_dropdownPanel{z-index:50;background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:8px;flex-direction:column;gap:2px;min-width:100%;padding:4px;display:flex;position:absolute;top:calc(100% + 4px);left:0;box-shadow:0 8px 24px #00000024}.B_Gxsq_dropdownItem,.B_Gxsq_dropdownItemActive{cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;text-align:left;border:none;border-radius:6px;justify-content:space-between;align-items:center;gap:10px;padding:4px 9px;font-size:12px;line-height:18px;transition:background .12s,color .12s;display:flex}.B_Gxsq_dropdownItem{color:var(--hub-text-primary);background:0 0}.B_Gxsq_dropdownItem:hover{background:var(--hub-bg-hover)}.B_Gxsq_dropdownItemActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}.B_Gxsq_dropdownItemLabel{text-overflow:ellipsis;min-width:0;overflow:hidden}.B_Gxsq_dropdownCount,.B_Gxsq_dropdownCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 6px;font-size:10px;line-height:14px}.B_Gxsq_dropdownCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.B_Gxsq_dropdownItemActive .B_Gxsq_dropdownCountActive{color:var(--hub-text-on-fill);background:var(--hub-bg-on-fill)}";
-		const tagId$2 = "dsh-plugin/Dropdown.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
-			const tag = document.createElement("style");
-			tag.dataset.plugin = "dsh-plugin";
-			tag.dataset.pluginCss = tagId$2;
-			tag.textContent = css$2;
-			document.head.appendChild(tag);
-		}
-		var Dropdown_module_css_default = {
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdown": "B_Gxsq_dropdown",
-			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel"
-		};
-		//#endregion
-		//#region src/client/components/Dropdown.tsx
+		//#region src/client/components/layout/CatalogControls.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
 		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
 		*
-		* Custom dropdown (native <select> replacement).
-		*
-		* macOS/浏览器原生下拉无法跟随宿主主题，这里自绘：触发器按钮 + 绝对定位面板，
-		* 点外部/Esc 关闭；选项 hover 加重底色、激活项深色实心高亮，全部走 --dsw-alias-* 主题变量。
+		* Toolbar above the market list:
+		* row 1 — full-width search input;
+		* row 2 — result count on the left, sort segmented control on the right
+		* (mirrors the Installed view: clicking the same sort toggles
+		* ascending/descending, a new sort uses its default order; the active
+		* button shows an up/down arrow for the current direction).
 		*/
-		function Dropdown({ value, options, onChange, title }) {
-			const [open, setOpen] = (0, react.useState)(false);
-			const rootRef = (0, react.useRef)(null);
-			(0, react.useEffect)(() => {
-				if (!open) return;
-				const onDoc = (e) => {
-					if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
-				};
-				const onKey = (e) => {
-					if (e.key === "Escape") setOpen(false);
-				};
-				document.addEventListener("mousedown", onDoc);
-				document.addEventListener("keydown", onKey);
-				return () => {
-					document.removeEventListener("mousedown", onDoc);
-					document.removeEventListener("keydown", onKey);
-				};
-			}, [open]);
-			const current = options.find((o) => o.value === value);
-			return (0, react.createElement)("div", {
-				className: Dropdown_module_css_default.dropdown,
-				ref: rootRef
-			}, (0, react.createElement)("button", {
-				className: Dropdown_module_css_default.dropdownBtn,
+		/** 单选按钮组中的一个按钮（segmented control，与已安装视图排序按钮同款） */
+		function SegBtn$1({ active, onClick, label, icon }) {
+			return (0, react.createElement)("button", {
 				type: "button",
-				title,
-				"aria-haspopup": "listbox",
-				"aria-expanded": open,
-				onClick: () => setOpen((v) => !v)
-			}, (0, react.createElement)("span", { className: Dropdown_module_css_default.dropdownLabel }, current?.label ?? value), (0, react.createElement)("span", { className: open ? Dropdown_module_css_default.dropdownArrowOpen : Dropdown_module_css_default.dropdownArrow }, (0, react.createElement)(ChevronDownIcon))), open && (0, react.createElement)("div", {
-				className: Dropdown_module_css_default.dropdownPanel,
-				role: "listbox"
-			}, options.map((o) => (0, react.createElement)("button", {
-				key: o.value,
-				type: "button",
-				role: "option",
-				"aria-selected": o.value === value,
-				className: o.value === value ? Dropdown_module_css_default.dropdownItemActive : Dropdown_module_css_default.dropdownItem,
-				onClick: () => {
-					onChange(o.value);
-					setOpen(false);
-				}
-			}, (0, react.createElement)("span", { className: Dropdown_module_css_default.dropdownItemLabel }, o.label), typeof o.count === "number" ? (0, react.createElement)("span", { className: o.value === value ? Dropdown_module_css_default.dropdownCountActive : Dropdown_module_css_default.dropdownCount }, o.count) : null))));
+				className: active ? `${Header_module_css_default.segBtn} ${Header_module_css_default.segBtnActive}` : Header_module_css_default.segBtn,
+				"aria-pressed": active,
+				onClick
+			}, label, icon);
 		}
-		//#endregion
-		//#region src/client/components/CatalogControls.tsx
-		/**
-		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
-		* Website: https://dsh-plugin.org
-		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
-		*
-		* Toolbar above the list: search input + sort dropdown + installed / not
-		* installed filter buttons + the notifications entry. All buttons share the
-		* same size (24px high, like the notification entry button).
-		*/
-		function CatalogControls({ query, setQuery, sort, setSort, installedFilter, setInstalledFilter, installedCount, notInstalledCount, t, resultText, noticeCount, onOpenNotifications }) {
+		function CatalogControls({ query, setQuery, sort, sortDir, toggleSort, t, resultText }) {
 			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)("div", { className: Header_module_css_default.searchRow }, (0, react.createElement)("input", {
 				className: Header_module_css_default.search,
 				type: "search",
@@ -2418,104 +3390,105 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				value: query,
 				spellCheck: false,
 				onInput: (e) => setQuery(e.target.value)
-			})), (0, react.createElement)("div", { className: Header_module_css_default.controls }, resultText ? (0, react.createElement)("span", { className: Header_module_css_default.filterResults }, ...resultText.split(/(\d+)/).map((part, i) => /^\d+$/.test(part) ? (0, react.createElement)("span", {
+			})), (0, react.createElement)("div", { className: Header_module_css_default.controls }, resultText ? (0, react.createElement)("span", { className: Header_module_css_default.resultSeg }, ...resultText.split(/(\d+)/).map((part, i) => /^\d+$/.test(part) ? (0, react.createElement)("span", {
 				key: i,
 				className: Header_module_css_default.resultCount
-			}, part) : part)) : null, (0, react.createElement)("button", {
-				className: installedFilter === "all" ? Header_module_css_default.installedBtnActive : Header_module_css_default.installedBtn,
-				onClick: () => setInstalledFilter("all"),
-				title: t("filterAllHint"),
-				"aria-pressed": installedFilter === "all"
-			}, t("all")), Dropdown({
-				value: sort,
-				options: SORTS.map((key) => ({
-					value: key,
-					label: t(key)
-				})),
-				onChange: setSort
-			}), (0, react.createElement)("button", {
-				className: installedFilter === "installed" ? Header_module_css_default.installedBtnActive : installedCount === 0 ? Header_module_css_default.installedBtnDisabled : Header_module_css_default.installedBtn,
-				onClick: () => setInstalledFilter("installed"),
-				disabled: installedCount === 0,
-				title: installedCount === 0 ? t("filterInstalledNone") : t("filterInstalledHint"),
-				"aria-pressed": installedFilter === "installed"
-			}, t("installed"), (0, react.createElement)("span", { className: installedFilter === "installed" ? Header_module_css_default.segCountActive : Header_module_css_default.segCount }, installedCount)), (0, react.createElement)("button", {
-				className: installedFilter === "notInstalled" ? Header_module_css_default.installedBtnActive : notInstalledCount === 0 ? Header_module_css_default.installedBtnDisabled : Header_module_css_default.installedBtn,
-				onClick: () => setInstalledFilter("notInstalled"),
-				disabled: notInstalledCount === 0,
-				title: notInstalledCount === 0 ? t("filterNotInstalledNone") : t("filterNotInstalledHint"),
-				"aria-pressed": installedFilter === "notInstalled"
-			}, t("notInstalled"), (0, react.createElement)("span", { className: installedFilter === "notInstalled" ? Header_module_css_default.segCountActive : Header_module_css_default.segCount }, notInstalledCount)), (0, react.createElement)("button", {
-				className: Header_module_css_default.failBtn,
-				onClick: onOpenNotifications,
-				title: t("notificationsHint"),
-				"aria-label": t("notificationsHint")
-			}, t("notificationsBtn"), noticeCount > 0 ? (0, react.createElement)("span", { className: Header_module_css_default.failBadge }, noticeCount) : null)));
+			}, part) : part)) : null, (0, react.createElement)("div", { className: Header_module_css_default.sortGroup }, (0, react.createElement)("span", { className: Header_module_css_default.segLabel }, t("sortByLabel")), (0, react.createElement)("div", {
+				className: Header_module_css_default.segGroup,
+				role: "radiogroup",
+				"aria-label": t("sortAria")
+			}, SORTS.map((key) => SegBtn$1({
+				active: sort === key,
+				onClick: () => toggleSort(key),
+				label: t(key),
+				icon: sort === key ? (0, react.createElement)(SortArrowIcon, { up: sortDir === "asc" }) : null
+			}))))));
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/List.module.css.mjs
-		const css$1 = "._3XaZHa_body{flex-direction:column;flex:1;min-height:0;display:flex}._3XaZHa_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}._3XaZHa_card{border:1px solid var(--hub-border-2);background:var(--hub-bg-1);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}._3XaZHa_card:hover{border-color:var(--hub-brand);background:var(--hub-bg-2)}._3XaZHa_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}._3XaZHa_cardHead{align-items:center;gap:6px;min-width:0;display:flex}._3XaZHa_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}._3XaZHa_categoryBadge,._3XaZHa_verified,._3XaZHa_versionBadge,._3XaZHa_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_categoryBadge{color:var(--hub-brand);border-color:var(--hub-border-ghost)}._3XaZHa_verified{color:var(--hub-success);border-color:var(--hub-success-border)}._3XaZHa_versionBadge{color:var(--hub-text-secondary);border-color:var(--hub-border-input)}._3XaZHa_updateBadge{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3XaZHa_desc{color:var(--hub-text-secondary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}._3XaZHa_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}._3XaZHa_topic{color:var(--hub-text-tertiary);background:var(--hub-bg-3);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}._3XaZHa_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}._3XaZHa_star{color:var(--hub-warn);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_fork{color:var(--hub-text-tertiary);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_date{color:var(--hub-text-tertiary);white-space:nowrap;font-size:10px;line-height:14px}._3XaZHa_installBtn,._3XaZHa_installBtnCopied,._3XaZHa_installBtnInstalled,._3XaZHa_installBtnUpdate,._3XaZHa_uninstallBtn,._3XaZHa_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}._3XaZHa_installBtnInstalled{color:var(--hub-success);background:var(--hub-success-tint);cursor:default;-webkit-user-select:none;user-select:none;border:none}._3XaZHa_installBtnUpdate{color:#fff;background:var(--hub-warn);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtnUpdate:hover{background:var(--hub-warn-strong)}._3XaZHa_uninstallBtn{color:var(--hub-danger);background:var(--hub-danger-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_uninstallBtn:hover{color:#fff;background:var(--hub-danger-hover)}._3XaZHa_installBtn{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtn:hover{background:var(--hub-btn-hover)}._3XaZHa_detailBtn{color:var(--hub-text-secondary);-webkit-user-select:none;user-select:none;background:0 0;border:none;align-items:center;text-decoration:none;display:inline-flex}._3XaZHa_detailBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_actions{align-items:center;gap:6px;display:flex}._3XaZHa_installBtnCopied{color:var(--hub-success);background:var(--hub-success-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_state{text-align:center;min-height:160px;color:var(--hub-text-tertiary);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}._3XaZHa_stateTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600}._3XaZHa_stateDesc{max-width:420px}._3XaZHa_retryBtn{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;margin-top:4px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_retryBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_footer{border-top:1px solid var(--hub-border-1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}._3XaZHa_footLink{color:var(--hub-brand);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}._3XaZHa_footLink:hover{text-decoration:underline}";
-		const tagId$1 = "dsh-plugin/List.module.css";
-		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
+		const css$9 = "._3XaZHa_body{flex-direction:column;flex:1;min-height:0;display:flex}._3XaZHa_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}._3XaZHa_moreSentinel{flex-shrink:0;height:1px}._3XaZHa_card{border:1px solid var(--hub-border-2);background:var(--hub-bg-1);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}._3XaZHa_card:hover{border-color:var(--hub-brand);background:var(--hub-bg-2)}._3XaZHa_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}._3XaZHa_cardHead{align-items:center;gap:6px;min-width:0;display:flex}._3XaZHa_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}._3XaZHa_categoryBadge,._3XaZHa_verified,._3XaZHa_versionBadge,._3XaZHa_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_categoryBadge{color:var(--hub-brand);border-color:var(--hub-border-ghost)}._3XaZHa_verified{color:var(--hub-success);border-color:var(--hub-success-border)}._3XaZHa_versionBadge{color:var(--hub-text-secondary);border-color:var(--hub-border-input)}._3XaZHa_updateBadge{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3XaZHa_desc{color:var(--hub-text-secondary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}._3XaZHa_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}._3XaZHa_topic{color:var(--hub-text-tertiary);background:var(--hub-bg-3);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}._3XaZHa_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}._3XaZHa_star{color:var(--hub-warn);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_fork{color:var(--hub-text-tertiary);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_date{color:var(--hub-text-tertiary);white-space:nowrap;font-size:10px;line-height:14px}._3XaZHa_installBtn,._3XaZHa_installBtnCopied,._3XaZHa_installBtnInstalled,._3XaZHa_installBtnUpdate,._3XaZHa_uninstallBtn,._3XaZHa_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}._3XaZHa_installBtnInstalled{color:var(--hub-success);background:var(--hub-success-tint);cursor:default;-webkit-user-select:none;user-select:none;border:none}._3XaZHa_installBtnUpdate{color:#fff;background:var(--hub-warn);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtnUpdate:hover{background:var(--hub-warn-strong)}._3XaZHa_uninstallBtn{color:var(--hub-danger);background:var(--hub-danger-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_uninstallBtn:hover{color:#fff;background:var(--hub-danger-hover)}._3XaZHa_installBtn{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtn:hover{background:var(--hub-btn-hover)}._3XaZHa_detailBtn{color:var(--hub-text-secondary);-webkit-user-select:none;user-select:none;background:0 0;border:none;align-items:center;text-decoration:none;display:inline-flex}._3XaZHa_detailBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_actions{align-items:center;gap:6px;display:flex}._3XaZHa_installBtnCopied{color:var(--hub-success);background:var(--hub-success-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_state{text-align:center;min-height:160px;color:var(--hub-text-tertiary);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}._3XaZHa_stateTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600}._3XaZHa_stateDesc{max-width:420px}._3XaZHa_retryBtn{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;margin-top:4px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_retryBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_footer{border-top:1px solid var(--hub-border-1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}._3XaZHa_footLink{color:var(--hub-brand);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}._3XaZHa_footLink:hover{text-decoration:underline}";
+		const tagId$9 = "dsh-plugin/List.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$9) + "]") === null) {
 			const tag = document.createElement("style");
 			tag.dataset.plugin = "dsh-plugin";
-			tag.dataset.pluginCss = tagId$1;
-			tag.textContent = css$1;
+			tag.dataset.pluginCss = tagId$9;
+			tag.textContent = css$9;
 			document.head.appendChild(tag);
 		}
 		var List_module_css_default = {
+			"footLink": "_3XaZHa_footLink",
+			"state": "_3XaZHa_state",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"stats": "_3XaZHa_stats",
+			"stateDesc": "_3XaZHa_stateDesc",
 			"body": "_3XaZHa_body",
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"desc": "_3XaZHa_desc",
+			"date": "_3XaZHa_date",
+			"actions": "_3XaZHa_actions",
+			"verified": "_3XaZHa_verified",
+			"cardSide": "_3XaZHa_cardSide",
+			"moreSentinel": "_3XaZHa_moreSentinel",
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"list": "_3XaZHa_list",
 			"star": "_3XaZHa_star",
 			"footer": "_3XaZHa_footer",
-			"footLink": "_3XaZHa_footLink",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"fork": "_3XaZHa_fork",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"topic": "_3XaZHa_topic",
-			"state": "_3XaZHa_state",
-			"date": "_3XaZHa_date",
-			"cardSide": "_3XaZHa_cardSide",
-			"verified": "_3XaZHa_verified",
-			"stats": "_3XaZHa_stats",
-			"installBtn": "_3XaZHa_installBtn",
-			"topics": "_3XaZHa_topics",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"cardHead": "_3XaZHa_cardHead",
-			"detailBtn": "_3XaZHa_detailBtn",
-			"list": "_3XaZHa_list",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"actions": "_3XaZHa_actions",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
 			"cardMain": "_3XaZHa_cardMain",
-			"desc": "_3XaZHa_desc",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"card": "_3XaZHa_card"
+			"cardHead": "_3XaZHa_cardHead",
+			"topic": "_3XaZHa_topic",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"card": "_3XaZHa_card",
+			"installBtn": "_3XaZHa_installBtn",
+			"fork": "_3XaZHa_fork",
+			"topics": "_3XaZHa_topics",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"categoryBadge": "_3XaZHa_categoryBadge"
 		};
 		//#endregion
-		//#region src/client/lib/format.ts
-		/** 星数/分支数的紧凑展示：<1k 原样；千级 1.2k；十万级取整。 */
-		function fmtStars(count) {
-			if (!count || count <= 0) return "0";
-			if (count < 1e3) return String(count);
-			const k = count / 1e3;
-			return `${k >= 100 ? Math.round(k) : k.toFixed(1).replace(/\.0$/, "")}k`;
-		}
-		/** 相对时间：今天 / N 天前 / N 个月前 / N 年前。 */
-		function relTime(iso, t) {
-			if (!iso) return "";
-			const days = Math.floor((Date.now() - new Date(iso).getTime()) / 864e5);
-			if (days <= 0) return t("today");
-			if (days < 30) return t("daysAgo", { days });
-			if (days < 365) return t("monthsAgo", { months: Math.floor(days / 30) });
-			return t("yearsAgo", { years: Math.floor(days / 365) });
+		//#region src/client/hooks/useIncrementalList.ts
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Incremental list: renders only the first batch of a (potentially huge)
+		* result set and appends the next batch whenever the end sentinel scrolls
+		* into view, so the plugin center never mounts thousands of cards at once.
+		* The items reference is the list identity — category / search / sort
+		* changes produce a new array, which resets the window to the first batch.
+		*/
+		/** 首批渲染条数 & 每次滚到底追加的增量（单卡约 80px 高，100 条已远超一屏） */
+		const PAGE_SIZE = 100;
+		/** 哨兵进入视口底部前 800px 就提前加载下一批，滚到底时无感知衔接 */
+		const PRELOAD_MARGIN = "800px 0px";
+		function useIncrementalList(items) {
+			const [limit, setLimit] = (0, react.useState)(PAGE_SIZE);
+			const sentinelRef = (0, react.useRef)(null);
+			(0, react.useEffect)(() => {
+				setLimit(PAGE_SIZE);
+			}, [items]);
+			(0, react.useEffect)(() => {
+				const el = sentinelRef.current;
+				if (!el || limit >= items.length) return;
+				const io = new IntersectionObserver((entries) => {
+					for (const entry of entries) if (entry.isIntersecting) setLimit((cur) => Math.min(cur + PAGE_SIZE, items.length));
+				}, { rootMargin: PRELOAD_MARGIN });
+				io.observe(el);
+				return () => io.disconnect();
+			}, [items.length, limit]);
+			return {
+				shown: items.slice(0, limit),
+				hasMore: limit < items.length,
+				sentinelRef
+			};
 		}
 		//#endregion
-		//#region src/client/components/PluginCard.tsx
+		//#region src/client/components/catalog/PluginCard.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -2566,7 +3539,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("uninstall")) : null) : null));
 		}
 		//#endregion
-		//#region src/client/components/CatalogList.tsx
+		//#region src/client/components/catalog/CatalogList.tsx
 		/**
 		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
 		* Website: https://dsh-plugin.org
@@ -2577,19 +3550,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* the category or install-status filter changes so the replaced content is
 		* not mistaken for a no-op update.
 		*/
-		function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, installedFilter, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall }) {
+		function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall }) {
 			/** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
 			const listRef = (0, react.useRef)(null);
+			/** 增量渲染：全量目录太大（4400+），只渲染首批，滚动接近底部时自动追加下一批 */
+			const { shown, hasMore, sentinelRef } = useIncrementalList(visible);
 			(0, react.useEffect)(() => {
 				listRef.current?.scrollTo({ top: 0 });
-			}, [category, installedFilter]);
+			}, [category]);
 			return (0, react.createElement)("div", { className: List_module_css_default.body }, (0, react.createElement)("div", {
 				ref: listRef,
 				className: List_module_css_default.list
 			}, plugins === null && !failed && (0, react.createElement)("div", { className: List_module_css_default.state }, t("loading")), failed && (0, react.createElement)("div", { className: List_module_css_default.state }, (0, react.createElement)("div", { className: List_module_css_default.stateTitle }, t("failed")), (0, react.createElement)("div", { className: List_module_css_default.stateDesc }, t("failedDesc")), (0, react.createElement)("button", {
 				className: List_module_css_default.retryBtn,
 				onClick: () => reload()
-			}, t("retry"))), plugins !== null && !failed && visible.length === 0 && (0, react.createElement)("div", { className: List_module_css_default.state }, (0, react.createElement)("div", { className: List_module_css_default.stateTitle }, t("noResult")), (0, react.createElement)("div", { className: List_module_css_default.stateDesc }, t("noResultDesc"))), plugins !== null && !failed && visible.map((p) => (0, react.createElement)(PluginCard, {
+			}, t("retry"))), plugins !== null && !failed && visible.length === 0 && (0, react.createElement)("div", { className: List_module_css_default.state }, (0, react.createElement)("div", { className: List_module_css_default.stateTitle }, t("noResult")), (0, react.createElement)("div", { className: List_module_css_default.stateDesc }, t("noResultDesc"))), plugins !== null && !failed && shown.map((p) => (0, react.createElement)(PluginCard, {
 				key: p.ownerSlug ? `${p.ownerSlug}/${p.slug}` : p.slug,
 				plugin: p,
 				copied,
@@ -2601,12 +3576,1719 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				langPath,
 				onInstall,
 				onUninstall
-			}))), plugins !== null && !failed && (0, react.createElement)("div", { className: List_module_css_default.footer }, (0, react.createElement)("a", {
+			})), hasMore && (0, react.createElement)("div", {
+				ref: sentinelRef,
+				className: List_module_css_default.moreSentinel,
+				"aria-hidden": "true"
+			})), plugins !== null && !failed && (0, react.createElement)("div", { className: List_module_css_default.footer }, (0, react.createElement)("a", {
 				className: List_module_css_default.footLink,
 				href: `https://dsh-plugin.org/${langPath}`,
 				target: "_blank",
 				rel: "noopener noreferrer"
 			}, t("browseAll", { n: total }))));
+		}
+		//#endregion
+		//#region src/client/components/views/MarketView.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Market view: the browse experience for the catalog — category tabs,
+		* search/sort/install-state controls and the plugin list. Owns nothing;
+		* it wires catalog state (query/sort/filter/category) to the small
+		* presentational components so PluginHubSection stays free of view internals.
+		*/
+		function MarketView({ catalog, t, langPath, langKey, copied, resultText, onInstall, onUninstall }) {
+			return (0, react.createElement)(react.Fragment, null, (0, react.createElement)(CategoryTabs, {
+				category: catalog.category,
+				setCategory: catalog.setCategory,
+				allLabel: t("all"),
+				totalCount: catalog.total,
+				langKey
+			}), (0, react.createElement)(CatalogControls, {
+				query: catalog.query,
+				setQuery: catalog.setQuery,
+				sort: catalog.sort,
+				sortDir: catalog.sortDir,
+				toggleSort: catalog.toggleSort,
+				t,
+				resultText
+			}), (0, react.createElement)(CatalogList, {
+				plugins: catalog.plugins,
+				failed: catalog.failed,
+				visible: catalog.visible,
+				total: catalog.total,
+				t,
+				langPath,
+				reload: catalog.reload,
+				category: catalog.category,
+				copied,
+				installedName: catalog.installedName,
+				installedVersion: catalog.installedVersion,
+				hasUpdate: catalog.hasUpdate,
+				langKey,
+				onInstall,
+				onUninstall
+			}));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/SectionTabs.module.css.mjs
+		const css$8 = "._7tvizq_root{border-bottom:1px solid var(--hub-border-1);flex-shrink:0;align-items:stretch;gap:28px;padding:0 2px;display:flex}._7tvizq_tab,._7tvizq_tabActive{cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;align-items:center;gap:7px;height:38px;padding:0 4px;font-size:14px;line-height:38px;transition:color .12s;display:inline-flex;position:relative}._7tvizq_tab{color:var(--hub-text-secondary)}._7tvizq_tab:hover{color:var(--hub-text-primary)}._7tvizq_tabActive{color:var(--hub-text-primary);font-weight:600}._7tvizq_tabIcon{flex-shrink:0;align-items:center;line-height:1;display:inline-flex}._7tvizq_tabActive:after{content:\"\";background:var(--hub-brand);border-radius:1px;height:2px;position:absolute;bottom:-1px;left:0;right:0}._7tvizq_tabCount,._7tvizq_tabCountActive{text-align:center;border-radius:999px;min-width:18px;padding:0 6px;font-size:11px;line-height:16px}._7tvizq_tabCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}._7tvizq_tabActive ._7tvizq_tabCountActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}._7tvizq_noticeBtn{box-sizing:border-box;height:26px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:1px solid #0000;border-radius:6px;flex-shrink:0;align-self:center;align-items:center;gap:5px;margin-left:auto;padding:0 8px;font-size:12px;line-height:24px;transition:color .12s,background .12s;display:inline-flex;position:relative}._7tvizq_noticeBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover);border-color:var(--hub-border-2)}._7tvizq_noticeIcon{align-items:center;line-height:1;display:inline-flex}._7tvizq_noticeCount{text-align:center;color:#fff;background:var(--hub-danger);border-radius:999px;min-width:17px;height:17px;padding:0 5px;font-size:11px;font-weight:600;line-height:17px;box-shadow:0 1px 3px #d1242f59}";
+		const tagId$8 = "dsh-plugin/SectionTabs.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$8) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$8;
+			tag.textContent = css$8;
+			document.head.appendChild(tag);
+		}
+		var SectionTabs_module_css_default = {
+			"tabCountActive": "_7tvizq_tabCountActive",
+			"root": "_7tvizq_root",
+			"noticeIcon": "_7tvizq_noticeIcon",
+			"tabIcon": "_7tvizq_tabIcon",
+			"noticeBtn": "_7tvizq_noticeBtn",
+			"tabActive": "_7tvizq_tabActive",
+			"tabCount": "_7tvizq_tabCount",
+			"noticeCount": "_7tvizq_noticeCount",
+			"tab": "_7tvizq_tab"
+		};
+		//#endregion
+		//#region src/client/components/layout/SectionTabs.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Primary navigation: a compact segmented control switching between the
+		* four top-level sections — Market (browse), Installed (manage), Custom
+		* (manual command installs) and Settings (network sources & preferences).
+		* Kept visually distinct from the category chips so the hierarchy reads:
+		* section → category → plugin.
+		*/
+		const ORDER = [
+			{
+				id: "market",
+				labelKey: "viewMarket",
+				hintKey: "viewMarketHint",
+				Icon: MarketIcon
+			},
+			{
+				id: "installed",
+				labelKey: "viewInstalled",
+				hintKey: "viewInstalledHint",
+				Icon: InstalledIcon
+			},
+			{
+				id: "custom",
+				labelKey: "viewCustom",
+				hintKey: "viewCustomHint",
+				Icon: TerminalIcon
+			},
+			{
+				id: "settings",
+				labelKey: "viewSettings",
+				hintKey: "viewSettingsHint",
+				Icon: SettingsIcon
+			}
+		];
+		function SectionTabs({ view, setView, installedCount, t, noticeCount, onOpenNotifications }) {
+			return (0, react.createElement)("div", {
+				className: SectionTabs_module_css_default.root,
+				role: "tablist"
+			}, ORDER.map(({ id, labelKey, hintKey, Icon }) => (0, react.createElement)("button", {
+				key: id,
+				role: "tab",
+				"aria-selected": view === id,
+				title: t(hintKey),
+				className: view === id ? SectionTabs_module_css_default.tabActive : SectionTabs_module_css_default.tab,
+				onClick: () => setView(id)
+			}, (0, react.createElement)("span", { className: SectionTabs_module_css_default.tabIcon }, (0, react.createElement)(Icon)), t(labelKey), id === "installed" && installedCount > 0 ? (0, react.createElement)("span", { className: view === id ? SectionTabs_module_css_default.tabCountActive : SectionTabs_module_css_default.tabCount }, installedCount) : null)), (0, react.createElement)("button", {
+				type: "button",
+				className: SectionTabs_module_css_default.noticeBtn,
+				onClick: onOpenNotifications,
+				title: t("notificationsHint"),
+				"aria-label": t("notificationsHint")
+			}, (0, react.createElement)("span", { className: SectionTabs_module_css_default.noticeIcon }, (0, react.createElement)(BellIcon)), noticeCount > 0 ? (0, react.createElement)("span", { className: SectionTabs_module_css_default.noticeCount }, noticeCount > 99 ? "99+" : String(noticeCount)) : null));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/InstalledView.module.css.mjs
+		const css$7 = "._1nXeGW_root{flex-direction:column;gap:8px;min-width:0;display:flex}._1nXeGW_toolbar{border-bottom:1px solid var(--hub-border-1);flex-direction:column;flex-shrink:0;gap:8px;padding:0 2px 10px;display:flex}._1nXeGW_searchWrap{width:100%;min-width:0;height:28px}._1nXeGW_searchInput{width:100%;height:28px;color:var(--hub-text-primary);border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}._1nXeGW_searchInput::placeholder{color:var(--hub-text-tertiary)}._1nXeGW_searchInput:focus{border-color:var(--hub-brand)}._1nXeGW_segRow{align-items:center;gap:8px;min-width:0;display:flex}._1nXeGW_segLabel{color:var(--hub-text-tertiary);flex-shrink:0;font-size:11px;line-height:16px}._1nXeGW_segGroup{border:1px solid var(--hub-border-2);border-radius:6px;flex-shrink:0;align-items:center;display:inline-flex;overflow:hidden}._1nXeGW_segBtn{height:24px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;justify-content:center;align-items:center;gap:4px;padding:0 10px;font-family:inherit;font-size:12px;line-height:24px;transition:color .12s,background .12s;display:inline-flex}._1nXeGW_segBtn svg{flex-shrink:0;display:block}._1nXeGW_segBtn+._1nXeGW_segBtn{border-left:1px solid var(--hub-border-2)}._1nXeGW_segBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._1nXeGW_segBtnActive,._1nXeGW_segBtnActive:hover{color:#fff;background:var(--hub-brand)}._1nXeGW_empty{color:var(--hub-text-tertiary);text-align:center;border:1px dashed var(--hub-border-2);border-radius:8px;flex-direction:column;align-items:center;gap:4px;padding:36px 12px;font-size:12px;line-height:18px;display:flex}._1nXeGW_emptyTitle{color:var(--hub-text-secondary);font-size:13px;font-weight:600}._1nXeGW_emptyDesc{color:var(--hub-text-tertiary)}._1nXeGW_list{border:1px solid var(--hub-border-1);border-radius:8px;flex-direction:column;margin:0;padding:0;list-style:none;display:flex;overflow:hidden}._1nXeGW_row{background:var(--hub-bg-1);cursor:pointer;-webkit-user-select:none;user-select:none;flex-direction:column;gap:4px;padding:8px 10px;transition:background .12s;display:flex}._1nXeGW_row+._1nXeGW_row{border-top:1px solid var(--hub-border-1)}._1nXeGW_row:hover{background:var(--hub-bg-2)}._1nXeGW_rowTitleLine{align-items:center;gap:8px;min-width:0;display:flex}._1nXeGW_rowDesc{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;padding-left:16px;font-size:11px;line-height:16px;overflow:hidden}._1nXeGW_statusDot{background:var(--hub-success);border-radius:50%;flex-shrink:0;width:8px;height:8px}._1nXeGW_statusDot._1nXeGW_statusPending{background:var(--hub-warning)}._1nXeGW_statusDot._1nXeGW_statusInactive{background:var(--hub-text-tertiary)}._1nXeGW_rowMain{flex:auto;align-items:baseline;gap:6px;min-width:0;display:flex}._1nXeGW_rowTitle{color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-size:12px;font-weight:600;line-height:18px;overflow:hidden}._1nXeGW_versionBadge{color:var(--hub-text-tertiary);background:var(--hub-bg-hover);border-radius:4px;flex-shrink:0;padding:0 5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px}._1nXeGW_updateBadge{color:var(--hub-brand);background:var(--hub-brand-tint-strong);border-radius:4px;flex-shrink:0;padding:0 5px;font-size:11px;font-weight:500;line-height:16px}._1nXeGW_rowSourceTag{box-sizing:border-box;text-align:center;white-space:nowrap;text-overflow:ellipsis;border-radius:4px;flex-shrink:0;width:60px;padding:0 4px;font-size:11px;font-weight:500;line-height:16px;overflow:hidden}._1nXeGW_rowSourceTagHub{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft)}._1nXeGW_rowSourceTagManual{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border)}._1nXeGW_exampleBadge{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:4px;flex-shrink:0;padding:0 5px;font-size:11px;font-weight:500;line-height:16px}._1nXeGW_exampleRow{align-items:center;min-width:0;padding-left:16px;display:flex}._1nXeGW_rowMeta{align-items:center;gap:8px;min-width:0;padding-left:16px;display:flex;overflow:hidden}._1nXeGW_rowRepo{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;overflow:hidden}._1nXeGW_rowCategory{color:var(--hub-text-tertiary);background:var(--hub-bg-hover);border-radius:4px;flex-shrink:0;padding:0 6px;font-size:11px;line-height:16px}._1nXeGW_rowActions{flex-shrink:0;align-items:center;gap:4px;display:flex}._1nXeGW_rowDetail{color:var(--hub-text-secondary);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowDetail:hover{color:var(--hub-text-primary);border-color:var(--hub-border-ghost);background:var(--hub-bg-hover)}._1nXeGW_rowRestart{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowRestart:hover{color:#fff;background:var(--hub-warning);border-color:var(--hub-warning)}._1nXeGW_rowUpdate{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:3px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s}._1nXeGW_rowUpdate:hover{background:var(--hub-brand-hover)}._1nXeGW_rowUninstall{color:var(--hub-danger);border:1px solid var(--hub-danger-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowUninstall:hover{color:#fff;background:var(--hub-danger);border-color:var(--hub-danger)}";
+		const tagId$7 = "dsh-plugin/InstalledView.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$7) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$7;
+			tag.textContent = css$7;
+			document.head.appendChild(tag);
+		}
+		var InstalledView_module_css_default = {
+			"searchWrap": "_1nXeGW_searchWrap",
+			"segRow": "_1nXeGW_segRow",
+			"emptyTitle": "_1nXeGW_emptyTitle",
+			"segGroup": "_1nXeGW_segGroup",
+			"rowDetail": "_1nXeGW_rowDetail",
+			"statusInactive": "_1nXeGW_statusInactive",
+			"rowMeta": "_1nXeGW_rowMeta",
+			"searchInput": "_1nXeGW_searchInput",
+			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
+			"root": "_1nXeGW_root",
+			"rowTitleLine": "_1nXeGW_rowTitleLine",
+			"rowUpdate": "_1nXeGW_rowUpdate",
+			"rowDesc": "_1nXeGW_rowDesc",
+			"rowUninstall": "_1nXeGW_rowUninstall",
+			"rowMain": "_1nXeGW_rowMain",
+			"segBtnActive": "_1nXeGW_segBtnActive",
+			"segBtn": "_1nXeGW_segBtn",
+			"list": "_1nXeGW_list",
+			"empty": "_1nXeGW_empty",
+			"statusPending": "_1nXeGW_statusPending",
+			"rowRepo": "_1nXeGW_rowRepo",
+			"updateBadge": "_1nXeGW_updateBadge",
+			"rowCategory": "_1nXeGW_rowCategory",
+			"rowActions": "_1nXeGW_rowActions",
+			"exampleRow": "_1nXeGW_exampleRow",
+			"toolbar": "_1nXeGW_toolbar",
+			"row": "_1nXeGW_row",
+			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
+			"emptyDesc": "_1nXeGW_emptyDesc",
+			"versionBadge": "_1nXeGW_versionBadge",
+			"exampleBadge": "_1nXeGW_exampleBadge",
+			"statusDot": "_1nXeGW_statusDot",
+			"rowSourceTag": "_1nXeGW_rowSourceTag",
+			"segLabel": "_1nXeGW_segLabel",
+			"rowTitle": "_1nXeGW_rowTitle",
+			"rowRestart": "_1nXeGW_rowRestart"
+		};
+		//#endregion
+		//#region src/client/components/views/InstalledView.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Installed view: manages the plugins installed into the current profile.
+		* Follows the mainstream extension-manager pattern (VSCode Installed tab) —
+		* a searchable, sortable list of installed entries that mixes catalog
+		* plugins (full metadata) and custom command installs (outside the catalog,
+		* only runtime info, tagged with a custom badge). The toolbar carries a
+		* search box plus two segmented radio-button groups: source filter
+		* (all / catalog / custom) and sort (name / recently installed / stars / forks).
+		* Each row carries restart (when pending), update and uninstall actions
+		* and opens a detail modal with the full install metadata.
+		*
+		* Pure presentational: owns only local search/sort state; the InstalledItem
+		* model arrives from the catalog hook and actions bubble up via callbacks.
+		*/
+		const INSTALLED_SORTS = [
+			"sortName",
+			"sortInstalledAt",
+			"sortStars",
+			"sortForks"
+		];
+		/** 各排序的默认方向：名称按字母正序，最近安装 / Star / Fork 按数值倒序 */
+		const SORT_DEFAULT_DIR = {
+			sortName: "asc",
+			sortInstalledAt: "desc",
+			sortStars: "desc",
+			sortForks: "desc"
+		};
+		/** 单选按钮组中的一个按钮（segmented control，与排序/来源筛选共用）；
+		可带尾随图标（排序按钮激活时显示当前方向箭头） */
+		function SegBtn({ active, onClick, label, icon }) {
+			return (0, react.createElement)("button", {
+				type: "button",
+				className: active ? `${InstalledView_module_css_default.segBtn} ${InstalledView_module_css_default.segBtnActive}` : InstalledView_module_css_default.segBtn,
+				"aria-pressed": active,
+				onClick
+			}, label, icon);
+		}
+		function InstalledRow({ item, t, langKey, canReveal, revealLabel, onOpenDetail, onReveal, onUpdate, onUninstall, onRestart }) {
+			const name = item.plugin?.displayName ?? item.name;
+			const repo = item.repo;
+			const category = item.plugin?.category;
+			const desc = item.plugin?.description;
+			const isCustom = item.plugin === null;
+			return (0, react.createElement)("li", {
+				className: InstalledView_module_css_default.row,
+				onClick: () => onOpenDetail(item),
+				role: "button",
+				tabIndex: 0,
+				title: t("detail"),
+				onKeyDown: (e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						onOpenDetail(item);
+					}
+				}
+			}, (0, react.createElement)("div", { className: InstalledView_module_css_default.rowTitleLine }, (0, react.createElement)("span", {
+				className: item.loaded ? InstalledView_module_css_default.statusDot : item.dshCapable ? `${InstalledView_module_css_default.statusDot} ${InstalledView_module_css_default.statusPending}` : `${InstalledView_module_css_default.statusDot} ${InstalledView_module_css_default.statusInactive}`,
+				title: item.loaded ? t("statusRunning") : item.dshCapable ? t("statusPending") : t("exampleHint"),
+				"aria-label": item.loaded ? t("statusRunning") : item.dshCapable ? t("statusPending") : t("exampleHint")
+			}), (0, react.createElement)("div", { className: InstalledView_module_css_default.rowMain }, (0, react.createElement)("span", { className: InstalledView_module_css_default.rowTitle }, name), item.installedVersion ? (0, react.createElement)("span", {
+				className: InstalledView_module_css_default.versionBadge,
+				title: t("installedVersionLabel")
+			}, item.installedVersion) : null, item.hasUpdate ? (0, react.createElement)("span", {
+				className: InstalledView_module_css_default.updateBadge,
+				title: t("updateAvailableHint")
+			}, t("updateAvailable")) : null), (0, react.createElement)("span", {
+				className: isCustom ? `${InstalledView_module_css_default.rowSourceTag} ${InstalledView_module_css_default.rowSourceTagManual}` : `${InstalledView_module_css_default.rowSourceTag} ${InstalledView_module_css_default.rowSourceTagHub}`,
+				title: isCustom ? t("manualInstallHint") : t("hubInstallHint")
+			}, isCustom ? t("manualInstall") : t("hubInstall")), (0, react.createElement)("div", { className: InstalledView_module_css_default.rowActions }, !item.loaded && item.dshCapable ? (0, react.createElement)("button", {
+				className: InstalledView_module_css_default.rowRestart,
+				type: "button",
+				title: t("restartPendingHint"),
+				onClick: (e) => {
+					e.stopPropagation();
+					onRestart();
+				}
+			}, t("restart")) : null, canReveal ? (0, react.createElement)("button", {
+				className: InstalledView_module_css_default.rowDetail,
+				type: "button",
+				onClick: (e) => {
+					e.stopPropagation();
+					onReveal(item);
+				}
+			}, revealLabel) : null, item.hasUpdate && item.plugin ? (0, react.createElement)("button", {
+				className: InstalledView_module_css_default.rowUpdate,
+				type: "button",
+				title: t("updateAvailableHint"),
+				onClick: (e) => {
+					e.stopPropagation();
+					onUpdate(item);
+				}
+			}, t("update")) : null, (0, react.createElement)("button", {
+				className: InstalledView_module_css_default.rowUninstall,
+				type: "button",
+				onClick: (e) => {
+					e.stopPropagation();
+					onUninstall(item);
+				}
+			}, t("uninstall")))), !item.dshCapable ? (0, react.createElement)("div", { className: InstalledView_module_css_default.exampleRow }, (0, react.createElement)("span", {
+				className: InstalledView_module_css_default.exampleBadge,
+				title: t("exampleHint")
+			}, t("exampleLabel"))) : null, repo || category ? (0, react.createElement)("div", { className: InstalledView_module_css_default.rowMeta }, item.repo ? (0, react.createElement)("span", { className: InstalledView_module_css_default.rowRepo }, item.repo) : null, category ? (0, react.createElement)("span", { className: InstalledView_module_css_default.rowCategory }, categoryLabel(CATEGORY_LABELS, category, langKey)) : null) : null, desc ? (0, react.createElement)("div", {
+				className: InstalledView_module_css_default.rowDesc,
+				title: desc
+			}, desc) : null);
+		}
+		/** 行列表：单个已安装列表（自定义安装与目录插件混排，靠徽标区分）。 */
+		function RowList({ items, t, langKey, canReveal, revealLabel, onOpenDetail, onReveal, onUpdate, onUninstall, onRestart }) {
+			return (0, react.createElement)("ul", { className: InstalledView_module_css_default.list }, items.map((item) => (0, react.createElement)(InstalledRow, {
+				key: item.name,
+				item,
+				t,
+				langKey,
+				canReveal,
+				revealLabel,
+				onOpenDetail,
+				onReveal,
+				onUpdate,
+				onUninstall,
+				onRestart
+			})));
+		}
+		function InstalledView({ items, t, langKey, platform, onOpenDetail, onReveal, onUpdate, onUninstall, onRestart }) {
+			const [query, setQuery] = (0, react.useState)("");
+			const [sort, setSort] = (0, react.useState)("sortName");
+			/** 当前排序方向：点同一个排序按钮切换 正序/倒序；点新排序用该排序的默认方向 */
+			const [sortDir, setSortDir] = (0, react.useState)("asc");
+			/** 已安装列表的来源筛选：全部 / 目录收录 / 自定义安装（单选按钮组） */
+			const [sourceFilter, setSourceFilter] = (0, react.useState)("all");
+			/** 点击排序按钮：同一按钮切换正/倒序，新按钮用默认方向 */
+			function pickSort(key) {
+				if (key === sort) setSortDir((d) => d === "asc" ? "desc" : "asc");
+				else {
+					setSort(key);
+					setSortDir(SORT_DEFAULT_DIR[key]);
+				}
+			}
+			const list = (0, react.useMemo)(() => {
+				const q = query.trim().toLowerCase();
+				const filtered = items.filter((item) => {
+					if (!q) return true;
+					return (item.plugin?.displayName ?? item.name).toLowerCase().includes(q) || item.name.toLowerCase().includes(q) || (item.repo ?? "").toLowerCase().includes(q) || (item.plugin?.description ?? "").toLowerCase().includes(q);
+				});
+				const dir = sortDir === "asc" ? 1 : -1;
+				return [...filtered].sort((a, b) => {
+					if (sort === "sortName") return (a.plugin?.displayName ?? a.name).localeCompare(b.plugin?.displayName ?? b.name) * dir;
+					if (sort === "sortStars" || sort === "sortForks") {
+						const metric = sort === "sortStars" ? "stargazers_count" : "forks_count";
+						const sa = a.plugin?.stats?.[metric];
+						const sb = b.plugin?.stats?.[metric];
+						if (sa == null && sb == null) return 0;
+						if (sa == null) return 1;
+						if (sb == null) return -1;
+						return (sa - sb) * dir;
+					}
+					const av = a.installedAt ?? "";
+					const bv = b.installedAt ?? "";
+					if (av === bv) return 0;
+					if (av === "") return 1;
+					if (bv === "") return -1;
+					return av.localeCompare(bv) * dir;
+				});
+			}, [
+				items,
+				query,
+				sort,
+				sortDir
+			]);
+			const catalogItems = list.filter((item) => item.plugin !== null);
+			const customItems = list.filter((item) => item.plugin === null);
+			const filtered = sourceFilter === "all" ? list : sourceFilter === "catalog" ? catalogItems : customItems;
+			const rowListProps = {
+				t,
+				langKey,
+				canReveal: platform === "darwin" || platform === "win32" || platform === "linux",
+				revealLabel: platform === "darwin" ? t("revealFolder") : t("openFolder"),
+				onOpenDetail,
+				onReveal,
+				onUpdate,
+				onUninstall,
+				onRestart
+			};
+			const listToolbar = (0, react.createElement)("div", { className: InstalledView_module_css_default.toolbar }, (0, react.createElement)("div", { className: InstalledView_module_css_default.searchWrap }, (0, react.createElement)("input", {
+				className: InstalledView_module_css_default.searchInput,
+				type: "search",
+				placeholder: t("installedSearch"),
+				value: query,
+				spellCheck: false,
+				onInput: (e) => setQuery(e.target.value)
+			})), (0, react.createElement)("div", { className: InstalledView_module_css_default.segRow }, (0, react.createElement)("span", { className: InstalledView_module_css_default.segLabel }, t("filterByLabel")), (0, react.createElement)("div", {
+				className: InstalledView_module_css_default.segGroup,
+				role: "radiogroup",
+				"aria-label": t("filterByLabel")
+			}, SegBtn({
+				active: sourceFilter === "all",
+				onClick: () => setSourceFilter("all"),
+				label: t("all")
+			}), SegBtn({
+				active: sourceFilter === "catalog",
+				onClick: () => setSourceFilter("catalog"),
+				label: t("installedFilterCatalog")
+			}), SegBtn({
+				active: sourceFilter === "custom",
+				onClick: () => setSourceFilter("custom"),
+				label: t("customLabel")
+			})), (0, react.createElement)("span", { className: InstalledView_module_css_default.segLabel }, t("sortByLabel")), (0, react.createElement)("div", {
+				className: InstalledView_module_css_default.segGroup,
+				role: "radiogroup",
+				"aria-label": t("sortAria")
+			}, INSTALLED_SORTS.map((key) => SegBtn({
+				active: sort === key,
+				onClick: () => pickSort(key),
+				label: t(key),
+				icon: sort === key ? (0, react.createElement)(SortArrowIcon, { up: sortDir === "asc" }) : null
+			})))));
+			return (0, react.createElement)("div", { className: InstalledView_module_css_default.root }, listToolbar, filtered.length === 0 ? items.length === 0 ? (0, react.createElement)("div", { className: InstalledView_module_css_default.empty }, (0, react.createElement)("div", { className: InstalledView_module_css_default.emptyTitle }, t("installedEmpty")), (0, react.createElement)("div", { className: InstalledView_module_css_default.emptyDesc }, t("installedEmptyDesc"))) : (0, react.createElement)("div", { className: InstalledView_module_css_default.empty }, (0, react.createElement)("div", { className: InstalledView_module_css_default.emptyTitle }, t("noResult")), (0, react.createElement)("div", { className: InstalledView_module_css_default.emptyDesc }, t("noResultDesc"))) : (0, react.createElement)(RowList, {
+				items: filtered,
+				...rowListProps
+			}));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/CustomInstallView.module.css.mjs
+		const css$6 = ".zISxCG_root{flex-direction:column;gap:10px;min-width:0;max-width:560px;display:flex}.zISxCG_desc{color:var(--hub-text-tertiary);margin:0;font-size:12px;line-height:18px}.zISxCG_installCards{flex-direction:column;flex-shrink:0;gap:10px;min-width:0;display:flex}.zISxCG_installCard{background:var(--hub-bg-1);border:1px solid var(--hub-border-1);border-radius:8px;flex-direction:column;gap:8px;min-width:0;padding:10px 12px;display:flex}.zISxCG_installCardHead{align-items:center;min-width:0;display:flex}.zISxCG_installLabel{color:var(--hub-text-primary);font-size:12px;font-weight:600;line-height:18px}.zISxCG_installExample{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-size:11px;line-height:16px;overflow:hidden}.zISxCG_installRow{align-items:center;gap:8px;min-width:0;display:flex}.zISxCG_installInput{min-width:0;height:28px;color:var(--hub-text-primary);border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;flex:auto;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}.zISxCG_installInput::placeholder{color:var(--hub-text-tertiary)}.zISxCG_installInput:focus{border-color:var(--hub-brand)}.zISxCG_installInputError,.zISxCG_installInputError:focus{border-color:var(--hub-danger-text)}.zISxCG_installBtn{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;padding:5px 14px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,opacity .12s}.zISxCG_installBtn:hover{background:var(--hub-brand-hover)}.zISxCG_installBtn:disabled{opacity:.45;cursor:default}.zISxCG_installError{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border);border-radius:6px;padding:5px 8px;font-size:12px;line-height:16px}";
+		const tagId$6 = "dsh-plugin/CustomInstallView.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$6) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$6;
+			tag.textContent = css$6;
+			document.head.appendChild(tag);
+		}
+		var CustomInstallView_module_css_default = {
+			"root": "zISxCG_root",
+			"installLabel": "zISxCG_installLabel",
+			"desc": "zISxCG_desc",
+			"installExample": "zISxCG_installExample",
+			"installInput": "zISxCG_installInput",
+			"installCardHead": "zISxCG_installCardHead",
+			"installBtn": "zISxCG_installBtn",
+			"installInputError": "zISxCG_installInputError",
+			"installRow": "zISxCG_installRow",
+			"installCards": "zISxCG_installCards",
+			"installError": "zISxCG_installError",
+			"installCard": "zISxCG_installCard"
+		};
+		//#endregion
+		//#region src/client/components/views/CustomInstallView.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Custom install view: a standalone top-level section for manually
+		* installing npm packages or GitHub sources outside the catalog. Three
+		* installer cards, one per channel — npm package, GitHub source and a raw
+		* DSH command (`dsh plugin ... add <target>`) — each with a placeholder
+		* example above the input and its own format check. The cards stay
+		* separate so a user never has to guess which format goes where. Finished
+		* installs surface in the Installed view, marked as custom.
+		*
+		* Pure presentational: owns only the three local input/error states; the
+		* actual install (custom source, gated by the security toggles) bubbles up
+		* via onInstallCustom.
+		*/
+		/** GitHub 地址（带前缀形态）：github:、https://github.com/、git+https://github.com/、git@github.com: */
+		const GITHUB_URL_RE = /^(?:github:|https?:\/\/github\.com\/|git\+https?:\/\/github\.com\/|git@github\.com:)([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?:\.git)?$/;
+		/** 裸 owner/repo（npm 包名只有 @scope/pkg 才带斜杠，无 @ 前缀的 a/b 一定是 GitHub 仓库） */
+		const GITHUB_BARE_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
+		/** npm 包名（含 @scope/pkg） */
+		const NPM_PACKAGE_RE = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/;
+		/** DSH 命令行前缀（`dsh plugin [--profile|-p <p>] add <target>`）—— 提取其中的安装目标；
+		* 命令大小写不敏感，支持 `-p` 简写与 `--profile=web` 等号形式，与 server 端 installTargetOf 口径一致。 */
+		const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+(?:(?:--profile|-p)(?:=|\s+)\S+\s*)?add\s+(.+)$/i;
+		function installTargetOf(raw) {
+			const input = raw.trim();
+			const match = DSH_PLUGIN_CMD_RE.exec(input);
+			return match !== null ? match[1].trim() : input;
+		}
+		function isGitHubInput(raw) {
+			const input = raw.trim();
+			return GITHUB_URL_RE.test(input) || GITHUB_BARE_RE.test(input);
+		}
+		function isNpmInput(raw) {
+			return NPM_PACKAGE_RE.test(raw.trim());
+		}
+		function isDshCommand(raw) {
+			return DSH_PLUGIN_CMD_RE.test(raw.trim());
+		}
+		function CustomInstallView({ t, onInstallCustom }) {
+			/** 自定义安装：NPM 包输入与格式错误（'' = 无错误） */
+			const [npmQuery, setNpmQuery] = (0, react.useState)("");
+			const [npmError, setNpmError] = (0, react.useState)("");
+			/** 自定义安装：GitHub 源码输入与格式错误（'' = 无错误） */
+			const [gitQuery, setGitQuery] = (0, react.useState)("");
+			const [gitError, setGitError] = (0, react.useState)("");
+			/** 自定义安装：DSH 命令输入与格式错误（'' = 无错误） */
+			const [cmdQuery, setCmdQuery] = (0, react.useState)("");
+			const [cmdError, setCmdError] = (0, react.useState)("");
+			const submitNpm = () => {
+				const target = npmQuery.trim();
+				if (!target) return;
+				if (!isNpmInput(target)) {
+					setNpmError(t("npmInstallInvalid"));
+					return;
+				}
+				onInstallCustom(target);
+				setNpmQuery("");
+				setNpmError("");
+			};
+			const submitGit = () => {
+				const target = gitQuery.trim();
+				if (!target) return;
+				if (!isGitHubInput(target)) {
+					setGitError(t("gitInstallInvalid"));
+					return;
+				}
+				onInstallCustom(target);
+				setGitQuery("");
+				setGitError("");
+			};
+			const submitCmd = () => {
+				const raw = cmdQuery.trim();
+				if (!raw) return;
+				if (!isDshCommand(raw)) {
+					setCmdError(t("dshCmdInvalid"));
+					return;
+				}
+				onInstallCustom(installTargetOf(raw));
+				setCmdQuery("");
+				setCmdError("");
+			};
+			return (0, react.createElement)("div", { className: CustomInstallView_module_css_default.root }, (0, react.createElement)("p", { className: CustomInstallView_module_css_default.desc }, t("customViewDesc")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCards }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCard }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("npmInstallLabel"))), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("npmInstallExample")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
+				className: npmError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
+				type: "text",
+				placeholder: t("npmInstallPlaceholder"),
+				value: npmQuery,
+				spellCheck: false,
+				onInput: (e) => {
+					setNpmQuery(e.target.value);
+					setNpmError("");
+				},
+				onKeyDown: (e) => {
+					if (e.key === "Enter") submitNpm();
+				}
+			}), (0, react.createElement)("button", {
+				className: CustomInstallView_module_css_default.installBtn,
+				type: "button",
+				disabled: npmQuery.trim() === "",
+				onClick: submitNpm
+			}, t("installCliBtn"))), npmError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, npmError) : null), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCard }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("gitInstallLabel"))), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("gitInstallExample")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
+				className: gitError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
+				type: "text",
+				placeholder: t("gitInstallPlaceholder"),
+				value: gitQuery,
+				spellCheck: false,
+				onInput: (e) => {
+					setGitQuery(e.target.value);
+					setGitError("");
+				},
+				onKeyDown: (e) => {
+					if (e.key === "Enter") submitGit();
+				}
+			}), (0, react.createElement)("button", {
+				className: CustomInstallView_module_css_default.installBtn,
+				type: "button",
+				disabled: gitQuery.trim() === "",
+				onClick: submitGit
+			}, t("installCliBtn"))), gitError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, gitError) : null), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCard }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("dshCmdLabel"))), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("dshCmdExample")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
+				className: cmdError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
+				type: "text",
+				placeholder: t("dshCmdPlaceholder"),
+				value: cmdQuery,
+				spellCheck: false,
+				onInput: (e) => {
+					setCmdQuery(e.target.value);
+					setCmdError("");
+				},
+				onKeyDown: (e) => {
+					if (e.key === "Enter") submitCmd();
+				}
+			}), (0, react.createElement)("button", {
+				className: CustomInstallView_module_css_default.installBtn,
+				type: "button",
+				disabled: cmdQuery.trim() === "",
+				onClick: submitCmd
+			}, t("installCliBtn"))), cmdError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, cmdError) : null)));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/SettingsView.module.css.mjs
+		const css$5 = "._506LLG_root{flex:1;align-items:stretch;min-width:0;min-height:0;display:flex}._506LLG_sidebar{border-right:1px solid var(--hub-border-1);flex-direction:column;flex:none;gap:2px;padding:8px 6px;display:flex;overflow-y:auto}._506LLG_navItem,._506LLG_navItemActive{box-sizing:border-box;text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:7px;align-items:center;gap:8px;width:100%;padding:7px 10px;font-size:12.5px;line-height:18px;transition:color .12s,background-color .12s;display:flex}._506LLG_navItem{color:var(--hub-text-secondary);background:0 0}._506LLG_navItem:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._506LLG_navItemActive{color:var(--hub-brand);background:var(--hub-brand-tint);font-weight:600}._506LLG_navIcon{flex:none;display:inline-flex}._506LLG_content{flex-direction:column;flex:1;min-width:0;min-height:0;padding:14px 16px 18px;display:flex;overflow-y:auto}._506LLG_pageHeader{margin-bottom:12px}._506LLG_pageTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}._506LLG_pageDesc{color:var(--hub-text-tertiary);margin-top:3px;font-size:11.5px;line-height:16px}._506LLG_card{border:1px solid var(--hub-border-1);background:var(--hub-bg-1);border-radius:8px;flex-direction:column;min-width:0;display:flex}._506LLG_settingRow{border-bottom:1px solid var(--hub-border-1);justify-content:space-between;align-items:center;gap:16px;min-width:0;padding:10px 12px;display:flex}._506LLG_settingRow:last-child{border-bottom:none}._506LLG_settingLabel{flex:1;min-width:0}._506LLG_settingTitle{color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;font-size:12.5px;font-weight:500;line-height:18px;overflow:hidden}._506LLG_settingDesc{color:var(--hub-text-tertiary);margin-top:2px;font-size:11px;line-height:15px}._506LLG_settingControl{flex:none;align-items:center;display:flex}._506LLG_settingRowStack{border-bottom:1px solid var(--hub-border-1);flex-direction:column;align-items:stretch;gap:8px;min-width:0;padding:10px 12px;display:flex}._506LLG_settingRowStack:last-child{border-bottom:none}._506LLG_settingControlStack{align-items:center;display:flex}._506LLG_settingControlStack ._506LLG_textInput{width:100%}._506LLG_controlDropdown{min-width:180px}._506LLG_textInput{width:240px;height:28px;color:var(--hub-text-primary);background:var(--hub-bg-1);border:1px solid var(--hub-border-input);border-radius:6px;outline:none;padding:0 9px;font-family:inherit;font-size:12px;transition:border-color .15s}._506LLG_textInput:focus{border-color:var(--hub-brand-border)}._506LLG_textInput::placeholder{color:var(--hub-text-disabled)}._506LLG_resetBtn,._506LLG_resetBtnArmed{cursor:pointer;border-radius:6px;flex:none;height:28px;padding:0 14px;font-size:12px;font-weight:500;transition:background-color .15s,border-color .15s,color .15s}._506LLG_resetBtn{color:var(--hub-danger-text);border:1px solid var(--hub-danger-border);background:0 0}._506LLG_resetBtn:hover{background:var(--hub-danger-tint);border-color:var(--hub-danger-text)}._506LLG_resetBtnArmed{color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger)}._506LLG_resetBtnArmed:hover{background:var(--hub-danger-hover)}";
+		const tagId$5 = "dsh-plugin/SettingsView.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$5) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$5;
+			tag.textContent = css$5;
+			document.head.appendChild(tag);
+		}
+		var SettingsView_module_css_default = {
+			"navIcon": "_506LLG_navIcon",
+			"navItemActive": "_506LLG_navItemActive",
+			"pageDesc": "_506LLG_pageDesc",
+			"controlDropdown": "_506LLG_controlDropdown",
+			"settingRow": "_506LLG_settingRow",
+			"settingDesc": "_506LLG_settingDesc",
+			"content": "_506LLG_content",
+			"card": "_506LLG_card",
+			"root": "_506LLG_root",
+			"navItem": "_506LLG_navItem",
+			"pageTitle": "_506LLG_pageTitle",
+			"settingTitle": "_506LLG_settingTitle",
+			"resetBtnArmed": "_506LLG_resetBtnArmed",
+			"settingControl": "_506LLG_settingControl",
+			"sidebar": "_506LLG_sidebar",
+			"pageHeader": "_506LLG_pageHeader",
+			"settingLabel": "_506LLG_settingLabel",
+			"settingRowStack": "_506LLG_settingRowStack",
+			"textInput": "_506LLG_textInput",
+			"resetBtn": "_506LLG_resetBtn",
+			"settingControlStack": "_506LLG_settingControlStack"
+		};
+		//#endregion
+		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
+		const css$4 = ".B_Gxsq_dropdown{flex-shrink:0;position:relative}.B_Gxsq_dropdownBtn{box-sizing:border-box;border:1px solid var(--hub-border-2);height:28px;color:var(--hub-text-primary);background:var(--hub-bg-hover);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;align-items:center;gap:6px;padding:0 10px;font-size:12px;line-height:26px;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.B_Gxsq_dropdownBtn:hover{background:#80808047}.B_Gxsq_dropdownLabel{white-space:nowrap}.B_Gxsq_dropdownArrow,.B_Gxsq_dropdownArrowOpen{color:var(--hub-text-tertiary);transition:transform .12s,color .12s;display:inline-flex}.B_Gxsq_dropdownArrowOpen{color:var(--hub-text-secondary);transform:rotate(180deg)}.B_Gxsq_dropdownPanel{z-index:20;border:1px solid var(--hub-border-2);background:var(--hub-bg-1);border-radius:8px;flex-direction:column;gap:1px;min-width:100%;padding:4px;display:flex;position:absolute;top:calc(100% + 4px);left:0}.B_Gxsq_dropdownItem,.B_Gxsq_dropdownItemActive{text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;justify-content:space-between;align-items:center;gap:12px;width:100%;padding:5px 8px;font-size:12px;line-height:16px;transition:color .12s,background .12s;display:flex}.B_Gxsq_dropdownItem{color:var(--hub-text-secondary);background:0 0}.B_Gxsq_dropdownItem:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.B_Gxsq_dropdownItemActive{color:var(--hub-brand);background:var(--hub-brand-tint);font-weight:600}.B_Gxsq_dropdownItemLabel{white-space:nowrap}.B_Gxsq_dropdownCount,.B_Gxsq_dropdownCountActive{text-align:center;border-radius:999px;min-width:16px;padding:0 5px;font-size:10px;line-height:14px}.B_Gxsq_dropdownCount{color:var(--hub-text-tertiary);background:var(--hub-bg-btn)}.B_Gxsq_dropdownCountActive{color:var(--hub-text-on-fill);background:var(--hub-btn-fill)}";
+		const tagId$4 = "dsh-plugin/Dropdown.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$4) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$4;
+			tag.textContent = css$4;
+			document.head.appendChild(tag);
+		}
+		var Dropdown_module_css_default = {
+			"dropdownItem": "B_Gxsq_dropdownItem",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
+			"dropdownBtn": "B_Gxsq_dropdownBtn",
+			"dropdownArrow": "B_Gxsq_dropdownArrow",
+			"dropdownLabel": "B_Gxsq_dropdownLabel"
+		};
+		//#endregion
+		//#region src/client/components/ui/Dropdown.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Button-style dropdown (native <select> replacement).
+		*
+		* The trigger is a compact toolbar button — hairline border + subtle grey
+		* fill + current value + chevron — so it sits naturally next to the other
+		* toolbar buttons and takes a single slot of horizontal space. Clicking
+		* outside or pressing Esc closes the panel; options get a hover fill and
+		* the active one a brand highlight, all driven by the --hub-* tokens.
+		*/
+		function Dropdown({ value, options, onChange, title, className }) {
+			const [open, setOpen] = (0, react.useState)(false);
+			const rootRef = (0, react.useRef)(null);
+			(0, react.useEffect)(() => {
+				if (!open) return;
+				const onDoc = (e) => {
+					if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+				};
+				const onKey = (e) => {
+					if (e.key === "Escape") setOpen(false);
+				};
+				document.addEventListener("mousedown", onDoc);
+				document.addEventListener("keydown", onKey);
+				return () => {
+					document.removeEventListener("mousedown", onDoc);
+					document.removeEventListener("keydown", onKey);
+				};
+			}, [open]);
+			const current = options.find((o) => o.value === value);
+			return (0, react.createElement)("div", {
+				className: className ? `${Dropdown_module_css_default.dropdown} ${className}` : Dropdown_module_css_default.dropdown,
+				ref: rootRef
+			}, (0, react.createElement)("button", {
+				className: Dropdown_module_css_default.dropdownBtn,
+				type: "button",
+				title,
+				"aria-haspopup": "listbox",
+				"aria-expanded": open,
+				onClick: () => setOpen((v) => !v)
+			}, (0, react.createElement)("span", { className: Dropdown_module_css_default.dropdownLabel }, current?.label ?? value), (0, react.createElement)("span", { className: open ? Dropdown_module_css_default.dropdownArrowOpen : Dropdown_module_css_default.dropdownArrow }, (0, react.createElement)(ChevronDownIcon))), open && (0, react.createElement)("div", {
+				className: Dropdown_module_css_default.dropdownPanel,
+				role: "listbox"
+			}, options.map((o) => (0, react.createElement)("button", {
+				key: o.value,
+				type: "button",
+				role: "option",
+				"aria-selected": o.value === value,
+				className: o.value === value ? Dropdown_module_css_default.dropdownItemActive : Dropdown_module_css_default.dropdownItem,
+				onClick: () => {
+					onChange(o.value);
+					setOpen(false);
+				}
+			}, (0, react.createElement)("span", { className: Dropdown_module_css_default.dropdownItemLabel }, o.label), typeof o.count === "number" ? (0, react.createElement)("span", { className: o.value === value ? Dropdown_module_css_default.dropdownCountActive : Dropdown_module_css_default.dropdownCount }, o.count) : null))));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/Toggle.module.css.mjs
+		const css$3 = ".k-cD4G_toggle,.k-cD4G_toggleOn{cursor:pointer;border:none;border-radius:999px;flex:none;align-items:center;width:34px;height:18px;padding:0;transition:background-color .15s;display:inline-flex}.k-cD4G_toggle{background:var(--hub-bg-3);box-shadow:inset 0 0 0 1px var(--hub-border-2)}.k-cD4G_toggle:hover{background:var(--hub-bg-hover)}.k-cD4G_toggleOn{background:var(--hub-brand)}.k-cD4G_toggleOn:hover{background:var(--hub-brand-hover)}.k-cD4G_toggle:disabled,.k-cD4G_toggleOn:disabled{opacity:.5;cursor:not-allowed}.k-cD4G_knob{background:#fff;border-radius:999px;width:14px;height:14px;transition:transform .15s;display:block;transform:translate(2px);box-shadow:0 1px 2px #00000040}.k-cD4G_toggleOn .k-cD4G_knob{transform:translate(18px)}";
+		const tagId$3 = "dsh-plugin/Toggle.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$3) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$3;
+			tag.textContent = css$3;
+			document.head.appendChild(tag);
+		}
+		var Toggle_module_css_default = {
+			"toggleOn": "k-cD4G_toggleOn",
+			"knob": "k-cD4G_knob",
+			"toggle": "k-cD4G_toggle"
+		};
+		//#endregion
+		//#region src/client/components/ui/Toggle.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Compact switch used by the settings rows. Native-button based so it is
+		* keyboard focusable and announces state via aria-checked; styling driven
+		* by the --hub-* tokens (on = brand fill, off = neutral track).
+		*/
+		function Toggle({ checked, onChange, title, disabled }) {
+			return (0, react.createElement)("button", {
+				type: "button",
+				role: "switch",
+				"aria-checked": checked,
+				disabled,
+				title,
+				className: checked ? Toggle_module_css_default.toggleOn : Toggle_module_css_default.toggle,
+				onClick: () => onChange(!checked)
+			}, (0, react.createElement)("span", { className: Toggle_module_css_default.knob }));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/DiagnosticsView.module.css.mjs
+		const css$2 = ".k9eRya_panel{flex-direction:column;min-width:0;display:flex}.k9eRya_envRow{border-bottom:1px solid var(--hub-border-1);align-items:center;gap:10px;padding:8px 12px;display:flex}.k9eRya_envLabel{flex:1;min-width:0}.k9eRya_envTitle{color:var(--hub-text-primary);font-size:12.5px;font-weight:500;line-height:18px}.k9eRya_envDesc{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}.k9eRya_envCopyBtn{height:24px;color:var(--hub-text-secondary);background:var(--hub-bg-hover);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;padding:0 12px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}.k9eRya_envCopyBtn:hover:not(:disabled){color:var(--hub-text-primary);background:var(--hub-bg-2)}.k9eRya_envCopyBtn:disabled{opacity:.55;cursor:default}.k9eRya_head{border-bottom:1px solid var(--hub-border-1);align-items:center;gap:10px;padding:8px 12px;display:flex}.k9eRya_headHint{min-width:0;color:var(--hub-text-tertiary);flex:1;font-size:11px;line-height:16px}.k9eRya_runBtn{height:24px;color:var(--hub-brand);background:var(--hub-brand-tint);cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #0000;border-radius:6px;flex:none;padding:0 12px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}.k9eRya_runBtn:hover:not(:disabled){color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}.k9eRya_runBtn:disabled{opacity:.55;cursor:default}.k9eRya_row{box-sizing:border-box;border:none;border-bottom:1px solid var(--hub-border-1);width:100%;min-width:0;font:inherit;text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;align-items:center;gap:10px;padding:9px 12px;transition:background-color .12s;display:flex}.k9eRya_row:last-of-type{border-bottom:none}.k9eRya_row:hover:not(:disabled){background:var(--hub-bg-hover)}.k9eRya_row:disabled{cursor:default}.k9eRya_name{color:var(--hub-text-primary);white-space:nowrap;flex:none;font-size:12.5px;font-weight:500;line-height:18px}.k9eRya_display{min-width:0;color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-size:11px;line-height:16px;overflow:hidden}.k9eRya_meta{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;font-size:11px;line-height:16px}.k9eRya_badge{text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;border-radius:999px;flex:none;height:17px;padding:0 8px;font-size:10.5px;line-height:17px}.k9eRya_badgeOk{color:var(--hub-success);background:var(--hub-success-tint)}.k9eRya_badgeFail{color:var(--hub-danger-text);background:var(--hub-danger-tint)}.k9eRya_badgeRunning{color:var(--hub-text-secondary);background:var(--hub-bg-hover);animation:1s ease-in-out infinite k9eRya_diagPulse}.k9eRya_badgeIdle{color:var(--hub-text-disabled);background:var(--hub-bg-hover)}@keyframes k9eRya_diagPulse{0%,to{opacity:1}50%{opacity:.4}}.k9eRya_summary{padding:8px 12px 10px;font-size:11px;line-height:16px}.k9eRya_summaryOk{color:var(--hub-success)}.k9eRya_summaryFail{color:var(--hub-danger-text)}.k9eRya_summaryRunning{color:var(--hub-text-tertiary)}";
+		const tagId$2 = "dsh-plugin/DiagnosticsView.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$2) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$2;
+			tag.textContent = css$2;
+			document.head.appendChild(tag);
+		}
+		var DiagnosticsView_module_css_default = {
+			"row": "k9eRya_row",
+			"envTitle": "k9eRya_envTitle",
+			"display": "k9eRya_display",
+			"badgeOk": "k9eRya_badgeOk",
+			"summaryFail": "k9eRya_summaryFail",
+			"head": "k9eRya_head",
+			"panel": "k9eRya_panel",
+			"headHint": "k9eRya_headHint",
+			"envRow": "k9eRya_envRow",
+			"envLabel": "k9eRya_envLabel",
+			"envCopyBtn": "k9eRya_envCopyBtn",
+			"badgeRunning": "k9eRya_badgeRunning",
+			"diagPulse": "k9eRya_diagPulse",
+			"summaryOk": "k9eRya_summaryOk",
+			"runBtn": "k9eRya_runBtn",
+			"summary": "k9eRya_summary",
+			"badge": "k9eRya_badge",
+			"summaryRunning": "k9eRya_summaryRunning",
+			"badgeFail": "k9eRya_badgeFail",
+			"meta": "k9eRya_meta",
+			"badgeIdle": "k9eRya_badgeIdle",
+			"name": "k9eRya_name",
+			"envDesc": "k9eRya_envDesc"
+		};
+		//#endregion
+		//#region src/client/components/views/DiagnosticsView.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* System diagnostics list: one row per connectivity channel (npm registry /
+		* GitHub API / catalog site), each with a live status badge — 200 OK in
+		* green, Unreachable in red, Checking… while probing. The list runs
+		* automatically when the page opens; every row is a button that re-probes
+		* just that channel, so a click always yields visible feedback
+		* (row pulses → badge flips → latency refreshes).
+		*/
+		/** 系统版本文本：提交 Issue 时粘贴到正文，方便作者复现。 */
+		function formatEnv(env) {
+			return [
+				`DSH-Plugin Hub ${PLUGIN_VERSION}`,
+				`DSH ${env.dshVersion ?? "unknown"}`,
+				`Node ${env.nodeVersion}`,
+				`${env.platform} ${env.arch} (${env.release})`,
+				`Profile ${env.profile}`,
+				env.dshHome ? `Home ${env.dshHome}` : ""
+			].filter(Boolean).join("\n");
+		}
+		const INITIAL_ROWS = [
+			{
+				key: "npm",
+				display: "registry.npmjs.org",
+				nameKey: "diagNpm",
+				status: "idle",
+				ms: null,
+				statusCode: null
+			},
+			{
+				key: "github",
+				display: "github.com",
+				nameKey: "diagGithub",
+				status: "idle",
+				ms: null,
+				statusCode: null
+			},
+			{
+				key: "catalog",
+				display: "dsh-plugin.org",
+				nameKey: "diagCatalog",
+				status: "idle",
+				ms: null,
+				statusCode: null
+			}
+		];
+		function DiagnosticsView({ t, env, onCopy }) {
+			const [rows, setRows] = (0, react.useState)(INITIAL_ROWS);
+			/** 当前探测请求：重测/卸载时 abort 旧请求，避免乱序结果覆盖 */
+			const runningRef = (0, react.useRef)(null);
+			const patchRows = (key, patch) => {
+				setRows((prev) => prev.map((r) => key === void 0 || r.key === key ? {
+					...r,
+					...patch
+				} : r));
+			};
+			/** 探测：key 缺省 = 全量串行；传 key = 只重测该通道 */
+			const run = (0, react.useCallback)((key) => {
+				runningRef.current?.abort();
+				const controller = new AbortController();
+				runningRef.current = controller;
+				patchRows(key, {
+					status: "running",
+					ms: null,
+					statusCode: null
+				});
+				(async () => {
+					try {
+						const res = await fetch("/dsh-plugin-hub/diagnostics", {
+							method: "POST",
+							headers: { "content-type": "application/json" },
+							body: key === void 0 ? "{}" : JSON.stringify({ key }),
+							cache: "no-store",
+							signal: controller.signal
+						});
+						if (!res.ok || res.body === null) throw new Error(`http ${res.status}`);
+						const reader = res.body.getReader();
+						const decoder = new TextDecoder();
+						let buf = "";
+						for (;;) {
+							const { done, value } = await reader.read();
+							if (done) break;
+							buf += decoder.decode(value, { stream: true });
+							let nl = buf.indexOf("\n");
+							while (nl !== -1) {
+								const raw = buf.slice(0, nl).trim();
+								buf = buf.slice(nl + 1);
+								if (raw !== "") {
+									const ev = JSON.parse(raw);
+									if (ev.type === "ok" || ev.type === "fail") patchRows(ev.key, {
+										status: ev.type === "ok" ? "ok" : "fail",
+										ms: typeof ev.ms === "number" ? ev.ms : null,
+										statusCode: typeof ev.status === "number" ? ev.status : null
+									});
+								}
+								nl = buf.indexOf("\n");
+							}
+						}
+					} catch {
+						if (controller.signal.aborted) return;
+						patchRows(key, {
+							status: "fail",
+							ms: null,
+							statusCode: null
+						});
+					}
+				})();
+			}, []);
+			(0, react.useEffect)(() => {
+				run();
+				return () => runningRef.current?.abort();
+			}, [run]);
+			const anyRunning = rows.some((r) => r.status === "running");
+			const allOk = !anyRunning && rows.every((r) => r.status === "ok");
+			!anyRunning && rows.some((r) => r.status === "fail");
+			return (0, react.createElement)("div", { className: DiagnosticsView_module_css_default.panel }, (0, react.createElement)("div", { className: DiagnosticsView_module_css_default.envRow }, (0, react.createElement)("div", { className: DiagnosticsView_module_css_default.envLabel }, (0, react.createElement)("div", { className: DiagnosticsView_module_css_default.envTitle }, t("settingsEnvSnapshot")), (0, react.createElement)("div", { className: DiagnosticsView_module_css_default.envDesc }, t("settingsEnvSnapshotDesc"))), (0, react.createElement)("button", {
+				type: "button",
+				className: DiagnosticsView_module_css_default.envCopyBtn,
+				disabled: env === null,
+				onClick: () => {
+					if (env) onCopy(formatEnv(env));
+				}
+			}, t("settingsEnvCopy"))), (0, react.createElement)("div", { className: DiagnosticsView_module_css_default.head }, (0, react.createElement)("span", { className: DiagnosticsView_module_css_default.headHint }, t("diagHeadHint", { n: rows.length })), (0, react.createElement)("button", {
+				type: "button",
+				className: DiagnosticsView_module_css_default.runBtn,
+				disabled: anyRunning,
+				onClick: () => run()
+			}, t("diagRunAll"))), rows.map((r) => {
+				const badge = r.status === "running" ? (0, react.createElement)("span", { className: `${DiagnosticsView_module_css_default.badge} ${DiagnosticsView_module_css_default.badgeRunning}` }, t("diagChecking")) : r.status === "ok" ? (0, react.createElement)("span", { className: `${DiagnosticsView_module_css_default.badge} ${DiagnosticsView_module_css_default.badgeOk}` }, r.statusCode !== null ? `HTTP ${r.statusCode} ${t("diagOk")}` : t("diagOk")) : r.status === "fail" ? (0, react.createElement)("span", { className: `${DiagnosticsView_module_css_default.badge} ${DiagnosticsView_module_css_default.badgeFail}` }, t("settingsDiagFail")) : (0, react.createElement)("span", { className: `${DiagnosticsView_module_css_default.badge} ${DiagnosticsView_module_css_default.badgeIdle}` }, t("diagIdle"));
+				return (0, react.createElement)("button", {
+					key: r.key,
+					type: "button",
+					className: DiagnosticsView_module_css_default.row,
+					disabled: r.status === "running",
+					onClick: () => run(r.key),
+					title: t("diagRecheck")
+				}, (0, react.createElement)("span", { className: DiagnosticsView_module_css_default.name }, t(r.nameKey)), (0, react.createElement)("span", { className: DiagnosticsView_module_css_default.display }, r.display), (0, react.createElement)("span", { className: DiagnosticsView_module_css_default.meta }, r.status === "ok" && r.ms !== null ? `${r.ms} ms` : ""), badge);
+			}), (0, react.createElement)("div", { className: `${DiagnosticsView_module_css_default.summary} ${anyRunning ? DiagnosticsView_module_css_default.summaryRunning : allOk ? DiagnosticsView_module_css_default.summaryOk : DiagnosticsView_module_css_default.summaryFail}` }, anyRunning ? t("diagSummaryRunning") : allOk ? t("diagSummaryOk") : t("diagSummaryFail")));
+		}
+		//#endregion
+		//#region \0dsh-css:src/client/styles/LogsView.module.css.mjs
+		const css$1 = "._3j77BW_panel{flex-direction:column;min-width:0;display:flex}._3j77BW_head{border-bottom:1px solid var(--hub-border-1);flex-direction:column;align-items:stretch;gap:6px;padding:8px 12px;display:flex}._3j77BW_headHint{min-width:0;color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_actions{flex:none;justify-content:flex-start;align-items:center;gap:6px;display:flex}._3j77BW_btn{height:24px;color:var(--hub-text-secondary);background:var(--hub-bg-hover);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;padding:0 10px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_btn:hover:not(:disabled){color:var(--hub-text-primary);background:var(--hub-bg-2)}._3j77BW_btn:disabled{opacity:.55;cursor:default}._3j77BW_btnPrimary{color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}._3j77BW_btnPrimary:hover:not(:disabled){background:var(--hub-brand-hover);border-color:var(--hub-brand-hover)}._3j77BW_list{flex-direction:column;max-height:340px;display:flex;overflow-y:auto}._3j77BW_entry{align-items:baseline;gap:8px;min-width:0;padding:5px 12px;font-size:11px;line-height:16px;display:flex}._3j77BW_entry:hover{background:var(--hub-bg-hover)}._3j77BW_time{font-variant-numeric:tabular-nums;color:var(--hub-text-tertiary);white-space:nowrap;flex:none}._3j77BW_event{color:var(--hub-text-tertiary);white-space:nowrap;flex:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px}._3j77BW_message{min-width:0;color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;flex:1;overflow:hidden}._3j77BW_pathRow{border-bottom:1px solid var(--hub-border-1);align-items:center;gap:8px;padding:6px 12px;display:flex}._3j77BW_pathLabel{color:var(--hub-text-tertiary);flex:none;font-size:11px;line-height:16px}._3j77BW_pathText{min-width:0;color:var(--hub-text-secondary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;line-height:16px;overflow:hidden}._3j77BW_footFail{color:var(--hub-danger-text);flex:none;font-size:11px;line-height:16px}._3j77BW_pathDialog{flex-direction:column;gap:10px;display:flex}._3j77BW_pathDialogDesc{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_pathDialogRow{align-items:center;gap:6px;display:flex}._3j77BW_pathDialogReset{justify-content:space-between;align-items:center;gap:8px;display:flex}._3j77BW_pathDialogHint{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_linkBtn{color:var(--hub-brand);cursor:pointer;background:0 0;border:none;flex:none;padding:0;font-size:11.5px;font-weight:500;line-height:16px}._3j77BW_linkBtn:hover{text-decoration:underline}._3j77BW_pathDraft{min-width:0;height:26px;color:var(--hub-text-primary);background:var(--hub-bg-1);border:1px solid var(--hub-border-input);border-radius:6px;outline:none;flex:1;padding:0 9px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;transition:border-color .12s}._3j77BW_pathDraft:focus{border-color:var(--hub-brand-border)}._3j77BW_pathDraft::placeholder{color:var(--hub-text-disabled)}._3j77BW_pathDialogFoot{justify-content:flex-end;gap:6px;display:flex}._3j77BW_previewRow{text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;width:100%;padding:0;display:block}._3j77BW_filterBar{flex-wrap:wrap;align-items:center;gap:6px;padding:2px 0 0;display:flex}._3j77BW_filterChip{height:22px;color:var(--hub-text-secondary);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:11px;flex:none;padding:0 10px;font-size:11px;line-height:20px;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_filterChip:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3j77BW_filterChipActive{color:var(--hub-brand);background:var(--hub-brand-tint);border-color:var(--hub-brand-border-soft);font-weight:500}._3j77BW_search{flex:1;min-width:140px}._3j77BW_searchInput{width:100%;height:24px;color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:6px;outline:none;padding:0 8px;font-size:11px;line-height:16px;transition:border-color .12s,background-color .12s}._3j77BW_searchInput:focus{border-color:var(--hub-brand);background:var(--hub-bg-1)}._3j77BW_searchInput::placeholder{color:var(--hub-text-tertiary)}._3j77BW_logList{flex-direction:column;flex:auto;min-height:0;padding:4px 0 6px;display:flex;overflow-y:auto}._3j77BW_more{height:26px;color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;align-self:center;margin:10px 0 4px;padding:0 18px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_more:hover:not(:disabled){color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}._3j77BW_more:disabled{opacity:.55;cursor:default}._3j77BW_moreEnd{text-align:center;color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;padding:12px 0 4px;font-size:11px;line-height:16px}._3j77BW_foot{border-top:1px solid var(--hub-border-1);align-items:center;gap:8px;padding:8px 12px;display:flex}._3j77BW_footPath{min-width:0;color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;line-height:16px;overflow:hidden}._3j77BW_footCount{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;font-size:11px;line-height:16px}._3j77BW_footActions{flex:none;align-items:center;gap:6px;display:inline-flex}._3j77BW_badge{letter-spacing:.3px;flex:none;font-size:10px;font-weight:600}._3j77BW_badgeSuccess{color:var(--hub-success)}._3j77BW_badgeError{color:var(--hub-danger-text)}._3j77BW_badgeWarn{color:var(--hub-warning)}._3j77BW_badgeInfo{color:var(--hub-text-secondary)}._3j77BW_badgeDebug{color:var(--hub-text-tertiary)}._3j77BW_catBadge{border:1px solid #0000;border-radius:4px;flex:none;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}._3j77BW_catInstall{color:var(--hub-brand);border-color:var(--hub-brand-border-soft);background:var(--hub-brand-tint)}._3j77BW_catUninstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}._3j77BW_catUpdate{color:var(--hub-warning);border-color:var(--hub-warning-border);background:var(--hub-warning-tint)}._3j77BW_catDiagnostics{color:var(--hub-success);border-color:var(--hub-success-border);background:var(--hub-success-tint)}._3j77BW_catSettings{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3j77BW_catSystem{color:var(--hub-text-secondary);border-color:var(--hub-border-2);background:var(--hub-bg-hover)}._3j77BW_empty{text-align:center;color:var(--hub-text-tertiary);padding:28px 12px;font-size:11.5px}";
+		const tagId$1 = "dsh-plugin/LogsView.module.css";
+		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
+			const tag = document.createElement("style");
+			tag.dataset.plugin = "dsh-plugin";
+			tag.dataset.pluginCss = tagId$1;
+			tag.textContent = css$1;
+			document.head.appendChild(tag);
+		}
+		var LogsView_module_css_default = {
+			"filterChip": "_3j77BW_filterChip",
+			"badgeDebug": "_3j77BW_badgeDebug",
+			"foot": "_3j77BW_foot",
+			"catUpdate": "_3j77BW_catUpdate",
+			"pathDraft": "_3j77BW_pathDraft",
+			"pathDialog": "_3j77BW_pathDialog",
+			"pathDialogDesc": "_3j77BW_pathDialogDesc",
+			"linkBtn": "_3j77BW_linkBtn",
+			"empty": "_3j77BW_empty",
+			"headHint": "_3j77BW_headHint",
+			"list": "_3j77BW_list",
+			"searchInput": "_3j77BW_searchInput",
+			"catInstall": "_3j77BW_catInstall",
+			"entry": "_3j77BW_entry",
+			"pathDialogReset": "_3j77BW_pathDialogReset",
+			"filterChipActive": "_3j77BW_filterChipActive",
+			"pathDialogFoot": "_3j77BW_pathDialogFoot",
+			"footFail": "_3j77BW_footFail",
+			"btnPrimary": "_3j77BW_btnPrimary",
+			"pathDialogRow": "_3j77BW_pathDialogRow",
+			"footActions": "_3j77BW_footActions",
+			"previewRow": "_3j77BW_previewRow",
+			"logList": "_3j77BW_logList",
+			"footPath": "_3j77BW_footPath",
+			"filterBar": "_3j77BW_filterBar",
+			"time": "_3j77BW_time",
+			"badgeSuccess": "_3j77BW_badgeSuccess",
+			"badgeError": "_3j77BW_badgeError",
+			"badgeInfo": "_3j77BW_badgeInfo",
+			"panel": "_3j77BW_panel",
+			"head": "_3j77BW_head",
+			"catUninstall": "_3j77BW_catUninstall",
+			"search": "_3j77BW_search",
+			"catDiagnostics": "_3j77BW_catDiagnostics",
+			"catSystem": "_3j77BW_catSystem",
+			"pathRow": "_3j77BW_pathRow",
+			"catBadge": "_3j77BW_catBadge",
+			"catSettings": "_3j77BW_catSettings",
+			"btn": "_3j77BW_btn",
+			"event": "_3j77BW_event",
+			"actions": "_3j77BW_actions",
+			"pathLabel": "_3j77BW_pathLabel",
+			"message": "_3j77BW_message",
+			"pathDialogHint": "_3j77BW_pathDialogHint",
+			"more": "_3j77BW_more",
+			"badgeWarn": "_3j77BW_badgeWarn",
+			"pathText": "_3j77BW_pathText",
+			"moreEnd": "_3j77BW_moreEnd",
+			"footCount": "_3j77BW_footCount",
+			"badge": "_3j77BW_badge"
+		};
+		//#endregion
+		//#region src/client/components/modals/LogsModal.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Built-in log viewer dialog: no external software needed — the app opens
+		* its own window and loads the local system log (JSONL at
+		* ~/.dsh/profiles/<profile>/hub.log) straight from the server, one page at
+		* a time.
+		*
+		* Every line is categorized twice: a function area (install / uninstall /
+		* update / diagnostics / settings / system) and a severity level (debug /
+		* info / success / warn / error). Filtering on both axes lets you target,
+		* say, only install errors — so the exact incompatible step of an install
+		* (or uninstall) is easy to spot. Search narrows by event code or message.
+		*
+		* Server pagination: GET /dsh-plugin-hub/logs?offset=&limit=&category=
+		* &level=&query= → { entries, total, hasMore, path }. The footer shows the
+		* real file location and reveals it in the system file manager.
+		*/
+		const PAGE = 100;
+		/** 类别筛选标签：值 → 语言包 key（弹窗内 chip 与行内类别徽章共用）。 */
+		const CAT_LABEL = {
+			install: "logCatInstall",
+			uninstall: "logCatUninstall",
+			update: "logCatUpdate",
+			diagnostics: "logCatDiagnostics",
+			settings: "logCatSettings",
+			system: "logCatSystem"
+		};
+		const CAT_FILTERS = [
+			{
+				value: "all",
+				key: "logCatAll"
+			},
+			{
+				value: "install",
+				key: "logCatInstall"
+			},
+			{
+				value: "uninstall",
+				key: "logCatUninstall"
+			},
+			{
+				value: "update",
+				key: "logCatUpdate"
+			},
+			{
+				value: "diagnostics",
+				key: "logCatDiagnostics"
+			},
+			{
+				value: "settings",
+				key: "logCatSettings"
+			},
+			{
+				value: "system",
+				key: "logCatSystem"
+			}
+		];
+		const LEVEL_FILTERS = [
+			{
+				value: "all",
+				key: "logLvAll"
+			},
+			{
+				value: "error",
+				key: "logLvError"
+			},
+			{
+				value: "warn",
+				key: "logLvWarn"
+			},
+			{
+				value: "success",
+				key: "logLvSuccess"
+			},
+			{
+				value: "info",
+				key: "logLvInfo"
+			},
+			{
+				value: "debug",
+				key: "logLvDebug"
+			}
+		];
+		/** 级别徽章文案：弹窗 chip 与行内级别徽章共用同一语言包 key。 */
+		const LEVEL_LABEL = {
+			debug: "logLvDebug",
+			info: "logLvInfo",
+			success: "logLvSuccess",
+			warn: "logLvWarn",
+			error: "logLvError"
+		};
+		/** 时间：YYYY-MM-DD HH:mm:ss（每条都精确到秒）。 */
+		function fmtLogTime(at) {
+			const d = new Date(at);
+			const pad = (n) => String(n).padStart(2, "0");
+			return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+		}
+		/** 导出文件名时间戳：2026-08-24_21-35-00。 */
+		function fmtFileStamp(at) {
+			const d = new Date(at);
+			const pad = (n) => String(n).padStart(2, "0");
+			return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+		}
+		/** 单条日志行：时间 + 级别徽章 + 类别徽章 + 事件码 + 描述。查看器弹窗与设置页预览共用。 */
+		function LogEntryRow({ e, t }) {
+			return (0, react.createElement)("div", {
+				className: LogsView_module_css_default.entry,
+				title: e.message
+			}, (0, react.createElement)("span", { className: LogsView_module_css_default.time }, fmtLogTime(e.at)), (0, react.createElement)("span", { className: `${LogsView_module_css_default.badge} ${LogsView_module_css_default[`badge${e.level}`]}` }, t(LEVEL_LABEL[e.level])), (0, react.createElement)("span", { className: `${LogsView_module_css_default.catBadge} ${LogsView_module_css_default[`cat${e.category}`]}` }, t(CAT_LABEL[e.category])), (0, react.createElement)("span", { className: LogsView_module_css_default.event }, e.event), (0, react.createElement)("span", { className: LogsView_module_css_default.message }, e.message));
+		}
+		function LogsModal({ t, onCopy, onClose }) {
+			const [category, setCategory] = (0, react.useState)("all");
+			const [level, setLevel] = (0, react.useState)("all");
+			const [query, setQuery] = (0, react.useState)("");
+			const [entries, setEntries] = (0, react.useState)([]);
+			const [total, setTotal] = (0, react.useState)(0);
+			const [hasMore, setHasMore] = (0, react.useState)(false);
+			const [path, setPath] = (0, react.useState)("");
+			const [loading, setLoading] = (0, react.useState)(false);
+			const [error, setError] = (0, react.useState)(false);
+			const [opening, setOpening] = (0, react.useState)(false);
+			const [openFailed, setOpenFailed] = (0, react.useState)(false);
+			const offsetRef = (0, react.useRef)(0);
+			/** 拉一页：过滤参数取当前 state，偏移量由调用方给出。 */
+			const fetchPage = (0, react.useCallback)(async (offset) => {
+				try {
+					const qs = new URLSearchParams({
+						offset: String(offset),
+						limit: String(PAGE)
+					});
+					if (category !== "all") qs.set("category", category);
+					if (level !== "all") qs.set("level", level);
+					const q = query.trim();
+					if (q !== "") qs.set("query", q);
+					const res = await fetch(`/dsh-plugin-hub/logs?${qs.toString()}`, { cache: "no-store" });
+					if (!res.ok) return null;
+					return await res.json();
+				} catch {
+					return null;
+				}
+			}, [
+				category,
+				level,
+				query
+			]);
+			/** 从第一页重新加载（换筛选/搜索时）。 */
+			const reload = (0, react.useCallback)(async () => {
+				setLoading(true);
+				const data = await fetchPage(0);
+				if (data === null) {
+					setError(true);
+					setLoading(false);
+					return;
+				}
+				offsetRef.current = data.entries.length;
+				setEntries(data.entries);
+				setTotal(data.total);
+				setHasMore(data.hasMore);
+				if (data.path !== "") setPath(data.path);
+				setError(false);
+				setLoading(false);
+			}, [fetchPage]);
+			/** 追加下一页（「加载更多」）。 */
+			const loadMore = (0, react.useCallback)(async () => {
+				if (loading) return;
+				setLoading(true);
+				const data = await fetchPage(offsetRef.current);
+				if (data === null) {
+					setError(true);
+					setLoading(false);
+					return;
+				}
+				offsetRef.current += data.entries.length;
+				setEntries((prev) => [...prev, ...data.entries]);
+				setTotal(data.total);
+				setHasMore(data.hasMore);
+				setLoading(false);
+			}, [fetchPage, loading]);
+			const first = (0, react.useRef)(true);
+			(0, react.useEffect)(() => {
+				if (first.current) {
+					first.current = false;
+					reload();
+					return;
+				}
+				const id = window.setTimeout(() => {
+					reload();
+				}, 280);
+				return () => window.clearTimeout(id);
+			}, [reload]);
+			/** 在系统文件管理器中定位日志文件（服务端 spawn open）。 */
+			const openFile = async () => {
+				if (opening) return;
+				setOpening(true);
+				setOpenFailed(false);
+				const ok = await openLogFile();
+				setOpening(false);
+				if (!ok) setOpenFailed(true);
+			};
+			/** 已加载条目的纯文本：分析 bug 时复制粘贴给作者。 */
+			const entriesText = () => entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
+			const copyAll = () => {
+				const text = entriesText();
+				if (text !== "") onCopy(text);
+			};
+			/** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
+			const exportFile = () => {
+				const text = entriesText();
+				if (text === "") return;
+				const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `dsh-plugin-hub-log-${fmtFileStamp(Date.now())}.log`;
+				document.body.appendChild(a);
+				a.click();
+				a.remove();
+				URL.revokeObjectURL(url);
+			};
+			return (0, react.createElement)("div", {
+				className: Modal_module_css_default.overlay,
+				onClick: (e) => {
+					if (e.target === e.currentTarget) onClose();
+				}
+			}, (0, react.createElement)("div", {
+				className: `${Modal_module_css_default.errorModal} ${Modal_module_css_default.logModal}`,
+				role: "dialog",
+				"aria-modal": "true"
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.modalTitle }, t("logModalTitle")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
+				"aria-label": t("errorClose"),
+				onClick: onClose
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: LogsView_module_css_default.filterBar }, CAT_FILTERS.map((f) => (0, react.createElement)("button", {
+				key: f.value,
+				type: "button",
+				className: category === f.value ? `${LogsView_module_css_default.filterChip} ${LogsView_module_css_default.filterChipActive}` : LogsView_module_css_default.filterChip,
+				onClick: () => setCategory(f.value)
+			}, t(f.key)))), (0, react.createElement)("div", { className: LogsView_module_css_default.filterBar }, LEVEL_FILTERS.map((f) => (0, react.createElement)("button", {
+				key: f.value,
+				type: "button",
+				className: level === f.value ? `${LogsView_module_css_default.filterChip} ${LogsView_module_css_default.filterChipActive}` : LogsView_module_css_default.filterChip,
+				onClick: () => setLevel(f.value)
+			}, t(f.key))), (0, react.createElement)("div", { className: LogsView_module_css_default.search }, (0, react.createElement)("input", {
+				className: LogsView_module_css_default.searchInput,
+				type: "search",
+				value: query,
+				placeholder: t("logSearchPlaceholder"),
+				"aria-label": t("logSearchPlaceholder"),
+				onChange: (e) => setQuery(e.target.value)
+			}))), (0, react.createElement)("div", { className: LogsView_module_css_default.logList }, error ? (0, react.createElement)("div", { className: LogsView_module_css_default.empty }, t("logsLoadFail")) : loading && entries.length === 0 ? (0, react.createElement)("div", { className: LogsView_module_css_default.empty }, t("logsLoading")) : entries.length === 0 ? (0, react.createElement)("div", { className: LogsView_module_css_default.empty }, t("logEmptyFilter")) : entries.map((e, i) => (0, react.createElement)(LogEntryRow, {
+				key: `${e.at}-${i}`,
+				e,
+				t
+			})), entries.length > 0 && (hasMore ? (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.more,
+				disabled: loading,
+				onClick: () => void loadMore()
+			}, loading ? t("logsLoading") : t("logLoadMore")) : (0, react.createElement)("div", { className: LogsView_module_css_default.moreEnd }, t("logNoMore", { n: total }))))), (0, react.createElement)("div", { className: LogsView_module_css_default.foot }, (0, react.createElement)("span", {
+				className: LogsView_module_css_default.footPath,
+				title: path
+			}, `${t("logPathLabel")}: ${path === "" ? "…" : path}`), openFailed ? (0, react.createElement)("span", { className: LogsView_module_css_default.footFail }, t("logOpenFileFail")) : (0, react.createElement)("span", { className: LogsView_module_css_default.footCount }, t("logCount", { n: total })), (0, react.createElement)("div", { className: LogsView_module_css_default.footActions }, (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: opening || path === "",
+				title: t("logOpenFileTip"),
+				onClick: () => void openFile()
+			}, t("logOpenFile")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: entries.length === 0,
+				onClick: copyAll
+			}, t("logsCopy")), (0, react.createElement)("button", {
+				type: "button",
+				className: `${LogsView_module_css_default.btn} ${LogsView_module_css_default.btnPrimary}`,
+				disabled: entries.length === 0,
+				onClick: exportFile
+			}, t("logsExport"))))));
+		}
+		//#endregion
+		//#region src/client/components/modals/LogsPathModal.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* 日志存放位置弹窗：设置页不内联长表单（挡视线），点「修改」弹窗编辑。
+		* 两种输入方式并存 —— 手输目录 / .log 文件路径，或点「选择目录」调系统
+		* 原生文件夹对话框（服务端 spawn osascript / FolderBrowserDialog / zenity）。
+		* 文本框预填当前生效位置，目录选择器也从该位置打开 —— 默认地址是动态的
+		* （随用户主目录/平台变化，如 ~/.dsh/profiles/<profile>/hub.log），必须实时展示。
+		* 留空或点「恢复默认」= 回到默认；保存前服务端预验证可写。
+		*/
+		function LogsPathModal({ t, defaultPath, currentPath, onSaved, onClose }) {
+			const [draft, setDraft] = (0, react.useState)(currentPath);
+			const [saving, setSaving] = (0, react.useState)(false);
+			const [fail, setFail] = (0, react.useState)(false);
+			const [browsing, setBrowsing] = (0, react.useState)(false);
+			const [browseFail, setBrowseFail] = (0, react.useState)(false);
+			(0, react.useEffect)(() => {
+				const onKey = (e) => {
+					if (e.key === "Escape") onClose();
+				};
+				window.addEventListener("keydown", onKey);
+				return () => window.removeEventListener("keydown", onKey);
+			}, [onClose]);
+			/** 保存：空串 = 回默认；填回默认位置同样按「未自定义」处理（设置里保持干净）。
+			* 服务端预建目录验证可写，失败给出反馈。 */
+			const save = async () => {
+				if (saving) return;
+				setSaving(true);
+				setFail(false);
+				try {
+					const value = draft.trim();
+					const normalized = value === "" || value === defaultPath ? "" : value;
+					if (!(await fetch("/dsh-plugin-hub/settings", {
+						method: "POST",
+						headers: { "content-type": "application/json" },
+						body: JSON.stringify({ logPath: normalized }),
+						cache: "no-store"
+					})).ok) {
+						setFail(true);
+						return;
+					}
+					onSaved(normalized);
+					onClose();
+				} catch {
+					setFail(true);
+				} finally {
+					setSaving(false);
+				}
+			};
+			/** 选择目录：系统对话框从默认位置打开，选中路径回填输入框（仍可手改）。 */
+			const browse = async () => {
+				if (browsing) return;
+				setBrowsing(true);
+				setBrowseFail(false);
+				const picked = await chooseLogDir();
+				setBrowsing(false);
+				if (picked !== null) {
+					setDraft(picked);
+					setFail(false);
+				} else setBrowseFail(true);
+			};
+			return (0, react.createElement)("div", {
+				className: Modal_module_css_default.overlay,
+				onClick: (e) => {
+					if (e.target === e.currentTarget) onClose();
+				}
+			}, (0, react.createElement)("div", {
+				className: `${Modal_module_css_default.modal} ${Modal_module_css_default.modalWide}`,
+				role: "dialog",
+				"aria-modal": "true"
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.modalTitle }, t("logPathSettingTitle")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
+				"aria-label": t("errorClose"),
+				onClick: onClose
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: LogsView_module_css_default.pathDialog }, (0, react.createElement)("div", { className: LogsView_module_css_default.pathDialogDesc }, t("logPathSettingDesc")), (0, react.createElement)("div", { className: LogsView_module_css_default.pathDialogRow }, (0, react.createElement)("input", {
+				type: "text",
+				className: LogsView_module_css_default.pathDraft,
+				value: draft,
+				placeholder: t("logPathPlaceholder"),
+				spellCheck: false,
+				onChange: (e) => {
+					setDraft(e.currentTarget.value);
+					setFail(false);
+					setBrowseFail(false);
+				}
+			}), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: browsing,
+				title: t("logPathBrowse"),
+				onClick: () => void browse()
+			}, browsing ? t("logPathSaving") : t("logPathBrowse"))), (0, react.createElement)("div", { className: LogsView_module_css_default.pathDialogReset }, (0, react.createElement)("span", { className: LogsView_module_css_default.pathDialogHint }, t("logPathResetHint")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.linkBtn,
+				onClick: () => {
+					setDraft(defaultPath);
+					setFail(false);
+					setBrowseFail(false);
+				}
+			}, t("logPathReset"))), browseFail && (0, react.createElement)("div", { className: LogsView_module_css_default.footFail }, t("logPathBrowseFail")), fail && (0, react.createElement)("div", { className: LogsView_module_css_default.footFail }, t("logPathSaveFail")), (0, react.createElement)("div", { className: LogsView_module_css_default.pathDialogFoot }, (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: saving,
+				onClick: onClose
+			}, t("confirmCancel")), (0, react.createElement)("button", {
+				type: "button",
+				className: `${LogsView_module_css_default.btn} ${LogsView_module_css_default.btnPrimary}`,
+				disabled: saving,
+				onClick: () => void save()
+			}, saving ? t("logPathSaving") : t("logPathSave")))))));
+		}
+		//#endregion
+		//#region src/client/components/views/LogsView.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* 系统日志入口视图：不在这里堆全文，而是给出「打开日志查看器」窗口入口 +
+		* 日志文件真实路径（可一键在系统文件管理器中定位）+ 最近若干条预览。
+		* 完整阅读/筛选/分页在 LogsModal 内置查看器弹窗里完成 —— 无需借助任何
+		* 外部软件，点击即弹出自己的窗口加载本地 JSONL 日志。
+		*/
+		/** 设置页预览条数：只放最近一小段，给用户快速感观，完整内容进查看器。 */
+		const PREVIEW = 12;
+		function LogsView({ t, onCopy, logPath, onLogPathSaved }) {
+			const [entries, setEntries] = (0, react.useState)([]);
+			const [path, setPath] = (0, react.useState)("");
+			const [defaultPath, setDefaultPath] = (0, react.useState)("");
+			const [loading, setLoading] = (0, react.useState)(false);
+			const [error, setError] = (0, react.useState)(false);
+			const [open, setOpen] = (0, react.useState)(false);
+			const [opening, setOpening] = (0, react.useState)(false);
+			const [openFailed, setOpenFailed] = (0, react.useState)(false);
+			const [showPathModal, setShowPathModal] = (0, react.useState)(false);
+			const mountedRef = (0, react.useRef)(true);
+			const load = (0, react.useCallback)(async () => {
+				setLoading(true);
+				try {
+					const res = await fetch("/dsh-plugin-hub/logs", { cache: "no-store" });
+					if (!res.ok) throw new Error(`http ${res.status}`);
+					const data = await res.json();
+					if (mountedRef.current) {
+						setEntries(data.entries);
+						if (data.path !== "") setPath(data.path);
+						if (data.defaultPath !== void 0) setDefaultPath(data.defaultPath);
+						setError(false);
+					}
+				} catch {
+					if (mountedRef.current) setError(true);
+				} finally {
+					if (mountedRef.current) setLoading(false);
+				}
+			}, []);
+			(0, react.useEffect)(() => {
+				mountedRef.current = true;
+				load();
+				return () => {
+					mountedRef.current = false;
+				};
+			}, [load]);
+			/** 复制全文：完整日志的纯文本，粘贴给作者分析 bug。 */
+			const copyAll = () => {
+				const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
+				if (text !== "") onCopy(text);
+			};
+			/** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
+			const exportFile = () => {
+				const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
+				if (text === "") return;
+				const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = "dsh-plugin-hub-log.log";
+				document.body.appendChild(a);
+				a.click();
+				a.remove();
+				URL.revokeObjectURL(url);
+			};
+			/** 在系统文件管理器中定位日志文件。 */
+			const openFile = async () => {
+				if (opening) return;
+				setOpening(true);
+				setOpenFailed(false);
+				const ok = await openLogFile();
+				setOpening(false);
+				if (!ok) setOpenFailed(true);
+			};
+			const preview = entries.slice(0, PREVIEW);
+			return (0, react.createElement)("div", { className: LogsView_module_css_default.panel }, (0, react.createElement)("div", { className: LogsView_module_css_default.head }, (0, react.createElement)("span", { className: LogsView_module_css_default.headHint }, t("logsHeadHint")), (0, react.createElement)("div", { className: LogsView_module_css_default.actions }, (0, react.createElement)("button", {
+				type: "button",
+				className: `${LogsView_module_css_default.btn} ${LogsView_module_css_default.btnPrimary}`,
+				onClick: () => setOpen(true)
+			}, t("logViewerOpen")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: entries.length === 0,
+				onClick: copyAll
+			}, t("logsCopy")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: entries.length === 0,
+				onClick: exportFile
+			}, t("logsExport")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: loading,
+				onClick: () => void load()
+			}, t("logsRefresh")))), (0, react.createElement)("div", { className: LogsView_module_css_default.pathRow }, (0, react.createElement)("span", { className: LogsView_module_css_default.pathLabel }, t("logPathSettingTitle")), (0, react.createElement)("span", {
+				className: LogsView_module_css_default.pathText,
+				title: path
+			}, path === "" ? "…" : path), openFailed && (0, react.createElement)("span", { className: LogsView_module_css_default.footFail }, t("logOpenFileFail")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				onClick: () => setShowPathModal(true)
+			}, t("logPathChange")), (0, react.createElement)("button", {
+				type: "button",
+				className: LogsView_module_css_default.btn,
+				disabled: opening || path === "",
+				title: t("logOpenFileTip"),
+				onClick: () => void openFile()
+			}, t("logOpenFile"))), error ? (0, react.createElement)("div", { className: LogsView_module_css_default.empty }, t("logsLoadFail")) : loading && entries.length === 0 ? (0, react.createElement)("div", { className: LogsView_module_css_default.empty }, t("logsLoading")) : entries.length === 0 ? (0, react.createElement)("div", { className: LogsView_module_css_default.empty }, t("logsEmpty")) : (0, react.createElement)("div", { className: LogsView_module_css_default.list }, preview.map((e, i) => (0, react.createElement)("button", {
+				key: `${e.at}-${i}`,
+				type: "button",
+				className: LogsView_module_css_default.previewRow,
+				onClick: () => setOpen(true),
+				title: t("logViewerOpen")
+			}, (0, react.createElement)(LogEntryRow, {
+				e,
+				t
+			})))), open && (0, react.createElement)(LogsModal, {
+				t,
+				onCopy,
+				onClose: () => setOpen(false)
+			}), showPathModal && (0, react.createElement)(LogsPathModal, {
+				t,
+				defaultPath,
+				currentPath: path,
+				onSaved: (v) => {
+					onLogPathSaved(v);
+					load();
+				},
+				onClose: () => setShowPathModal(false)
+			}));
+		}
+		//#endregion
+		//#region src/client/components/views/SettingsView.tsx
+		/**
+		* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+		* Website: https://dsh-plugin.org
+		* GitHub: https://github.com/dshplugin/dsh-plugin-hub
+		*
+		* Settings view: desktop-settings navigation — a fixed left sidebar lists
+		* the sections (icon + label, click to switch), the right pane shows the
+		* active section's rows. New settings only add rows, new areas only add a
+		* sidebar entry.
+		*
+		* Sections mirror what the local server actually enforces:
+		*   Updates & Sources — startup update check / auto-install / npm mirror /
+		*                        HTTP proxy (all wired into the install command path)
+		*   Security & Trust  — restricted custom installs (server 403 gate)
+		*   Diagnostics       — live connectivity probe + environment snapshot
+		*   Logs              — system log viewer + storage location
+		*/
+		/** 左侧导航：顺序即展示顺序；labelKey 是分组标题，icon 是行内小图标。 */
+		const NAV = [
+			{
+				key: "updates",
+				labelKey: "settingsUpdate",
+				icon: UpdatesIcon
+			},
+			{
+				key: "security",
+				labelKey: "settingsSecurity",
+				icon: SecurityIcon
+			},
+			{
+				key: "diagnostics",
+				labelKey: "settingsDiagnostics",
+				icon: DiagnosticsIcon
+			},
+			{
+				key: "logs",
+				labelKey: "settingsLogs",
+				icon: LogsIcon
+			},
+			{
+				key: "reset",
+				labelKey: "settingsReset",
+				icon: ResetIcon
+			}
+		];
+		/** npm 镜像源预设：空串 = 官方源；值相等即视为选中对应预设，其余进入「自定义」输入。 */
+		const MIRROR_PRESETS = [
+			{
+				value: "",
+				labelKey: "mirrorOfficial"
+			},
+			{
+				value: "https://registry.npmmirror.com",
+				labelKey: "mirrorNpmmirror"
+			},
+			{
+				value: "https://mirrors.cloud.tencent.com/npm/",
+				labelKey: "mirrorTencent"
+			}
+		];
+		/** 设置行：默认标签左控件右；stack=true 时控件独占一行（文本框整行显示），hairline 分隔。 */
+		function SettingRow({ title, desc, children, stack = false }) {
+			return (0, react.createElement)("div", { className: stack ? SettingsView_module_css_default.settingRowStack : SettingsView_module_css_default.settingRow }, (0, react.createElement)("div", { className: SettingsView_module_css_default.settingLabel }, (0, react.createElement)("div", { className: SettingsView_module_css_default.settingTitle }, title), desc ? (0, react.createElement)("div", { className: SettingsView_module_css_default.settingDesc }, desc) : null), (0, react.createElement)("div", { className: stack ? SettingsView_module_css_default.settingControlStack : SettingsView_module_css_default.settingControl }, children));
+		}
+		function SettingsView({ t, settings, update, reset, env, onCopy }) {
+			/** 当前激活的分组：左侧导航点击切换，右侧只渲染这一组 */
+			const [section, setSection] = (0, react.useState)("updates");
+			/** 重置按钮两段式确认：首次点击进入确认态，4 秒内再点才真正重置，超时自动复原 */
+			const [resetArmed, setResetArmed] = (0, react.useState)(false);
+			const resetTimer = (0, react.useRef)(0);
+			const onResetClick = () => {
+				if (!resetArmed) {
+					setResetArmed(true);
+					window.clearTimeout(resetTimer.current);
+					resetTimer.current = window.setTimeout(() => setResetArmed(false), 4e3);
+					return;
+				}
+				window.clearTimeout(resetTimer.current);
+				setResetArmed(false);
+				reset();
+			};
+			const mirrorCustom = !MIRROR_PRESETS.some((p) => p.value === settings.npmRegistry);
+			const onMirrorChange = (value) => {
+				if (value === "custom") return;
+				update({ npmRegistry: value });
+			};
+			const onMirrorInput = (e) => update({ npmRegistry: e.target.value });
+			const onProxyChange = (e) => update({ proxy: e.target.value });
+			/** 每个分组的页面副标题（导航标题之上再补一句说明，保持桌面设置质感） */
+			const pageDesc = {
+				updates: t("settingsUpdateDesc"),
+				security: t("settingsSecurityDesc"),
+				diagnostics: t("settingsDiagnosticsDesc"),
+				logs: t("settingsLogsDesc"),
+				reset: t("settingsResetDesc")
+			};
+			const activeNav = NAV.find((n) => n.key === section) ?? NAV[0];
+			const updatesCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(SettingRow, {
+				title: t("settingsCheckOnStart"),
+				desc: t("settingsCheckOnStartDesc"),
+				children: (0, react.createElement)(Toggle, {
+					checked: settings.checkUpdatesOnStart,
+					onChange: (v) => update({ checkUpdatesOnStart: v }),
+					title: t("settingsCheckOnStart")
+				})
+			}), (0, react.createElement)(SettingRow, {
+				title: t("settingsAutoInstall"),
+				desc: t("settingsAutoInstallDesc"),
+				children: (0, react.createElement)(Toggle, {
+					checked: settings.autoInstallUpdates,
+					onChange: (v) => update({ autoInstallUpdates: v }),
+					title: t("settingsAutoInstall")
+				})
+			}), (0, react.createElement)(SettingRow, {
+				title: t("settingsMirror"),
+				desc: t("settingsMirrorDesc"),
+				children: (0, react.createElement)(Dropdown, {
+					value: mirrorCustom ? "custom" : settings.npmRegistry,
+					options: [...MIRROR_PRESETS.map((p) => ({
+						value: p.value,
+						label: t(p.labelKey)
+					})), {
+						value: "custom",
+						label: t("mirrorCustom")
+					}],
+					onChange: onMirrorChange,
+					title: t("settingsMirror"),
+					className: SettingsView_module_css_default.controlDropdown
+				})
+			}), mirrorCustom && (0, react.createElement)(SettingRow, {
+				title: t("mirrorCustom"),
+				stack: true,
+				children: (0, react.createElement)("input", {
+					className: SettingsView_module_css_default.textInput,
+					type: "url",
+					value: settings.npmRegistry,
+					placeholder: "https://registry.npmjs.org",
+					spellCheck: false,
+					onChange: onMirrorInput
+				})
+			}), (0, react.createElement)(SettingRow, {
+				title: t("settingsProxy"),
+				desc: t("settingsProxyDesc"),
+				stack: true,
+				children: (0, react.createElement)("input", {
+					className: SettingsView_module_css_default.textInput,
+					type: "text",
+					value: settings.proxy,
+					placeholder: "http://127.0.0.1:7890",
+					spellCheck: false,
+					onChange: onProxyChange
+				})
+			}));
+			const securityCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(SettingRow, {
+				title: t("settingsEnableNpm"),
+				desc: t("settingsEnableNpmDesc"),
+				children: (0, react.createElement)(Toggle, {
+					checked: settings.enableNpmInstall,
+					onChange: (v) => update({ enableNpmInstall: v }),
+					title: t("settingsEnableNpm")
+				})
+			}), (0, react.createElement)(SettingRow, {
+				title: t("settingsEnableGit"),
+				desc: t("settingsEnableGitDesc"),
+				children: (0, react.createElement)(Toggle, {
+					checked: settings.enableGitInstall,
+					onChange: (v) => update({ enableGitInstall: v }),
+					title: t("settingsEnableGit")
+				})
+			}));
+			const diagnosticsCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(DiagnosticsView, {
+				t,
+				env,
+				onCopy
+			}));
+			const logsCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(LogsView, {
+				t,
+				onCopy,
+				logPath: settings.logPath,
+				onLogPathSaved: (v) => update({ logPath: v })
+			}));
+			const resetCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(SettingRow, {
+				title: t("settingsReset"),
+				desc: t("settingsResetDetail"),
+				children: (0, react.createElement)("button", {
+					type: "button",
+					className: resetArmed ? SettingsView_module_css_default.resetBtnArmed : SettingsView_module_css_default.resetBtn,
+					onClick: onResetClick
+				}, resetArmed ? t("settingsResetConfirm") : t("settingsResetRun"))
+			}));
+			return (0, react.createElement)("div", { className: SettingsView_module_css_default.root }, (0, react.createElement)("nav", {
+				className: SettingsView_module_css_default.sidebar,
+				"aria-label": t("viewSettings")
+			}, NAV.map((item) => (0, react.createElement)("button", {
+				key: item.key,
+				type: "button",
+				className: section === item.key ? SettingsView_module_css_default.navItemActive : SettingsView_module_css_default.navItem,
+				onClick: () => setSection(item.key),
+				"aria-current": section === item.key ? "page" : void 0,
+				title: t(item.labelKey)
+			}, (0, react.createElement)("span", { className: SettingsView_module_css_default.navIcon }, (0, react.createElement)(item.icon)), (0, react.createElement)("span", { className: SettingsView_module_css_default.navLabel }, t(item.labelKey))))), (0, react.createElement)("div", { className: SettingsView_module_css_default.content }, (0, react.createElement)("div", { className: SettingsView_module_css_default.pageHeader }, (0, react.createElement)("div", { className: SettingsView_module_css_default.pageTitle }, t(activeNav.labelKey)), (0, react.createElement)("div", { className: SettingsView_module_css_default.pageDesc }, pageDesc[section])), section === "updates" ? updatesCard : section === "security" ? securityCard : section === "diagnostics" ? diagnosticsCard : section === "logs" ? logsCard : resetCard));
 		}
 		//#endregion
 		//#region src/client/components/PluginHubSection.tsx
@@ -2621,17 +5303,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* folder; it hosts the dialogs/toast and the section-level copy actions.
 		*/
 		function PluginHubSection({ t: _hostT, locale }) {
-			/** 界面语言：默认跟随宿主（系统）语言；右上角按钮可手动切换，切换后以手动选择为准 */
-			const [manualLang, setManualLang] = (0, react.useState)(null);
-			const lang = manualLang ?? locale.getSnapshot().active;
-			const langKey = lang === "en" ? "en" : "zh";
-			const langPath = langPathOf(lang);
-			const dict = langKey === "en" ? en : zh;
-			const t = (key, params) => {
-				const raw = dict[key] ?? key;
-				return params ? raw.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? "")) : raw;
-			};
+			const { lang, langKey, langPath, t, toggleLang } = useLanguage(locale);
 			const catalog = useCatalog(lang);
+			/** 设置状态：服务端 hub-settings.json 持久化，本地乐观更新即时生效 */
+			const { settings: hubSettings, ready: settingsReady, update: updateSettings, reset: resetSettings } = useSettings();
+			/** 一级导航：插件中心 / 已安装 / 自定义安装 / 设置 */
+			const [view, setView] = (0, react.useState)("market");
 			/** 全局反馈 Toast：{id} 用于重复触发时重新走入场动画，kind 决定文案与配色 */
 			const [toast, setToast] = (0, react.useState)(null);
 			/** 复制反馈：记录刚复制安装命令的仓库，按钮短暂切换为「已复制」样式 */
@@ -2640,12 +5317,22 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [confirmPlugin, setConfirmPlugin] = (0, react.useState)(null);
 			/** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
 			const [confirmIsUpdate, setConfirmIsUpdate] = (0, react.useState)(false);
+			/** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名 / GitHub 地址，DSH 命令已剥成裸目标）——
+			*  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
+			const [confirmCustomTarget, setConfirmCustomTarget] = (0, react.useState)(null);
 			/** Hub 自我更新说明弹窗：点「可更新」徽标先展示版本 + Markdown 变更记录，确认后再进安装弹窗 */
 			const [showHubUpdate, setShowHubUpdate] = (0, react.useState)(false);
 			/** 「关注我们」弹窗：GitHub 图标后按钮点击打开，展示平台介绍 + 用户反馈群二维码（Worker /about 推送） */
 			const [showAbout, setShowAbout] = (0, react.useState)(false);
-			/** 卸载确认弹窗：记录待卸载的插件 */
+			/** 卸载确认弹窗：记录待卸载的插件（目录内） */
 			const [uninstallPlugin, setUninstallPlugin] = (0, react.useState)(null);
+			/** 卸载确认弹窗：记录待卸载的已安装项（自定义安装无目录数据，按包名直卸） */
+			const [uninstallItem, setUninstallItem] = (0, react.useState)(null);
+			/** 已安装详情弹窗：记录当前查看的已安装项（行点击 / 详情按钮打开） */
+			const [detailItem, setDetailItem] = (0, react.useState)(null);
+			/** 待重启确认弹窗：已安装列表行内「重启」先弹「立即重启 / 稍后重启」确认（与通知中心一致），
+			*  确认后才真正触发宿主重启，避免误触 */
+			const [showRestartConfirm, setShowRestartConfirm] = (0, react.useState)(false);
 			/** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
 			const [installDone, setInstallDone] = (0, react.useState)(false);
 			const [uninstallDone, setUninstallDone] = (0, react.useState)(false);
@@ -2657,8 +5344,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const [restarting, setRestarting] = (0, react.useState)(false);
 			/** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
 			const [errorMsg, setErrorMsg] = (0, react.useState)(null);
-			/** 安装/卸载任务通知记录：localStorage 持久化，成败即落盘，即使错过弹窗也能回来查看 */
+			/** 通知中心记录：localStorage 持久化，每次安装/卸载任务成败都留痕（启动时读回） */
 			const [notifications, setNotifications] = (0, react.useState)(() => loadNotifications());
+			/** 通知中心弹窗：一级导航「设置」tab 后边的铃铛入口按钮打开 */
 			const [showNotifications, setShowNotifications] = (0, react.useState)(false);
 			/** 宿主机器环境快照：提交 bug 的 issue 正文附带；取不到为 null（链接少环境段，不阻塞） */
 			const [env, setEnv] = (0, react.useState)(null);
@@ -2715,7 +5403,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					}));
 				},
 				installPlugin: confirmPlugin,
+				installCustomTarget: confirmCustomTarget,
 				uninstallPlugin,
+				uninstallName: uninstallItem ? uninstallItem.name : null,
 				installedName: catalog.installedName,
 				resolvePending: (repo) => {
 					const p = catalog.plugins?.find((x) => x.source?.repo === repo);
@@ -2725,12 +5415,43 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					} : null;
 				}
 			});
+			const startupCheckedRef = (0, react.useRef)(false);
 			(0, react.useEffect)(() => {
-				if (!confirmPlugin && !uninstallPlugin && !showNotifications && !showHubUpdate && !showAbout) return;
+				if (startupCheckedRef.current) return;
+				if (!settingsReady || catalog.plugins === null || catalog.failed) return;
+				startupCheckedRef.current = true;
+				if (!hubSettings.checkUpdatesOnStart) return;
+				const updatable = catalog.installedItems.filter((i) => i.hasUpdate && i.plugin);
+				if (updatable.length === 0) return;
+				if (hubSettings.autoInstallUpdates) {
+					for (const item of updatable) if (item.plugin) queue.installNow(item.plugin, { update: true });
+					setToast({
+						id: Date.now(),
+						kind: "updatesAuto",
+						n: updatable.length
+					});
+				} else setToast({
+					id: Date.now(),
+					kind: "updates",
+					n: updatable.length
+				});
+			}, [
+				settingsReady,
+				hubSettings,
+				catalog.plugins,
+				catalog.failed,
+				catalog.installedItems,
+				queue
+			]);
+			(0, react.useEffect)(() => {
+				if (!confirmPlugin && !confirmCustomTarget && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return;
 				const onKey = (e) => {
 					if (e.key === "Escape") {
 						setConfirmPlugin(null);
+						setConfirmCustomTarget(null);
 						setUninstallPlugin(null);
+						setUninstallItem(null);
+						setDetailItem(null);
 						setUninstallDone(false);
 						setShowHubUpdate(false);
 						setShowAbout(false);
@@ -2741,10 +5462,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				return () => window.removeEventListener("keydown", onKey);
 			}, [
 				confirmPlugin,
+				confirmCustomTarget,
 				uninstallPlugin,
-				showNotifications,
+				uninstallItem,
+				detailItem,
 				showHubUpdate,
-				showAbout
+				showAbout,
+				showNotifications
 			]);
 			(0, react.useEffect)(() => {
 				if (!toast) return;
@@ -2773,6 +5497,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					return ok;
 				}
 			};
+			/** 命令行安装目标是否已安装（与服务端 already 判定同口径）：GitHub 地址按仓库身份匹配
+			*  （归一化后比对已装项的 repo/spec），npm 包名按依赖 key 直查。命中 → 弹窗转「更新」语义
+			*  （mode=update 放行覆盖重装），避免重复点击撞 409 报错。 */
+			const customTargetInstalled = (raw) => {
+				const target = raw.trim();
+				if (!target) return false;
+				const repo = repoFromInstallTarget(target);
+				if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo)) {
+					const needle = repo.toLowerCase();
+					return catalog.installedItems.some((i) => i.repo !== null && i.repo.toLowerCase() === needle || repoFromInstallTarget(i.spec).toLowerCase() === needle);
+				}
+				return catalog.installedItems.some((i) => i.name === target);
+			};
 			/** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行（npm 通道显示包名命令）。 */
 			const copyCommand = async (p) => {
 				const repo = p.source?.repo ?? "";
@@ -2786,13 +5523,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				}
 				setConfirmPlugin(null);
 			};
-			/** 卸载弹窗动作：复制卸载命令，万一直接卸载失败可去终端手动执行。 */
+			/** 卸载弹窗动作：复制卸载命令，万一直接卸载失败可去终端手动执行。
+			*  自定义安装（无目录数据）按已安装项包名直卸，同样给复制通道。 */
 			const copyUninstallCommand = async () => {
-				const name = uninstallPlugin ? catalog.installedName(uninstallPlugin) : null;
+				const name = uninstallItem ? uninstallItem.name : uninstallPlugin ? catalog.installedName(uninstallPlugin) : null;
 				if (!name) return;
 				if (await doCopy(`dsh plugin remove ${name}`)) setToast({
 					id: Date.now(),
 					kind: "copied"
+				});
+			};
+			/** 详情弹窗动作：在系统文件管理器里定位安装目录；服务端失败给 toast 提示。 */
+			const revealFolder = async (item) => {
+				if (!await revealInstallFolder(item.name)) setToast({
+					id: Date.now(),
+					kind: "revealFail"
 				});
 			};
 			/** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。 */
@@ -2835,44 +5580,24 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				langPath,
 				statsTotal,
 				statsVerified,
-				onToggleLang: () => setManualLang(lang === "en" ? "zh" : "en"),
+				onToggleLang: toggleLang,
 				hubUpdate: catalog.hubHasUpdate,
 				onVersionClick: () => setShowHubUpdate(true),
 				onAboutClick: () => setShowAbout(true)
-			}), (0, react.createElement)(CategoryTabs, {
-				category: catalog.category,
-				setCategory: catalog.setCategory,
-				allLabel: t("all"),
-				totalCount: catalog.total,
-				langKey
-			}), (0, react.createElement)(CatalogControls, {
-				query: catalog.query,
-				setQuery: catalog.setQuery,
-				sort: catalog.sort,
-				setSort: catalog.setSort,
-				installedFilter: catalog.installedFilter,
-				setInstalledFilter: catalog.setInstalledFilter,
-				installedCount: catalog.installedCountInCategory,
-				notInstalledCount: catalog.notInstalledCountInCategory,
+			}), (0, react.createElement)("div", { className: Header_module_css_default.tabsRow }, (0, react.createElement)(SectionTabs, {
+				view,
+				setView,
+				installedCount: catalog.installedItems.length,
 				t,
-				resultText: catalog.plugins === null || catalog.failed ? null : catalog.category === "all" && count === total ? t("pluginsTotal", { n: count }) : t("filterResults", { n: count }),
 				noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
 				onOpenNotifications: () => setShowNotifications(true)
-			}), (0, react.createElement)(CatalogList, {
-				plugins: catalog.plugins,
-				failed: catalog.failed,
-				visible: catalog.visible,
-				total,
+			})), view === "market" ? (0, react.createElement)(MarketView, {
+				catalog,
 				t,
 				langPath,
-				reload: catalog.reload,
-				category: catalog.category,
-				installedFilter: catalog.installedFilter,
-				copied,
-				installedName,
-				installedVersion,
-				hasUpdate,
 				langKey,
+				copied,
+				resultText: catalog.plugins === null || catalog.failed ? null : catalog.category === "all" && count === total ? t("pluginsTotal", { n: count }) : t("filterResults", { n: count }),
 				onInstall: (p, opts) => {
 					setInstallDone(false);
 					setConfirmIsUpdate(opts?.update ?? false);
@@ -2883,6 +5608,53 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					setUninstallDone(false);
 					queue.clearModalTask();
 					setUninstallPlugin(p);
+				}
+			}) : view === "installed" ? (0, react.createElement)(InstalledView, {
+				items: catalog.installedItems,
+				langKey,
+				t,
+				platform: env?.platform ?? "",
+				onOpenDetail: (item) => setDetailItem(item),
+				onReveal: (item) => {
+					revealFolder(item);
+				},
+				onUpdate: (item) => {
+					if (!item.plugin) return;
+					setDetailItem(null);
+					setInstallDone(false);
+					setConfirmIsUpdate(true);
+					queue.clearModalTask();
+					setConfirmPlugin(item.plugin);
+				},
+				onUninstall: (item) => {
+					setDetailItem(null);
+					setUninstallDone(false);
+					queue.clearModalTask();
+					setUninstallItem(item);
+				},
+				onRestart: () => setShowRestartConfirm(true)
+			}) : view === "custom" ? (0, react.createElement)(CustomInstallView, {
+				t,
+				onInstallCustom: (raw) => {
+					const target = raw.trim();
+					if (!target) return;
+					setInstallDone(false);
+					queue.clearModalTask();
+					setConfirmIsUpdate(customTargetInstalled(target));
+					setConfirmCustomTarget(target);
+				}
+			}) : (0, react.createElement)(SettingsView, {
+				t,
+				settings: hubSettings,
+				update: updateSettings,
+				reset: resetSettings,
+				env,
+				onCopy: (text) => {
+					doCopy(text);
+					setToast({
+						id: Date.now(),
+						kind: "copied"
+					});
 				}
 			}), showHubUpdate && (0, react.createElement)(HubUpdateModal, {
 				info: catalog.hubUpdateInfo ?? { version: "1.1.2" },
@@ -2904,61 +5676,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				lang,
 				t,
 				onClose: () => setShowAbout(false)
-			}), confirmPlugin && (0, react.createElement)(InstallModal, {
-				plugin: confirmPlugin,
-				done: installDone,
-				task: queue.installModalTask,
-				t,
-				langPath,
-				restarting,
-				update: confirmIsUpdate,
-				cliOnly: confirmPlugin.install?.webInstallable === false,
-				submitting: queue.submitting,
-				needsRestart: installNeedsRestart,
-				onClose: () => setConfirmPlugin(null),
-				onCopy: () => copyCommand(confirmPlugin),
-				onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : void 0),
-				onRestart: () => {
-					requestRestart();
-				}
-			}), uninstallPlugin && (0, react.createElement)(UninstallModal, {
-				plugin: uninstallPlugin,
-				done: uninstallDone,
-				task: queue.uninstallModalTask,
-				t,
-				langPath,
-				restarting,
-				submitting: queue.submitting,
-				needsRestart: uninstallNeedsRestart,
-				onClose: () => {
-					setUninstallDone(false);
-					setUninstallPlugin(null);
-				},
-				onCancel: () => setUninstallPlugin(null),
-				onCopyCommand: copyUninstallCommand,
-				onConfirm: () => queue.uninstallNow(uninstallPlugin),
-				onRestart: () => {
-					requestRestart();
-				}
-			}), toast && (0, react.createElement)(Toast, {
-				toast,
-				t
-			}), errorMsg && (0, react.createElement)(ErrorModal, {
-				message: errorMsg.message,
-				repo: errorMsg.repo,
-				kind: errorMsg.kind,
-				command: errorMsg.command,
-				attempts: errorMsg.attempts,
-				t,
-				env,
-				onCopy: (text) => {
-					doCopy(text);
-					setToast({
-						id: Date.now(),
-						kind: "errCopied"
-					});
-				},
-				onClose: () => setErrorMsg(null)
 			}), showNotifications && (0, react.createElement)(NotificationsModal, {
 				records: notifications,
 				tasks: queue.queue,
@@ -2980,11 +5697,138 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onRestart: () => {
 					requestRestart();
 				}
+			}), confirmPlugin && (0, react.createElement)(InstallModal, {
+				plugin: confirmPlugin,
+				done: installDone,
+				task: queue.installModalTask,
+				t,
+				langPath,
+				restarting,
+				update: confirmIsUpdate,
+				cliOnly: confirmPlugin.install?.webInstallable === false,
+				submitting: queue.submitting,
+				needsRestart: installNeedsRestart,
+				onClose: () => setConfirmPlugin(null),
+				onCopy: () => copyCommand(confirmPlugin),
+				onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : void 0),
+				onRestart: () => {
+					requestRestart();
+				}
+			}), confirmCustomTarget && (0, react.createElement)(InstallModal, {
+				plugin: null,
+				customTarget: confirmCustomTarget,
+				done: installDone,
+				task: queue.installModalTask,
+				t,
+				langPath,
+				restarting,
+				update: confirmIsUpdate,
+				cliOnly: false,
+				submitting: queue.submitting,
+				needsRestart: installNeedsRestart,
+				onClose: () => {
+					setInstallDone(false);
+					setConfirmCustomTarget(null);
+				},
+				onCopy: () => {
+					doCopy(`pnpm add ${confirmCustomTarget}`);
+					setToast({
+						id: Date.now(),
+						kind: "copied"
+					});
+				},
+				onInstall: () => void queue.installCustom(confirmCustomTarget, confirmIsUpdate ? { update: true } : void 0),
+				onRestart: () => {
+					requestRestart();
+				}
+			}), (uninstallPlugin || uninstallItem) && (0, react.createElement)(UninstallModal, {
+				plugin: uninstallPlugin ?? pluginOfItem(uninstallItem),
+				done: uninstallDone,
+				task: queue.uninstallModalTask,
+				t,
+				langPath,
+				restarting,
+				submitting: queue.submitting,
+				needsRestart: uninstallNeedsRestart,
+				onClose: () => {
+					setUninstallDone(false);
+					setUninstallPlugin(null);
+					setUninstallItem(null);
+				},
+				onCancel: () => {
+					setUninstallPlugin(null);
+					setUninstallItem(null);
+				},
+				onCopyCommand: copyUninstallCommand,
+				onConfirm: () => {
+					if (uninstallItem) queue.uninstallItem(uninstallItem);
+					else if (uninstallPlugin) queue.uninstallNow(uninstallPlugin);
+				},
+				onRestart: () => {
+					requestRestart();
+				}
+			}), detailItem && (0, react.createElement)(InstalledDetailModal, {
+				item: detailItem,
+				t,
+				lang: langKey,
+				langPath,
+				onClose: () => setDetailItem(null),
+				onUpdate: (item) => {
+					if (!item.plugin) return;
+					setDetailItem(null);
+					setInstallDone(false);
+					setConfirmIsUpdate(true);
+					queue.clearModalTask();
+					setConfirmPlugin(item.plugin);
+				},
+				onUninstall: (item) => {
+					setDetailItem(null);
+					setUninstallDone(false);
+					queue.clearModalTask();
+					setUninstallItem(item);
+				},
+				onCopyPath: (path) => {
+					doCopy(path);
+					setToast({
+						id: Date.now(),
+						kind: "copied"
+					});
+				},
+				onReveal: (item) => {
+					revealFolder(item);
+				}
+			}), toast && (0, react.createElement)(Toast, {
+				toast,
+				t
+			}), errorMsg && (0, react.createElement)(ErrorModal, {
+				message: errorMsg.message,
+				repo: errorMsg.repo,
+				kind: errorMsg.kind,
+				command: errorMsg.command,
+				attempts: errorMsg.attempts,
+				t,
+				env,
+				onCopy: (text) => {
+					doCopy(text);
+					setToast({
+						id: Date.now(),
+						kind: "errCopied"
+					});
+				},
+				onClose: () => setErrorMsg(null)
+			}), showRestartConfirm && (0, react.createElement)(RestartConfirmModal, {
+				t,
+				restarting,
+				onClose: () => setShowRestartConfirm(false),
+				onRestartNow: () => {
+					setShowRestartConfirm(false);
+					requestRestart();
+				}
 			}));
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/tokens.module.css.mjs
-		const css = ":root,body[data-ds-dark-theme]{--hub-text-primary:var(--dsw-alias-label-primary,#1f2328);--hub-text-secondary:var(--dsw-alias-label-secondary,#6b7280);--hub-text-tertiary:var(--dsw-alias-label-tertiary,#8b93a1);--hub-text-disabled:var(--dsw-alias-label-disabled,#aab1bd);--hub-text-on-fill:var(--dsw-alias-label-primary-foreground,#fff);--hub-bg-1:var(--dsw-alias-bg-layer-1,#fff);--hub-bg-2:var(--dsw-alias-bg-layer-2,#80808014);--hub-bg-3:#8080801a;--hub-bg-btn:#8080801f;--hub-bg-hover:var(--dsw-alias-interactive-bg-hover,#80808029);--hub-bg-on-fill:#80808038;--hub-border-1:var(--dsw-alias-border-l1,#eceef1);--hub-border-2:var(--dsw-alias-border-l2,#e5e7eb);--hub-border-ghost:var(--dsw-alias-button-ghost-active-border,#4f6ef740);--hub-border-input:var(--dsw-alias-input-border,#6b728040);--hub-brand:var(--dsw-alias-state-business-primary,#4f6ef7);--hub-brand-hover:#3b5bdb;--hub-brand-tint:#4f6ef70f;--hub-brand-tint-strong:#4f6ef71f;--hub-brand-border:#4f6ef759;--hub-brand-border-soft:#4f6ef738;--hub-purple-1:#4f46e5;--hub-purple-2:#7c3aed;--hub-purple-border:#8b5cf68c;--hub-purple-tint:#4f46e514;--hub-purple-shadow:#4f46e547;--hub-purple-shadow-strong:#7c3aed6b;--hub-btn-fill:var(--dsw-alias-button-primary-fill,#1f2328);--hub-btn-hover:var(--dsw-alias-button-primary-hover,#43454a);--hub-success:#16a34a;--hub-success-tint:#16a34a1f;--hub-success-border:#16a34a4d;--hub-warn:var(--dsw-alias-state-warn-primary,#b8860b);--hub-warn-tint:#b8860b14;--hub-warn-border:#b8860b59;--hub-warn-strong:#b8860bd9;--hub-warning:var(--dsw-alias-state-warning-primary,#b45309);--hub-warning-tint:#b4530914;--hub-warning-border:#b453094d;--hub-danger:var(--dsw-alias-state-danger-primary,#d1242f);--hub-danger-hover:var(--dsw-alias-state-danger-hover,#b91c1c);--hub-danger-strong:#b0202a;--hub-danger-text:#e5484d;--hub-danger-tint:#e5484d14;--hub-danger-tint-weak:#e5484d0d;--hub-danger-border:#e5484d59;--hub-danger-border-soft:#e5484d47;--hub-danger-soft:#d1242f14}body[data-ds-dark-theme]{--hub-bg-btn:#ffffff1f;--hub-success:#22c55e;--hub-success-tint:#22c55e29;--hub-success-border:#22c55e59}";
+		const css = ":root,body[data-ds-dark-theme]{--hub-text-primary:var(--dsw-alias-label-primary,#1f2328);--hub-text-secondary:var(--dsw-alias-label-secondary,#6b7280);--hub-text-tertiary:var(--dsw-alias-label-tertiary,#8b93a1);--hub-text-disabled:var(--dsw-alias-label-disabled,#aab1bd);--hub-text-on-fill:var(--dsw-alias-label-primary-foreground,#fff);--hub-bg-1:var(--dsw-alias-bg-layer-1,#fff);--hub-bg-2:var(--dsw-alias-bg-layer-2,#80808014);--hub-bg-3:#8080801a;--hub-bg-btn:#8080801f;--hub-bg-hover:var(--dsw-alias-interactive-bg-hover,#80808029);--hub-bg-on-fill:#80808038;--hub-border-1:var(--dsw-alias-border-l1,#eceef1);--hub-border-2:var(--dsw-alias-border-l2,#e5e7eb);--hub-border-ghost:var(--dsw-alias-button-ghost-active-border,#4f6ef740);--hub-border-input:var(--dsw-alias-input-border,#6b728040);--hub-brand:var(--dsw-alias-state-business-primary,#4f6ef7);--hub-brand-hover:#3b5bdb;--hub-brand-tint:#4f6ef70f;--hub-brand-tint-strong:#4f6ef71f;--hub-brand-border:#4f6ef759;--hub-brand-border-soft:#4f6ef738;--hub-purple-1:#4f46e5;--hub-purple-2:#7c3aed;--hub-purple-border:#8b5cf68c;--hub-purple-tint:#4f46e514;--hub-purple-shadow:#4f46e547;--hub-purple-shadow-strong:#7c3aed6b;--hub-btn-fill:var(--dsw-alias-button-primary-fill,#1f2328);--hub-btn-hover:var(--dsw-alias-button-primary-hover,#43454a);--hub-success:#16a34a;--hub-success-tint:#16a34a1f;--hub-success-border:#16a34a4d;--hub-warn:var(--dsw-alias-state-warn-primary,#b8860b);--hub-warn-tint:#b8860b14;--hub-warn-border:#b8860b59;--hub-warn-strong:#b8860bd9;--hub-warning:var(--dsw-alias-state-warning-primary,#b45309);--hub-warning-hover:#92400e;--hub-warning-tint:#b4530914;--hub-warning-border:#b453094d;--hub-danger:var(--dsw-alias-state-danger-primary,#d1242f);--hub-danger-hover:var(--dsw-alias-state-danger-hover,#b91c1c);--hub-danger-strong:#b0202a;--hub-danger-text:#e5484d;--hub-danger-tint:#e5484d14;--hub-danger-tint-weak:#e5484d0d;--hub-danger-border:#e5484d59;--hub-danger-border-soft:#e5484d47;--hub-danger-soft:#d1242f14}body[data-ds-dark-theme]{--hub-bg-btn:#ffffff1f;--hub-success:#22c55e;--hub-success-tint:#22c55e29;--hub-success-border:#22c55e59}";
 		const tagId = "dsh-plugin/tokens.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
 			const tag = document.createElement("style");

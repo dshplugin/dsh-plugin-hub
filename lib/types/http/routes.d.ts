@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { readProfileArg, type LoaderHandle } from '../services/install.ts';
+import { readProfileArg, type LoaderHandle } from '../services/install/install.ts';
 export interface WebRoute {
     kind: 'exact';
     path: string;

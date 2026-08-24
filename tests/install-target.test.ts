@@ -7,7 +7,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { githubRepoOf, githubTarget } from '../src/server/services/profile.ts'
+import { githubRepoOf, githubTarget, installTargetOf } from '../src/server/services/profile/profile.ts'
 
 test('githubTarget: emits an explicit HTTPS Git URL', () => {
   assert.equal(githubTarget('GanyuanRan/Aegis'), 'git+https://github.com/GanyuanRan/Aegis.git')
@@ -27,4 +27,16 @@ test('githubRepoOf: recognizes canonical and legacy GitHub targets', () => {
   }
   assert.equal(githubRepoOf('@scope/package'), null)
   assert.equal(githubRepoOf('https://example.com/owner/repo.git'), null)
+})
+
+test('installTargetOf: strips a full dsh plugin command down to its target', () => {
+  // --profile 段可选，支持 -p 简写与 --profile=web 等号形式；非命令输入原样返回
+  assert.equal(installTargetOf('dsh plugin --profile web add github:dHR-P/dsh-safe-launch'), 'github:dHR-P/dsh-safe-launch')
+  assert.equal(installTargetOf('dsh plugin -p web add github:dHR-P/dsh-safe-launch'), 'github:dHR-P/dsh-safe-launch')
+  assert.equal(installTargetOf('dsh plugin --profile=web add github:dHR-P/dsh-safe-launch'), 'github:dHR-P/dsh-safe-launch')
+  assert.equal(installTargetOf('dsh plugin add lodash'), 'lodash')
+  assert.equal(installTargetOf('DSH PLUGIN --profile web ADD https://github.com/owner/repo.git'), 'https://github.com/owner/repo.git')
+  assert.equal(installTargetOf('lodash'), 'lodash')
+  assert.equal(installTargetOf('https://github.com/owner/repo.git'), 'https://github.com/owner/repo.git')
+  assert.equal(installTargetOf(''), '')
 })

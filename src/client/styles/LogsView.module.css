@@ -1,0 +1,495 @@
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * System logs: one row per entry — time, level badge (OK green / FAIL red /
+ * WARN amber / INFO grey), event code and the message. Header holds the
+ * refresh / copy-all / export (.log download) actions. */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 头部：说明文字独占一行，操作按钮组独立一行靠左（打开查看器 / 复制 / 导出 / 刷新） */
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.headHint {
+  min-width: 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.btn {
+  flex: none;
+  height: 24px;
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--hub-text-secondary);
+  background: var(--hub-bg-hover);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.btn:hover:not(:disabled) {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-2);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 主操作：导出日志，品牌色实底 */
+.btnPrimary {
+  color: #ffffff;
+  background: var(--hub-brand);
+  border-color: var(--hub-brand);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--hub-brand-hover);
+  border-color: var(--hub-brand-hover);
+}
+
+/* 日志列表：一行一条，悬浮高亮；超出限高内部滚动 */
+.list {
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.entry {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 12px;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.entry:hover {
+  background: var(--hub-bg-hover);
+}
+
+.time {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+}
+
+/* 事件码：等宽小字 */
+.event {
+  flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+}
+
+/* 描述：占满剩余宽度，过长省略（悬浮看全） */
+.message {
+  flex: 1;
+  min-width: 0;
+  color: var(--hub-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* —— 系统日志入口 —— */
+
+/* 日志文件位置行：展示真实存放路径 + 一键在系统文件管理器中打开 */
+.pathRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.pathLabel {
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+/* 路径文本：等宽、省略，悬浮看全 —— 默认存放位置合法可用，用户无需改 */
+.pathText {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  line-height: 16px;
+  color: var(--hub-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 打开失败 / 打开中出错提示：红色小字，出现即提醒换手动定位 */
+.footFail {
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-danger-text);
+}
+
+/* —— 日志存放位置弹窗 —— */
+
+/* 弹窗主体：说明文字 → 输入行（手输 + 选择目录）→ 底部操作 */
+.pathDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pathDialogDesc {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+/* 输入行：手输路径占满宽度，「选择目录」按钮收在右侧 */
+.pathDialogRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 提示 + 「恢复默认」一行：提示左、动作右 */
+.pathDialogReset {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pathDialogHint {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
+/* 「恢复默认」链接按钮：低调文字、不占空间，hover 下划线提示可点 */
+.linkBtn {
+  flex: none;
+  padding: 0;
+  font-size: 11.5px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--hub-brand);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+/* 路径输入框：等宽小字、占满宽度（与设置页文本框同构） */
+.pathDraft {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 9px;
+  font-size: 11.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-1);
+  border: 1px solid var(--hub-border-input);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.12s ease;
+}
+
+.pathDraft:focus {
+  border-color: var(--hub-brand-border);
+}
+
+.pathDraft::placeholder {
+  color: var(--hub-text-disabled);
+}
+
+/* 底部操作：取消 / 保存，右对齐 */
+.pathDialogFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* 预览行：整行可点击打开查看器，内嵌通用日志行（button 重置默认外观） */
+.previewRow {
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* —— 系统日志查看器弹窗 —— */
+
+/* 筛选栏：类别/级别 chip 横排，可换行 */
+.filterBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 0;
+}
+
+/* 筛选 chip：胶囊按钮，选中 = 品牌蓝浅底 */
+.filterChip {
+  flex: none;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 11px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.filterChip:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+}
+
+.filterChipActive {
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border-color: var(--hub-brand-border-soft);
+  font-weight: 500;
+}
+
+/* 搜索框：占满筛选行剩余宽度 */
+.search {
+  flex: 1;
+  min-width: 140px;
+}
+
+.searchInput {
+  width: 100%;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-2);
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--hub-brand);
+  background: var(--hub-bg-1);
+}
+
+.searchInput::placeholder {
+  color: var(--hub-text-tertiary);
+}
+
+/* 日志列表：弹窗主体，独占高度内滚动，头部与底部操作栏始终可见 */
+.logList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0 6px;
+}
+
+/* 加载更多：居中主按钮，整行可点 */
+.more {
+  flex: none;
+  align-self: center;
+  margin: 10px 0 4px;
+  height: 26px;
+  padding: 0 18px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border: 1px solid var(--hub-brand-border-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.more:hover:not(:disabled) {
+  color: #ffffff;
+  background: var(--hub-brand);
+  border-color: var(--hub-brand);
+}
+
+.more:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 拉完收尾：居中灰字 + 总数 */
+.moreEnd {
+  flex: none;
+  padding: 12px 0 4px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 底部操作栏：路径（左）+ 计数 + 打开/复制/导出（右） */
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--hub-border-1);
+}
+
+.footPath {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.footCount {
+  flex: none;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.footActions {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 级别徽章：与类别徽章同排，颜色区分严重程度 */
+.badge {
+  flex: none;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.badgeSuccess {
+  color: var(--hub-success);
+}
+
+.badgeError {
+  color: var(--hub-danger-text);
+}
+
+.badgeWarn {
+  color: var(--hub-warning);
+}
+
+.badgeInfo {
+  color: var(--hub-text-secondary);
+}
+
+.badgeDebug {
+  color: var(--hub-text-tertiary);
+}
+
+/* 类别徽章：小圆角标签，颜色区分功能域 —— 安装/卸载/更新一眼可辨 */
+.catBadge {
+  flex: none;
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+}
+
+.catInstall {
+  color: var(--hub-brand);
+  border-color: var(--hub-brand-border-soft);
+  background: var(--hub-brand-tint);
+}
+
+.catUninstall {
+  color: var(--hub-danger-text);
+  border-color: var(--hub-danger-border);
+  background: var(--hub-danger-tint);
+}
+
+.catUpdate {
+  color: var(--hub-warning);
+  border-color: var(--hub-warning-border);
+  background: var(--hub-warning-tint);
+}
+
+.catDiagnostics {
+  color: var(--hub-success);
+  border-color: var(--hub-success-border);
+  background: var(--hub-success-tint);
+}
+
+.catSettings {
+  color: var(--hub-warn);
+  border-color: var(--hub-warn-border);
+  background: var(--hub-warn-tint);
+}
+
+.catSystem {
+  color: var(--hub-text-secondary);
+  border-color: var(--hub-border-2);
+  background: var(--hub-bg-hover);
+}
+
+/* 空态 / 加载 / 失败提示 */
+.empty {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--hub-text-tertiary);
+}

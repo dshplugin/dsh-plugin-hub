@@ -1,0 +1,142 @@
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Custom install view: a standalone top-level section for manually
+ * installing npm packages or GitHub sources outside the catalog. The two
+ * installer cards (npm / GitHub) stack one per line; each card = channel
+ * label + example hint above the input + input row (input + install button)
+ * + optional format-error note. Colors resolve through the --hub-* tokens.
+ */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  /* 输入面板集中在左侧可读宽度，避免在宽窗口里把输入框拉得过长 */
+  max-width: 560px;
+}
+
+/* 页面说明：一行灰字，交代这是做什么的、装完去哪看 */
+.desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--hub-text-tertiary);
+}
+
+/* —— 输入卡片：NPM / GitHub 两块，一行一个 —— */
+.installCards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.installCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--hub-bg-1);
+  border: 1px solid var(--hub-border-1);
+  border-radius: 8px;
+}
+
+.installCardHead {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.installLabel {
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--hub-text-primary);
+}
+
+/* 文本框上方的示例：灰字小字，告诉用户该通道的推荐写法 */
+.installExample {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.installRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.installInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+  line-height: 26px;
+  color: var(--hub-text-primary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.installInput::placeholder {
+  color: var(--hub-text-tertiary);
+}
+
+.installInput:focus {
+  border-color: var(--hub-brand);
+}
+
+.installInputError,
+.installInputError:focus {
+  border-color: var(--hub-danger-text);
+}
+
+.installBtn {
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--hub-brand);
+  border: none;
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, opacity 120ms ease;
+}
+
+.installBtn:hover {
+  background: var(--hub-brand-hover);
+}
+
+.installBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* 格式错误：输入框红边框 + 卡片下方红字提示（给出该通道的推荐写法） */
+.installError {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--hub-danger-text);
+  background: var(--hub-danger-tint);
+  border: 1px solid var(--hub-danger-border);
+  border-radius: 6px;
+  padding: 5px 8px;
+}

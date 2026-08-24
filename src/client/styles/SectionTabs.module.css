@@ -1,0 +1,142 @@
+/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * Website: https://dsh-plugin.org
+ * GitHub: https://github.com/dshplugin/dsh-plugin-hub
+ *
+ * Primary navigation (section tabs): an underline tab bar under the header
+ * switching between Market / Installed / Settings. The active tab carries a
+ * brand-colored underline; the bar itself draws a hairline bottom border so
+ * the selected state reads clearly without extra chrome. */
+
+.root {
+  display: flex;
+  align-items: stretch;
+  gap: 28px;
+  flex-shrink: 0;
+  padding: 0 2px;
+  border-bottom: 1px solid var(--hub-border-1);
+}
+
+.tab,
+.tabActive {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 38px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease;
+}
+
+.tab {
+  color: var(--hub-text-secondary);
+}
+
+.tab:hover {
+  color: var(--hub-text-primary);
+}
+
+.tabActive {
+  color: var(--hub-text-primary);
+  font-weight: 600;
+}
+
+/* tab 图标：16px 随字号等宽对齐，SVG 继承 currentColor 自动跟随选中/悬浮色 */
+.tabIcon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* 选中下划线：紧贴栏底边（覆盖 hairline 分隔线），品牌色 2px，一眼定位当前视图 */
+.tabActive::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--hub-brand);
+}
+
+/* 计数徽标（已安装数量）：浅灰胶囊；选中态跟随文字转深 */
+.tabCount,
+.tabCountActive {
+  font-size: 11px;
+  line-height: 16px;
+  border-radius: 999px;
+  padding: 0 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.tabCount {
+  color: var(--hub-text-tertiary);
+  background: var(--hub-bg-btn);
+}
+
+.tabActive .tabCountActive {
+  color: var(--hub-text-on-fill);
+  background: var(--hub-btn-fill);
+}
+
+/* —— 通知中心入口 —— */
+
+/* 通知铃铛按钮：位于「设置」tab 后边、靠右对齐（margin-left:auto 吃掉 tab 剩余空间），
+   在 38px tab 栏里垂直居中；常态透明底只显铃铛轮廓，hover 浅灰，不抢 tab 视觉层级 */
+.noticeBtn {
+  position: relative;
+  margin-left: auto;
+  align-self: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 24px;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.noticeBtn:hover {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-hover);
+  border-color: var(--hub-border-2);
+}
+
+/* 铃铛图标容器：保持 SVG 与文字基线对齐 */
+.noticeIcon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+/* 红底白字计数胶囊：内联跟在铃铛后边（不悬浮），只在计数 >0 时出现 */
+.noticeCount {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 17px;
+  text-align: center;
+  color: #ffffff;
+  background: var(--hub-danger);
+  box-shadow: 0 1px 3px rgba(209, 36, 47, 0.35);
+}

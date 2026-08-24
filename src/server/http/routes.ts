@@ -6,17 +6,21 @@
  * Local HTTP routes exposing real installs to the in-app Plugin Hub UI.
  * The client fetches the same-origin `/dsh-plugin-hub/*` endpoints; the
  * install handler validates the target, then spawns the official dsh CLI
- * (see services/install.ts) and reports the captured result back.
+ * (see services/install/install.ts) and reports the captured result back.
  */
-import { readFileSync } from 'node:fs'
+import { mkdirSync, readFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir, release } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
-import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, hasQueuedTarget, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install.ts'
-import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/installed-versions.ts'
-import { resolveNpmPackage } from '../services/npm-resolve.ts'
-import { preflightTarget } from '../services/preflight.ts'
+import { probeUrl, systemProxy } from '../services/probe.ts'
+import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, hasQueuedTarget, installTargetOf, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install/install.ts'
+import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/profile/installed-versions.ts'
+import { resolveNpmPackage } from '../services/install/npm-resolve.ts'
+import { preflightTarget } from '../services/install/preflight.ts'
+import { isDshPlugin, isEntryLoaded } from '../services/loader.ts'
+import { loadSettings, saveSettings, resetSettings, type HubSettings } from '../services/settings.ts'
+import { appendLog, readLog, logFilePath, defaultLogFilePath, customLogFile } from '../services/log.ts'
 
 export interface WebRoute {
   kind: 'exact'
@@ -84,6 +88,22 @@ function hostEnv(profile: string): Record<string, string | null> {
     profile,
     dshHome: process.env.DSH_HOME ?? join(homedir(), '.dsh'),
   }
+}
+
+/** 安装/卸载 CLI 的子进程环境：透传宿主环境，并按设置注入 npm 镜像源与 HTTP(S) 代理。
+ *  代理优先级：设置里的代理 → 系统代理（macOS scutil / Windows 注册表）→ 宿主 env 原有值。
+ *  使安装通道与诊断使用相同的代理来源。 */
+function mutationEnv(settings: HubSettings): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, CI: 'true' }
+  if (settings.npmRegistry !== '') env.npm_config_registry = settings.npmRegistry
+  const proxy = settings.proxy !== '' ? settings.proxy : (systemProxy() ?? '')
+  if (proxy !== '') {
+    env.HTTP_PROXY = proxy
+    env.HTTPS_PROXY = proxy
+    env.http_proxy = proxy
+    env.https_proxy = proxy
+  }
+  return env
 }
 
 /** Match a GitHub install target against the installed table; returns the package name when already installed. */
@@ -155,6 +175,14 @@ async function readJsonBody(request: IncomingMessage): Promise<unknown> {
 export function mountPluginHubRoutes(webServer: WebServerService, profile: string, loader?: LoaderHandle): () => void {
   if (!PROFILE_RE.test(profile)) throw new Error(`invalid profile name: ${profile}`)
   console.log(`[hub] routes mounted (profile=${profile}, loader=${loader === undefined ? 'undefined' : 'provided'})`)
+  // 系统日志：插件随宿主启动即记录一条 —— 保证「打开就有运行日志」，日志页永远有内容
+  appendLog(profile, {
+    at: Date.now(),
+    level: 'info',
+    category: 'system',
+    event: 'system.start',
+    message: `Plugin Hub 已启动（profile=${profile}）`,
+  })
   const disposers = [
     webServer.register({
       kind: 'exact',
@@ -162,6 +190,233 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       handler: (request, response) => {
         if (!requireMethod(request, response, 'GET')) return
         sendJson(response, 200, { entries: dumpLoaderEntries(loader) })
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/settings',
+      // GET 读 / POST 写：webServer.register 按 (kind, path) 唯一，多方法必须合并到同一个 handler 按 method 分派
+      handler: async (request, response) => {
+        if (request.method === 'GET') {
+          sendJson(response, 200, loadSettings(profile))
+          return
+        }
+        if (!requireTrustedPost(request, response)) return
+        try {
+          const body = await readJsonBody(request)
+          // 白名单字段：只接受已知设置项，防客户端把任意键写进文件
+          const patch: Record<string, unknown> = {}
+          const source = typeof body === 'object' && body !== null ? body as Record<string, unknown> : {}
+          for (const key of ['checkUpdatesOnStart', 'autoInstallUpdates', 'enableNpmInstall', 'enableGitInstall', 'npmRegistry', 'proxy', 'logPath'] as const) {
+            if (source[key] !== undefined) patch[key] = source[key]
+          }
+          // 日志位置：非空时预建目录验证可写，失败直接 400 拦截（默认位置永远合法，空串 = 回默认）
+          if (typeof patch.logPath === 'string' && patch.logPath.trim() !== '') {
+            try {
+              mkdirSync(dirname(customLogFile(patch.logPath)), { recursive: true })
+            } catch {
+              sendJson(response, 400, { error: 'log path is not writable' })
+              return
+            }
+          }
+          sendJson(response, 200, saveSettings(profile, patch))
+          // 系统日志：设置项变更
+          appendLog(profile, {
+            at: Date.now(),
+            level: 'info',
+            category: 'settings',
+            event: 'settings.update',
+            message: `更新设置：${Object.keys(patch).join(', ')}`,
+          })
+        } catch (error) {
+          sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/settings/reset',
+      handler: async (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        sendJson(response, 200, resetSettings(profile))
+        appendLog(profile, {
+          at: Date.now(),
+          level: 'warn',
+          category: 'settings',
+          event: 'settings.reset',
+          message: '恢复全部默认设置',
+        })
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/logs',
+      handler: (request, response) => {
+        if (!requireMethod(request, response, 'GET')) return
+        // 日志查看器分页接口：?offset=&limit=&category=&level=&query=，返回过滤后的倒序分页
+        try {
+          const url = new URL(request.url ?? '/', 'http://localhost')
+          const num = (name: string): number | undefined => {
+            const v = url.searchParams.get(name)
+            if (v === null || v === '') return undefined
+            const n = Number(v)
+            return Number.isFinite(n) && n >= 0 ? Math.floor(n) : undefined
+          }
+          const limit = Math.min(num('limit') ?? 200, 500)
+          const category = url.searchParams.get('category') ?? 'all'
+          const level = url.searchParams.get('level') ?? 'all'
+          const query = url.searchParams.get('query') ?? ''
+          const result = readLog(profile, {
+            offset: num('offset') ?? 0,
+            limit,
+            category: category as 'all' | 'install' | 'uninstall' | 'update' | 'diagnostics' | 'settings' | 'system',
+            level: level as 'all' | 'debug' | 'info' | 'success' | 'warn' | 'error',
+            query,
+          })
+          sendJson(response, 200, {
+            entries: result.entries,
+            total: result.total,
+            offset: num('offset') ?? 0,
+            limit,
+            hasMore: result.total > (num('offset') ?? 0) + result.entries.length,
+            path: logFilePath(profile),
+            defaultPath: defaultLogFilePath(profile),
+          })
+        } catch {
+          sendJson(response, 400, { error: 'invalid log query' })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/open-log',
+      handler: (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        // 在系统文件管理器里定位日志文件（macOS Finder -R / Windows explorer /select, / Linux xdg-open）
+        try {
+          const file = logFilePath(profile)
+          const bin = process.platform === 'darwin' ? 'open'
+            : process.platform === 'win32' ? 'explorer'
+              : 'xdg-open'
+          const args = process.platform === 'darwin' ? ['-R', file]
+            : process.platform === 'win32' ? ['/select,', file]
+              : [file]
+          const child = spawn(bin, args, { stdio: 'ignore', detached: true })
+          child.once('error', () => sendJson(response, 500, { error: 'failed to open log file' }))
+          child.once('spawn', () => sendJson(response, 200, { ok: true }))
+        } catch {
+          sendJson(response, 500, { error: 'failed to open log file' })
+        }
+      },
+    }),
+    // 系统目录选择器：弹原生文件夹对话框让用户挑日志存放目录（macOS osascript /
+    // Windows FolderBrowserDialog / Linux zenity），选中返回绝对路径，取消返回 cancelled。
+    // 与 open-log 不同，这里必须等对话框关闭才能拿结果，所以阻塞收集 stdout 再应答。
+    // 对话框默认定位到当前日志文件所在目录 —— 每台机器/平台的默认位置都不同，
+    // 这里动态取 logFilePath() 的目录，用户打开就在「它原来的位置」附近。
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/choose-log-dir',
+      handler: (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        try {
+          const title = 'DSH Plugin Hub — choose log folder'
+          const startDir = dirname(logFilePath(profile))
+          let bin: string
+          let args: string[]
+          if (process.platform === 'darwin') {
+            bin = 'osascript'
+            args = ['-e', `POSIX path of (choose folder with prompt "${title}" default location (POSIX file "${startDir}"))`]
+          } else if (process.platform === 'win32') {
+            bin = 'powershell.exe'
+            args = ['-NoProfile', '-STA', '-Command', [
+              'Add-Type -AssemblyName System.Windows.Forms',
+              '$f = New-Object System.Windows.Forms.FolderBrowserDialog',
+              `$f.Description = '${title}'`,
+              // 初始定位到当前日志目录（单引号字符串内反斜杠不转义，Windows 路径原样传入）
+              `$f.SelectedPath = '${startDir}'`,
+              'if ($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $f.SelectedPath } else { "" }',
+            ].join('; ')]
+          } else {
+            bin = 'zenity'
+            args = ['--file-selection', '--directory', `--title=${title}`, `--filename=${startDir}`]
+          }
+          const child = spawn(bin, args)
+          let out = ''
+          child.stdout.on('data', (d) => { out += String(d) })
+          child.on('error', () => sendJson(response, 500, { error: 'directory picker unavailable' }))
+          child.on('close', (code) => {
+            // macOS osascript 输出带引号（如 "/Users/x"），统一剥掉首尾空白与引号
+            const picked = out.trim().replace(/^"|"$/g, '')
+            if (code === 0 && picked !== '') sendJson(response, 200, { path: picked })
+            else sendJson(response, 200, { cancelled: true })
+          })
+        } catch {
+          sendJson(response, 500, { error: 'directory picker unavailable' })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/diagnostics',
+      handler: async (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        // 连通性自检：npm registry（镜像/官方）/ GitHub API / 目录站点，逐路探测并测速。
+        // 与安装通道一一对应 —— npm 反查与 npm 安装走 registry、git 源走 github、目录数据走 dsh-plugin.org。
+        // 流式（NDJSON）逐条上报：每个探测先发命令行，完成后发结果行，客户端以黑窗口终端实时展示。
+        // 可选 body { key }：只重测指定通道（页面列表「重测」单项时用），缺省全量串行探测。
+        let onlyKey = ''
+        try {
+          const body = await readJsonBody(request)
+          if (body !== null && typeof body === 'object' && typeof (body as { key?: unknown }).key === 'string') {
+            onlyKey = (body as { key: string }).key
+          }
+        } catch {
+          // 空 body / 非 JSON：视为全量探测
+        }
+        const settings = loadSettings(profile)
+        const registry = settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org'
+        // 连通性自检直接打安装通道真实访问的轻量资源：npm 源拉包元数据、git 通道探
+        // 仓库主页、目录站探 badge 小文件，避免拉取目录全量 JSON。
+        const allChecks: Array<{ key: string; url: string; display: string; cmd: string }> = [
+          { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? settings.npmRegistry : 'registry.npmjs.org', cmd: `npm view dsh-plugin version --registry ${registry}` },
+          { key: 'github', url: 'https://github.com/dshplugin/dsh-plugin-hub', display: 'github.com', cmd: 'git ls-remote https://github.com/dshplugin/dsh-plugin-hub' },
+          { key: 'catalog', url: 'https://dsh-plugin.org/badges/listed.svg', display: 'dsh-plugin.org', cmd: 'curl -s https://dsh-plugin.org/badges/listed.svg' },
+        ]
+        const checks = onlyKey !== '' ? allChecks.filter((c) => c.key === onlyKey) : allChecks
+        response.writeHead(200, {
+          'content-type': 'application/x-ndjson; charset=utf-8',
+          'cache-control': 'no-store',
+        })
+        const send = (line: unknown) => { response.write(`${JSON.stringify(line)}\n`) }
+        // 探测走代理的优先级：设置里的代理 → 系统代理（macOS scutil / Windows 注册表）→ 环境变量 HTTPS_PROXY → 直连。
+        // 与安装通道一致（npm/git 靠 HTTP_PROXY 环境变量走代理），且自动跟随系统代理 ——
+        // 浏览器挂着代理能开、诊断就能测通，不用用户手动把代理填进设置。
+        const effectiveProxy = settings.proxy !== ''
+          ? settings.proxy
+          : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
+        const probe = (url: string) => probeUrl(url, effectiveProxy, 6000)
+        // 逐路串行：一条命令一条结果地推送给终端，保持「程序在跑」的真实感
+        const results: Array<{ key: string; ok: boolean }> = []
+        for (const c of checks) {
+          send({ type: 'probe', key: c.key, cmd: c.cmd, display: c.display })
+          const r = await probe(c.url)
+          results.push({ key: c.key, ok: r.ok })
+          send({ type: r.ok ? 'ok' : 'fail', key: c.key, display: c.display, ms: r.ms, status: r.status })
+        }
+        send({ type: 'end', at: Date.now() })
+        response.end()
+        // 系统日志：诊断汇总（全部通过 / 存在不可达）
+        const failed = results.filter((r) => !r.ok)
+        appendLog(profile, {
+          at: Date.now(),
+          level: failed.length === 0 ? 'success' : 'error',
+          category: 'diagnostics',
+          event: 'diagnostics.done',
+          message: failed.length === 0
+            ? `连通性检测通过（${results.length} 个通道）`
+            : `连通性检测：${failed.length}/${results.length} 个通道不可达`,
+        })
       },
     }),
     webServer.register({
@@ -176,39 +431,65 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           const mode = body !== null && typeof body === 'object' && (body as { mode?: unknown }).mode === 'update'
             ? 'update'
             : 'install'
+          // installTargetOf 先把完整 DSH 命令（`dsh plugin [--profile <p>] add <target>`）剥成裸目标，
+          // 兼容用户直接粘贴命令行（防输错），真正语法判定交给下面 githubRepoOf / validPackageName。
           const rawRepo = typeof body === 'object' && body !== null && typeof (body as { repo?: unknown }).repo === 'string'
-            ? (body as { repo: string }).repo.trim()
+            ? installTargetOf((body as { repo: string }).repo)
             : ''
           // 前端决策的展示用仓库名（owner/repo）：npm 安装时 body.repo 是包名，display 用于
           // 待重启行 / 任务恢复时展示仓库名，保证用户无感知（安装通道变化不改变所见目标）
           const displayRepo = typeof body === 'object' && body !== null && typeof (body as { display?: unknown }).display === 'string'
             ? (body as { display: string }).display.trim()
             : rawRepo
-          // 目标语法两态：owner/repo → 显式 HTTPS Git 源（走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装
-          const repoTarget = githubTarget(rawRepo)
-          let target: string | null = repoTarget ?? (repoTarget === null && validPackageName(rawRepo) ? rawRepo : null)
+          // 请求来源：目录插件安装（catalog）走目录白名单；命令行安装（custom）按通道受安全开关控制
+          const source = typeof body === 'object' && body !== null && typeof (body as { source?: unknown }).source === 'string'
+            ? (body as { source: string }).source
+            : ''
+          const settings = loadSettings(profile)
+          // 目标语法两态：GitHub 地址（owner/repo、github:、https/ssh 链接等任意写法）→ 显式
+          // HTTPS Git 源（走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装。
+          // githubRepoOf 先把各种 GitHub 地址归一成 owner/repo，让「输入地址即装」兼容粘贴完整链接。
+          const gitRepo = githubRepoOf(rawRepo)
+          const repoTarget = gitRepo !== null ? githubTarget(gitRepo) : null
+          let target: string | null = repoTarget ?? (validPackageName(rawRepo) ? rawRepo : null)
           if (target === null) {
             sendJson(response, 400, { error: 'unsupported install target' })
             return
           }
           // npm 优先：git 目标先反查该仓库的官方 npm 包，命中则改走 npm 通道。
-          // git 分发常缺构建产物/子模块导致 prepare 必败，而 npm 包是作者发布的
-          // 完整产物，成功率高得多；未命中或查询失败保留 github 直装（不阻塞安装，
-          // 预检仍会兜底拦截 git 分发缺入口文件的情况）。通用机制，不针对具体插件。
+          // git 分发常缺构建产物/子模块，npm 包是作者发布的完整产物；未命中或
+          // 查询失败保留 github 直装（不阻塞安装，预检仍会拦截缺入口文件的情况）。
+          // 通用机制，不针对具体插件。
           // 反查本身计入「已尝试的安装方式」：组织 scope 与 GitHub 用户名不一致时仅凭
           // 仓库名猜不到包名，失败提 Issue 时作者看到我们查过的命令就能直接指认正确包名。
           const attempts: string[] = []
           if (repoTarget !== null) {
-            const npmName = await resolveNpmPackage(rawRepo)
+            // 反查/记录统一用归一化后的 owner/repo（gitRepo），保证「输入完整链接」也走同一套 npm 反查
+            const repoIdentity = gitRepo ?? rawRepo
+            const npmName = await resolveNpmPackage(repoIdentity, settings.npmRegistry)
             if (npmName !== null) {
               target = npmName
-              attempts.push(`npm registry search: \`npm search repository:${rawRepo}\` → found \`${npmName}\``)
+              attempts.push(`npm registry search: \`npm search repository:${repoIdentity}\` → found \`${npmName}\``)
               // 持久化 repo → npm 包名映射：目录数据未下发 npmPackage（组织 scope 与 GitHub
               // 用户名不一致）时，客户端仍能通过 /installed 的 versions 把依赖 key 匹配回仓库，
               // 列表立即显示「已安装」，避免安装成功后仍显示可安装
-              recordResolvedNpmPackage(profile, rawRepo, npmName)
+              recordResolvedNpmPackage(profile, repoIdentity, npmName)
             } else {
-              attempts.push(`npm registry search: \`npm search repository:${rawRepo}\` → no matching package found (falling back to git install)`)
+              attempts.push(`npm registry search: \`npm search repository:${repoIdentity}\` → no matching package found (falling back to git install)`)
+            }
+          }
+          // 命令行安装（目录外）按通道门禁：GitHub 源码通道受「启用 GitHub 源码安装」控制，
+          // npm 通道受「启用 NPM 安装」控制 —— 目录插件安装走目录白名单，不受开关影响。
+          // 通道判定看反查后的最终 target：仍是 git 目标 = 走 GitHub 源码，否则走 npm。
+          if (source !== 'catalog') {
+            const isGitChannel = repoTarget !== null && target === repoTarget
+            if (isGitChannel && !settings.enableGitInstall) {
+              sendJson(response, 403, { error: 'git installs are disabled by the security settings' })
+              return
+            }
+            if (!isGitChannel && !settings.enableNpmInstall) {
+              sendJson(response, 403, { error: 'npm installs are disabled by the security settings' })
+              return
             }
           }
           // 重复安装防护：非更新请求命中已安装目标时直接拒绝，不重复跑 CLI
@@ -259,7 +540,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             // 已尝试的安装方式（npm 反查）：实际执行命令由 spawn 时追加，失败 issue 一并展示
             attempts,
             timeoutMs: COMMAND_TIMEOUT_MS,
-            env: { ...process.env, CI: 'true' },
+            env: mutationEnv(settings),
           })
           sendJson(response, 200, { ok: true, task: task.id })
         } catch (error) {
@@ -304,7 +585,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             // 运行中 loader：卸载成功后主动移除条目，立即生效、无需重启
             uninstallLoader: loader,
             timeoutMs: COMMAND_TIMEOUT_MS,
-            env: { ...process.env, CI: 'true' },
+            env: mutationEnv(loadSettings(profile)),
           })
           sendJson(response, 200, { ok: true, task: task.id })
         } catch (error) {
@@ -420,12 +701,56 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
     }),
     webServer.register({
       kind: 'exact',
+      path: '/dsh-plugin-hub/open-path',
+      handler: async (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        // 在系统文件管理器里定位并打开已安装插件目录（详情视图「在文件夹中显示」）。
+        // 只接受已安装依赖的包名、服务端自行拼接路径——杜绝任意路径注入
+        try {
+          const body = await readJsonBody(request)
+          const name = typeof body === 'object' && body !== null && typeof (body as { name?: unknown }).name === 'string'
+            ? (body as { name: string }).name
+            : ''
+          if (!validPackageName(name) || readInstalled(profile)[name] === undefined) {
+            sendJson(response, 400, { error: 'plugin is not installed' })
+            return
+          }
+          const dir = join(profileDirectory(profile), 'node_modules', name)
+          // macOS Finder 用 -R 定位选中；Windows explorer 用 /select,；Linux 打开目录（xdg-open）
+          const bin = process.platform === 'darwin' ? 'open'
+            : process.platform === 'win32' ? 'explorer'
+              : 'xdg-open'
+          const args = process.platform === 'darwin' ? ['-R', dir]
+            : process.platform === 'win32' ? ['/select,', dir]
+              : [dir]
+          spawn(bin, args, { detached: true, stdio: 'ignore' }).unref()
+          sendJson(response, 200, { ok: true })
+        } catch (error) {
+          sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
       path: '/dsh-plugin-hub/installed',
       handler: (request, response) => {
         if (!requireMethod(request, response, 'GET')) return
-        // installed：依赖表（包名 → spec）；versions：安装时记录的目录版本（repo → 版本），
-        // 客户端合并两者判断「是否有更新」
-        sendJson(response, 200, { profile, installed: readInstalled(profile), versions: readInstalledVersions(profile) })
+        // installed：依赖表（包名 → spec）；versions：安装时记录的目录版本（repo → 版本）；
+        // paths：每个依赖在系统上的安装目录（profile/node_modules/<包名>），详情视图展示用；
+        // loaded：已加载进运行中 loader 的包名（官方 ctx.loader.entries()，未重启装的新插件不在其中）；
+        // dshCapable：真正的 dsh 插件（包内声明 dsh 配置 / 在 profile bundles 清单）——
+        //   非 dsh 插件（如 GitHub 官方示例仓库）装上也不会被宿主加载，客户端据此不再提示「待重启」。
+        // 客户端合并这些判断「是否有更新」「运行状态」并展示安装路径/时间等运行时信息。
+        const installed = readInstalled(profile)
+        const paths: Record<string, string> = {}
+        const loaded: string[] = []
+        const dshCapable: string[] = []
+        for (const name of Object.keys(installed)) {
+          paths[name] = join(profileDirectory(profile), 'node_modules', name)
+          if (isEntryLoaded(loader, name)) loaded.push(name)
+          if (isDshPlugin(profile, name)) dshCapable.push(name)
+        }
+        sendJson(response, 200, { profile, installed, versions: readInstalledVersions(profile), paths, loaded, dshCapable })
       },
     }),
   ]

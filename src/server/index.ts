@@ -7,7 +7,7 @@
  * web server service is available. The browser bundle (src/client) talks to
  * these same-origin routes to perform real installs from inside the app.
  */
-import { readProfileArg, type LoaderHandle } from './services/install.ts'
+import { readProfileArg, type LoaderHandle } from './services/install/install.ts'
 import { mountPluginHubRoutes, type WebServerService } from './http/routes.ts'
 
 export const name = 'dsh-plugin'

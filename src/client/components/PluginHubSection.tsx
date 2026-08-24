@@ -8,43 +8,41 @@
  * rendering is delegated to the small presentational components in this
  * folder; it hosts the dialogs/toast and the section-level copy actions.
  */
-import { createElement as h, useEffect, useState } from 'react'
+import { createElement as h, useEffect, useRef, useState } from 'react'
 import styles from '../styles/Header.module.css'
-import { en, zh } from '../locales.ts'
-import type { EnvInfo, HubPlugin, LocaleId, SectionProps, ToastState } from '../types.ts'
-import { langPathOf, installCommandOf, HUB_REPO, PLUGIN_VERSION } from '../lib/catalog.ts'
-import { getEnv } from '../lib/env.ts'
+import type { EnvInfo, HubPlugin, SectionProps, ToastState } from '../types.ts'
+import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
+import { HUB_REPO, PLUGIN_VERSION } from '../logic/constants.ts'
+import { getEnv, revealInstallFolder } from '../data/host.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
+import { useLanguage } from '../hooks/useLanguage.ts'
+import { useSettings } from '../hooks/useSettings.ts'
 import { useTaskQueue } from '../hooks/useTaskQueue.ts'
-import { ErrorModal, InstallModal, UninstallModal, Toast } from './modals.tsx'
-import { AboutModal } from './AboutModal.tsx'
-import { HubUpdateModal } from './HubUpdateModal.tsx'
-import { NotificationsModal } from './NotificationsModal.tsx'
-import { addFailure, addSuccess, clearNotifications, loadNotifications, removeNotification } from '../lib/failures.ts'
-import type { NotificationRecord } from '../lib/failures.ts'
-import { CatalogHeader } from './CatalogHeader.tsx'
-import { CategoryTabs } from './CategoryTabs.tsx'
-import { CatalogControls } from './CatalogControls.tsx'
-import { CatalogList } from './CatalogList.tsx'
+import { ErrorModal, InstallModal, RestartConfirmModal, UninstallModal, Toast } from './modals/modals.tsx'
+import { AboutModal } from './modals/AboutModal.tsx'
+import { HubUpdateModal } from './modals/HubUpdateModal.tsx'
+import { InstalledDetailModal } from './modals/InstalledDetailModal.tsx'
+import { NotificationsModal } from './modals/NotificationsModal.tsx'
+import { addFailure, addSuccess, clearNotifications, loadNotifications, removeNotification } from '../logic/failures.ts'
+import type { NotificationRecord } from '../logic/failures.ts'
+import { CatalogHeader } from './layout/CatalogHeader.tsx'
+import { MarketView } from './views/MarketView.tsx'
+import { SectionTabs } from './layout/SectionTabs.tsx'
+import type { SectionView } from './layout/SectionTabs.tsx'
+import { InstalledView } from './views/InstalledView.tsx'
+import { CustomInstallView } from './views/CustomInstallView.tsx'
+import { SettingsView } from './views/SettingsView.tsx'
+import type { InstalledItem } from '../logic/installed.ts'
+import { pluginOfItem } from '../logic/installed.ts'
 
 export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
-  /** 界面语言：默认跟随宿主（系统）语言；右上角按钮可手动切换，切换后以手动选择为准 */
-  const [manualLang, setManualLang] = useState<LocaleId | null>(null)
-  const lang: LocaleId = manualLang ?? locale.getSnapshot().active
-  const langKey: LocaleId = lang === 'en' ? 'en' : 'zh'
-  // dsh-plugin.org keeps zh pages under the /zh/ prefix; en is the root.
-  const langPath = langPathOf(lang)
-
-  // 界面语言跟随宿主（系统）locale 自动切换；宿主的 t() 绑定宿主 locale，
-  // 这里基于本地字典自建翻译函数，与宿主 locale 保持一致。
-  // （settings.section 的导航 label 仍在 apply 里用宿主 t()，跟随宿主语言。）
-  const dict: Record<string, string> = langKey === 'en' ? en : zh
-  const t = (key: string, params?: Record<string, string | number>): string => {
-    const raw = dict[key] ?? key
-    return params ? raw.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? '')) : raw
-  }
-
+  const { lang, langKey, langPath, t, toggleLang } = useLanguage(locale)
   const catalog = useCatalog(lang)
+  /** 设置状态：服务端 hub-settings.json 持久化，本地乐观更新即时生效 */
+  const { settings: hubSettings, ready: settingsReady, update: updateSettings, reset: resetSettings } = useSettings()
+
+  /** 一级导航：插件中心 / 已安装 / 自定义安装 / 设置 */
+  const [view, setView] = useState<SectionView>('market')
 
   /** 全局反馈 Toast：{id} 用于重复触发时重新走入场动画，kind 决定文案与配色 */
   const [toast, setToast] = useState<ToastState | null>(null)
@@ -54,12 +52,22 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
   const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
+  /** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名 / GitHub 地址，DSH 命令已剥成裸目标）——
+   *  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
+  const [confirmCustomTarget, setConfirmCustomTarget] = useState<string | null>(null)
   /** Hub 自我更新说明弹窗：点「可更新」徽标先展示版本 + Markdown 变更记录，确认后再进安装弹窗 */
   const [showHubUpdate, setShowHubUpdate] = useState(false)
   /** 「关注我们」弹窗：GitHub 图标后按钮点击打开，展示平台介绍 + 用户反馈群二维码（Worker /about 推送） */
   const [showAbout, setShowAbout] = useState(false)
-  /** 卸载确认弹窗：记录待卸载的插件 */
+  /** 卸载确认弹窗：记录待卸载的插件（目录内） */
   const [uninstallPlugin, setUninstallPlugin] = useState<HubPlugin | null>(null)
+  /** 卸载确认弹窗：记录待卸载的已安装项（自定义安装无目录数据，按包名直卸） */
+  const [uninstallItem, setUninstallItem] = useState<InstalledItem | null>(null)
+  /** 已安装详情弹窗：记录当前查看的已安装项（行点击 / 详情按钮打开） */
+  const [detailItem, setDetailItem] = useState<InstalledItem | null>(null)
+  /** 待重启确认弹窗：已安装列表行内「重启」先弹「立即重启 / 稍后重启」确认（与通知中心一致），
+   *  确认后才真正触发宿主重启，避免误触 */
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false)
   /** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
   const [installDone, setInstallDone] = useState(false)
   const [uninstallDone, setUninstallDone] = useState(false)
@@ -71,8 +79,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [restarting, setRestarting] = useState(false)
   /** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
   const [errorMsg, setErrorMsg] = useState<{ message: string; repo: string | null; kind: 'install' | 'uninstall'; command?: string; attempts?: string[] } | null>(null)
-  /** 安装/卸载任务通知记录：localStorage 持久化，成败即落盘，即使错过弹窗也能回来查看 */
+  /** 通知中心记录：localStorage 持久化，每次安装/卸载任务成败都留痕（启动时读回） */
   const [notifications, setNotifications] = useState<NotificationRecord[]>(() => loadNotifications())
+  /** 通知中心弹窗：一级导航「设置」tab 后边的铃铛入口按钮打开 */
   const [showNotifications, setShowNotifications] = useState(false)
   /** 宿主机器环境快照：提交 bug 的 issue 正文附带；取不到为 null（链接少环境段，不阻塞） */
   const [env, setEnv] = useState<EnvInfo | null>(null)
@@ -104,7 +113,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       setNotifications(addFailure({ kind, repo: repo ?? '', message, command, attempts }))
     },
     installPlugin: confirmPlugin,
+    installCustomTarget: confirmCustomTarget,
     uninstallPlugin,
+    uninstallName: uninstallItem ? uninstallItem.name : null,
     installedName: catalog.installedName,
     // 待重启项展示信息补齐：从目录按 owner/repo 解析插件简介/版本（找不到返回 null，行内只显示仓库名）
     resolvePending: (repo) => {
@@ -113,13 +124,37 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     },
   })
 
-  // 信任/卸载/更新说明/通知记录弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
+  // 启动更新策略：目录数据与设置都就绪后触发一次 —— 开启「启动时检查更新」→ 发现可更新插件
+  // 即 toast 提示；同时开启「有更新时自动安装」→ 直接入队覆盖重装（进度走队列条，装完重启生效）。
+  // ref 守卫保证只跑一次，后续目录刷新/设置变化不会重复打扰。
+  const startupCheckedRef = useRef(false)
   useEffect(() => {
-    if (!confirmPlugin && !uninstallPlugin && !showNotifications && !showHubUpdate && !showAbout) return
+    if (startupCheckedRef.current) return
+    if (!settingsReady || catalog.plugins === null || catalog.failed) return
+    startupCheckedRef.current = true
+    if (!hubSettings.checkUpdatesOnStart) return
+    const updatable = catalog.installedItems.filter((i) => i.hasUpdate && i.plugin)
+    if (updatable.length === 0) return
+    if (hubSettings.autoInstallUpdates) {
+      for (const item of updatable) {
+        if (item.plugin) void queue.installNow(item.plugin, { update: true })
+      }
+      setToast({ id: Date.now(), kind: 'updatesAuto', n: updatable.length })
+    } else {
+      setToast({ id: Date.now(), kind: 'updates', n: updatable.length })
+    }
+  }, [settingsReady, hubSettings, catalog.plugins, catalog.failed, catalog.installedItems, queue])
+
+  // 信任/卸载/更新说明弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
+  useEffect(() => {
+    if (!confirmPlugin && !confirmCustomTarget && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
+        setConfirmCustomTarget(null)
         setUninstallPlugin(null)
+        setUninstallItem(null)
+        setDetailItem(null)
         setUninstallDone(false)
         setShowHubUpdate(false)
         setShowAbout(false)
@@ -128,7 +163,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [confirmPlugin, uninstallPlugin, showNotifications, showHubUpdate, showAbout])
+  }, [confirmPlugin, confirmCustomTarget, uninstallPlugin, uninstallItem, detailItem, showHubUpdate, showAbout, showNotifications])
 
   // Toast 统一自动消失
   useEffect(() => {
@@ -162,6 +197,23 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
   }
 
+  /** 命令行安装目标是否已安装（与服务端 already 判定同口径）：GitHub 地址按仓库身份匹配
+   *  （归一化后比对已装项的 repo/spec），npm 包名按依赖 key 直查。命中 → 弹窗转「更新」语义
+   *  （mode=update 放行覆盖重装），避免重复点击撞 409 报错。 */
+  const customTargetInstalled = (raw: string): boolean => {
+    const target = raw.trim()
+    if (!target) return false
+    const repo = repoFromInstallTarget(target)
+    const isRepo = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo)
+    if (isRepo) {
+      const needle = repo.toLowerCase()
+      return catalog.installedItems.some((i) =>
+        (i.repo !== null && i.repo.toLowerCase() === needle) ||
+        repoFromInstallTarget(i.spec).toLowerCase() === needle)
+    }
+    return catalog.installedItems.some((i) => i.name === target)
+  }
+
   /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行（npm 通道显示包名命令）。 */
   const copyCommand = async (p: HubPlugin) => {
     const repo = p.source?.repo ?? ''
@@ -174,12 +226,19 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     setConfirmPlugin(null)
   }
 
-  /** 卸载弹窗动作：复制卸载命令，万一直接卸载失败可去终端手动执行。 */
+  /** 卸载弹窗动作：复制卸载命令，万一直接卸载失败可去终端手动执行。
+   *  自定义安装（无目录数据）按已安装项包名直卸，同样给复制通道。 */
   const copyUninstallCommand = async () => {
-    const name = uninstallPlugin ? catalog.installedName(uninstallPlugin) : null
+    const name = uninstallItem ? uninstallItem.name : (uninstallPlugin ? catalog.installedName(uninstallPlugin) : null)
     if (!name) return
     const ok = await doCopy(`dsh plugin remove ${name}`)
     if (ok) setToast({ id: Date.now(), kind: 'copied' })
+  }
+
+  /** 详情弹窗动作：在系统文件管理器里定位安装目录；服务端失败给 toast 提示。 */
+  const revealFolder = async (item: InstalledItem) => {
+    const ok = await revealInstallFolder(item.name)
+    if (!ok) setToast({ id: Date.now(), kind: 'revealFail' })
   }
 
   /** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。 */
@@ -232,7 +291,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       langPath,
       statsTotal,
       statsVerified,
-      onToggleLang: () => setManualLang(lang === 'en' ? 'zh' : 'en'),
+      onToggleLang: toggleLang,
       // Hub 自身版本信息入口：版本号常驻可点（无更新也看得到当前版本更新内容），
       // 有可用更新时版本号后紧跟红色「可更新」徽标（同一入口），点击都打开同一个更新说明弹窗。
       // 有更新弹窗显示新版本 + Markdown 变更记录，点「直接更新」进安装弹窗覆盖重装。
@@ -240,64 +299,103 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onVersionClick: () => setShowHubUpdate(true),
       onAboutClick: () => setShowAbout(true),
     }),
-    h(CategoryTabs, {
-      category: catalog.category,
-      setCategory: catalog.setCategory,
-      allLabel: t('all'),
-      totalCount: catalog.total,
-      langKey,
-    }),
-    h(CatalogControls, {
-      query: catalog.query,
-      setQuery: catalog.setQuery,
-      sort: catalog.sort,
-      setSort: catalog.setSort,
-      installedFilter: catalog.installedFilter,
-      setInstalledFilter: catalog.setInstalledFilter,
-      // 已安装/未安装按钮计数跟随当前分类：切到某分类即显示该分类下的已装/未装数量
-      installedCount: catalog.installedCountInCategory,
-      notInstalledCount: catalog.notInstalledCountInCategory,
-      t,
-      // 列表头部「筛选出 N 条」：分类/搜索/安装状态筛选后的结果数；全部视图且未筛选时显示总数
-      resultText: catalog.plugins === null || catalog.failed
-        ? null
-        : catalog.category === 'all' && count === total
-          ? t('pluginsTotal', { n: count })
-          : t('filterResults', { n: count }),
-      // 通知入口计数：历史通知记录数 + 进行中任务数 + 待重启数 ——
-      // 待重启不可清除，装完等重启时必须持续亮着提示「必须重启」，不能因为队列空了就归零
-      // 红圈白字数字（进行中的任务见通知中心「进行中」分区，待重启见「待重启」分区）
-      noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
-      onOpenNotifications: () => setShowNotifications(true),
-    }),
-    h(CatalogList, {
-      plugins: catalog.plugins,
-      failed: catalog.failed,
-      visible: catalog.visible,
-      total,
-      t,
-      langPath,
-      reload: catalog.reload,
-      category: catalog.category,
-      installedFilter: catalog.installedFilter,
-      copied,
-      installedName,
-      installedVersion,
-      hasUpdate,
-      langKey,
-      onInstall: (p, opts) => {
-        setInstallDone(false)
-        setConfirmIsUpdate(opts?.update ?? false)
-        // 与卸载一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务而禁用安装按钮
-        queue.clearModalTask()
-        setConfirmPlugin(p)
-      },
-      onUninstall: (p) => {
-        setUninstallDone(false)
-        queue.clearModalTask()
-        setUninstallPlugin(p)
-      },
-    }),
+    // 一级导航行：tab 占满左侧，通知入口靠右（「设置」tab 后边，右对齐）
+    h('div', { className: styles.tabsRow },
+      // 「已安装」徽标 = 目录插件 + 自定义安装总数（installedItems 已排除 hub 自身）
+      h(SectionTabs, {
+        view,
+        setView,
+        installedCount: catalog.installedItems.length,
+        t,
+        // 通知中心入口：红圈徽标 = 记录数 + 进行中任务 + 待重启（有动静才醒目）
+        noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
+        onOpenNotifications: () => setShowNotifications(true),
+      }),
+    ),
+    view === 'market'
+      ? h(MarketView, {
+          catalog,
+          t,
+          langPath,
+          langKey,
+          copied,
+          // 列表头部「筛选出 N 条」：分类/搜索/安装状态筛选后的结果数；全部视图且未筛选时显示总数
+          resultText: catalog.plugins === null || catalog.failed
+            ? null
+            : catalog.category === 'all' && count === total
+              ? t('pluginsTotal', { n: count })
+              : t('filterResults', { n: count }),
+          onInstall: (p, opts) => {
+            setInstallDone(false)
+            setConfirmIsUpdate(opts?.update ?? false)
+            // 与卸载一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务而禁用安装按钮
+            queue.clearModalTask()
+            setConfirmPlugin(p)
+          },
+          onUninstall: (p) => {
+            setUninstallDone(false)
+            queue.clearModalTask()
+            setUninstallPlugin(p)
+          },
+        })
+      : view === 'installed'
+        ? h(InstalledView, {
+            items: catalog.installedItems,
+            langKey,
+            t,
+            // 支持系统文件管理器定位的平台（macOS / Linux）上，行内「打开详情」替换为
+            // 打开安装目录按钮（行点击本身即打开详情弹窗）；Windows 不支持则按钮不显示
+            platform: env?.platform ?? '',
+            // 行点击 / 详情按钮：打开已安装详情弹窗（完整元数据 + 运行时信息）
+            onOpenDetail: (item) => setDetailItem(item),
+            onReveal: (item) => { void revealFolder(item) },
+            // 更新：已安装视图的「更新」= 目录插件覆盖重装，与市场列表内更新同一流程
+            onUpdate: (item) => {
+              if (!item.plugin) return
+              setDetailItem(null)
+              setInstallDone(false)
+              setConfirmIsUpdate(true)
+              queue.clearModalTask()
+              setConfirmPlugin(item.plugin)
+            },
+            // 卸载：目录插件与自定义安装统一按已安装项走卸载确认弹窗（自定义无目录数据，按包名直卸）
+            onUninstall: (item) => {
+              setDetailItem(null)
+              setUninstallDone(false)
+              queue.clearModalTask()
+              setUninstallItem(item)
+            },
+            // 重启：待重启条目行内按钮 → 先弹「立即重启 / 稍后重启」确认（与通知中心一致），确认后才触发宿主重启
+            onRestart: () => setShowRestartConfirm(true),
+          })
+        : view === 'custom'
+          ? h(CustomInstallView, {
+              t,
+              // 命令行安装：与应用商店同一套确认/进度/结果弹窗 —— 输入 npm 包名 / GitHub 地址 /
+              // dsh plugin 命令即装（custom 源，受安全设置两开关控制）。点安装先弹确认窗，
+              // 确认后走队列安装（实时进度 + 成功结果视图）；目标已安装 → 弹窗转「更新」覆盖重装，
+              // 不再撞「already installed」报错（第一次安装没有反馈才导致用户重复点击）。
+              onInstallCustom: (raw) => {
+                const target = raw.trim()
+                if (!target) return
+                setInstallDone(false)
+                // 与目录安装一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务
+                queue.clearModalTask()
+                setConfirmIsUpdate(customTargetInstalled(target))
+                setConfirmCustomTarget(target)
+              },
+            })
+          : h(SettingsView, {
+            t,
+            settings: hubSettings,
+            update: updateSettings,
+            reset: resetSettings,
+            env,
+            onCopy: (text: string) => {
+              doCopy(text)
+              setToast({ id: Date.now(), kind: 'copied' })
+            },
+          }),
     // Hub 版本信息弹窗：版本号/徽标点击打开 —— 有更新显示新版本 + 变更记录 + 「直接更新」，
     // 无更新显示当前版本 + 记录 + 「已是最新」。Worker 拉取失败时兜底展示当前版本号。
     showHubUpdate && h(HubUpdateModal, {
@@ -326,6 +424,25 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       t,
       onClose: () => setShowAbout(false),
     }),
+    // 安装/卸载任务通知中心：本地持久化的成败清单，随时可回来查看/复制/清空；
+    // 进行中的任务（实时进度）与待重启插件也一并展示，关掉任务弹窗后仍可盯着
+    showNotifications && h(NotificationsModal, {
+      records: notifications,
+      tasks: queue.queue,
+      pendingRestarts: queue.pendingRestarts,
+      t,
+      env,
+      onClose: () => setShowNotifications(false),
+      onCopy: (text) => {
+        doCopy(text)
+        setToast({ id: Date.now(), kind: 'errCopied' })
+      },
+      onClear: () => setNotifications(clearNotifications()),
+      onRemove: (id: number) => setNotifications(removeNotification(id)),
+      cancelTask: queue.cancelTask,
+      restarting,
+      onRestart: () => { void requestRestart() },
+    }),
     // 安装确认弹窗：锁定/进度/结果视图逻辑收敛在 modals.tsx；更新与安装同入口，仅标记 update
     confirmPlugin && h(InstallModal, {
       plugin: confirmPlugin,
@@ -344,9 +461,35 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : undefined),
       onRestart: () => { void requestRestart() },
     }),
-    // 卸载确认弹窗：确认/进度/结果视图逻辑收敛在 modals.tsx
-    uninstallPlugin && h(UninstallModal, {
-      plugin: uninstallPlugin,
+    // 命令行安装确认弹窗：与目录安装同一套确认/进度/结果流程（plugin 传 null 走 customTarget 模式）。
+    // 已安装目标 → update 标记，确认后走覆盖重装（服务端 mode=update 放行），不再 409 报错。
+    confirmCustomTarget && h(InstallModal, {
+      plugin: null,
+      customTarget: confirmCustomTarget,
+      done: installDone,
+      task: queue.installModalTask,
+      t,
+      langPath,
+      restarting,
+      update: confirmIsUpdate,
+      cliOnly: false,
+      submitting: queue.submitting,
+      needsRestart: installNeedsRestart,
+      onClose: () => {
+        setInstallDone(false)
+        setConfirmCustomTarget(null)
+      },
+      onCopy: () => {
+        doCopy(`pnpm add ${confirmCustomTarget}`)
+        setToast({ id: Date.now(), kind: 'copied' })
+      },
+      onInstall: () => void queue.installCustom(confirmCustomTarget, confirmIsUpdate ? { update: true } : undefined),
+      onRestart: () => { void requestRestart() },
+    }),
+    // 卸载确认弹窗：确认/进度/结果视图逻辑收敛在 modals.tsx。
+    // 已安装视图的自定义安装（目录外）没有完整目录数据，按已安装项伪插件适配后走同一弹窗
+    (uninstallPlugin || uninstallItem) && h(UninstallModal, {
+      plugin: uninstallPlugin ?? pluginOfItem(uninstallItem!),
       done: uninstallDone,
       task: queue.uninstallModalTask,
       t,
@@ -357,11 +500,45 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onClose: () => {
         setUninstallDone(false)
         setUninstallPlugin(null)
+        setUninstallItem(null)
       },
-      onCancel: () => setUninstallPlugin(null),
+      onCancel: () => {
+        setUninstallPlugin(null)
+        setUninstallItem(null)
+      },
       onCopyCommand: copyUninstallCommand,
-      onConfirm: () => queue.uninstallNow(uninstallPlugin),
+      onConfirm: () => {
+        if (uninstallItem) void queue.uninstallItem(uninstallItem)
+        else if (uninstallPlugin) void queue.uninstallNow(uninstallPlugin)
+      },
       onRestart: () => { void requestRestart() },
+    }),
+    // 已安装详情弹窗：目录元数据 + 宿主运行时信息的完整展示，操作（更新/卸载/复制路径）由此发起
+    detailItem && h(InstalledDetailModal, {
+      item: detailItem,
+      t,
+      lang: langKey,
+      langPath,
+      onClose: () => setDetailItem(null),
+      onUpdate: (item) => {
+        if (!item.plugin) return
+        setDetailItem(null)
+        setInstallDone(false)
+        setConfirmIsUpdate(true)
+        queue.clearModalTask()
+        setConfirmPlugin(item.plugin)
+      },
+      onUninstall: (item) => {
+        setDetailItem(null)
+        setUninstallDone(false)
+        queue.clearModalTask()
+        setUninstallItem(item)
+      },
+      onCopyPath: (path) => {
+        doCopy(path)
+        setToast({ id: Date.now(), kind: 'copied' })
+      },
+      onReveal: (item) => { void revealFolder(item) },
     }),
     toast && h(Toast, { toast, t }),
     // 操作失败：完整错误弹窗（重复安装、CLI 失败、请求错误等），可复制并去插件仓库反馈
@@ -379,24 +556,15 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       },
       onClose: () => setErrorMsg(null),
     }),
-    // 安装/卸载任务通知记录：本地持久化的成败清单，随时可回来查看/复制/清空；
-    // 进行中的任务（实时进度）与待重启插件也一并展示，关掉任务弹窗后仍可盯着
-    showNotifications && h(NotificationsModal, {
-      records: notifications,
-      tasks: queue.queue,
-      pendingRestarts: queue.pendingRestarts,
+    // 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出，稍后重启 / 立即重启
+    showRestartConfirm && h(RestartConfirmModal, {
       t,
-      env,
-      onClose: () => setShowNotifications(false),
-      onCopy: (text) => {
-        doCopy(text)
-        setToast({ id: Date.now(), kind: 'errCopied' })
-      },
-      onClear: () => setNotifications(clearNotifications()),
-      onRemove: (id: number) => setNotifications(removeNotification(id)),
-      cancelTask: queue.cancelTask,
       restarting,
-      onRestart: () => { void requestRestart() },
+      onClose: () => setShowRestartConfirm(false),
+      onRestartNow: () => {
+        setShowRestartConfirm(false)
+        void requestRestart()
+      },
     }),
   )
 }

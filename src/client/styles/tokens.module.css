@@ -69,6 +69,7 @@ body[data-ds-dark-theme] {
 
   /* warning (deep amber) */
   --hub-warning: var(--dsw-alias-state-warning-primary, #b45309);
+  --hub-warning-hover: #92400e;
   --hub-warning-tint: rgba(180, 83, 9, 0.08);
   --hub-warning-border: rgba(180, 83, 9, 0.3);
 

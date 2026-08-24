@@ -11,7 +11,12 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { HubPlugin, Translate } from '../types.ts'
-import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../lib/catalog.ts'
+import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../logic/install-command.ts'
+import type { InstalledItem } from '../logic/installed.ts'
+
+/** 安装/卸载请求超时（ms）：服务端 preflight + npm 反查可能耗时（各自都有超时，合计约 20~30s），
+ *  给足余量；超时主动中止，避免服务端 preflight 网络挂起时前端永久卡「安装中 0%」。 */
+const REQUEST_TIMEOUT_MS = 60_000
 
 /** 客户端任务队列项：镜像服务端 active 任务（running 在前、pending 在后）。 */
 export interface QueueTask {
@@ -19,7 +24,7 @@ export interface QueueTask {
   kind: 'install' | 'uninstall'
   /** 展示目标：owner/repo（安装）或 npm 包名（卸载） */
   target: string
-  /** 插件中文简介（入队时从插件数据带过来，轮询合并时保留）：展示在仓库名下方，让人知道排队的到底是什么 */
+  /** 插件中文简介（入队时从插件数据带过来，轮询合并时保留）：展示在仓库名下方，标识排队中的插件 */
   desc?: string
   /** 所属插件仓库（owner/repo）：失败时错误弹窗据此提供「去仓库反馈」入口；卸载为 null */
   repo: string | null
@@ -65,7 +70,11 @@ export interface TaskQueueOptions {
   onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[]) => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
   installPlugin: HubPlugin | null
+  /** 当前打开的自定义安装（命令行）确认弹窗目标：与应用商店同一弹窗机制，匹配进行中的 custom 安装任务。 */
+  installCustomTarget?: string | null
   uninstallPlugin: HubPlugin | null
+  /** 已安装视图发起的卸载目标（npm 包名）：目录插件走 uninstallPlugin，自定义安装走包名直卸。 */
+  uninstallName: string | null
   installedName: (p: HubPlugin) => string | null
   /** 待重启项展示信息补齐：按 owner/repo 从插件目录解析简介/版本；找不到返回 null。 */
   resolvePending: (repo: string) => { desc?: string; version?: string } | null
@@ -74,7 +83,7 @@ export interface TaskQueueOptions {
 export function useTaskQueue(opts: TaskQueueOptions) {
   const {
     t, refreshInstalled, onInstallDone, onUninstallDone, onError,
-    installPlugin, uninstallPlugin, installedName, resolvePending,
+    installPlugin, installCustomTarget, uninstallPlugin, uninstallName, installedName, resolvePending,
   } = opts
   const [queue, setQueue] = useState<QueueTask[]>([])
   const queueRef = useRef<QueueTask[]>([])
@@ -374,46 +383,59 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   }, [])
 
   /** 弹窗动作：直接安装。请求宿主本地路由，任务进入服务端队列（FIFO），弹窗内实时显示进度。 */
-  const installNow = async (p: HubPlugin, opts?: { update?: boolean }) => {
-    const repo = p.source?.repo ?? ''
-    if (!repo) return
-    // 安装通道决策（用户无感知）：有 npm 包名 → 走 npm；否则 git 直装。
-    // 队列条目一律用仓库名展示/防重，只有发给后端的实际安装目标随通道变化。
-    const { target } = installTargetOf(p)
-    if (!target) return
+  /** 安装入队核心：目录插件（catalog，后端走目录白名单）与命令行安装（custom，
+   *  受安全开关控制）共用。队列条目一律用仓库名（repo）展示/防重，只有发给后端的
+   *  实际安装目标（target）随通道变化（npm 包名 / github: 源）。 */
+  const submitInstall = async (input: {
+    /** 发给后端的实际安装目标：npm 包名或 github: 源（服务端再决定最终通道） */
+    target: string
+    /** 队列展示与防重用的仓库名 */
+    repo: string
+    desc?: string
+    version?: string
+    updatedAt?: string
+    command: string
+    source: 'catalog' | 'custom'
+    /** 更新已安装目标（放行 add 覆盖重装） */
+    update?: boolean
+  }) => {
     // 防重复入队：同一目标已在排队/执行中则忽略
-    if (queueRef.current.some((q) => q.kind === 'install' && q.target === repo)) return
+    if (queueRef.current.some((q) => q.kind === 'install' && q.target === input.repo)) return
     // 请求在途防重：任务要等响应回来才进本地队列，这之前再次点击（双击）直接忽略
-    if (submittingRef.current.has(repo)) return
-    submittingRef.current.add(repo)
+    if (submittingRef.current.has(input.repo)) return
+    submittingRef.current.add(input.repo)
     // 乐观入队：点击安装立即显示「正在安装中」，不等 POST 响应。
     // 服务端 /install 会先跑预检（preflight，可能耗时数秒）再入队，若等响应才入队列，
-    // 用户点完安装立刻去通知中心会看不到任务 —— 只有刷新后 restore 才拉回来。
+    // 用户点完安装立刻去看任务会看不到 —— 只有刷新后 restore 才拉回来。
     // 用负临时 id 占位，响应回来换成真实 task id；失败/出错则移除该占位。
     tempIdRef.current -= 1
     const tempId = tempIdRef.current
     modalTaskRef.current = tempId
     applyQueue((prev) => [...prev, {
-      id: tempId, kind: 'install', target: repo, repo, desc: p.description,
-      version: p.version, updatedAt: p.dates?.repoUpdatedAt,
+      id: tempId, kind: 'install', target: input.repo, repo: input.repo, desc: input.desc,
+      version: input.version, updatedAt: input.updatedAt,
       status: 'running', progress: 0, lines: [], optimistic: true,
-      command: installCommandOf(p, true),
+      command: input.command,
       // 服务端登记后 /active 会带回真实尝试记录（npm 反查 + 执行命令），先占位空列表
       attempts: [], needsRestart: true,
     }])
     setSubmitting(true)
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
     try {
       const res = await fetch('/dsh-plugin-hub/install', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ repo: target, display: repo, mode: opts?.update ? 'update' : undefined }),
+        body: JSON.stringify({ repo: input.target, display: input.repo, source: input.source, mode: input.update ? 'update' : undefined }),
+        signal: controller.signal,
       })
       const data = await res.json() as { ok?: boolean; task?: number; error?: string; attempts?: string[] }
       if (!data.ok || typeof data.task !== 'number') {
-        // 请求层失败（重复安装 409 / 参数错误等）：移除乐观条目 + 完整错误弹窗
+        // 请求层失败（重复安装 409 / 参数错误 / 安全开关 403 等）：移除乐观条目 + 完整错误弹窗
         applyQueue((prev) => prev.filter((x) => x.id !== tempId))
-        // 同步 400（如预检拦截）服务端会附上已尝试的安装方式，issue 预填一并展示
-        onError(data.error ?? `HTTP ${res.status}`, repo, 'install', installCommandOf(p, true), data.attempts)
+        // 同步 400（如预检拦截）服务端会附上已尝试的安装方式，issue 预填一并展示；
+        // 用 || 而非 ?? ：error 为空字符串时回退 HTTP 状态，避免复制出来是空白
+        onError(data.error || `HTTP ${res.status}`, input.repo, 'install', input.command, data.attempts)
         return
       }
       const taskId = data.task
@@ -423,51 +445,111 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         ? { ...x, id: taskId, optimistic: undefined }
         : x)))
       // 提前缓存展示信息：安装成功后服务端登记待重启，轮询合并时不用等目录解析
-      pendingInfoRef.current.set(repo, { desc: p.description, version: p.version })
+      pendingInfoRef.current.set(input.repo, { desc: input.desc, version: input.version })
       // 摘要条常驻顶部（含实时进度），明细面板保持折叠，想看时再点开
       pollQueue()
-    } catch {
-      // 网络异常：移除乐观条目 + 兜底错误弹窗
+    } catch (err) {
+      // 网络异常：移除乐观条目 + 兜底错误弹窗（附上底层原因，避免只剩一句笼统的「安装失败」）
       applyQueue((prev) => prev.filter((x) => x.id !== tempId))
-      onError(t('installFail'), repo, 'install', installCommandOf(p, true))
+      const aborted = (err as { name?: string } | null)?.name === 'AbortError'
+      const reason = aborted
+        ? t('requestTimeout')
+        : err instanceof Error && err.message ? err.message : String(err ?? '')
+      onError(reason ? `${t('installFail')} — ${reason}` : t('installFail'), input.repo, 'install', input.command)
     } finally {
-      submittingRef.current.delete(repo)
+      window.clearTimeout(timeout)
+      submittingRef.current.delete(input.repo)
       setSubmitting(false)
     }
   }
 
-  /** 弹窗动作：直接卸载。与安装同一队列机制，弹窗内实时显示进度。 */
-  const uninstallNow = async (p: HubPlugin) => {
-    const name = installedName(p)
+  /** 目录插件安装：通道由目录数据（npmPackage）决定，走 catalog 白名单。 */
+  const installNow = async (p: HubPlugin, opts?: { update?: boolean }) => {
+    const repo = p.source?.repo ?? ''
+    if (!repo) return
+    // 安装通道决策（用户无感知）：有 npm 包名 → 走 npm；否则 git 直装。
+    const { target } = installTargetOf(p)
+    if (!target) return
+    await submitInstall({
+      target,
+      repo,
+      desc: p.description,
+      version: p.version,
+      updatedAt: p.dates?.repoUpdatedAt,
+      command: installCommandOf(p, true),
+      source: 'catalog',
+      update: opts?.update,
+    })
+  }
+
+  /** 命令行安装：用户手输 npm 包名或 GitHub 地址，走 custom 源（受安全开关控制）。
+   *  update=true 时对已安装目标放行覆盖重装（与目录插件「更新」同一语义）。
+   *  队列展示/防重一律用归一化身份（owner/repo 或 npm 包名）：与服务端 /active 合并、
+   *  弹窗目标匹配同口径，npm 包名透传不受影响。 */
+  const installCustom = async (raw: string, opts?: { update?: boolean }) => {
+    const target = raw.trim()
+    if (!target) return
+    const repo = repoFromInstallTarget(target)
+    await submitInstall({
+      target,
+      repo,
+      command: `pnpm add ${target}`,
+      source: 'custom',
+      update: opts?.update,
+    })
+  }
+
+  /** 卸载入队核心：按 npm 包名直卸（目录插件与自定义安装共用，弹窗进度匹配同源）。 */
+  const enqueueUninstall = async (name: string, repo: string | null, desc?: string) => {
     if (!name) return
-    const repo = p.source?.repo ?? null
     if (queueRef.current.some((q) => q.kind === 'uninstall' && q.target === name)) return
     // 请求在途防重：与安装一致，响应回来前再次点击直接忽略
     if (submittingRef.current.has(name)) return
     submittingRef.current.add(name)
     setSubmitting(true)
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
     try {
       const res = await fetch('/dsh-plugin-hub/uninstall', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ name, repo: repo ?? undefined }),
+        signal: controller.signal,
       })
       const data = await res.json() as { ok?: boolean; task?: number; error?: string }
       if (!data.ok || typeof data.task !== 'number') {
-        onError(data.error ?? `HTTP ${res.status}`, repo, 'uninstall')
+        onError(data.error || `HTTP ${res.status}`, repo, 'uninstall')
         return
       }
       const taskId = data.task
       modalTaskRef.current = taskId
-      applyQueue((prev) => [...prev, { id: taskId, kind: 'uninstall', target: name, desc: p.description, repo, status: 'pending', progress: 0, lines: [], needsRestart: true }])
+      applyQueue((prev) => [...prev, { id: taskId, kind: 'uninstall', target: name, desc, repo, status: 'pending', progress: 0, lines: [], needsRestart: true }])
       // 摘要条常驻顶部（含实时进度），明细面板保持折叠，想看时再点开
       pollQueue()
-    } catch {
-      onError(t('uninstallFail'), repo, 'uninstall')
+    } catch (err) {
+      // 网络异常：附上底层原因，避免只剩一句笼统的「卸载失败」
+      const aborted = (err as { name?: string } | null)?.name === 'AbortError'
+      const reason = aborted
+        ? t('requestTimeout')
+        : err instanceof Error && err.message ? err.message : String(err ?? '')
+      onError(reason ? `${t('uninstallFail')} — ${reason}` : t('uninstallFail'), repo, 'uninstall')
     } finally {
+      window.clearTimeout(timeout)
       submittingRef.current.delete(name)
       setSubmitting(false)
     }
+  }
+
+  /** 弹窗动作：直接卸载（目录插件入口）。与安装同一队列机制，弹窗内实时显示进度。 */
+  const uninstallNow = async (p: HubPlugin) => {
+    const name = installedName(p)
+    if (!name) return
+    await enqueueUninstall(name, p.source?.repo ?? null, p.description)
+  }
+
+  /** 已安装视图动作：按已安装项卸载（覆盖目录外自定义安装，无目录数据也能卸）。 */
+  const uninstallItem = async (item: InstalledItem) => {
+    await enqueueUninstall(item.name, item.repo, item.plugin?.description)
   }
 
   /** 取消任务：排队中立即出队，执行中终止子进程；先标记「正在取消」短暂过渡后再移除。 */
@@ -493,15 +575,18 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   const clearModalTask = () => { modalTaskRef.current = null }
 
   // 弹窗对应任务：优先当前弹窗发起任务，其次按目标匹配（重新打开弹窗 / 目标已在队列时也能展示实时进度）
+  // 目录插件按 source.repo 匹配；命令行安装（custom）按归一化后的仓库身份/包名匹配；
   // 排除 cancelling：取消中的任务不再关联到弹窗，弹窗回到「确认」态可重新操作
-  const installModalTask = installPlugin
-    ? (queue.find((q) => q.id === modalTaskRef.current && q.status !== 'cancelling')
-      ?? queue.find((q) => q.kind === 'install' && q.target === (installPlugin.source?.repo ?? '') && q.status !== 'cancelling')
+  const installModalTarget = installPlugin?.source?.repo
+    ?? (installCustomTarget ? repoFromInstallTarget(installCustomTarget) : null)
+  const installModalTask = (installPlugin || installCustomTarget)
+    ? (queue.find((q) => q.id === modalTaskRef.current && q.kind === 'install' && q.status !== 'cancelling')
+      ?? queue.find((q) => q.kind === 'install' && q.target === installModalTarget && q.status !== 'cancelling')
       ?? null)
     : null
-  const uninstallModalTask = uninstallPlugin
+  const uninstallModalTask = (uninstallPlugin || uninstallName)
     ? (queue.find((q) => q.id === modalTaskRef.current && q.status !== 'cancelling')
-      ?? queue.find((q) => q.kind === 'uninstall' && q.target === (installedName(uninstallPlugin) ?? '') && q.status !== 'cancelling')
+      ?? queue.find((q) => q.kind === 'uninstall' && q.target === (uninstallName ?? installedName(uninstallPlugin!) ?? '') && q.status !== 'cancelling')
       ?? null)
     : null
 
@@ -512,7 +597,9 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     uninstallModalTask,
     submitting,
     installNow,
+    installCustom,
     uninstallNow,
+    uninstallItem,
     cancelTask,
     clearModalTask,
   }

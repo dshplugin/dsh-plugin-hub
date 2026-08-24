@@ -13,7 +13,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resolveNpmPackage } from '../src/server/services/npm-resolve.ts'
+import { resolveNpmPackage } from '../src/server/services/install/npm-resolve.ts'
 
 const ONLINE = process.env.DSH_HUB_TEST_OFFLINE !== '1'
 
