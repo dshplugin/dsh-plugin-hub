@@ -11,7 +11,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { HubPlugin, Translate } from '../types.ts'
-import { installCommandOf, installTargetOf } from '../lib/catalog.ts'
+import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../lib/catalog.ts'
 
 /** 客户端任务队列项：镜像服务端 active 任务（running 在前、pending 在后）。 */
 export interface QueueTask {
@@ -45,7 +45,7 @@ export interface QueueTask {
 
 /** 客户端待重启项：镜像服务端内存列表 + 本地补齐的展示信息（简介/版本）。 */
 export interface PendingRestart {
-  /** owner/repo（展示用，已去 github: 前缀） */
+  /** owner/repo（展示用，已从安装目标归一化） */
   target: string
   /** 待重启语义：install 装完等挂载 / uninstall 卸完等清理 */
   kind: 'install' | 'uninstall'
@@ -124,7 +124,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     setQueue(next)
   }
 
-  /** 解析服务端待重启列表（`github:` 前缀已去掉，与安装任务的 target 对齐）。 */
+  /** 解析服务端待重启列表（安装目标归一化为 owner/repo，与安装任务对齐）。 */
   const parsePendingRestarts = (value: unknown): PendingRestart[] => {
     if (!Array.isArray(value)) return []
     const out: PendingRestart[] = []
@@ -134,7 +134,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       if (typeof target !== 'string' || target === '') continue
       const at = (x as { at?: unknown }).at
       out.push({
-        target: target.replace(/^github:/, ''),
+        target: repoFromInstallTarget(target),
         kind: (x as { kind?: unknown }).kind === 'uninstall' ? 'uninstall' : 'install',
         at: typeof at === 'number' ? at : 0,
       })
@@ -284,9 +284,9 @@ export function useTaskQueue(opts: TaskQueueOptions) {
               next.push({
                 id,
                 kind: isRemove ? 'uninstall' : 'install',
-                target: typeof a.target === 'string' ? a.target.replace(/^github:/, '') : (prevTask?.target ?? ''),
+                target: typeof a.target === 'string' ? repoFromInstallTarget(a.target) : (prevTask?.target ?? ''),
                 desc: prevTask?.desc,
-                repo: prevTask?.repo ?? (isRemove ? null : (typeof a.target === 'string' ? a.target.replace(/^github:/, '') : null)),
+                repo: prevTask?.repo ?? (isRemove ? null : (typeof a.target === 'string' ? repoFromInstallTarget(a.target) : null)),
                 // 安装时快照的目录信号：轮询合并时保留，任务成功后记录到本地
                 version: prevTask?.version,
                 updatedAt: prevTask?.updatedAt,
@@ -345,11 +345,11 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           .filter((a) => typeof a.id === 'number')
           .map((a) => {
             const isRemove = a.action === 'remove'
-            // 服务端任务的 target：github:repo（git 安装）/ npm 包名（npm 安装/卸载）。
+            // 服务端任务的 target：显式 HTTPS Git URL（安装）/ npm 包名（npm 安装/卸载）。
             // 恢复展示统一用 displayTarget（owner/repo，服务端固定传）：npm 安装时 target 是包名，
             // 直接展示会让用户看到「安装方式」的内部细节，违背无感知原则；卸载保持包名（匹配已装表）。
-            const display = typeof (a as { displayTarget?: unknown }).displayTarget === 'string' ? (a as { displayTarget: string }).displayTarget.replace(/^github:/, '') : ''
-            const fallback = typeof a.target === 'string' ? a.target.replace(/^github:/, '') : ''
+            const display = typeof (a as { displayTarget?: unknown }).displayTarget === 'string' ? repoFromInstallTarget((a as { displayTarget: string }).displayTarget) : ''
+            const fallback = typeof a.target === 'string' ? repoFromInstallTarget(a.target) : ''
             return {
               id: a.id as number,
               kind: (isRemove ? 'uninstall' : 'install') as 'install' | 'uninstall',

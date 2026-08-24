@@ -16,7 +16,7 @@ import { cleanLine, estimateProgress } from './progress.ts'
 import type { LoaderHandle } from './loader.ts'
 import { removeLoadedEntry } from './loader.ts'
 import { addPendingRestart, clearPendingRestart } from './pending-restart.ts'
-import { addAllowBuildsKey, parseAllowBuildsKey, profileDirectory } from './profile.ts'
+import { addAllowBuildsKey, githubRepoOf, parseAllowBuildsKey, profileDirectory } from './profile.ts'
 
 /** In-memory task registry, keyed by task id. */
 const tasks = new Map<number, InstallTask>()
@@ -227,7 +227,7 @@ function spawnMutation(options: {
   const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, uninstallLoader } = options
   const invocation = cliInvocation()
   const args = [...invocation.prefixArgs, 'plugin', '--profile', profile, action, target]
-  // 记录实际执行的命令（npm 通道显示包名，git 通道显示 github: 源）：失败提 Issue 时
+  // 记录实际执行的命令（npm 通道显示包名，git 通道显示 HTTPS 源）：失败提 Issue 时
   // 「已尝试的安装方式」如实展示完整命令链，作者一眼看清我们跑过什么
   const executed = `dsh plugin --profile ${profile} ${action} ${target}`
   if (task && !task.attempts.includes(executed)) {
@@ -388,8 +388,11 @@ export function verifyInstalledEntry(profile: string, target: string): { name: s
     return { name: null, missing: null }
   }
   const deps = (profilePkg?.dependencies ?? {}) as Record<string, string>
-  // target 自身是依赖名（npm 包），或通过 github: specifier 反查依赖名
-  const name = deps[target] !== undefined ? target : Object.keys(deps).find((k) => deps[k] === target)
+  // target 自身是依赖名（npm 包），或通过 Git specifier 反查依赖名
+  const targetRepo = githubRepoOf(target)?.toLowerCase()
+  const name = targetRepo !== undefined
+    ? Object.keys(deps).find((k) => githubRepoOf(deps[k])?.toLowerCase() === targetRepo)
+    : deps[target] !== undefined ? target : Object.keys(deps).find((k) => deps[k] === target)
   if (!name) return { name: null, missing: null }
   const pkgDir = join(profileDirectory(profile), 'node_modules', name)
   let entry: string | null = null
@@ -468,7 +471,7 @@ export async function runPluginMutation(options: {
     // 输出解析不到时回退用目标名（插件自身构建脚本被拦的 npm 场景）。
     if (output.includes('ERR_PNPM_IGNORED_BUILDS')) {
       const keys = ignoredBuildKeys(output)
-      if (keys.length === 0 && !options.target.startsWith('github:')) keys.push(options.target)
+      if (keys.length === 0 && githubRepoOf(options.target) === null) keys.push(options.target)
       if (keys.length > 0) {
         if (options.task) {
           options.task.status = 'running'

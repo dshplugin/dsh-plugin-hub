@@ -13,7 +13,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir, release } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
-import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubTarget, hasQueuedTarget, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install.ts'
+import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, hasQueuedTarget, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install.ts'
 import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/installed-versions.ts'
 import { resolveNpmPackage } from '../services/npm-resolve.ts'
 import { preflightTarget } from '../services/preflight.ts'
@@ -86,11 +86,13 @@ function hostEnv(profile: string): Record<string, string | null> {
   }
 }
 
-/** Match an install target (`github:<owner>/<repo>`) against the installed table; returns the package name when already installed. */
+/** Match a GitHub install target against the installed table; returns the package name when already installed. */
 function installedByRepo(installed: Record<string, string>, target: string): string | null {
-  const needle = target.toLowerCase()
+  const repo = githubRepoOf(target)
+  if (repo === null) return null
+  const needle = repo.toLowerCase()
   for (const [name, spec] of Object.entries(installed)) {
-    if (spec.toLowerCase().includes(needle)) return name
+    if (githubRepoOf(spec)?.toLowerCase() === needle) return name
   }
   return null
 }
@@ -182,7 +184,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           const displayRepo = typeof body === 'object' && body !== null && typeof (body as { display?: unknown }).display === 'string'
             ? (body as { display: string }).display.trim()
             : rawRepo
-          // 目标语法两态：owner/repo → github 源（走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装
+          // 目标语法两态：owner/repo → 显式 HTTPS Git 源（走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装
           const repoTarget = githubTarget(rawRepo)
           let target: string | null = repoTarget ?? (repoTarget === null && validPackageName(rawRepo) ? rawRepo : null)
           if (target === null) {
@@ -212,7 +214,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           // 重复安装防护：非更新请求命中已安装目标时直接拒绝，不重复跑 CLI
           // （否则 CLI 会因「已存在」失败，且用户看到的是莫名其妙的报错）；
           // 更新请求（mode: 'update'）放行，CLI 的 add 对已存在依赖是 pnpm 原位覆盖重装。
-          // 命中判定双通道：npm 包名按 dependencies 键直接命中，github: 目标按 spec 值匹配。
+          // 命中判定双通道：npm 包名按 dependencies 键直接命中，GitHub 目标按仓库身份匹配。
           const installed = readInstalled(profile)
           const already = installedByRepo(installed, target) ?? (installed[target] !== undefined ? target : null)
           if (already !== null && mode !== 'update') {
@@ -253,7 +255,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             profile,
             target,
             // npm 安装时 target 是包名：displayTarget 固定展示仓库名，待重启行/前端恢复不受通道变化影响
-            displayTarget: githubTarget(displayRepo) ?? undefined,
+            displayTarget: githubRepoOf(displayRepo) ?? undefined,
             // 已尝试的安装方式（npm 反查）：实际执行命令由 spawn 时追加，失败 issue 一并展示
             attempts,
             timeoutMs: COMMAND_TIMEOUT_MS,
@@ -298,7 +300,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             profile,
             target: name,
             // 卸载的 mutation 目标是 npm 包名；待重启行要显示 owner/repo（与安装行一致），非法/缺失时回退包名
-            displayTarget: githubTarget(repo) ?? undefined,
+            displayTarget: githubRepoOf(repo) ?? undefined,
             // 运行中 loader：卸载成功后主动移除条目，立即生效、无需重启
             uninstallLoader: loader,
             timeoutMs: COMMAND_TIMEOUT_MS,

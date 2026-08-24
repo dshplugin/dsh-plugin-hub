@@ -111,7 +111,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的安装命令（含 --profile）与执行结果，链接由常量动态拼接
       `## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
       `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
-      `- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add github:${repo}`}\``,
+      `- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add git+https://github.com/${repo}.git`}\``,
       `- 执行结果：安装失败，未能安装该插件。`,
       // 尝试过的安装方式（npm 反查 + 实际执行命令，按先后顺序）：作者据此反推正确的
       // npm 包名 —— 组织 scope 与 GitHub 用户名不一致时仅凭仓库名猜不到，作者看到我们
@@ -124,7 +124,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
         ? [
           '',
           '## 安装方式说明',
-          'DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add github:owner/repo`（git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。',
+          'DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add git+https://github.com/owner/repo.git`（Git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。',
         ]
         : []),
       '',
@@ -235,12 +235,29 @@ export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'g
   return { target: repo, via: 'github' }
 }
 
-/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示 github: 源。 */
+/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示显式 HTTPS URL。 */
 export function installCommandOf(p: HubPlugin, withProfile = false): string {
   const { target, via } = installTargetOf(p)
   return via === 'npm'
     ? `dsh plugin${withProfile ? ' --profile web' : ''} add ${target}`
-    : `dsh plugin${withProfile ? ' --profile web' : ''} add github:${target}`
+    : `dsh plugin${withProfile ? ' --profile web' : ''} add git+https://github.com/${target}.git`
+}
+
+/** Normalize a task/install target to its owner/repo display identity. */
+export function repoFromInstallTarget(value: string): string {
+  const input = value.trim()
+  if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(input)) return input
+  const patterns = [
+    /^github:([^/]+)\/([^/]+)$/i,
+    /^(?:git\+)?https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+    /^(?:git\+)?ssh:\/\/(?:git@)?github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+    /^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+  ]
+  for (const pattern of patterns) {
+    const match = pattern.exec(input)
+    if (match !== null) return `${match[1]}/${match[2]}`
+  }
+  return value
 }
 
 export const CATEGORY_LABELS: Record<string, { zh: string; en: string }> = {

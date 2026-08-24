@@ -113,7 +113,7 @@ The plugin is published to the npm registry as `dsh-plugin` — one command inst
 Install from GitHub:
 
 ```bash
-dsh plugin --profile web add github:dshplugin/dsh-plugin-hub
+dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
 ```
 
 > **Note**: the browser bundle ships with the package, so installing from GitHub needs no build step or authorization — just restart `dsh web` and open Settings → Plugin Hub.

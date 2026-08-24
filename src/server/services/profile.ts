@@ -23,10 +23,30 @@ export function profileDirectory(profile: string): string {
   return join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'profiles', profile)
 }
 
-/** Build a safe `github:<owner>/<repo>` target, or null when the repo is unsafe. */
+/** Build a safe explicit HTTPS Git target, or null when the repo is unsafe. */
 export function githubTarget(repo: string): string | null {
   if (typeof repo !== 'string' || !REPO_RE.test(repo)) return null
-  return `github:${repo}`
+  return `git+https://github.com/${repo}.git`
+}
+
+/** Extract an owner/repo identity from a catalog value or an installed Git spec. */
+export function githubRepoOf(value: string): string | null {
+  if (typeof value !== 'string') return null
+  const input = value.trim()
+  if (REPO_RE.test(input)) return input
+  const patterns = [
+    /^github:([^/]+)\/([^/]+)$/i,
+    /^(?:git\+)?https:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+    /^(?:git\+)?ssh:\/\/(?:git@)?github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+    /^git@github\.com:([^/]+)\/([^/]+?)(?:\.git)?(?:[?#].*)?$/i,
+  ]
+  for (const pattern of patterns) {
+    const match = pattern.exec(input)
+    if (match === null) continue
+    const repo = `${match[1]}/${match[2]}`
+    if (REPO_RE.test(repo)) return repo
+  }
+  return null
 }
 
 /** Validate an npm package name (uninstall target grammar). */
@@ -36,7 +56,7 @@ export function validPackageName(name: string): boolean {
 
 /**
  * The exact `allowBuilds` key pnpm printed in its
- * `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` hint. For `github:` installs pnpm
+ * `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` hint. For Git installs pnpm
  * matches against `name@<resolved fetch URL>` — the URL it actually fetches,
  * e.g. `https://codeload.github.com/<owner>/<repo>/tar.gz/<commit>` — not the
  * `git+ssh://`/branch spec. A bare name or a `git+` spec does not match, so

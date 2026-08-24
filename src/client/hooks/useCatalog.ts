@@ -11,7 +11,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import type { HubPlugin, LocaleId } from '../types.ts'
-import { HUB_ABOUT_URL, HUB_REPO, HUB_UPDATE_URL, normalize, PLUGIN_VERSION } from '../lib/catalog.ts'
+import { HUB_ABOUT_URL, HUB_REPO, HUB_UPDATE_URL, normalize, PLUGIN_VERSION, repoFromInstallTarget } from '../lib/catalog.ts'
 import type { HubAboutInfo, HubUpdateInfo } from '../lib/catalog.ts'
 import type { SortKey } from '../lib/catalog.ts'
 
@@ -133,13 +133,13 @@ export function useCatalog(lang: LocaleId) {
     return () => { cancelled = true }
   }, [reloadKey])
 
-  /** 插件是否已安装：匹配 installed spec 中的 `github:<owner>/<repo>`，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
+  /** 插件是否已安装：匹配 Git spec 中的 owner/repo，或 npm 通道安装的依赖包名；命中返回 npm 包名。 */
   const installedName = (p: HubPlugin): string | null => {
     const repo = p.source?.repo
     if (!repo) return null
-    const needle = `github:${repo.toLowerCase()}`
+    const needle = repo.toLowerCase()
     for (const [name, spec] of Object.entries(installed)) {
-      if (spec.toLowerCase().includes(needle)) return name
+      if (repoFromInstallTarget(spec).toLowerCase() === needle) return name
     }
     // npm 通道安装：profile 依赖 key 直接是 npm 包名。包名来源两处——目录数据（npmPackage），
     // 或服务端 npm 优先反查持久化的映射（versions[repo].npmPackage，覆盖组织 scope 与 GitHub

@@ -12,7 +12,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { normalize, pluginIssueUrl } from '../src/client/lib/catalog.ts'
+import { installCommandOf, normalize, pluginIssueUrl, repoFromInstallTarget } from '../src/client/lib/catalog.ts'
 
 test('normalize: parses the vr short key into version', () => {
   const p = normalize({
@@ -42,7 +42,7 @@ test('pluginIssueUrl: 把尝试过的安装方式（npm 反查 + 实际执行命
     'npm registry search: `npm search repository:ccch1mneyyy/dsh-tui` → found `@deepseek-harness-tui/dsh-tui`',
     'dsh plugin --profile web add @deepseek-harness-tui/dsh-tui',
   ]
-  const url = pluginIssueUrl('ccch1mneyyy/dsh-tui', 'prepare failed', null, 'dsh plugin --profile web add github:ccch1mneyyy/dsh-tui', attempts)
+  const url = pluginIssueUrl('ccch1mneyyy/dsh-tui', 'prepare failed', null, 'dsh plugin --profile web add git+https://github.com/ccch1mneyyy/dsh-tui.git', attempts)
   const body = decodeURIComponent(url.split('body=')[1])
   assert.match(body, /## Attempted install channels/)
   // 每条尝试都以 markdown 列表项出现在正文里（保留反引号）：作者据此反推正确的 npm 包名
@@ -53,4 +53,21 @@ test('pluginIssueUrl: 无尝试记录时正文不含该段落', () => {
   const url = pluginIssueUrl('owner/repo', 'error xyz')
   const body = decodeURIComponent(url.split('body=')[1])
   assert.ok(!body.includes('Attempted install channels'))
+})
+
+test('installCommandOf: GitHub source uses an explicit HTTPS URL', () => {
+  const p = normalize({ s: 'aegis', n: 'Aegis', r: 'ganyuanran/aegis' })
+  assert.equal(installCommandOf(p), 'dsh plugin add git+https://github.com/ganyuanran/aegis.git')
+  assert.equal(installCommandOf(p, true), 'dsh plugin --profile web add git+https://github.com/ganyuanran/aegis.git')
+})
+
+test('repoFromInstallTarget: keeps catalog identity across Git target formats', () => {
+  for (const value of [
+    'ganyuanran/aegis',
+    'github:ganyuanran/aegis',
+    'git+https://github.com/ganyuanran/aegis.git',
+    'git+ssh://github.com/ganyuanran/aegis.git',
+  ]) {
+    assert.equal(repoFromInstallTarget(value), 'ganyuanran/aegis')
+  }
 })

@@ -3,7 +3,7 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 安装前预检：对 `github:` 源的插件，检查其分发（codeload tarball）里是否
+ * 安装前预检：对 GitHub 源的插件，检查其分发（codeload tarball）里是否
  * 真的包含 package.json 声明的入口文件（main / exports["."].default）。
  * git 分发常不提交构建产物（lib/ 等），这类残缺包装完会让宿主重启加载插件树时
  * ERR_MODULE_NOT_FOUND 直接崩溃 —— 预检在动手安装前就把它们拦下，避免白装一次。
@@ -17,6 +17,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
+import { githubRepoOf } from './profile.ts'
 
 const execFileAsync = promisify(execFile)
 
@@ -27,9 +28,9 @@ export interface PreflightResult {
 }
 
 export async function preflightTarget(target: string): Promise<PreflightResult> {
-  const m = /^github:([^/]+)\/([^/]+)$/.exec(target)
-  if (m === null) return { ok: true, missing: null }
-  const [, owner, repo] = m
+  const source = githubRepoOf(target)
+  if (source === null) return { ok: true, missing: null }
+  const [owner, repo] = source.split('/')
   let commit = ''
   try {
     const { stdout } = await execFileAsync('git', ['ls-remote', `https://github.com/${owner}/${repo}.git`, 'HEAD'])

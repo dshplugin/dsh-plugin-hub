@@ -15,7 +15,7 @@ export interface InstallResult {
 }
 export interface InstallTask {
     id: number;
-    /** 操作目标：`github:<owner>/<repo>`（安装）或 npm 包名（卸载），冲突/恢复时需要展示给用户 */
+    /** 操作目标：显式 HTTPS Git URL（安装）或 npm 包名（卸载），冲突/恢复时需要展示给用户 */
     target: string;
     /** 展示用目标（owner/repo）：npm 安装时 target 是包名，前端恢复用此字段显示仓库名，保持用户无感知 */
     displayTarget?: string;
@@ -58,14 +58,14 @@ export interface QueueItem {
  * 它自然清空，正好等于「重启后提醒消失」的语义，无需任何重启探测。
  */
 export interface PendingRestart {
-    /** `github:<owner>/<repo>` 安装目标（与任务一致；卸载时为展示用的 owner/repo） */
+    /** Git 安装目标（与任务一致；卸载时为展示用的 owner/repo） */
     target: string;
     /** 待重启语义：install 装完等挂载生效 / uninstall 卸完等清理 loader 残留 */
     kind: 'install' | 'uninstall';
     /** 任务完成时刻（epoch ms） */
     at: number;
 }
-/** Grammar of an accepted `github:<owner>/<repo>` install target. */
+/** Grammar of a catalog GitHub repository identity (`owner/repo`). */
 export declare const REPO_RE: RegExp;
 /** Grammar of an npm package name (used for uninstall targets). */
 export declare const PACKAGE_RE: RegExp;

@@ -113,7 +113,7 @@ dsh plugin --profile web add dsh-plugin
 从 GitHub 安装：
 
 ```bash
-dsh plugin --profile web add github:dshplugin/dsh-plugin-hub
+dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
 ```
 
 > **提示**：插件已内置浏览器端 bundle，从 GitHub 安装无需任何构建与授权；装完重启 `dsh web`，在「设置 → 插件中心」即可使用。
