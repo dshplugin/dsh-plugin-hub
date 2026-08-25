@@ -77,7 +77,7 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 | 设置 | 自定义安装 |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-settings-zh.png" alt="设置" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-custom-install-zh.png" alt="自定义安装" width="400" height="280"> |
+| <img src="docs/screenshots/dsh-plugin-hub-settings-zh.png" alt="设置" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-custom-install-zh-v1.2.1.png" alt="自定义安装" width="400" height="280"> |
 | 启动时检查更新、NPM 镜像源与代理通道、命令行安装安全开关与日志存放位置集中管理 | 手动安装目录外的 NPM 包或 GitHub 源码，粘贴官方安装命令即可装任意插件，装完标记「自定义安装」 |
 
 ## 官网一览

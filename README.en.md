@@ -77,7 +77,7 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 | Settings | Custom install |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-settings-en.png" alt="Settings" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400" height="280"> |
+| <img src="docs/screenshots/dsh-plugin-hub-settings-en.png" alt="Settings" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-custom-install-en-v1.2.1.png" alt="Custom install" width="400" height="280"> |
 | Update checks, npm mirror and proxy channel, command-line install toggles and log location — managed in one place | Install any npm package or GitHub source outside the catalog, or paste an official install command; finished installs are marked as custom |
 
 ## Website Overview
