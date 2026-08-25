@@ -42,7 +42,7 @@ interface RowState {
 const INITIAL_ROWS: RowState[] = [
   { key: 'npm', display: 'registry.npmjs.org', nameKey: 'diagNpm', status: 'idle', ms: null, statusCode: null },
   { key: 'github', display: 'github.com', nameKey: 'diagGithub', status: 'idle', ms: null, statusCode: null },
-  { key: 'catalog', display: 'dsh-plugin.org', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
+  { key: 'catalog', display: 'api.dsh-plugin.org', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
 ]
 
 export function DiagnosticsView({ t, env, onCopy }: {

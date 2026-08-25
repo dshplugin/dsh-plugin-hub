@@ -306,7 +306,7 @@ export const zh = {
   aboutEmpty: '内容暂未发布，敬请期待。',
   aboutUpdated: '更新于',
   empty: '该分类暂无插件',
-  dataFrom: '数据源 dsh-plugin.org · 每日人工更新',
+  dataFrom: '数据源 api.dsh-plugin.org · 每日人工更新',
 }
 
 export const en = {
@@ -611,5 +611,5 @@ export const en = {
   aboutEmpty: 'Content not published yet — stay tuned.',
   aboutUpdated: 'Updated',
   empty: 'No plugins in this category yet',
-  dataFrom: 'Data from dsh-plugin.org · curated daily',
+  dataFrom: 'Data from api.dsh-plugin.org · curated daily',
 }

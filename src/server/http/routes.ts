@@ -381,7 +381,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         const allChecks: Array<{ key: string; url: string; display: string; cmd: string }> = [
           { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? settings.npmRegistry : 'registry.npmjs.org', cmd: `npm view dsh-plugin version --registry ${registry}` },
           { key: 'github', url: 'https://github.com/dshplugin/dsh-plugin-hub', display: 'github.com', cmd: 'git ls-remote https://github.com/dshplugin/dsh-plugin-hub' },
-          { key: 'catalog', url: 'https://dsh-plugin.org/badges/listed.svg', display: 'dsh-plugin.org', cmd: 'curl -s https://dsh-plugin.org/badges/listed.svg' },
+          { key: 'catalog', url: 'https://api.dsh-plugin.org/stats.json', display: 'api.dsh-plugin.org', cmd: 'curl -s https://api.dsh-plugin.org/stats.json' },
         ]
         const checks = onlyKey !== '' ? allChecks.filter((c) => c.key === onlyKey) : allChecks
         response.writeHead(200, {
@@ -435,8 +435,8 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
         const isStats = url.searchParams.get('stats') === '1'
         const target = isStats
-          ? 'https://dsh-plugin.org/api/stats.json'
-          : `https://dsh-plugin.org/api/plugins.${url.searchParams.get('lang') === 'en' ? 'en' : 'zh'}.json`
+          ? 'https://api.dsh-plugin.org/stats.json'
+          : `https://api.dsh-plugin.org/plugins.${url.searchParams.get('lang') === 'en' ? 'en' : 'zh'}.json`
         const r = await fetchViaCurl(target, proxy, 20000)
         if (!r.ok || r.body === '') {
           sendJson(response, 502, { error: 'catalog fetch failed' })

@@ -5,7 +5,7 @@
  *
  * Catalog data + view state for the Plugin Hub section.
  *
- * Owns the online-data pipeline (live fetch from dsh-plugin.org), the local
+ * Owns the online-data pipeline (live fetch from api.dsh-plugin.org), the local
  * installed-plugin table, and the filter/search/sort/install-status view
  * state, exposing the derived visible list and per-category counts.
  */
@@ -62,9 +62,9 @@ export function useCatalog(lang: LocaleId) {
   const [loadedNames, setLoadedNames] = useState<string[] | null>(null)
   /** 真正的 dsh 插件包名（包内声明 dsh 配置 / 在 profile bundles 清单）：非 dsh 插件不提示「待重启」 */
   const [dshCapableNames, setDshCapableNames] = useState<string[] | null>(null)
-  /** Hub 自我更新信息：来自 CF Worker 版本控制中心（hub.dsh-plugin.org），与目录数据解耦 */
+  /** Hub 自我更新信息：来自接口中心 Pages（api.dsh-plugin.org），与目录数据解耦 */
   const [hubUpdateInfo, setHubUpdateInfo] = useState<HubUpdateInfo | null>(null)
-  /** 头部「关注我们」弹窗内容（平台介绍 + 反馈群二维码）：来自同款 Worker /about，Markdown 推送非写死 */
+  /** 头部「关注我们」弹窗内容（平台介绍 + 反馈群二维码）：来自接口中心 /about，Markdown 推送非写死 */
   const [hubAboutInfo, setHubAboutInfo] = useState<HubAboutInfo | null>(null)
 
   // 拉取目录 + 统计。在线 API 已只返回 verified；再过滤一次，保证只展示人工验证通过的插件。
