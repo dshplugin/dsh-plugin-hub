@@ -29,7 +29,7 @@
 DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方插件开发规范构建的开源插件，安装进「设置 → 插件中心」后，无需离开应用即可浏览、搜索并一键安装社区插件。本项目为独立社区项目，与 DeepSeek Harness 官方无隶属关系。
 
 <p align="center">
-  <img src="https://dsh-plugin.org/dshplugin/dsh-plugin-hub/dsh-plugin-hub-v1-1-1-zh.png" alt="DSH-Plugin Hub v1.1.1 in DeepSeek Harness" width="840">
+  <img src="docs/screenshots/dsh-plugin-hub-home-zh.png" alt="DSH-Plugin Hub in DeepSeek Harness" width="840">
 </p>
 
 ## 插件中心特性

@@ -29,7 +29,7 @@
 DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="https://dsh-plugin.org/dshplugin/dsh-plugin-hub/dsh-plugin-hub-v1-1-1-en.png" alt="DSH-Plugin Hub v1.1.1 inside DeepSeek Harness" width="840">
+  <img src="docs/screenshots/dsh-plugin-hub-home-en.png" alt="DSH-Plugin Hub inside DeepSeek Harness" width="840">
 </p>
 
 ## Plugin Hub Features
