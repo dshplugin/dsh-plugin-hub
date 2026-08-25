@@ -659,6 +659,8 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             attempts,
             timeoutMs: COMMAND_TIMEOUT_MS,
             env: mutationEnv(settings),
+            // 覆盖更新：npm 通道命令显式 @latest（pnpm add 无版本对已存在依赖是幂等的，不加版本不会真更新）
+            updateNpm: mode === 'update',
           })
           sendJson(response, 200, { ok: true, task: task.id })
         } catch (error) {

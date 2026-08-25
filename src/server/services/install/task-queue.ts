@@ -177,6 +177,8 @@ export function startPluginMutation(options: {
   uninstallLoader?: LoaderHandle
   /** 入队前已尝试的安装方式（npm registry 反查等）：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
   attempts?: string[]
+  /** 更新已安装的 npm 包（mode=update）：命令显式带 @latest，让 pnpm 真正解析最新版本 */
+  updateNpm?: boolean
 }): InstallTask {
   const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, globalNpm: options.globalNpm, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
@@ -266,21 +268,29 @@ function spawnMutation(options: {
   uninstallLoader?: LoaderHandle
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
   globalNpm?: string[]
+  /** 更新已安装的 npm 包（mode=update）：命令显式带 @latest，让 pnpm 真正解析最新版本 */
+  updateNpm?: boolean
 }): Promise<InstallResult> {
-  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, uninstallLoader, globalNpm } = options
+  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, uninstallLoader, globalNpm, updateNpm } = options
   // 全局 npm 安装：直接 spawn 本机 npm（`npm install -g <pkgs>`），不是 dsh plugin 命令
   const isGlobalNpm = (globalNpm ?? []).length > 0
   const invocation = isGlobalNpm
     ? { file: 'npm', prefixArgs: [], cwd: process.cwd(), useShell: process.platform === 'win32' }
     : cliInvocation()
+  // 更新已安装的 npm 包：显式指定 @latest。pnpm add <pkg>（无版本）对已存在依赖
+  // （尤其精确 spec 如 "1.3.0"）是幂等的 —— 输出 "Already up to date" 且不改 package.json，
+  // 导致「更新成功」但实际仍停留在旧版本；git 地址与全局安装不受此影响。
+  const npmUpdateTarget = updateNpm && !isGlobalNpm && githubRepoOf(target) === null
+    ? `${target}@latest`
+    : target
   const args = isGlobalNpm
     ? ['install', '-g', ...(globalNpm ?? [])]
-    : [...invocation.prefixArgs, 'plugin', '--profile', profile, action, target]
+    : [...invocation.prefixArgs, 'plugin', '--profile', profile, action, npmUpdateTarget]
   // 记录实际执行的命令（npm 通道显示包名，git 通道显示 HTTPS 源），
   // 失败提 Issue 时作为「已尝试的安装方式」随附
   const executed = isGlobalNpm
     ? `npm install -g ${(globalNpm ?? []).join(' ')}`
-    : `dsh plugin --profile ${profile} ${action} ${target}`
+    : `dsh plugin --profile ${profile} ${action} ${npmUpdateTarget}`
   if (task && !task.attempts.includes(executed)) {
     task.attempts.push(executed)
   }
