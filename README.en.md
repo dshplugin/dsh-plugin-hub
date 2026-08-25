@@ -75,6 +75,11 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 | <img src="docs/screenshots/dsh-plugin-hub-update-en.png" alt="One-click update with overwrite install" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-en.png" alt="Visual notifications" width="400"> |
 | New versions detected automatically; the card turns into "Update" and overwrite-installs in one click | Running tasks, pending restarts and full success / failure history in one place; failed installs can be filed as a GitHub Issue in one click |
 
+| Settings | Custom install |
+| :---: | :---: |
+| <img src="docs/screenshots/dsh-plugin-hub-settings-en.png" alt="Settings" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400"> |
+| Update checks, npm mirror and proxy channel, command-line install toggles and log location — managed in one place | Install any npm package or GitHub source outside the catalog, or paste an official install command; finished installs are marked as custom |
+
 ## Website Overview
 
 The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugin.org) and stays in sync with the site; on the website you can also see plugin details, ratings and links back to their GitHub sources.
