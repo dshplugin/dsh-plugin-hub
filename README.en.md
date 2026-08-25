@@ -4,7 +4,7 @@
   <img src="docs/assets/logo.svg" alt="DSH-Plugin Hub" width="96" height="96" />
 </p>
 
-# DSH-Plugin Hub for DeepSeek Harness
+# DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
 
 **A community plugin marketplace for DeepSeek Harness · 5,048 DSH plugins indexed · 4,470 human-verified**
 

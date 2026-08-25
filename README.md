@@ -4,7 +4,7 @@
   <img src="docs/assets/logo.svg" alt="DSH-Plugin Hub" width="96" height="96" />
 </p>
 
-# DSH-Plugin Hub for DeepSeek Harness
+# DSH Plugin 插件中心 - DeepSeek Harness Plugin (DSH) 下载与安装 · 插件大全
 
 **DeepSeek Harness 社区插件市场：收录 5,048 个 DSH plugin，人工精选验证 4,470**
 
