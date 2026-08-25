@@ -67,7 +67,7 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 | 一键安装 | 一键卸载 |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-install-zh.png" alt="一键安装" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-zh-v1.2.1.png" alt="一键卸载" width="400" height="280"> |
+| <img src="docs/screenshots/dsh-plugin-hub-install-zh-v1.2.1.png" alt="一键安装" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-zh-v1.2.1.png" alt="一键卸载" width="400" height="280"> |
 | 后台队列串行执行，弹窗实时显示安装进度，可随时取消 | 卸载全程可视化，实时进度一目了然，成功即生效 |
 
 | 一键更新 | 通知中心 |

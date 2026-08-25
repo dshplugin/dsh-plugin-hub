@@ -67,7 +67,7 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 | One-click install | One-click uninstall |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-install-en.png" alt="One-click install with live progress" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-en-v1.2.1.png" alt="One-click uninstall with live progress" width="400" height="280"> |
+| <img src="docs/screenshots/dsh-plugin-hub-install-en-v1.2.1.png" alt="One-click install with live progress" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-en-v1.2.1.png" alt="One-click uninstall with live progress" width="400" height="280"> |
 | A serial background queue with live progress in the dialog, cancellable anytime | Fully visualized with live progress; changes take effect immediately |
 
 | One-click update | Notification center |
