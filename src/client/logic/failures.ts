@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -84,9 +84,55 @@ export function addSuccess(record: Omit<NotificationRecord, 'id' | 'at' | 'ok' |
   return addNotification({ ...record, ok: true, message: '' })
 }
 
-/** 记录一条「发现新版本」更新提醒：成功类轻量记录，携带目录新版本号供通知中心展示。 */
+/** 记录一条「发现新版本」更新提醒：成功类轻量记录，携带目录新版本号供通知中心展示。
+ *  同一插件同一新版本已在通知中心时跳过：宿主重载会重新触发启动检查，不更新时
+ *  通知里已有的提醒保持单条，不重复追加。 */
 export function addUpdateNotice(record: Omit<NotificationRecord, 'id' | 'at' | 'ok' | 'message'>): NotificationRecord[] {
+  const prev = loadNotifications()
+  const dup = prev.some((r) =>
+    r.kind === 'update' && r.repo === record.repo && (r.version ?? undefined) === (record.version ?? undefined))
+  if (dup) return prev
   return addNotification({ ...record, ok: true, message: '' })
+}
+
+/** 已忽略的更新提醒持久化 key：`owner/repo@version` 字符串数组。 */
+const IGNORE_KEY = 'gro.ngilp-hsd.ignored-updates'
+
+/** 读取已忽略的更新提醒（`owner/repo@version` 字符串集合）；损坏/不可用时返回空集合。 */
+export function loadIgnoredUpdates(): Set<string> {
+  try {
+    const raw = storage()?.getItem(IGNORE_KEY)
+    if (!raw) return new Set()
+    const list = JSON.parse(raw) as unknown
+    if (!Array.isArray(list)) return new Set()
+    return new Set(list.filter((x): x is string => typeof x === 'string'))
+  } catch {
+    return new Set()
+  }
+}
+
+function saveIgnoredUpdates(ignored: Set<string>): void {
+  try {
+    storage()?.setItem(IGNORE_KEY, JSON.stringify([...ignored]))
+  } catch {
+    /* storage full / unavailable：仅保留内存态 */
+  }
+}
+
+/** 忽略某插件本次更新（repo+version 持久化入忽略集）：本次版本不再提醒，直到下一个新版本发布。 */
+export function ignoreUpdate(repo: string, version?: string): Set<string> {
+  const next = loadIgnoredUpdates()
+  next.add(`${repo}@${version ?? ''}`)
+  saveIgnoredUpdates(next)
+  return next
+}
+
+/** 移除某插件某版本的更新提醒记录（忽略本次更新时一并清理通知），返回更新后的列表。 */
+export function removeUpdateNotice(repo: string, version?: string): NotificationRecord[] {
+  const next = loadNotifications().filter((r) =>
+    !(r.kind === 'update' && r.repo === repo && (r.version ?? undefined) === (version ?? undefined)))
+  save(next)
+  return next
 }
 
 /** 清空全部通知记录，返回空列表。 */

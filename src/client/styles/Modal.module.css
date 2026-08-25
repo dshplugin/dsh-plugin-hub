@@ -1,4 +1,4 @@
-/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+/* DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -49,6 +49,13 @@
    输入框内要完整显示长路径，窄了显示不下 */
 .modalWide {
   width: 560px;
+  max-width: calc(100vw - 48px);
+}
+
+/* 自定义安装「帮助」弹窗：比错误弹窗更宽 —— 命令格式 + 中文说明要排在一行，
+   窄了容易折行，宽窗让每条格式整行展示 */
+.helpModal {
+  width: 720px;
   max-width: calc(100vw - 48px);
 }
 
@@ -997,6 +1004,30 @@
 
 .noticeUpdateGo:hover {
   background: var(--hub-brand-hover);
+}
+
+/* 更新提醒：行尾「忽略本次更新」小按钮（中性描边，弱于实底的「去更新」），
+   hover 转红提示可忽略本次版本 */
+.noticeIgnore {
+  flex-shrink: 0;
+  margin-left: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 5px;
+  padding: 1px 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.noticeIgnore:hover {
+  color: var(--hub-danger-text);
+  border-color: var(--hub-danger-border);
+  background: var(--hub-danger-tint);
 }
 
 /* 操作类型徽标：安装失败红 / 卸载失败黄 */

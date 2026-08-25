@@ -1,6 +1,6 @@
-# DSH-Plugin Hub 文档
+# DSH Plugin Hub 文档
 
-DSH-Plugin Hub 是 DeepSeek Harness 的插件中心（cordis 插件）。本目录集中存放
+DSH Plugin Hub 是 DeepSeek Harness 的插件中心（cordis 插件）。本目录集中存放
 开发相关的规范、架构与操作指南。
 
 ## 目录结构

@@ -1,4 +1,4 @@
-/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+/* DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -262,8 +262,9 @@
   font-size: 11px;
   line-height: 16px;
   font-weight: 500;
-  color: var(--hub-brand);
-  background: var(--hub-brand-tint-strong);
+  color: var(--hub-warn);
+  background: var(--hub-warn-tint);
+  border: 1px solid var(--hub-warn-border);
   border-radius: 4px;
   padding: 0 5px;
 }
@@ -405,14 +406,14 @@
   border-color: var(--hub-warning);
 }
 
-/* 更新：品牌色实底小按钮，仅在「有更新」时出现 */
+/* 更新：琥珀色实底小按钮（与插件中心「可更新」同色），仅在「有更新」时出现 */
 .rowUpdate {
   font-family: inherit;
   font-size: 12px;
   line-height: 18px;
   font-weight: 500;
   color: #fff;
-  background: var(--hub-brand);
+  background: var(--hub-warn);
   border: none;
   border-radius: 6px;
   padding: 3px 10px;
@@ -422,7 +423,7 @@
 }
 
 .rowUpdate:hover {
-  background: var(--hub-brand-hover);
+  background: var(--hub-warn-strong);
 }
 
 /* 卸载：危险色描边小按钮 */
@@ -444,4 +445,16 @@
   color: #fff;
   background: var(--hub-danger);
   border-color: var(--hub-danger);
+}
+
+/* 夜间模式：卸载按钮直接红底白字（破坏性操作醒目化，无需 hover 才转实底） */
+body[data-ds-dark-theme] .rowUninstall {
+  color: #fff;
+  background: var(--hub-danger);
+  border-color: var(--hub-danger);
+}
+
+body[data-ds-dark-theme] .rowUninstall:hover {
+  background: var(--hub-danger-hover);
+  border-color: var(--hub-danger-hover);
 }

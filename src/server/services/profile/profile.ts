@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -30,11 +30,12 @@ export function githubTarget(repo: string): string | null {
 }
 
 /**
- * DSH 命令行前缀（`dsh plugin [--profile|-p <p>] add <target>`）—— 提取其中的安装目标；
- * 非命令输入原样返回。兼容「直接粘贴完整命令」（防用户输错）：--profile 段可选，
- * 支持 `-p` 简写与 `--profile=web` 等号形式，命令大小写不敏感。
+ * DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> add <target>`）—— 提取其中的安装目标；
+ * 非命令输入原样返回。兼容「直接粘贴完整命令」（防用户输错）：--profile 必填且只有长选项
+ * （官方 CLI 无 -p 简写，省略即报错），支持 `--profile=<name>` 等号形式，命令大小写不敏感。
+ * 与客户端 CustomInstallView 口径一致。
  */
-const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+(?:(?:--profile|-p)(?:=|\s+)\S+\s*)?add\s+(.+)$/i
+const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+add\s+(.+)$/i
 
 export function installTargetOf(value: string): string {
   const input = typeof value === 'string' ? value.trim() : ''

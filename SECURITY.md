@@ -1,6 +1,6 @@
 # Security Policy
 
-DSH-Plugin Hub is a plugin marketplace that runs real plugin installs inside
+DSH Plugin Hub is a plugin marketplace that runs real plugin installs inside
 DeepSeek Harness. Security reports are taken seriously.
 
 ## Supported Versions

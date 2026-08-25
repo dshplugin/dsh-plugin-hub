@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -20,7 +20,7 @@ type ProbeKey = 'npm' | 'github' | 'catalog'
 /** 系统版本文本：提交 Issue 时粘贴到正文，方便作者复现。 */
 function formatEnv(env: EnvInfo): string {
   return [
-    `DSH-Plugin Hub ${PLUGIN_VERSION}`,
+    `DSH Plugin Hub ${PLUGIN_VERSION}`,
     `DSH ${env.dshVersion ?? 'unknown'}`,
     `Node ${env.nodeVersion}`,
     `${env.platform} ${env.arch} (${env.release})`,

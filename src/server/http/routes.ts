@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -8,7 +8,7 @@
  * install handler validates the target, then spawns the official dsh CLI
  * (see services/install/install.ts) and reports the captured result back.
  */
-import { mkdirSync, readFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir, release } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
@@ -36,6 +36,44 @@ export interface WebServerService {
 const PROFILE_RE = /^[A-Za-z0-9_-]+$/
 const BODY_LIMIT_BYTES = 4 * 1024
 const COMMAND_TIMEOUT_MS = 5 * 60 * 1000
+
+/** 目录/统计数据代理的本地缓存时长：1 小时内重复打开插件中心直接读盘，
+ *  不重复走 curl 拉远程 —— 重启宿主后首次打开同样秒开（缓存跨重启存活）。 */
+const CATALOG_CACHE_TTL_MS = 60 * 60 * 1000
+
+/** 磁盘缓存内容：原始响应字符串 + 写入时间戳（TTL 判定用）。 */
+interface CatalogCacheEntry {
+  at: number
+  body: string
+}
+
+function catalogCacheFile(profile: string, key: string): string {
+  return join(profileDirectory(profile), 'cache', `catalog-${key}.json`)
+}
+
+/** 读缓存：文件存在、JSON 合法、未过期 → 返回原始响应字符串；否则 null（视为 miss）。 */
+function readCatalogCache(file: string): string | null {
+  try {
+    const entry = JSON.parse(readFileSync(file, 'utf8')) as CatalogCacheEntry
+    if (entry && typeof entry.at === 'number' && typeof entry.body === 'string'
+      && Date.now() - entry.at < CATALOG_CACHE_TTL_MS) {
+      return entry.body
+    }
+  } catch {
+    // 文件缺失 / 解析失败 / 字段不完整 → miss，重新拉取覆盖写盘
+  }
+  return null
+}
+
+/** 写缓存：目录不存在则创建；写失败静默忽略（缓存只是加速，不影响功能）。 */
+function writeCatalogCache(file: string, body: string): void {
+  try {
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, JSON.stringify({ at: Date.now(), body } satisfies CatalogCacheEntry))
+  } catch {
+    // 磁盘只读/无权限等极端情况：忽略，继续走直连
+  }
+}
 
 function profileDirectory(profile: string): string {
   return join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'profiles', profile)
@@ -434,9 +472,21 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           ? settings.proxy
           : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
         const isStats = url.searchParams.get('stats') === '1'
+        const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'zh'
         const target = isStats
           ? 'https://api.dsh-plugin.org/stats.json'
-          : `https://api.dsh-plugin.org/plugins.${url.searchParams.get('lang') === 'en' ? 'en' : 'zh'}.json`
+          : `https://api.dsh-plugin.org/plugins.${lang}.json`
+        // 1 小时本地缓存：命中直接返回（跨重启生效，插件中心秒开），未命中才走 curl 拉远程
+        const cacheFile = catalogCacheFile(profile, isStats ? 'stats' : `plugins-${lang}`)
+        const cached = readCatalogCache(cacheFile)
+        if (cached !== null) {
+          try {
+            sendJson(response, 200, JSON.parse(cached))
+            return
+          } catch {
+            // 缓存正文损坏：忽略，走重新拉取并覆盖写盘
+          }
+        }
         const r = await fetchViaCurl(target, proxy, 20000)
         if (!r.ok || r.body === '') {
           sendJson(response, 502, { error: 'catalog fetch failed' })
@@ -444,6 +494,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         }
         try {
           sendJson(response, 200, JSON.parse(r.body))
+          writeCatalogCache(cacheFile, r.body)
         } catch {
           sendJson(response, 502, { error: 'catalog fetch returned invalid JSON' })
         }

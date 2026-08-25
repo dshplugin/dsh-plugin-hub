@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -55,7 +55,7 @@ function BadgeGlyph({ ok }: { ok: boolean }) {
     }))
 }
 
-export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, cancelTask, restarting, onRestart }: {
+export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, onIgnoreUpdate, cancelTask, restarting, onRestart }: {
   records: NotificationRecord[]
   /** 进行中的安装/卸载任务（实时进度，与队列弹窗同一数据源） */
   tasks: QueueTask[]
@@ -70,6 +70,8 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
   onRemove: (id: number) => void
   /** 更新提醒通知点击：跳去该插件的更新确认弹窗 */
   onUpdate: (repo: string) => void
+  /** 更新提醒「忽略本次更新」：先弹确认，确认后本次版本不再提醒，下一个新版本再通知 */
+  onIgnoreUpdate: (repo: string, version?: string) => void
   cancelTask: (id: number) => void
   restarting: boolean
   onRestart: () => void
@@ -216,6 +218,13 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                         className: styles.noticeUpdateGo,
                         onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onUpdate(r.repo) },
                       }, t('updateNoticeGo'))
+                      : null,
+                    // 更新提醒：「忽略本次更新」按钮 —— 先弹确认，确认后本次版本不再提醒
+                    isUpdate
+                      ? h('button', {
+                        className: styles.noticeIgnore,
+                        onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onIgnoreUpdate(r.repo, r.version) },
+                      }, t('ignoreUpdateRun'))
                       : null,
                     // 每条通知右侧的删除按钮：单独移除这一条
                     h('button', {

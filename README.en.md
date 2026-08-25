@@ -1,7 +1,7 @@
 <div align="center">
 
 <p>
-  <img src="docs/assets/logo.svg" alt="DSH-Plugin Hub" width="96" height="96" />
+  <img src="docs/assets/logo.svg" alt="DSH Plugin Hub" width="96" height="96" />
 </p>
 
 # DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
@@ -11,7 +11,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
 [![CI](https://github.com/dshplugin/dsh-plugin-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/dshplugin/dsh-plugin-hub/actions)
-[![Listed on DSH-Plugin Hub](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/dshplugin/dsh-plugin-hub)
+[![Listed on DSH Plugin Hub](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/dshplugin/dsh-plugin-hub)
 [![GitHub stars](https://img.shields.io/github/stars/dshplugin/dsh-plugin-hub.svg?style=flat-square)](https://github.com/dshplugin/dsh-plugin-hub)
 [![Website](https://img.shields.io/badge/website-dsh--plugin.org-blue.svg?style=flat-square)](https://dsh-plugin.org)
 [![Topic](https://img.shields.io/badge/topic-dsh--plugin-0e7490.svg?style=flat-square)](https://github.com/topics/dsh-plugin)
@@ -24,12 +24,12 @@
 
 ---
 
-## What is DSH-Plugin Hub
+## What is DSH Plugin Hub
 
-DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
+DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="docs/screenshots/dsh-plugin-hub-home-en-v1.2.1.png" alt="DSH-Plugin Hub inside DeepSeek Harness" width="840">
+  <img src="docs/screenshots/dsh-plugin-hub-home-en-v1.2.1.png" alt="DSH Plugin Hub inside DeepSeek Harness" width="840">
 </p>
 
 ## Plugin Hub Features
@@ -86,12 +86,12 @@ The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugi
 
 | Homepage | Browse by category |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-site-home.png" alt="DSH-Plugin website homepage" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH-Plugin category browsing" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-site-home.png" alt="DSH Plugin website homepage" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH Plugin category browsing" width="400"> |
 | Same data source as the hub — human-verified, updated daily | Browse every indexed plugin by category, search straight to it |
 
-## Why DSH-Plugin Hub
+## Why DSH Plugin Hub
 
-The DSH-Plugin Hub indexes **5,048** DeepSeek Harness plugins (DSH), **4,470** of which are hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
+The DSH Plugin Hub indexes **5,048** DeepSeek Harness plugins (DSH), **4,470** of which are hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
 
 ### Always Fresh
 
@@ -105,7 +105,7 @@ Every DSH plugin is manually checked by a professional team — install commands
 
 Every DSH plugin links back to its GitHub source repository with stars, forks and last-update time; data is compiled from the DeepSeek Harness official site, official architecture docs and official repos — everything is traceable.
 
-## Install DSH-Plugin Hub
+## Install DSH Plugin Hub
 
 Install from npm (recommended):
 
@@ -144,4 +144,4 @@ Publish your plugin to GitHub and add the `dsh-plugin` topic — it will be disc
 
 ## License
 
-[MIT](LICENSE) © DSH-Plugin Hub contributors
+[MIT](LICENSE) © DSH Plugin Hub contributors

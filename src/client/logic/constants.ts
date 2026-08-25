@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -32,7 +32,7 @@ export const HUB_ABOUT_URL = 'https://api.dsh-plugin.org/about.json'
 declare const __PLUGIN_VERSION__: string
 
 /**
- * 插件当前版本号，供头部标题展示「DSH-Plugin Hub v0.1.1」。
+ * 插件当前版本号，供头部标题展示「DSH Plugin Hub v0.1.1」。
  * tsdown 构建时用 define 把 __PLUGIN_VERSION__ 替换成 package.json 的版本号；
  * node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
  */

@@ -1,4 +1,4 @@
-/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+/* DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -89,8 +89,35 @@ body[data-ds-dark-theme] {
 body[data-ds-dark-theme] {
   --hub-bg-btn: rgba(255, 255, 255, 0.12);
 
-  /* 暗色下的成功绿：提亮一档，对勾在深底上清晰且不刺眼 */
-  --hub-success: #22c55e;
-  --hub-success-tint: rgba(34, 197, 94, 0.16);
-  --hub-success-border: rgba(34, 197, 94, 0.35);
+  /* 夜间彩色统一收敛为中性灰白：品牌蓝 / 琥珀 / 深琥珀 / 绿 / 紫全部转灰 ——
+     非破坏性操作按钮克制化，深色界面下不刺眼；红色（danger 系：卸载 / 删除 /
+     破坏性操作）保留原提醒色，破坏性操作在任何主题下都能一眼认出。 */
+  --hub-brand: #6b6b76;
+  --hub-brand-hover: #7d7d88;
+  --hub-brand-tint: rgba(255, 255, 255, 0.08);
+  --hub-brand-tint-strong: rgba(255, 255, 255, 0.13);
+  --hub-brand-border: rgba(255, 255, 255, 0.3);
+  --hub-brand-border-soft: rgba(255, 255, 255, 0.2);
+
+  --hub-purple-1: #6b6b76;
+  --hub-purple-2: #7d7d88;
+  --hub-purple-border: rgba(255, 255, 255, 0.35);
+  --hub-purple-tint: rgba(255, 255, 255, 0.08);
+  --hub-purple-shadow: rgba(0, 0, 0, 0.35);
+  --hub-purple-shadow-strong: rgba(0, 0, 0, 0.5);
+
+  --hub-warn: #6b6b76;
+  --hub-warn-tint: rgba(255, 255, 255, 0.08);
+  --hub-warn-border: rgba(255, 255, 255, 0.3);
+  --hub-warn-strong: #7d7d88;
+
+  --hub-warning: #6b6b76;
+  --hub-warning-hover: #7d7d88;
+  --hub-warning-tint: rgba(255, 255, 255, 0.08);
+  --hub-warning-border: rgba(255, 255, 255, 0.3);
+
+  /* 成功文字（已安装态 / 对勾徽标）用浅灰白，深底上比中灰更清晰 */
+  --hub-success: #9a9aa4;
+  --hub-success-tint: rgba(255, 255, 255, 0.1);
+  --hub-success-border: rgba(255, 255, 255, 0.3);
 }

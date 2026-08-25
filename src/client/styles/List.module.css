@@ -1,4 +1,4 @@
-/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+/* DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -217,6 +217,16 @@
 
 .uninstallBtn:hover {
   color: #ffffff;
+  background: var(--hub-danger-hover);
+}
+
+/* 夜间模式：卸载按钮直接红底白字（破坏性操作醒目化，无需 hover 才转实底） */
+body[data-ds-dark-theme] .uninstallBtn {
+  color: #ffffff;
+  background: var(--hub-danger);
+}
+
+body[data-ds-dark-theme] .uninstallBtn:hover {
   background: var(--hub-danger-hover);
 }
 

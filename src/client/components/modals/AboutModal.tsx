@@ -1,9 +1,9 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 头部「关注我们」弹窗：介绍 DSH-Plugin Hub 的功能定位 + 用户反馈群二维码。
+ * 头部「关注我们」弹窗：介绍 DSH Plugin Hub 的功能定位 + 用户反馈群二维码。
  * 内容以 Markdown 形式由 dsh-update Worker 的 /about 接口下发（key = hub:about），
  * 客户端按接口返回渲染，不内置固定文案。
  * 图片（反馈群二维码）经 renderMarkdown 的 ![](url) 语法嵌入，居中、最大高度受控。

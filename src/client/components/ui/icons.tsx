@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -51,6 +51,27 @@ export function LinkIcon() {
       strokeLinecap: 'round',
       strokeLinejoin: 'round',
     }))
+}
+
+/** 帮助图标：圆圈 + 问号（stroke 继承 currentColor），自定义安装卡片标题旁的「帮助」按钮用。 */
+export function HelpIcon() {
+  return h('svg', {
+    viewBox: '0 0 16 16',
+    width: 13,
+    height: 13,
+    fill: 'none',
+    'aria-hidden': 'true',
+  },
+    h('circle', {
+      cx: 8, cy: 8, r: 6.3,
+      stroke: 'currentColor', strokeWidth: 1.4,
+    }),
+    h('path', {
+      d: 'M6.3 6.5a1.9 1.9 0 1 1 2.7 1.7c-.7.3-1 .8-1 1.4',
+      stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round',
+    }),
+    h('circle', { cx: 8, cy: 11.6, r: 0.95, fill: 'currentColor' }),
+  )
 }
 
 /** 品牌 logo 图标：蓝紫渐变圆角方块 + 白色拼图块（2x2 错落），标题左侧的品牌标识。 */

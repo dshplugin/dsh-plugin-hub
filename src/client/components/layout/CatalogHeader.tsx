@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -40,7 +40,7 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggle
           h(LogoIcon),
           h('h1', { className: styles.title }, t('title')),
         ),
-        // 版本号：紧跟标题「DSH-Plugin Hub」之后，常驻可点入口（<a> 内不能嵌套按钮，故从官网链接里移出放在旁边）。
+        // 版本号：紧跟标题「DSH Plugin Hub」之后，常驻可点入口（<a> 内不能嵌套按钮，故从官网链接里移出放在旁边）。
         // 点击打开更新记录弹窗 —— 有更新看新版本内容，无更新看当前版本内容。
         // 有更新时版本号后直接跟一个红色「可更新」徽标（同一按钮内，不分开成两个元素），静态显示不闪烁。
         h('button', {

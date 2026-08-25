@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -22,7 +22,7 @@ import {
 } from '../logic/installed.ts'
 import type { InstalledItem, InstalledVersionSignal } from '../logic/installed.ts'
 
-/** 插件市场自身仓库：DSH-Plugin Hub 不显示在目录里（自己不进自己的插件列表） */
+/** 插件市场自身仓库：DSH Plugin Hub 不显示在目录里（自己不进自己的插件列表） */
 const SELF_REPO = 'dshplugin/dsh-plugin-hub'
 
 /** 市场各排序的默认方向：全部按倒序（Star/Fork 多、更新/收录近的在前） */
@@ -51,6 +51,19 @@ export function useCatalog(lang: LocaleId) {
     if (key === sort) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
     else { setSort(key); setSortDir(SORT_DEFAULT_DIR[key]) }
   }
+  /**
+   * 强制刷新 Hub 版本与「关注我们」信息：点击头部版本号/徽标时触发。
+   * 挂载期的 useEffect 只在进入/reload 时拉一次，发版后已打开的界面点版本号
+   * 仍显示旧数据；此处重新拉接口中心，最新版本与变更记录点击即见。
+   * 失败静默为 null（弹窗兜底展示当前版本号），与挂载期拉取口径一致。
+   */
+  const refreshHub = async () => {
+    // 版本接口已恒带时间戳绕过 CDN，手动/自动拉取都能拿到最新公告
+    const [info, about] = await Promise.all([fetchHubUpdate(), fetchHubAbout()])
+    setHubUpdateInfo(info)
+    setHubAboutInfo(about)
+  }
+
   /** 当前 profile 已安装插件：npm 包名 -> manifest spec（来自宿主本地路由） */
   const [installed, setInstalled] = useState<Record<string, string>>({})
   /** 安装时记录的目录信号：repo(小写) -> { version, updatedAt }（来自宿主本地路由）；
@@ -74,15 +87,14 @@ export function useCatalog(lang: LocaleId) {
     setHubPlugin(null)
     setStats(null)
     setFailed(false)
-    // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口；
-    // 数据接口 CDN 缓存 1 小时，发布新数据后最长 1 小时全网生效。
+    // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口。
     const load = () => Promise.all([fetchCatalog(lang), fetchStats()])
     load()
       .then(([list, stats]) => {
         if (cancelled) return
-        // 插件市场不显示自己：DSH-Plugin Hub 从目录里排除自身条目，
+        // 插件市场不显示自己：DSH Plugin Hub 从目录里排除自身条目，
         // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
-        // 主站数据已同步排除自身，此处为 CDN 缓存期的兜底。
+        // 目录数据已排除自身，此处再兜底过滤一次，防旧快照仍含自身条目。
         const hadSelf = list.some((p) => p.source?.repo === SELF_REPO)
         // 过滤前单独保留 hub 自身条目：它不进目录列表，但「可更新」徽标的直接更新需要它作为重装目标
         setHubPlugin(list.find((p) => p.source?.repo === SELF_REPO) ?? null)
@@ -215,6 +227,7 @@ export function useCatalog(lang: LocaleId) {
     hubHasUpdate,
     hubUpdateInfo,
     hubAboutInfo,
+    refreshHub,
     refreshInstalled,
     category,
     setCategory,

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for taking the time to contribute to DSH-Plugin Hub. This document
+Thanks for taking the time to contribute to DSH Plugin Hub. This document
 keeps the bar high so the marketplace stays safe and pleasant for everyone.
 
 Please note that this project is released with a

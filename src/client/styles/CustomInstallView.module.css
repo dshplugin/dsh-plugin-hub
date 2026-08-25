@@ -1,4 +1,4 @@
-/* DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+/* DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -57,6 +57,31 @@
   line-height: 18px;
   font-weight: 600;
   color: var(--hub-text-primary);
+}
+
+/* 卡片标题旁的帮助按钮：小号问号圆钮，弱化但可点，hover 提亮成品牌蓝 */
+.installHelpBtn {
+  flex-shrink: 0;
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  color: var(--hub-text-tertiary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  user-select: none;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.installHelpBtn:hover {
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border-color: var(--hub-brand-border-soft);
 }
 
 /* 文本框上方的示例：灰字小字，告诉用户该通道的推荐写法 */
@@ -188,4 +213,37 @@
   border: 1px solid var(--hub-danger-border);
   border-radius: 6px;
   padding: 5px 8px;
+}
+
+/* —— 帮助弹窗内容：该通道支持的格式清单（命令 + 说明） —— */
+.helpBody {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 4px 2px;
+}
+
+.helpLine {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+/* 命令/格式部分：等宽字体主文字色，不换行 —— 弹窗够宽，长格式也整行展示 */
+.helpCmd {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--hub-text-primary);
+  white-space: nowrap;
+}
+
+/* 说明部分：灰字小号，跟在命令后面 */
+.helpNote {
+  min-width: 0;
+  font-size: 11px;
+  color: var(--hub-text-tertiary);
 }

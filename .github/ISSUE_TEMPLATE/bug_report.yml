@@ -20,7 +20,7 @@ body:
     id: plugin-version
     attributes:
       label: Plugin Hub version
-      description: Shown in the plugin header as "DSH-Plugin Hub vX.Y.Z".
+      description: Shown in the plugin header as "DSH Plugin Hub vX.Y.Z".
       placeholder: e.g. 0.1.1
     validations:
       required: true

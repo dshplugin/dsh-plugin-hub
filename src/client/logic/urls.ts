@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -64,7 +64,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       ...(code ? [`- Key error: \`${code}\``] : []),
       '',
       // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的安装命令（含 --profile）与执行结果，链接由常量动态拼接
-      `## [DSH-Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
+      `## [DSH Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
       `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
       `- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add git+https://github.com/${repo}.git`}\``,
       `- 执行结果：安装失败，未能安装该插件。`,

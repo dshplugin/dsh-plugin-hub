@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -9,7 +9,9 @@
  * folder; it hosts the dialogs/toast and the section-level copy actions.
  */
 import { createElement as h, useEffect, useRef, useState } from 'react'
+import type { MouseEvent } from 'react'
 import styles from '../styles/Header.module.css'
+import modalStyles from '../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, SectionProps, ToastState } from '../types.ts'
 import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import { PLUGIN_VERSION } from '../logic/constants.ts'
@@ -23,7 +25,7 @@ import { AboutModal } from './modals/AboutModal.tsx'
 import { HubUpdateModal } from './modals/HubUpdateModal.tsx'
 import { InstalledDetailModal } from './modals/InstalledDetailModal.tsx'
 import { NotificationsModal } from './modals/NotificationsModal.tsx'
-import { addFailure, addSuccess, addUpdateNotice, clearNotifications, loadNotifications, removeNotification } from '../logic/failures.ts'
+import { addFailure, addSuccess, addUpdateNotice, clearNotifications, ignoreUpdate, loadIgnoredUpdates, loadNotifications, removeNotification, removeUpdateNotice } from '../logic/failures.ts'
 import type { NotificationRecord } from '../logic/failures.ts'
 import { CatalogHeader } from './layout/CatalogHeader.tsx'
 import { MarketView } from './views/MarketView.tsx'
@@ -32,6 +34,7 @@ import type { SectionView } from './layout/SectionTabs.tsx'
 import { InstalledView } from './views/InstalledView.tsx'
 import { CustomInstallView } from './views/CustomInstallView.tsx'
 import { SettingsView } from './views/SettingsView.tsx'
+import { CloseIcon } from './ui/icons.tsx'
 import type { InstalledItem } from '../logic/installed.ts'
 import { pluginOfItem } from '../logic/installed.ts'
 
@@ -86,6 +89,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [notifications, setNotifications] = useState<NotificationRecord[]>(() => loadNotifications())
   /** 通知中心弹窗：一级导航「设置」tab 后边的铃铛入口按钮打开 */
   const [showNotifications, setShowNotifications] = useState(false)
+  /** 「忽略本次更新」确认弹窗：{ repo, version }；null = 关闭 */
+  const [ignoreTarget, setIgnoreTarget] = useState<{ repo: string; version?: string } | null>(null)
   /** 宿主机器环境快照：提交 bug 的 issue 正文附带；取不到为 null（链接少环境段，不阻塞） */
   const [env, setEnv] = useState<EnvInfo | null>(null)
   useEffect(() => {
@@ -128,6 +133,28 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     },
   })
 
+  /** 补齐更新提醒：把「当前有更新但通知中心还没有」的插件补写进通知（repo+version 去重）。
+   *  返回本次实际新增的条数（0 = 无可更新或全部已提示过）。启动检查与打开通知中心共用，
+   *  保证通知中心始终反映可更新状态：同一版本只一条、清空/删除后重开恢复、更新完成后消失。 */
+  const syncUpdateNotices = (): number => {
+    const updatable = catalog.installedItems.filter((i) => i.hasUpdate && i.plugin)
+    if (updatable.length === 0) return 0
+    const known = new Set(loadIgnoredUpdates())
+    // 已忽略（repo+version 持久化）与通知中心已有的更新提醒都不再补写：
+    // 忽略本次版本后不再提醒，直到下一个新版本（version 变化）才重新提示
+    for (const r of loadNotifications()) {
+      if (r.kind === 'update') known.add(`${r.repo}@${r.version ?? ''}`)
+    }
+    const fresh = updatable.filter((item) =>
+      item.repo !== null && !known.has(`${item.repo}@${item.catalogVersion ?? ''}`))
+    if (fresh.length === 0) return 0
+    for (const item of fresh) {
+      if (item.repo) addUpdateNotice({ kind: 'update', repo: item.repo, version: item.catalogVersion ?? undefined })
+    }
+    setNotifications(loadNotifications())
+    return fresh.length
+  }
+
   // 启动更新策略：目录数据与设置都就绪后触发一次 —— 开启「启动时检查更新」→ 发现可更新插件
   // 即写入通知中心（每条一条，点击可去更新），toast 同步提示已入通知。
   // 绝不自动安装：是否更新完全由用户决定。
@@ -138,18 +165,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     if (!settingsReady || catalog.plugins === null || catalog.failed) return
     startupCheckedRef.current = true
     if (!hubSettings.checkUpdatesOnStart) return
-    const updatable = catalog.installedItems.filter((i) => i.hasUpdate && i.plugin)
-    if (updatable.length === 0) return
-    for (const item of updatable) {
-      if (item.repo) addUpdateNotice({ kind: 'update', repo: item.repo, version: item.catalogVersion ?? undefined })
-    }
-    setNotifications(loadNotifications())
-    setToast({ id: Date.now(), kind: 'updates', n: updatable.length })
+    const added = syncUpdateNotices()
+    if (added > 0) setToast({ id: Date.now(), kind: 'updates', n: added })
   }, [settingsReady, hubSettings, catalog.plugins, catalog.failed, catalog.installedItems, queue])
 
   // 信任/卸载/更新说明弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
   useEffect(() => {
-    if (!confirmPlugin && !confirmCustomTarget && !confirmGlobalNpm && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return
+    if (!confirmPlugin && !confirmCustomTarget && !confirmGlobalNpm && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications && !ignoreTarget) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
@@ -162,11 +184,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setShowHubUpdate(false)
         setShowAbout(false)
         setShowNotifications(false)
+        setIgnoreTarget(null)
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [confirmPlugin, confirmCustomTarget, uninstallPlugin, uninstallItem, detailItem, showHubUpdate, showAbout, showNotifications])
+  }, [confirmPlugin, confirmCustomTarget, uninstallPlugin, uninstallItem, detailItem, showHubUpdate, showAbout, showNotifications, ignoreTarget])
 
   // Toast 统一自动消失
   useEffect(() => {
@@ -299,7 +322,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       // 有可用更新时版本号后紧跟红色「可更新」徽标（同一入口），点击都打开同一个更新说明弹窗。
       // 有更新弹窗显示新版本 + Markdown 变更记录，点「直接更新」进安装弹窗覆盖重装。
       hubUpdate: catalog.hubHasUpdate,
-      onVersionClick: () => setShowHubUpdate(true),
+      // 点击版本号/徽标：先强制刷新拉取最新版本信息（发版后点击即见新版本），再打开弹窗
+      onVersionClick: () => {
+        void catalog.refreshHub().then(() => setShowHubUpdate(true))
+      },
       onAboutClick: () => setShowAbout(true),
     }),
     // 一级导航行：tab 占满左侧，通知入口靠右（「设置」tab 后边，右对齐）
@@ -312,7 +338,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         t,
         // 通知中心入口：红圈徽标 = 记录数 + 进行中任务 + 待重启（有动静才醒目）
         noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
-        onOpenNotifications: () => setShowNotifications(true),
+        onOpenNotifications: () => {
+          // 打开弹窗时补齐更新提醒（受「启动时检查更新」开关约束）：同一版本只一条，
+          // 清空/删除后重开仍恢复，直到插件更新完成才消失
+          if (hubSettings.checkUpdatesOnStart) syncUpdateNotices()
+          setShowNotifications(true)
+        },
       }),
     ),
     view === 'market'
@@ -466,10 +497,49 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         queue.clearModalTask()
         setConfirmPlugin(plugin)
       },
+      // 更新提醒「忽略本次更新」：先弹确认弹窗，确认后该版本不再提醒（持久化），直到下一个新版本
+      onIgnoreUpdate: (repo: string, version?: string) => setIgnoreTarget({ repo, version }),
       cancelTask: queue.cancelTask,
       restarting,
       onRestart: () => { void requestRestart() },
     }),
+    // 「忽略本次更新」确认弹窗：确认后该版本写入忽略集（持久化）并从通知中心移除，
+    // 本次版本不再提醒，直到插件发布下一个新版本
+    ignoreTarget && h('div', {
+      className: modalStyles.overlay,
+      onClick: (e: MouseEvent<HTMLDivElement>) => { if (e.target === e.currentTarget) setIgnoreTarget(null) },
+    },
+      h('div', { className: modalStyles.modal, role: 'dialog', 'aria-modal': 'true' },
+        h('div', { className: modalStyles.modalHead },
+          h('div', { className: modalStyles.modalTitle }, t('ignoreUpdateConfirmTitle')),
+          h('button', {
+            className: modalStyles.modalClose,
+            type: 'button',
+            'aria-label': t('errorClose'),
+            onClick: () => setIgnoreTarget(null),
+          }, h(CloseIcon)),
+        ),
+        h('div', { className: modalStyles.modalBody },
+          h('div', { className: modalStyles.failPrepareHint }, t('ignoreUpdateConfirmDetail')),
+          h('div', { className: modalStyles.modalActions },
+            h('button', {
+              className: modalStyles.restartLater,
+              type: 'button',
+              onClick: () => setIgnoreTarget(null),
+            }, t('confirmCancel')),
+            h('button', {
+              className: modalStyles.restartNow,
+              type: 'button',
+              onClick: () => {
+                ignoreUpdate(ignoreTarget.repo, ignoreTarget.version)
+                setNotifications(removeUpdateNotice(ignoreTarget.repo, ignoreTarget.version))
+                setIgnoreTarget(null)
+              },
+            }, t('ignoreUpdateConfirm')),
+          ),
+        ),
+      ),
+    ),
     // 安装确认弹窗：锁定/进度/结果视图逻辑收敛在 modals.tsx；更新与安装同入口，仅标记 update
     confirmPlugin && h(InstallModal, {
       plugin: confirmPlugin,

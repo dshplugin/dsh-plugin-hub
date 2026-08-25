@@ -1,6 +1,6 @@
 # 开发
 
-DSH-Plugin Hub 的本地构建、测试与迭代指南。
+DSH Plugin Hub 的本地构建、测试与迭代指南。
 
 > **写代码前先读 [reference.md](reference.md)**——它是基于官方 DeepSeek Harness
 > 文档（loader、client-modules、profile/bundle、已知坑）的开发规范。

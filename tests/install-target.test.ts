@@ -1,5 +1,5 @@
 /**
- * DSH-Plugin Hub — the community plugin marketplace for DeepSeek Harness.
+ * DSH Plugin Hub — the community plugin marketplace for DeepSeek Harness.
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
@@ -29,13 +29,15 @@ test('githubRepoOf: recognizes canonical and legacy GitHub targets', () => {
   assert.equal(githubRepoOf('https://example.com/owner/repo.git'), null)
 })
 
-test('installTargetOf: strips a full dsh plugin command down to its target', () => {
-  // --profile 段可选，支持 -p 简写与 --profile=web 等号形式；非命令输入原样返回
+test('installTargetOf: strips an official dsh plugin command down to its target', () => {
+  // 官方唯一形式：`dsh plugin --profile <name> add <target>`（--profile 必填、无 -p 简写）；
+  // 支持 --profile=<name> 等号形式；非命令/非官方输入原样返回
   assert.equal(installTargetOf('dsh plugin --profile web add github:dHR-P/dsh-safe-launch'), 'github:dHR-P/dsh-safe-launch')
-  assert.equal(installTargetOf('dsh plugin -p web add github:dHR-P/dsh-safe-launch'), 'github:dHR-P/dsh-safe-launch')
   assert.equal(installTargetOf('dsh plugin --profile=web add github:dHR-P/dsh-safe-launch'), 'github:dHR-P/dsh-safe-launch')
-  assert.equal(installTargetOf('dsh plugin add lodash'), 'lodash')
   assert.equal(installTargetOf('DSH PLUGIN --profile web ADD https://github.com/owner/repo.git'), 'https://github.com/owner/repo.git')
+  // 官方 CLI 不认 -p 简写、--profile 不可省略：这类输入不再剥命令，原样返回
+  assert.equal(installTargetOf('dsh plugin -p web add github:dHR-P/dsh-safe-launch'), 'dsh plugin -p web add github:dHR-P/dsh-safe-launch')
+  assert.equal(installTargetOf('dsh plugin add lodash'), 'dsh plugin add lodash')
   assert.equal(installTargetOf('lodash'), 'lodash')
   assert.equal(installTargetOf('https://github.com/owner/repo.git'), 'https://github.com/owner/repo.git')
   assert.equal(installTargetOf(''), '')
