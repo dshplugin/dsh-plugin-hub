@@ -8,6 +8,9 @@ node_modules/
 coverage/
 # 内部文档：发布信息模板等仅供内部使用，禁止提交到公开仓库
 docs/release-notes.template.md
+# 内部资料：Issue 回复模板与回复输出，仅存本地，禁止提交
+docs/GitHub Issue 回复模板.md
+docs/回复输出.md
 # 构建产物：/lib（server 编译输出）、/client（tsdown 打包输出）每次构建整目录重建，
 # 排除后 IDE 索引（尊重 .gitignore）不再反复重扫它们。已跟踪的产物不受影响
 # （git 直装仍需提交产物）；新增的未跟踪产物文件发布时用 `git add -f lib client` 强制加入。
