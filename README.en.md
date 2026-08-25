@@ -6,7 +6,7 @@
 
 # DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
 
-**A community plugin marketplace for DeepSeek Harness · 5,048 DSH plugins indexed · 4,470 human-verified**
+**4,400+ DeepSeek Harness (DSH) plugins in one community hub, updated daily. Browse, search, download and install by category — free, human-verified, traceable.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
