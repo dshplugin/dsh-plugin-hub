@@ -13,7 +13,7 @@
  * failures keep their copy / fix / file-an-issue actions. Opened from the
  * header entry button (after the Settings tab).
  */
-import { createElement as h } from 'react'
+import { createElement as h, useState } from 'react'
 import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
@@ -22,6 +22,7 @@ import { classifyFailure, npmTooLowVersion } from '../../logic/failures.ts'
 import type { PendingRestart, QueueTask } from '../../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
 import { CloseIcon } from '../ui/icons.tsx'
+import { ConfirmDialog } from './ConfirmDialog.tsx'
 
 /** 记录时间完整展示：YYYY-MM-DD HH:mm:ss（每条通知都带精确到秒的时间戳）。 */
 function fmtTime(at: number): string {
@@ -79,6 +80,10 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
    *  查不到返回 null，按钮与仓库链接一并隐藏（防提到错误仓库）。不传则按记录原样展示。 */
   resolveRepo?: (repo: string) => string | null
 }) {
+  // 危险操作确认：清空全部 / 删除单条都必须先弹独立确认框（垃圾桶图标），禁止按钮内直接生效
+  const [confirmClear, setConfirmClear] = useState(false)
+  const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null)
+
   return h('div', {
     className: styles.overlay,
     onClick: (e: MouseEvent<HTMLDivElement>) => {
@@ -234,12 +239,12 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                         onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onIgnoreUpdate(r.repo, r.version) },
                       }, t('ignoreUpdateRun'))
                       : null,
-                    // 每条通知右侧的删除按钮：单独移除这一条
+                    // 每条通知右侧的删除按钮：先弹确认框，确认后移除这一条
                     h('button', {
                       className: styles.noticeRemove,
                       'aria-label': t('removeNotification'),
                       title: t('removeNotification'),
-                      onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onRemove(r.id) },
+                      onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); setConfirmRemoveId(r.id) },
                     }, h(CloseIcon)),
                   ),
                   // 每条失败记录是一个独立卡片：头部（状态/仓库/时间/复制完整日志）→ 修复或提 Issue 动作。
@@ -294,11 +299,31 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
         h('div', { className: styles.modalActions },
           records.length > 0 ? h('button', {
             className: styles.failClear,
-            onClick: onClear,
+            onClick: () => setConfirmClear(true),
           }, t('notificationsClear')) : null,
           h('button', { className: styles.restartNow, onClick: onClose }, t('errorClose')),
         ),
       ),
     ),
+    // 清空全部通知确认弹窗：独立弹出框（垃圾桶图标，危险操作），确认后才真正清空
+    confirmClear && h(ConfirmDialog, {
+      type: 'trash',
+      title: t('notificationsClearConfirmTitle'),
+      desc: t('notificationsClearConfirmDesc'),
+      confirmLabel: t('notificationsClear'),
+      t,
+      onConfirm: () => { setConfirmClear(false); onClear() },
+      onCancel: () => setConfirmClear(false),
+    }),
+    // 删除单条通知确认弹窗：独立弹出框（垃圾桶图标），确认后才移除
+    confirmRemoveId !== null && h(ConfirmDialog, {
+      type: 'trash',
+      title: t('removeNotificationConfirmTitle'),
+      desc: t('removeNotificationConfirmDesc'),
+      confirmLabel: t('removeNotification'),
+      t,
+      onConfirm: () => { onRemove(confirmRemoveId); setConfirmRemoveId(null) },
+      onCancel: () => setConfirmRemoveId(null),
+    }),
   )
 }

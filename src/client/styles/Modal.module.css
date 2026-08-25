@@ -122,6 +122,83 @@
   flex-shrink: 0;
 }
 
+/* 确认弹窗图标区：图标居中占位，位于标题下方、描述上方 —— 所有询问框都要有对应图标 */
+.confirmIconWrap {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0 6px;
+}
+
+/* 确认弹窗图标：圆形徽标（48px），普通确认 = 品牌蓝底白图形 */
+.confirmIcon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--hub-brand);
+  box-shadow: 0 4px 12px rgba(79, 110, 247, 0.28);
+}
+
+/* 危险操作确认图标：红色底白图形 —— 清空/删除/卸载/重置，醒目区分于普通确认 */
+.confirmIconDanger {
+  background: var(--hub-danger);
+  box-shadow: 0 4px 12px rgba(209, 36, 47, 0.3);
+}
+
+/* 危险操作确认按钮：红色实底白字 —— 清空/删除/卸载/重置的最终确认，显著醒目 */
+.dangerConfirm {
+  flex: none;
+  height: 28px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--hub-danger);
+  border: 1px solid var(--hub-danger);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.dangerConfirm:hover:not(:disabled) {
+  background: var(--hub-danger-hover);
+  border-color: var(--hub-danger-hover);
+}
+
+.dangerConfirm:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 普通确认按钮：品牌蓝实底白字 —— 安装/更新/重启/忽略等常规确认 */
+.confirmPrimary {
+  flex: none;
+  height: 28px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--hub-brand);
+  border: 1px solid var(--hub-brand);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: filter 0.12s ease;
+}
+
+.confirmPrimary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.confirmPrimary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .modalDesc {
   font-size: 12px;
   line-height: 18px;

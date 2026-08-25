@@ -77,6 +77,10 @@ export default defineConfig({
         '  tag.textContent = css;',
         '  document.head.appendChild(tag);',
         '}',
+        // 登记到全局清单：宿主重启后页面不刷新、factory 不重跑时，
+        // 客户端挂载时据此比对 DOM 并补注入缺失的样式（自愈）。
+        `const cssRegistry = (globalThis.__DSH_PLUGIN_CSS__ ??= []);`,
+        'if (!cssRegistry.some(e => e.tagId === tagId)) cssRegistry.push({ tagId, css });',
         `export default ${JSON.stringify(classMap)};`,
       ].join('\n')
     },

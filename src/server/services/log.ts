@@ -105,6 +105,18 @@ export function appendLog(profile: string, entry: LogEntry): void {
   }
 }
 
+/** 清空系统日志：把当前日志文件截断为空。失败返回 false（不阻断调用方）。 */
+export function clearLog(profile: string): boolean {
+  try {
+    const file = logFilePath(profile)
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, '')
+    return true
+  } catch {
+    return false
+  }
+}
+
 /** 兼容旧格式：早期无 category（level 用 info/ok/fail/warn），归一化到新版。 */
 function normalize(raw: unknown): LogEntry | null {
   if (typeof raw !== 'object' || raw === null) return null

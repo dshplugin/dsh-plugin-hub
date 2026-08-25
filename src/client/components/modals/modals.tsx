@@ -12,7 +12,7 @@ import { createElement as h } from 'react'
 import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, TaskState, ToastState, Translate } from '../../types.ts'
-import { CloseIcon, CopyIcon, LinkIcon } from '../ui/icons.tsx'
+import { CloseIcon, ConfirmIcon, CopyIcon, LinkIcon } from '../ui/icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
 import { installCommandOf } from '../../logic/install-command.ts'
 import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
@@ -144,6 +144,10 @@ export function InstallModal(props: InstallModalProps) {
         })
         // 确认/进行中：来源行 + 安装命令 + 实时进度 + 操作按钮
         : h('div', { className: styles.modalBody },
+          // 安装/更新确认态：品牌蓝问号图标，一眼识别这是确认询问
+          !busy ? h('div', { className: styles.confirmIconWrap },
+            h(ConfirmIcon, { type: 'question' }),
+          ) : null,
           h('div', { className: styles.trustHint }, t('confirmDesc')),
           h('div', { className: styles.modalRow },
             h('span', { className: styles.modalLabel }, t('confirmPlugin')),
@@ -267,6 +271,10 @@ export function UninstallModal(props: UninstallModalProps) {
         })
         // 确认/进行中：来源行 + 实时进度 + 操作按钮
         : h('div', { className: styles.modalBody },
+          // 卸载确认态：红色垃圾桶图标，删除类危险操作
+          !busy ? h('div', { className: styles.confirmIconWrap },
+            h(ConfirmIcon, { type: 'trash' }),
+          ) : null,
           h('div', { className: styles.modalDesc }, t('uninstallDesc')),
           h('div', { className: styles.modalRow },
             h('span', { className: styles.modalLabel }, t('confirmPlugin')),
@@ -449,6 +457,10 @@ export function RestartConfirmModal({ t, restarting, onClose, onRestartNow }: {
         }, h(CloseIcon)),
       ),
       h('div', { className: styles.modalBody },
+        // 重启确认：红色警告三角 —— 重启会中断正在进行的安装/卸载任务，风险提示
+        h('div', { className: styles.confirmIconWrap },
+          h(ConfirmIcon, { type: 'warning' }),
+        ),
         h('div', { className: styles.failPrepareHint }, t('restartHint')),
         h('div', { className: styles.modalActions },
           h('button', {

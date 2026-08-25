@@ -20,7 +20,7 @@ import { resolveNpmPackage } from '../services/install/npm-resolve.ts'
 import { preflightTarget } from '../services/install/preflight.ts'
 import { isDshPlugin, isEntryLoaded } from '../services/loader.ts'
 import { loadSettings, saveSettings, resetSettings, type HubSettings } from '../services/settings.ts'
-import { appendLog, readLog, logFilePath, defaultLogFilePath, customLogFile } from '../services/log.ts'
+import { appendLog, clearLog, readLog, logFilePath, defaultLogFilePath, customLogFile } from '../services/log.ts'
 
 export interface WebRoute {
   kind: 'exact'
@@ -322,6 +322,25 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           })
         } catch {
           sendJson(response, 400, { error: 'invalid log query' })
+        }
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/clear-log',
+      handler: (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        // 清空所有日志：截断当前日志文件为空
+        try {
+          const ok = clearLog(profile)
+          if (!ok) {
+            sendJson(response, 500, { error: 'failed to clear log' })
+            return
+          }
+          appendLog(profile, { at: Date.now(), level: 'info', category: 'system', event: 'system.clear', message: '日志已由用户清空' })
+          sendJson(response, 200, { ok: true })
+        } catch {
+          sendJson(response, 500, { error: 'failed to clear log' })
         }
       },
     }),

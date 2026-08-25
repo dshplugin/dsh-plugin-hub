@@ -24,7 +24,7 @@ import { Toggle } from '../ui/Toggle.tsx'
 import { DiagnosticsView } from './DiagnosticsView.tsx'
 import { LogsView } from './LogsView.tsx'
 import {
-  CloseIcon, DiagnosticsIcon, LogsIcon, ResetIcon, SecurityIcon, UpdatesIcon,
+  CloseIcon, ConfirmIcon, DiagnosticsIcon, LogsIcon, ResetIcon, SecurityIcon, UpdatesIcon,
 } from '../ui/icons.tsx'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { HubSettings } from '../../hooks/useSettings.ts'
@@ -253,6 +253,10 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
           }, h(CloseIcon)),
         ),
         h('div', { className: modalStyles.modalBody },
+          // 恢复默认 = 破坏性操作：红色警告三角图标，醒目提示风险
+          h('div', { className: modalStyles.confirmIconWrap },
+            h(ConfirmIcon, { type: 'warning' }),
+          ),
           h('div', { className: modalStyles.failPrepareHint }, t('settingsResetConfirmDetail')),
           h('div', { className: modalStyles.modalActions },
             h('button', {

@@ -16,21 +16,22 @@ const PROXY_BASE = '/dsh-plugin-hub/catalog'
 const PLUGINS_URL = (lang: LocaleId) => `${PROXY_BASE}?lang=${lang}`
 const STATS_URL = `${PROXY_BASE}?stats=1`
 
-async function fetchJson(url: string): Promise<unknown> {
-  const res = await fetch(url, { cache: 'no-store' })
+async function fetchJson(url: string, signal?: AbortSignal): Promise<unknown> {
+  const res = await fetch(url, { cache: 'no-store', signal })
   if (!res.ok) throw new Error(String(res.status))
   return res.json()
 }
 
-/** 目录插件列表（在线 API 已只返回 verified；过滤与排序由上层负责）。 */
-export async function fetchCatalog(lang: LocaleId): Promise<HubPlugin[]> {
-  const data = await fetchJson(PLUGINS_URL(lang))
+/** 目录插件列表（在线 API 已只返回 verified；过滤与排序由上层负责）。
+ *  signal 可选：宿主重启/代理抖动导致请求挂起时，上层可中止旧请求释放连接。 */
+export async function fetchCatalog(lang: LocaleId, signal?: AbortSignal): Promise<HubPlugin[]> {
+  const data = await fetchJson(PLUGINS_URL(lang), signal)
   return (Array.isArray(data) ? data : []).map((item) => normalize(item as Record<string, unknown>))
 }
 
 /** 收录/精选统计（/api/stats.json）；字段不完整返回 null。 */
-export async function fetchStats(): Promise<{ total: number; verified: number } | null> {
-  const s = await fetchJson(STATS_URL) as { total?: number; verified?: number }
+export async function fetchStats(signal?: AbortSignal): Promise<{ total: number; verified: number } | null> {
+  const s = await fetchJson(STATS_URL, signal) as { total?: number; verified?: number }
   if (s && typeof s.total === 'number' && typeof s.verified === 'number') {
     return { total: s.total, verified: s.verified }
   }

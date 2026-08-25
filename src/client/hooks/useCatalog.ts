@@ -9,7 +9,7 @@
  * installed-plugin table, and the filter/search/sort/install-status view
  * state, exposing the derived visible list and per-category counts.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { HubPlugin, LocaleId } from '../types.ts'
 import { HUB_REPO, PLUGIN_VERSION } from '../logic/constants.ts'
 import type { HubAboutInfo, HubUpdateInfo } from '../types.ts'
@@ -45,6 +45,14 @@ export function useCatalog(lang: LocaleId) {
   const [sort, setSort] = useState<SortKey>('sortStars')
   /** 当前排序方向：点同一个排序按钮切换 正序/倒序；点新排序用该排序的默认方向（与已安装视图一致） */
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  /** 目录加载「超时自动强制刷新」重试计数：宿主重启/代理未就绪时请求可能长时间挂起，
+   *  界面停在「正在加载插件数据…」假死 —— 超时自动重拉，最多自动重试 2 次后转失败态；
+   *  用户手动刷新（reload）时清零重新计数。 */
+  const loadRetriesRef = useRef(0)
+  /** 目录加载超时阈值：超过即判定挂起，强制刷新一次（服务端代理 curl 上限 20s，客户端 12s 先兜底） */
+  const LOAD_TIMEOUT_MS = 12000
+  /** 挂起后最多自动重试次数：避免代理持续不通时无限循环刷新（每次重试仍 12s，2 次后转失败界面可手动重试） */
+  const MAX_LOAD_RETRIES = 2
 
   /** 点击排序按钮：同一按钮切换正/倒序，新按钮用默认方向 */
   function toggleSort(key: SortKey) {
@@ -83,15 +91,21 @@ export function useCatalog(lang: LocaleId) {
   // 拉取目录 + 统计。在线 API 已只返回 verified；再过滤一次，保证只展示人工验证通过的插件。
   useEffect(() => {
     let cancelled = false
+    // 本次加载是否已收尾（成功或失败）：超时定时器只对「还在加载中」生效
+    let settled = false
+    // 中止控制器：请求挂起时（宿主重启/代理抖动）超时自动重试会换新请求，
+    // 旧请求在此中止释放连接，避免挂起堆积
+    const controller = new AbortController()
     setPlugins(null)
     setHubPlugin(null)
     setStats(null)
     setFailed(false)
     // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口。
-    const load = () => Promise.all([fetchCatalog(lang), fetchStats()])
+    const load = () => Promise.all([fetchCatalog(lang, controller.signal), fetchStats(controller.signal)])
     load()
       .then(([list, stats]) => {
         if (cancelled) return
+        settled = true
         // 插件市场不显示自己：DSH Plugin Hub 从目录里排除自身条目，
         // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
         // 目录数据已排除自身，此处再兜底过滤一次，防旧快照仍含自身条目。
@@ -106,9 +120,27 @@ export function useCatalog(lang: LocaleId) {
         }
       })
       .catch(() => {
-        if (!cancelled) setFailed(true)
+        if (cancelled) return
+        settled = true
+        setFailed(true)
       })
-    return () => { cancelled = true }
+    // 加载超时兜底：宿主刚重启/代理未就绪时目录请求可能长时间挂起，界面停在「正在加载插件数据…」
+    // 像假死。超过阈值未收尾 → 强制刷新列表（重拉一次，最多 MAX_LOAD_RETRIES 次自动重试），
+    // 重试仍失败 → 转失败界面（显示「重试」按钮，手动刷新时计数清零重新开始）。
+    const timer = window.setTimeout(() => {
+      if (cancelled || settled) return
+      if (loadRetriesRef.current < MAX_LOAD_RETRIES) {
+        loadRetriesRef.current += 1
+        setReloadKey((k) => k + 1)
+      } else {
+        setFailed(true)
+      }
+    }, LOAD_TIMEOUT_MS)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+      controller.abort()
+    }
     // lang 必须进依赖：切换界面语言要重新拉对应语言的数据文件，
     // 否则英文模式仍停留在 plugins.zh.json，描述/名称全是中文
   }, [reloadKey, lang])
@@ -218,7 +250,7 @@ export function useCatalog(lang: LocaleId) {
     hubPlugin,
     stats,
     failed,
-    reload: () => setReloadKey((k) => k + 1),
+    reload: () => { loadRetriesRef.current = 0; setReloadKey((k) => k + 1) },
     installed,
     installedItems,
     installedName,

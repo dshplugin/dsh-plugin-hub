@@ -25,6 +25,7 @@ import view from '../../styles/LogsView.module.css'
 import type { Translate } from '../../types.ts'
 import { openLogFile } from '../../data/host.ts'
 import { CloseIcon } from '../ui/icons.tsx'
+import { ConfirmDialog } from './ConfirmDialog.tsx'
 
 /** 与服务端 /logs 返回的 LogEntry 对齐的客户端投影。 */
 export interface LogEntryView {
@@ -120,6 +121,9 @@ export function LogsModal({ t, onClose }: {
   const [error, setError] = useState(false)
   const [opening, setOpening] = useState(false)
   const [openFailed, setOpenFailed] = useState(false)
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [clearFailed, setClearFailed] = useState(false)
   const offsetRef = useRef(0)
 
   /** 拉一页：过滤参数取当前 state，偏移量由调用方给出。 */
@@ -195,6 +199,24 @@ export function LogsModal({ t, onClose }: {
     if (!ok) setOpenFailed(true)
   }
 
+  /** 清空所有日志：确认弹窗（独立弹出框，垃圾桶图标）确认后执行。 */
+  const doClear = async () => {
+    setClearing(true)
+    try {
+      const res = await fetch('/dsh-plugin-hub/clear-log', { method: 'POST', cache: 'no-store' })
+      if (!res.ok) {
+        setClearFailed(true)
+        return
+      }
+      await reload()
+    } catch {
+      setClearFailed(true)
+    } finally {
+      setClearing(false)
+      setShowClearConfirm(false)
+    }
+  }
+
   /** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
   const exportFile = () => {
     const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join('\n')
@@ -219,6 +241,15 @@ export function LogsModal({ t, onClose }: {
     h('div', { className: `${styles.errorModal} ${styles.logModal}`, role: 'dialog', 'aria-modal': 'true' },
       h('div', { className: styles.modalHead },
         h('div', { className: styles.modalTitle }, t('logModalTitle')),
+        h('div', { className: view.headActions },
+          h('button', {
+            type: 'button',
+            className: view.clearBtn,
+            disabled: clearing,
+            title: t('logClearAllTip'),
+            onClick: () => setShowClearConfirm(true),
+          }, t('logClearAll')),
+        ),
         h('button', {
           className: styles.modalClose,
           'aria-label': t('errorClose'),
@@ -277,9 +308,11 @@ export function LogsModal({ t, onClose }: {
       h('div', { className: view.foot },
         h('span', { className: view.footPath, title: path },
           `${t('logPathLabel')}: ${path === '' ? '…' : path}`),
-        openFailed
-          ? h('span', { className: view.footFail }, t('logOpenFileFail'))
-          : h('span', { className: view.footCount }, t('logCount', { n: total })),
+        clearFailed
+          ? h('span', { className: view.footFail }, t('logClearFailed'))
+          : openFailed
+            ? h('span', { className: view.footFail }, t('logOpenFileFail'))
+            : h('span', { className: view.footCount }, t('logCount', { n: total })),
         h('div', { className: view.footActions },
           h('button', {
             type: 'button',
@@ -290,12 +323,24 @@ export function LogsModal({ t, onClose }: {
           }, t('logOpenFile')),
           h('button', {
             type: 'button',
-            className: `${view.btn} ${view.btnPrimary}`,
+            className: view.btn,
             disabled: entries.length === 0,
             onClick: exportFile,
           }, t('logsExport')),
         ),
       ),
     ),
+    // 清空日志确认弹窗：独立弹出框（垃圾桶图标，危险操作），确认后才真正清空
+    showClearConfirm && h(ConfirmDialog, {
+      type: 'trash',
+      title: t('logClearConfirmTitle'),
+      desc: t('logClearConfirmDesc'),
+      confirmLabel: t('logClearAll'),
+      busy: clearing,
+      busyLabel: t('logClearing'),
+      t,
+      onConfirm: () => void doClear(),
+      onCancel: () => setShowClearConfirm(false),
+    }),
   )
 }

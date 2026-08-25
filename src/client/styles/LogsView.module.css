@@ -62,16 +62,37 @@
   cursor: default;
 }
 
-/* 主操作：导出日志，品牌色实底 */
-.btnPrimary {
-  color: #ffffff;
-  background: var(--hub-brand);
-  border-color: var(--hub-brand);
+/* 弹窗头部动作：清空所有日志（危险操作，二次确认时转红） */
+.headActions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 4px;
 }
 
-.btnPrimary:hover:not(:disabled) {
-  background: var(--hub-brand-hover);
-  border-color: var(--hub-brand-hover);
+.clearBtn {
+  flex: none;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.clearBtn:hover:not(:disabled) {
+  color: var(--hub-text-primary);
+  background: var(--hub-bg-2);
+}
+
+.clearBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 /* 日志列表：一行一条，悬浮高亮；超出限高内部滚动 */

@@ -95,7 +95,7 @@ export function LogsView({ t, logPath, onLogPathSaved }: {
       h('div', { className: styles.actions },
         h('button', {
           type: 'button',
-          className: `${styles.btn} ${styles.btnPrimary}`,
+          className: styles.btn,
           onClick: () => setOpen(true),
         }, t('logViewerOpen')),
         h('button', { type: 'button', className: styles.btn, disabled: entries.length === 0, onClick: exportFile }, t('logsExport')),

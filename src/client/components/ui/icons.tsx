@@ -340,6 +340,54 @@ export function ResetIcon() {
     }))
 }
 
+/** 确认弹窗图标类型：普通确认 = 问号；危险操作 = 垃圾桶 / 警告三角 / 还原箭头 */
+export type ConfirmIconType = 'question' | 'trash' | 'warning' | 'reset'
+
+/** 确认弹窗图标：圆形徽标 + 白色图形 —— 普通确认（安装/更新/重启/忽略）蓝底白问号；
+ *  危险操作（清空/删除/卸载/重置）红底白动作图形。居中放在弹窗标题下方，一眼区分确认类型。 */
+export function ConfirmIcon({ type }: { type: ConfirmIconType }) {
+  const danger = type !== 'question'
+  const glyphs = type === 'trash'
+    ? [
+      h('path', {
+        d: 'M4.5 6.5h15M9.5 6.5V4.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7',
+        stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round',
+      }),
+      h('path', {
+        d: 'M6.2 6.5l.7 12.2a1.5 1.5 0 0 0 1.5 1.3h7.2a1.5 1.5 0 0 0 1.5-1.3l.7-12.2',
+        stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round',
+      }),
+      h('path', { d: 'M10 10.2v6M14 10.2v6', stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round' }),
+    ]
+    : type === 'warning'
+      ? [
+        h('path', {
+          d: 'M12 4.2l8.5 14.3a1 1 0 0 1-.87 1.5H4.37a1 1 0 0 1-.87-1.5L12 4.2z',
+          stroke: '#ffffff', strokeWidth: 1.9, strokeLinejoin: 'round',
+        }),
+        h('path', { d: 'M12 9.6v4.5', stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round' }),
+        h('circle', { cx: 12, cy: 16.7, r: 1.05, fill: '#ffffff' }),
+      ]
+      : type === 'reset'
+        ? [
+          h('path', { d: 'M4.5 7.8A8.4 8.4 0 1 1 3.6 14.4', stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round' }),
+          h('path', { d: 'M3.9 3.9v3.9h3.9', stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+        ]
+        : [
+          h('path', {
+            d: 'M9.5 9.2a2.6 2.6 0 1 1 3.7 2.38c-.84.38-1.2.95-1.2 1.72',
+            stroke: '#ffffff', strokeWidth: 1.9, strokeLinecap: 'round',
+          }),
+          h('circle', { cx: 12, cy: 16.4, r: 1.1, fill: '#ffffff' }),
+        ]
+  return h('div', {
+    className: danger ? `${modalStyles.confirmIcon} ${modalStyles.confirmIconDanger}` : modalStyles.confirmIcon,
+    'aria-hidden': 'true',
+  },
+    h('svg', { viewBox: '0 0 24 24', width: 22, height: 22, fill: 'none' }, ...glyphs),
+  )
+}
+
 /** 系统日志图标：文档纸 + 三行文字（stroke 继承 currentColor），设置左侧导航「系统日志」用。 */
 export function LogsIcon() {
   return h('svg', {

@@ -15,6 +15,7 @@ import modalStyles from '../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, SectionProps, ToastState } from '../types.ts'
 import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import { PLUGIN_VERSION } from '../logic/constants.ts'
+import { ensurePluginCss } from '../logic/ensure-plugin-css.ts'
 import { getEnv, revealInstallFolder } from '../data/host.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
 import { useLanguage } from '../hooks/useLanguage.ts'
@@ -34,7 +35,7 @@ import type { SectionView } from './layout/SectionTabs.tsx'
 import { InstalledView } from './views/InstalledView.tsx'
 import { CustomInstallView } from './views/CustomInstallView.tsx'
 import { SettingsView } from './views/SettingsView.tsx'
-import { CloseIcon } from './ui/icons.tsx'
+import { CloseIcon, ConfirmIcon } from './ui/icons.tsx'
 import type { InstalledItem } from '../logic/installed.ts'
 import { issueRepoOf, pluginOfItem } from '../logic/installed.ts'
 
@@ -98,6 +99,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     void getEnv().then((info) => { if (alive) setEnv(info) })
     return () => { alive = false }
   }, [])
+
+  // 样式自愈：宿主重启/热更可能移除 <style> 标签而模块缓存未失效（factory 不重跑、CSS 不回来）。
+  // 挂载与每次切换视图时比对全局 CSS 清单，把缺失的样式补注入回去 —— 用户无需再手动点击恢复。
+  useEffect(() => { ensurePluginCss() }, [view])
 
   const queue = useTaskQueue({
     t,
@@ -509,7 +514,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onIgnoreUpdate: (repo: string, version?: string) => setIgnoreTarget({ repo, version }),
       cancelTask: queue.cancelTask,
       restarting,
-      onRestart: () => { void requestRestart() },
+      onRestart: () => setShowRestartConfirm(true),
       // 失败记录仓库反查：历史记录可能存的是裸 npm 包名，反查成 owner/repo 才显示仓库链接
       // 与提 Issue 按钮；查不到则隐藏（防提到错误仓库）
       resolveRepo: (repo: string) => issueRepoOf(repo, catalog.installedItems, catalog.plugins),
@@ -531,6 +536,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
           }, h(CloseIcon)),
         ),
         h('div', { className: modalStyles.modalBody },
+          // 忽略更新确认：品牌蓝问号图标，普通确认
+          h('div', { className: modalStyles.confirmIconWrap },
+            h(ConfirmIcon, { type: 'question' }),
+          ),
           h('div', { className: modalStyles.failPrepareHint }, t('ignoreUpdateConfirmDetail')),
           h('div', { className: modalStyles.modalActions },
             h('button', {
@@ -567,7 +576,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onClose: () => setConfirmPlugin(null),
       onCopy: () => copyCommand(confirmPlugin),
       onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : undefined),
-      onRestart: () => { void requestRestart() },
+      // 重启：结果视图「立即重启」也会中断进行中的任务 → 先弹重启确认弹窗
+      onRestart: () => setShowRestartConfirm(true),
     }),
     // 命令行安装确认弹窗：与目录安装同一套确认/进度/结果流程（plugin 传 null 走 customTarget 模式）。
     // 已安装目标 → update 标记，确认后走覆盖重装（服务端 mode=update 放行），不再 409 报错。
@@ -592,7 +602,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setToast({ id: Date.now(), kind: 'copied' })
       },
       onInstall: () => void queue.installCustom(confirmCustomTarget, confirmIsUpdate ? { update: true } : undefined),
-      onRestart: () => { void requestRestart() },
+      onRestart: () => setShowRestartConfirm(true),
     }),
     // 全局 npm 安装确认弹窗（官方 `npm install -g <pkgs>`）：与应用商店同一套确认/进度/结果流程。
     // 装的是系统级 CLI 工具（如 @deepseek-ai/dsh），不进任何 profile、无需宿主重启；
@@ -618,7 +628,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setToast({ id: Date.now(), kind: 'copied' })
       },
       onInstall: () => void queue.installGlobalNpm(confirmGlobalNpm.pkgs),
-      onRestart: () => { void requestRestart() },
+      onRestart: () => setShowRestartConfirm(true),
     }),
     // 卸载确认弹窗：确认/进度/结果视图逻辑收敛在 modals.tsx。
     // 已安装视图的自定义安装（目录外）没有完整目录数据，按已安装项伪插件适配后走同一弹窗
@@ -645,7 +655,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         if (uninstallItem) void queue.uninstallItem(uninstallItem)
         else if (uninstallPlugin) void queue.uninstallNow(uninstallPlugin)
       },
-      onRestart: () => { void requestRestart() },
+      onRestart: () => setShowRestartConfirm(true),
     }),
     // 已安装详情弹窗：目录元数据 + 宿主运行时信息的完整展示，操作（更新/卸载/复制路径）由此发起
     detailItem && h(InstalledDetailModal, {
