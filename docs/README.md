@@ -65,5 +65,5 @@ DeepSeek Harness 是开源仓库（MIT）。强烈建议把官方源码克隆到
 
 - `logo.svg`：项目标识。
 - `screenshot-hub-main.png`：插件中心主界面截图（历史素材；README 主图现引用 `dsh-plugin-hub-home-en.png`（英文）/ `dsh-plugin-hub-home-zh.png`（中文））。
-- `screenshot-install-uninstall.png`：可视化安装/卸载过程截图（历史素材；README 功能一览现引用 `dsh-plugin-hub-install-en/zh.png`、`dsh-plugin-hub-uninstall-en/zh.png`、`dsh-plugin-hub-update-en/zh.png`）。
+- `screenshot-install-uninstall.png`：可视化安装/卸载过程截图（历史素材；README 功能一览现引用 `dsh-plugin-hub-install-en/zh-v1.2.1.png`、`dsh-plugin-hub-uninstall-en/zh-v1.2.1.png`、`dsh-plugin-hub-update-en/zh-v1.2.1.png`）。
 - `screenshot-notifications.png`：可视化消息通知截图（历史素材；README 现引用 `dsh-plugin-hub-notifications-en.png`（英文）/ `dsh-plugin-hub-notifications-zh.png`（中文））。

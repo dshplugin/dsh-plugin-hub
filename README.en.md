@@ -72,7 +72,7 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 | One-click update | Notification center |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-update-en.png" alt="One-click update with overwrite install" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-en-v1.2.1.png" alt="Visual notifications" width="400" height="280"> |
+| <img src="docs/screenshots/dsh-plugin-hub-update-en-v1.2.1.png" alt="One-click update with overwrite install" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-en-v1.2.1.png" alt="Visual notifications" width="400" height="280"> |
 | New versions detected automatically; the card turns into "Update" and overwrite-installs in one click | Running tasks, pending restarts and full success / failure history in one place; failed installs can be filed as a GitHub Issue in one click |
 
 | Settings | Custom install |

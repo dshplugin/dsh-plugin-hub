@@ -72,7 +72,7 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 | 一键更新 | 通知中心 |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-update-zh.png" alt="一键更新" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-zh-v1.2.1.png" alt="可视化消息通知" width="400" height="280"> |
+| <img src="docs/screenshots/dsh-plugin-hub-update-zh-v1.2.1.png" alt="一键更新" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-zh-v1.2.1.png" alt="可视化消息通知" width="400" height="280"> |
 | 检测到新版本自动提示「更新」，一键覆盖安装完成升级 | 进行中任务、待重启项与成功/失败历史集中管理，失败可一键提交 Issue |
 
 | 设置 | 自定义安装 |
