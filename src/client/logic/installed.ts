@@ -116,6 +116,40 @@ function isRepoLike(value: string): boolean {
   return /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(value)
 }
 
+/**
+ * 提 Issue 的仓库身份解析：失败目标可能是 owner/repo 也可能是 npm 包名（含 @scope/pkg、
+ * 可带 @version，如 dsh-plugin、@scope/pkg@1.2.3）。
+ *  - 目标本身就能解析出 owner/repo → 直接用；
+ *  - npm 包名 → 反查仓库身份：先查已安装表（该包名的条目若带仓库身份即命中），再查目录插件
+ *    （source.npmPackage 与包名一致，取目录收录的仓库身份）。
+ * 反查到才返回，查不到返回 null —— 调用方据此不显示「一键提 Issue」按钮，避免把 Issue
+ * 提到错误的地址（别人发的 npm 包名不是 GitHub 仓库，直接拼 github.com/<包名> 是打不开的）。
+ */
+export function issueRepoOf(
+  target: string,
+  installedItems: InstalledItem[],
+  plugins: HubPlugin[] | null,
+): string | null {
+  const input = target.trim()
+  if (!input) return null
+  const parsed = repoFromInstallTarget(input)
+  if (isRepoLike(parsed)) return parsed
+  const pkg = parsed.replace(/@[^@]*$/, '').toLowerCase()
+  // 已安装表：包名命中的条目（目录收录条目直接带仓库身份；自定义安装按 github: spec 解析）
+  for (const item of installedItems) {
+    if (item.name.toLowerCase() !== pkg) continue
+    if (item.repo) return item.repo
+    const repo = repoFromInstallTarget(item.spec)
+    if (isRepoLike(repo)) return repo
+  }
+  // 目录插件：npmPackage 与包名一致 → 用目录收录的仓库身份
+  for (const p of plugins ?? []) {
+    const pkgName = (p.source?.npmPackage ?? '').trim()
+    if (pkgName !== '' && pkgName.toLowerCase() === pkg && p.source?.repo) return p.source.repo
+  }
+  return null
+}
+
 /** 已安装项 → 弹窗可用的伪插件对象：卸载确认弹窗只读名称/来源行，
  *  自定义安装（目录外）没有完整目录数据，用它把 InstalledItem 适配成 HubPlugin。 */
 export function pluginOfItem(item: InstalledItem): HubPlugin {
@@ -139,7 +173,12 @@ function isHubSelf(name: string, spec: string): boolean {
   if (name !== 'dsh-plugin') return false
   if (spec.startsWith('file:') || spec.startsWith('link:')) return true
   const repo = repoFromInstallTarget(spec)
-  return isRepoLike(repo) && repo.toLowerCase() === HUB_REPO.toLowerCase()
+  if (isRepoLike(repo) && repo.toLowerCase() === HUB_REPO.toLowerCase()) return true
+  // npm 通道覆盖重装 hub 自身后，file:/link: 本地链接会被替换成 registry 版本号/范围
+  // （如 1.3.0、^1.3.0）——依赖 key `dsh-plugin` 在 npm 上唯一属于本插件（不存在第三方
+  // 同名包），版本号形态与仓库身份同样视为 hub 自身：命令窗口「自己装自己」成功后，
+  // 条目仍不进已安装列表（卸载接口对它的 400 拒绝是服务端最后一道防线）。
+  return !isRepoLike(repo)
 }
 
 /**

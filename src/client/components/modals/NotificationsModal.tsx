@@ -55,7 +55,7 @@ function BadgeGlyph({ ok }: { ok: boolean }) {
     }))
 }
 
-export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, onIgnoreUpdate, cancelTask, restarting, onRestart }: {
+export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, onIgnoreUpdate, cancelTask, restarting, onRestart, resolveRepo }: {
   records: NotificationRecord[]
   /** 进行中的安装/卸载任务（实时进度，与队列弹窗同一数据源） */
   tasks: QueueTask[]
@@ -75,6 +75,9 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
   cancelTask: (id: number) => void
   restarting: boolean
   onRestart: () => void
+  /** 失败记录 repo 反查：npm 包名（历史记录存的是裸包名）反查成 owner/repo 再显示/提 Issue；
+   *  查不到返回 null，按钮与仓库链接一并隐藏（防提到错误仓库）。不传则按记录原样展示。 */
+  resolveRepo?: (repo: string) => string | null
 }) {
   return h('div', {
     className: styles.overlay,
@@ -165,6 +168,9 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
           : h('div', { className: styles.noticeList },
             records.map((r) => {
               const isUpdate = r.kind === 'update'
+              // 展示用仓库：历史记录存的可能是裸 npm 包名，反查成 owner/repo 才显示/提 Issue；
+              // 查不到为空 → 仓库链接与提 Issue 按钮都不渲染
+              const shownRepo = resolveRepo ? (resolveRepo(r.repo) ?? '') : r.repo
               return h('div', {
                 key: r.id,
                 // 更新提醒：整行可点击直达更新确认弹窗；install/uninstall 记录维持原交互
@@ -191,14 +197,16 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     r.repo
                       ? (isUpdate
                         ? h('span', { className: styles.failRepo, title: r.repo }, r.repo)
-                        : h('a', {
-                          className: styles.failRepo,
-                          // 跳转到官网详情页（含插件收录信息），不在通知弹窗直接跳 GitHub
-                          href: pluginSiteUrl(r.repo),
-                          target: '_blank',
-                          rel: 'noopener noreferrer',
-                          title: r.repo,
-                        }, r.repo))
+                        : shownRepo
+                          ? h('a', {
+                            className: styles.failRepo,
+                            // 跳转到官网详情页（含插件收录信息），不在通知弹窗直接跳 GitHub
+                            href: pluginSiteUrl(shownRepo),
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                            title: shownRepo,
+                          }, shownRepo)
+                          : null)
                       : null,
                     !r.ok && h('button', {
                       className: styles.failCopy,
@@ -252,18 +260,18 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                         h('div', { className: styles.failPrepareHint }, kind === 'pnpmIgnoredBuild'
                           ? t('failIgnoredBuild')
                           : /\[packaging\]/i.test(r.message) ? t('failPackagingHint') : t('failPrepareHint')),
-                        r.repo ? h('a', {
+                        r.repo && shownRepo ? h('a', {
                           className: styles.failBigIssue,
-                          href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
+                          href: pluginIssueUrl(shownRepo, r.message, env, r.command, r.attempts),
                           target: '_blank',
                           rel: 'noopener noreferrer',
                           title: t('failIssueHint'),
                         }, t('failIssueBig')) : null,
                       ])
                     }
-                    return r.repo ? h('a', {
+                    return r.repo && shownRepo ? h('a', {
                       className: styles.failBigIssue,
-                      href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
+                      href: pluginIssueUrl(shownRepo, r.message, env, r.command, r.attempts),
                       target: '_blank',
                       rel: 'noopener noreferrer',
                       title: t('failIssueHint'),

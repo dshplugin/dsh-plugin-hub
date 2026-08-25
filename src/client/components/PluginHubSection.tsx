@@ -36,7 +36,7 @@ import { CustomInstallView } from './views/CustomInstallView.tsx'
 import { SettingsView } from './views/SettingsView.tsx'
 import { CloseIcon } from './ui/icons.tsx'
 import type { InstalledItem } from '../logic/installed.ts'
-import { pluginOfItem } from '../logic/installed.ts'
+import { issueRepoOf, pluginOfItem } from '../logic/installed.ts'
 
 export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const { lang, langKey, langPath, t, toggleLang } = useLanguage(locale)
@@ -116,9 +116,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       setNotifications(addSuccess({ kind: 'uninstall', repo: repo ?? '' }))
     },
     onError: (message, repo, kind, command, attempts) => {
-      setErrorMsg({ message, repo, kind, command, attempts })
+      // 提 Issue 目标先反查仓库身份：npm 包名能在已安装表/目录里反查到 owner/repo 才保留，
+      // 反查不到置 null —— 错误弹窗/通知中心据此不显示「一键提 Issue」按钮（防提到错误仓库）
+      const issueRepo = issueRepoOf(repo ?? '', catalog.installedItems, catalog.plugins)
+      setErrorMsg({ message, repo: issueRepo, kind, command, attempts })
       // 失败自动写入通知记录：任务在后台结束时没人盯着也能留痕
-      setNotifications(addFailure({ kind, repo: repo ?? '', message, command, attempts }))
+      setNotifications(addFailure({ kind, repo: issueRepo ?? '', message, command, attempts }))
     },
     installPlugin: confirmPlugin,
     installCustomTarget: confirmCustomTarget,
@@ -237,7 +240,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         (i.repo !== null && i.repo.toLowerCase() === needle) ||
         repoFromInstallTarget(i.spec).toLowerCase() === needle)
     }
-    return catalog.installedItems.some((i) => i.name === target)
+    // npm 包名（可带 @version）：剥掉版本号后同时查已安装列表与原始依赖表。
+    // Hub 自身（file:/link: 安装）被 installedItems 刻意排除（防误卸载），列表里查不到，
+    // 但依赖表真实存在——补齐后「命令窗口重装 hub 自身」也能转「更新」语义，不再撞 already installed
+    const pkg = repo.replace(/@[^@]*$/, '').toLowerCase()
+    return catalog.installedItems.some((i) => i.name.toLowerCase() === pkg) ||
+      Object.keys(catalog.installed).some((k) => k.toLowerCase() === pkg)
   }
 
   /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行（npm 通道显示包名命令）。 */
@@ -502,6 +510,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       cancelTask: queue.cancelTask,
       restarting,
       onRestart: () => { void requestRestart() },
+      // 失败记录仓库反查：历史记录可能存的是裸 npm 包名，反查成 owner/repo 才显示仓库链接
+      // 与提 Issue 按钮；查不到则隐藏（防提到错误仓库）
+      resolveRepo: (repo: string) => issueRepoOf(repo, catalog.installedItems, catalog.plugins),
     }),
     // 「忽略本次更新」确认弹窗：确认后该版本写入忽略集（持久化）并从通知中心移除，
     // 本次版本不再提醒，直到插件发布下一个新版本
