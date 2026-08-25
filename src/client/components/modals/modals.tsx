@@ -16,7 +16,7 @@ import { CloseIcon, CopyIcon, LinkIcon } from '../ui/icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
 import { installCommandOf } from '../../logic/install-command.ts'
 import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
-import { classifyFailure } from '../../logic/failures.ts'
+import { classifyFailure, npmTooLowVersion } from '../../logic/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述；
  *  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
@@ -71,6 +71,9 @@ export interface InstallModalProps {
   plugin: HubPlugin | null
   /** 命令行安装目标（无目录元数据）：提供时按裸目标展示确认/进度/结果，命令条显示 pnpm add <target> */
   customTarget?: string
+  /** 全局 npm 安装（官方 README 的 `npm install -g <pkgs>`）：提供时按包列表展示确认/进度/结果，
+   *  命令条显示 npm install -g <pkgs> —— 装的是系统级 CLI 工具，不进插件列表、无需重启 */
+  globalNpm?: string[]
   done: boolean
   task: TaskState | null
   t: Translate
@@ -96,11 +99,11 @@ export interface InstallModalProps {
  * 目录插件与命令行安装（customTarget 模式）共用同一套确认/进度/结果流程。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, customTarget, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props
+  const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分；
-  // 命令行安装无插件元数据 → 直接用输入的目标展示
-  const name = customTarget ?? plugin?.displayName ?? plugin?.slug ?? ''
+  // 命令行安装无插件元数据 → 直接用输入的目标展示；全局 npm 安装 → 包列表空格拼接
+  const name = customTarget ?? (globalNpm !== undefined && globalNpm.length > 0 ? globalNpm.join(' ') : undefined) ?? plugin?.displayName ?? plugin?.slug ?? ''
   const busyTitle = (label: string) => langPath === 'zh/' ? `${name} 插件${label}` : `${label} ${name}`
   const title = busy
     ? task && task.status === 'pending'
@@ -158,7 +161,7 @@ export function InstallModal(props: InstallModalProps) {
             }, h(LinkIcon), plugin.source.repo),
           ) : null,
           // 手动命令条：整条点击即复制，右侧再放一个显式复制按钮；
-          // 命令行安装（无目录数据）直接展示 pnpm add <target>
+          // 命令行安装（无目录数据）直接展示 pnpm add <target>；全局 npm 安装展示 npm install -g <pkgs>
           h('div', {
             className: styles.modalCmd,
             onClick: onCopy,
@@ -167,9 +170,15 @@ export function InstallModal(props: InstallModalProps) {
             tabIndex: 0,
           },
             h('span', { className: styles.modalCmdText },
-              customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin!)),
+              globalNpm !== undefined && globalNpm.length > 0
+                ? `npm install -g ${globalNpm.join(' ')}`
+                : customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin!)),
             h('span', { className: styles.modalCmdCopy }, h(CopyIcon), t('copyCmdLabel')),
           ),
+          // 全局 npm 安装说明：装的是系统级 CLI 工具，不进插件列表、无需重启宿主
+          globalNpm !== undefined && globalNpm.length > 0
+            ? h('div', { className: styles.cliOnlyHint }, t('globalNpmHint'))
+            : null,
           // AI 识别可能需要命令行辅助的插件（webInstallable=false）：提示但不拦截，仍允许尝试一键安装
           cliOnly ? h('div', { className: styles.cliOnlyHint }, t('cliOnlyHint')) : null,
           task && task.status === 'pending' ? h('div', { className: styles.queuedHint }, t('queuedHint')) : null,
@@ -317,6 +326,8 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
 }) {
   // 失败归类：当前安装通道（npm/git）装不上 = 插件分发/依赖的问题，一律引导提 Issue
   const failureKind = classifyFailure(message)
+  // 服务端 [npm-too-low] 标记里带的本机 npm 版本（无标记为 null，提示文案降级为「怀疑」）
+  const npmVersion = npmTooLowVersion(message)
   // 复制完整错误：实际执行/尝试过的安装命令（如有）+ 完整错误正文。
   // 只复制 message 会丢上下文 —— 命令行安装输入的目标、执行过的命令都在 command/attempts 里，
   // 光拷一句「unsupported install target」出去没人看得懂
@@ -361,29 +372,33 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
           ),
           // 报错信息完整展示（可滚动），比失败记录的预览看得更多
           h('pre', { className: styles.errorBox }, message),
-          // 插件问题（prepare 构建失败 / 原生依赖构建被拦截 / git 分发缺产物）：都是插件打包分发问题 —— 先说明原因，按钮在下方引导提 Issue
-          failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
-            ? h('div', null, [
-              // [packaging]（预检/装后校验拦截：git 分发缺产物）与
-              // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
-              h('div', { className: styles.failPrepareHint }, failureKind === 'pnpmIgnoredBuild'
-                ? t('failIgnoredBuild')
-                : /\[packaging\]/i.test(message) ? t('failPackagingHint') : t('failPrepareHint')),
-              repo ? h('a', {
+          // npm 内部崩溃（edgesOut）＋ 本机 npm 版本过低：npm 自身已知缺陷，不是插件问题 ——
+          // 直接给升级指引，不引导提 Issue（提了也是 npm 的问题，插件作者无法修复）
+          failureKind === 'npmTooOld'
+            ? h('div', { className: styles.failPrepareHint },
+              t(npmVersion ? 'failNpmTooLowV' : 'failNpmTooLow', npmVersion ? { v: npmVersion } : undefined))
+            : failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
+              ? h('div', null, [
+                // [packaging]（预检/装后校验拦截：git 分发缺产物）与
+                // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交
+                h('div', { className: styles.failPrepareHint }, failureKind === 'pnpmIgnoredBuild'
+                  ? t('failIgnoredBuild')
+                  : /\[packaging\]/i.test(message) ? t('failPackagingHint') : t('failPrepareHint')),
+                repo ? h('a', {
+                  className: styles.failBigIssue,
+                  href: pluginIssueUrl(repo, message, env, command, attempts),
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  title: t('failIssueHint'),
+                }, t('failIssueBig')) : null,
+              ])
+              : repo ? h('a', {
                 className: styles.failBigIssue,
                 href: pluginIssueUrl(repo, message, env, command, attempts),
                 target: '_blank',
                 rel: 'noopener noreferrer',
                 title: t('failIssueHint'),
               }, t('failIssueBig')) : null,
-            ])
-            : repo ? h('a', {
-              className: styles.failBigIssue,
-              href: pluginIssueUrl(repo, message, env, command, attempts),
-              target: '_blank',
-              rel: 'noopener noreferrer',
-              title: t('failIssueHint'),
-            }, t('failIssueBig')) : null,
         ),
         h('div', { className: styles.modalActions },
           h('button', { className: styles.restartLater, onClick: onClose }, t('errorClose')),
@@ -402,7 +417,6 @@ export function Toast({ toast, t }: { toast: ToastState; t: Translate }) {
           : toast.kind === 'removed' ? t('uninstallDone')
             : toast.kind === 'revealFail' ? t('openFolderFail')
               : toast.kind === 'updates' ? t('updatesFound', { n: toast.n ?? 0 })
-                : toast.kind === 'updatesAuto' ? t('updatesAutoQueued', { n: toast.n ?? 0 })
                   : t('uninstallFail')
   const fail = toast.kind === 'fail' || toast.kind === 'removeFail' || toast.kind === 'revealFail'
   return h('div', {

@@ -12,6 +12,7 @@ import { readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import type { InstallResult, InstallTask, Invocation, QueueItem } from './install-types.ts'
 import { CAPTURE_LIMIT_BYTES, MAX_TASKS, MAX_TASK_LINES } from './install-types.ts'
+import { npmTooLowMarker } from './npm-check.ts'
 import { cleanLine, estimateProgress } from '../profile/progress.ts'
 import type { LoaderHandle } from '../loader.ts'
 import { removeLoadedEntry } from '../loader.ts'
@@ -168,6 +169,8 @@ export function startPluginMutation(options: {
   target: string
   timeoutMs?: number
   env?: NodeJS.ProcessEnv
+  /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
+  globalNpm?: string[]
   /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
   displayTarget?: string
   /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
@@ -175,7 +178,7 @@ export function startPluginMutation(options: {
   /** 入队前已尝试的安装方式（npm registry 反查等）：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
   attempts?: string[]
 }): InstallTask {
-  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false }
+  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, globalNpm: options.globalNpm, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
   tasks.set(task.id, task)
   if (tasks.size > MAX_TASKS) {
@@ -261,24 +264,37 @@ function spawnMutation(options: {
   displayTarget?: string
   /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
   uninstallLoader?: LoaderHandle
+  /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
+  globalNpm?: string[]
 }): Promise<InstallResult> {
-  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, uninstallLoader } = options
-  const invocation = cliInvocation()
-  const args = [...invocation.prefixArgs, 'plugin', '--profile', profile, action, target]
+  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, uninstallLoader, globalNpm } = options
+  // 全局 npm 安装：直接 spawn 本机 npm（`npm install -g <pkgs>`），不是 dsh plugin 命令
+  const isGlobalNpm = (globalNpm ?? []).length > 0
+  const invocation = isGlobalNpm
+    ? { file: 'npm', prefixArgs: [], cwd: process.cwd(), useShell: process.platform === 'win32' }
+    : cliInvocation()
+  const args = isGlobalNpm
+    ? ['install', '-g', ...(globalNpm ?? [])]
+    : [...invocation.prefixArgs, 'plugin', '--profile', profile, action, target]
   // 记录实际执行的命令（npm 通道显示包名，git 通道显示 HTTPS 源），
   // 失败提 Issue 时作为「已尝试的安装方式」随附
-  const executed = `dsh plugin --profile ${profile} ${action} ${target}`
+  const executed = isGlobalNpm
+    ? `npm install -g ${(globalNpm ?? []).join(' ')}`
+    : `dsh plugin --profile ${profile} ${action} ${target}`
   if (task && !task.attempts.includes(executed)) {
     task.attempts.push(executed)
   }
-  return new Promise((resolvePromise) => {
+  // 单次 spawn 并捕获结果：流式输出打日志 + 超时/取消兜底，close 后 resolve。
+  // 不做任何终态后处理（exitCode/status/needsRestart 由下方统一收尾），
+  // 这样全局 npm 首次失败后可以干净地换参数重试一次。
+  const spawnOnce = (attemptArgs: string[]): Promise<InstallResult> => new Promise((resolveOnce) => {
     let stdout = ''
     let stderr = ''
     let timedOut = false
     let settled = false
     let child: ReturnType<typeof spawn>
     try {
-      child = spawn(invocation.file, args, {
+      child = spawn(invocation.file, attemptArgs, {
         cwd: invocation.cwd,
         env,
         shell: invocation.useShell,
@@ -293,7 +309,7 @@ function spawnMutation(options: {
         task.exitCode = null
         pushLine(task, `[error] ${error instanceof Error ? error.message : String(error)}`)
       }
-      resolvePromise({
+      resolveOnce({
         exitCode: null,
         timedOut: false,
         error: error instanceof Error ? error.message : String(error),
@@ -310,9 +326,8 @@ function spawnMutation(options: {
     let exitWatch: ReturnType<typeof setTimeout> | undefined
     let forceSettle: ReturnType<typeof setTimeout> | undefined
 
-    // 唯一收尾入口：close / error / 兜底超时 三者只放行一次，
-    // 确保 runPluginMutation 与队列 worker 持续推进
-    const settle = (result: InstallResult): void => {
+    // 唯一收尾入口：close / error / 兜底超时 三者只放行一次，确保任务持续推进
+    const settleOnce = (result: InstallResult): void => {
       if (settled) return
       settled = true
       if (timer !== undefined) clearTimeout(timer)
@@ -320,7 +335,7 @@ function spawnMutation(options: {
       if (exitWatch !== undefined) clearTimeout(exitWatch)
       if (forceSettle !== undefined) clearTimeout(forceSettle)
       if (task) runningChildren.delete(task.id)
-      resolvePromise(result)
+      resolveOnce(result)
     }
 
     timer = setTimeout(() => {
@@ -336,7 +351,7 @@ function spawnMutation(options: {
       if (kind === 'stdout') stdout = (stdout + text).slice(-CAPTURE_LIMIT_BYTES)
       else stderr = (stderr + text).slice(-CAPTURE_LIMIT_BYTES)
       if (task) {
-        // 原生透传 pnpm 输出：stdout/stderr 原样入日志，不做格式化，保证报错信息完整可见
+        // 原生透传 pnpm/npm 输出：stdout/stderr 原样入日志，不做格式化，保证报错信息完整可见
         for (const line of text.split(/\r?\n|\r/)) {
           if (line.trim() !== '') pushLine(task, line.trimEnd())
         }
@@ -362,7 +377,7 @@ function spawnMutation(options: {
             task.timedOut = true
             pushLine(task, '[timed out]')
           }
-          settle({ exitCode: null, timedOut: true, error: 'child failed to close', stdout, stderr })
+          settleOnce({ exitCode: null, timedOut: true, error: 'child failed to close', stdout, stderr })
         }, 5_000)
       }, 3_000)
     })
@@ -373,43 +388,62 @@ function spawnMutation(options: {
         task.exitCode = null
         pushLine(task, `[error] ${error.message}`)
       }
-      settle({ exitCode: null, timedOut: false, error: error.message, stdout, stderr })
+      settleOnce({ exitCode: null, timedOut: false, error: error.message, stdout, stderr })
     })
 
-    child.once('close', async (code) => {
-      try {
-        if (task) {
-          task.exitCode = code
-          task.timedOut = timedOut
-          if (task.status !== 'cancelled') {
-            task.status = timedOut || code !== 0 ? 'failed' : 'done'
-            if (task.status === 'done') {
-              task.progress = 100
-              if (action === 'remove' && uninstallLoader) {
-                // 卸载成功 → 主动从运行中 loader 停用该包条目；
-                // 仅当宿主从未加载过它（磁盘已干净）才判「无需重启」；
-                // 只要曾在 loader 中存活（停用过 live entry）就仍要求重启——
-                // 带 UI 的插件（侧边栏面板等宿主启动时渲染的槽位）disable 后不会
-                // 主动消失，重启才能立即摘除面板
-                const removed = await removeLoadedEntry(uninstallLoader, target)
-                task.needsRestart = !removed
-                if (removed) clearPendingRestart(displayTarget ?? target)
-                else addPendingRestart(displayTarget ?? target, 'uninstall')
-              } else {
-                // 安装成功（或卸载但无 loader 引用）→ 登记待重启：
-                // 插件要宿主重启才会挂载/卸载干净，重启前一直提醒；展示目标用 displayTarget（owner/repo）
-                task.needsRestart = true
-                addPendingRestart(displayTarget ?? target, action === 'add' ? 'install' : 'uninstall')
-              }
-            }
-            pushLine(task, timedOut ? '[timed out]' : `[exit ${code ?? '?'}]`)
-          }
-        }
-      } finally {
-        settle({ exitCode: code, timedOut, error: null, stdout, stderr })
-      }
+    child.once('close', (code) => {
+      settleOnce({ exitCode: code, timedOut, error: null, stdout, stderr })
     })
   })
+
+  return (async () => {
+    let result = await spawnOnce(args)
+    // npm 11 的 arborist peer-set bug（`Cannot read properties of null (reading 'children')`，npm/cli#9911）：
+    // 某些包的 peerDependencies 用「双段 prerelease 范围」（如 dsh-tui@0.9.0 的 `^0.1.0-rc.6 || ^0.1.1-rc.1`，
+    // 26 个必需 peer 全是这种形状）会让 `npm install -g` 在解析阶段直接崩溃 —— 退出码 1、什么都没装，
+    // 与是不是从我们界面发起无关（终端里同样复现）。首次失败后自动带 `--legacy-peer-deps` 重试一次：
+    // 跳过 peer 自动解析即可绕过该 bug（peer 通常由同装的 @deepseek-ai/dsh 依赖树天然提供）。
+    // 二次尝试仍失败则保留其错误信息，不掩盖真正的原因。
+    if (isGlobalNpm && result.exitCode !== 0 && !result.timedOut && task?.status !== 'cancelled') {
+      const retryArgs = ['install', '-g', '--legacy-peer-deps', ...(globalNpm ?? [])]
+      const retryExecuted = `npm install -g --legacy-peer-deps ${(globalNpm ?? []).join(' ')}`
+      if (task && !task.attempts.includes(retryExecuted)) task.attempts.push(retryExecuted)
+      if (task) pushLine(task, '[npm] peer-set resolution crashed npm (known npm bug) — retrying with --legacy-peer-deps')
+      result = await spawnOnce(retryArgs)
+    }
+    // 统一终态后处理：exitCode/status/needsRestart 以最后一次尝试为准
+    if (task) {
+      task.exitCode = result.exitCode
+      task.timedOut = result.timedOut
+      if (task.status !== 'cancelled') {
+        task.status = result.timedOut || result.exitCode !== 0 ? 'failed' : 'done'
+        if (task.status === 'done') {
+          task.progress = 100
+          if (isGlobalNpm) {
+            // 全局 npm 安装：装的是本机 CLI 工具（如 dsh-tui），不进任何 profile，无需宿主重启
+            task.needsRestart = false
+          } else if (action === 'remove' && uninstallLoader) {
+            // 卸载成功 → 主动从运行中 loader 停用该包条目；
+            // 仅当宿主从未加载过它（磁盘已干净）才判「无需重启」；
+            // 只要曾在 loader 中存活（停用过 live entry）就仍要求重启——
+            // 带 UI 的插件（侧边栏面板等宿主启动时渲染的槽位）disable 后不会
+            // 主动消失，重启才能立即摘除面板
+            const removed = await removeLoadedEntry(uninstallLoader, target)
+            task.needsRestart = !removed
+            if (removed) clearPendingRestart(displayTarget ?? target)
+            else addPendingRestart(displayTarget ?? target, 'uninstall')
+          } else {
+            // 安装成功（或卸载但无 loader 引用）→ 登记待重启：
+            // 插件要宿主重启才会挂载/卸载干净，重启前一直提醒；展示目标用 displayTarget（owner/repo）
+            task.needsRestart = true
+            addPendingRestart(displayTarget ?? target, action === 'add' ? 'install' : 'uninstall')
+          }
+        }
+        pushLine(task, result.timedOut ? '[timed out]' : `[exit ${result.exitCode ?? '?'}]`)
+      }
+    }
+    return result
+  })()
 }
 
 /**
@@ -465,6 +499,21 @@ function ignoredBuildKeys(output: string): string[] {
     .filter((s) => s !== '')
 }
 
+/** npm arborist edgesOut 崩溃 + 本机 npm 版本过低 → 把 [npm-too-low] 标记追加到任务输出，
+ *  前端据此展示「本机 npm 版本过低」的准确原因 —— 避免该报错被外层 ERR_PNPM_PREPARE_PACKAGE
+ *  误判成插件打包/分发问题、误导用户提 Issue。检测逻辑在独立的 npm-check.ts（本机 npm 环境职责）。 */
+function annotateNpmTooLow(result: InstallResult, options: {
+  action: 'add' | 'remove'
+  task?: InstallTask
+  env?: NodeJS.ProcessEnv
+}): InstallResult {
+  if (options.action !== 'add' || result.exitCode === 0 || result.timedOut) return result
+  const line = npmTooLowMarker(`${result.stderr}\n${result.stdout}`, options.env)
+  if (line === null) return result
+  if (options.task && options.task.status !== 'cancelled') pushLine(options.task, line)
+  return { ...result, stderr: `${result.stderr}\n${line}`, error: result.error ? `${result.error}\n${line}` : line }
+}
+
 /**
  * Run a plugin mutation with one recovery path: when `add` fails because
  * pnpm's allowBuilds gate blocks a build script — either the git-hosted
@@ -485,9 +534,13 @@ export async function runPluginMutation(options: {
   displayTarget?: string
   /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
   uninstallLoader?: LoaderHandle
+  /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
+  globalNpm?: string[]
 }): Promise<InstallResult> {
-  const result = await spawnMutation(options)
-  if (options.action === 'add' && result.exitCode !== 0 && !result.timedOut) {
+  let result = await spawnMutation(options)
+  // allowBuilds 放行 / 装后入口校验都是 profile 专属（pnpm 装进 profile 的场景）；
+  // 全局 npm 安装直接走 npm，无 pnpm allowBuilds 拦截、也不进 profile，跳过这两类恢复
+  if (options.action === 'add' && result.exitCode !== 0 && !result.timedOut && (options.globalNpm ?? []).length === 0) {
     const output = `${result.stderr}\n${result.stdout}`
     // git 源：pnpm 打印的 key@url 提示
     if (output.includes('ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED')) {
@@ -501,14 +554,15 @@ export async function runPluginMutation(options: {
           pushLine(options.task, `[allow build] ${key}`)
         }
         addAllowBuildsKey(options.profile, key)
-        return spawnMutation(options)
+        result = await spawnMutation(options)
       }
     }
     // 依赖原生模块/构建脚本被 pnpm v11 拦截（ERR_PNPM_IGNORED_BUILDS）：git 与 npm 源都会出现。
     // allowBuilds 的 key 是输出里列出的 name@version（如 node-pty@1.1.0），逐个放行后重试一次；
     // 输出解析不到时回退用目标名（插件自身构建脚本被拦的 npm 场景）。
-    if (output.includes('ERR_PNPM_IGNORED_BUILDS')) {
-      const keys = ignoredBuildKeys(output)
+    // 用重试后的最终结果判断：git 源放行 prepare 后可能又在依赖层撞上原生构建拦截。
+    if (result.exitCode !== 0 && !result.timedOut && `${result.stderr}\n${result.stdout}`.includes('ERR_PNPM_IGNORED_BUILDS')) {
+      const keys = ignoredBuildKeys(`${result.stderr}\n${result.stdout}`)
       if (keys.length === 0 && githubRepoOf(options.target) === null) keys.push(options.target)
       if (keys.length > 0) {
         if (options.task) {
@@ -517,13 +571,14 @@ export async function runPluginMutation(options: {
           pushLine(options.task, `[allow build] ${keys.join(', ')}`)
         }
         for (const key of keys) addAllowBuildsKey(options.profile, key)
-        return spawnMutation(options)
+        result = await spawnMutation(options)
       }
     }
   }
   // pnpm 安装本身成功，但目标包入口文件缺失（git 分发缺构建产物）→ 判为失败：
-  // 撤销刚登记的待重启，避免用户重启时宿主加载残缺包直接崩溃
-  if (options.action === 'add' && result.exitCode === 0 && !result.timedOut) {
+  // 撤销刚登记的待重启，避免用户重启时宿主加载残缺包直接崩溃。
+  // 全局 npm 安装不进 profile（profile deps 里没有这些包），跳过入口校验
+  if (options.action === 'add' && result.exitCode === 0 && !result.timedOut && (options.globalNpm ?? []).length === 0) {
     const verified = verifyInstalledEntry(options.profile, options.target)
     if (verified.name !== null && verified.missing !== null) {
       clearPendingRestart(options.displayTarget ?? options.target)
@@ -537,5 +592,6 @@ export async function runPluginMutation(options: {
       return { exitCode: 1, timedOut: false, error: `entry file missing: ${verified.missing}`, stdout: result.stdout, stderr: `${result.stderr}\n${detail}` }
     }
   }
-  return result
+  // npm arborist edgesOut 崩溃 + 本机 npm 版本过低 → 追加 [npm-too-low] 标记，前端据此给准确原因
+  return annotateNpmTooLow(result, options)
 }

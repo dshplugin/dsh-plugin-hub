@@ -123,3 +123,35 @@ export function probeUrl(url: string, proxy: string, timeoutMs: number): Promise
   try { target = new URL(url) } catch { return Promise.resolve(probeFail()) }
   return curlProbe(target.href, proxy, timeoutMs)
 }
+
+/**
+ * curl 子进程抓取响应体（与 probeUrl 同一套代理 env 注入）。
+ * 供服务端 /catalog 代理路由使用：目录/统计数据经此拉到服务端再转给浏览器，
+ * 使「目录数据请求走设置里的代理」与 npm / git 安装通道口径一致。
+ * 失败（curl 不存在 / 连接失败 / 超时 / 非零退出）时 ok=false，全程不抛错。
+ */
+export function fetchViaCurl(url: string, proxy: string, timeoutMs: number): Promise<{ ok: boolean; body: string }> {
+  return new Promise((resolve) => {
+    const env: NodeJS.ProcessEnv = { ...process.env }
+    if (proxy !== '') {
+      env.HTTP_PROXY = proxy
+      env.HTTPS_PROXY = proxy
+      env.http_proxy = proxy
+      env.https_proxy = proxy
+    }
+    const child = spawn('curl', ['-s', '--max-time', String(Math.max(1, Math.round(timeoutMs / 1000))), url], { env })
+    let body = ''
+    child.stdout.on('data', (c: Buffer) => { body += c.toString() })
+    let done = false
+    const finish = (ok: boolean) => {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      resolve({ ok, body })
+    }
+    child.on('error', () => finish(false))
+    child.on('close', (code) => finish(code === 0))
+    // 超时兜底：curl --max-time 到点自行退出，此处再设一个进程级超时防止悬挂
+    const timer = setTimeout(() => { child.kill(); finish(false) }, timeoutMs + 1000)
+  })
+}

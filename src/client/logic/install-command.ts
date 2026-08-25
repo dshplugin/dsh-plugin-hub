@@ -21,9 +21,18 @@ export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'g
   return { target: repo, via: 'github' }
 }
 
-/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示显式 HTTPS URL。 */
+/** 展示用安装命令（复制/弹窗）：目录下发的权威命令优先（CLI-only 插件如 dsh-tui
+ *  需专属 profile（--profile dsh-tui），无法从 repo/npm 包名推断，必须用官方命令）；
+ *  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。 */
 export function installCommandOf(p: HubPlugin, withProfile = false): string {
   const { target, via } = installTargetOf(p)
+  if (via === 'npm') {
+    const cmd = p.install?.command
+    if (cmd) return cmd
+  } else {
+    const cmd = p.install?.githubCommand
+    if (cmd) return cmd
+  }
   return via === 'npm'
     ? `dsh plugin${withProfile ? ' --profile web' : ''} add ${target}`
     : `dsh plugin${withProfile ? ' --profile web' : ''} add git+https://github.com/${target}.git`

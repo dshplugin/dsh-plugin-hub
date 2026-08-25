@@ -18,9 +18,8 @@ import { LogsPathModal } from '../modals/LogsPathModal.tsx'
 /** 设置页预览条数：只放最近一小段，给用户快速感观，完整内容进查看器。 */
 const PREVIEW = 12
 
-export function LogsView({ t, onCopy, logPath, onLogPathSaved }: {
+export function LogsView({ t, logPath, onLogPathSaved }: {
   t: Translate
-  onCopy: (text: string) => void
   /** 设置里已保存的日志位置覆盖（空串 = 默认位置） */
   logPath: string
   /** 保存自定义日志位置（写入设置，服务端同时预建目录验证可写） */
@@ -64,12 +63,6 @@ export function LogsView({ t, onCopy, logPath, onLogPathSaved }: {
     return () => { mountedRef.current = false }
   }, [load])
 
-  /** 复制全文：完整日志的纯文本，粘贴给作者分析 bug。 */
-  const copyAll = () => {
-    const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join('\n')
-    if (text !== '') onCopy(text)
-  }
-
   /** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
   const exportFile = () => {
     const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join('\n')
@@ -105,7 +98,6 @@ export function LogsView({ t, onCopy, logPath, onLogPathSaved }: {
           className: `${styles.btn} ${styles.btnPrimary}`,
           onClick: () => setOpen(true),
         }, t('logViewerOpen')),
-        h('button', { type: 'button', className: styles.btn, disabled: entries.length === 0, onClick: copyAll }, t('logsCopy')),
         h('button', { type: 'button', className: styles.btn, disabled: entries.length === 0, onClick: exportFile }, t('logsExport')),
         h('button', { type: 'button', className: styles.btn, disabled: loading, onClick: () => void load() }, t('logsRefresh')),
       ),
@@ -143,7 +135,7 @@ export function LogsView({ t, onCopy, logPath, onLogPathSaved }: {
               title: t('logViewerOpen'),
             }, h(LogEntryRow, { e, t }))),
           ),
-    open && h(LogsModal, { t, onCopy, onClose: () => setOpen(false) }),
+    open && h(LogsModal, { t, onClose: () => setOpen(false) }),
     showPathModal && h(LogsPathModal, {
       t,
       defaultPath,

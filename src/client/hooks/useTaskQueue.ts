@@ -72,6 +72,9 @@ export interface TaskQueueOptions {
   installPlugin: HubPlugin | null
   /** 当前打开的自定义安装（命令行）确认弹窗目标：与应用商店同一弹窗机制，匹配进行中的 custom 安装任务。 */
   installCustomTarget?: string | null
+  /** 当前打开的全局 npm 安装（`npm install -g <pkgs>`）确认弹窗身份（包列表空格拼接）：
+   *  匹配服务端登记的全局安装任务（target = 包列表 join(' ')）。 */
+  installGlobalTarget?: string | null
   uninstallPlugin: HubPlugin | null
   /** 已安装视图发起的卸载目标（npm 包名）：目录插件走 uninstallPlugin，自定义安装走包名直卸。 */
   uninstallName: string | null
@@ -83,7 +86,7 @@ export interface TaskQueueOptions {
 export function useTaskQueue(opts: TaskQueueOptions) {
   const {
     t, refreshInstalled, onInstallDone, onUninstallDone, onError,
-    installPlugin, installCustomTarget, uninstallPlugin, uninstallName, installedName, resolvePending,
+    installPlugin, installCustomTarget, installGlobalTarget, uninstallPlugin, uninstallName, installedName, resolvePending,
   } = opts
   const [queue, setQueue] = useState<QueueTask[]>([])
   const queueRef = useRef<QueueTask[]>([])
@@ -398,6 +401,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     source: 'catalog' | 'custom'
     /** 更新已安装目标（放行 add 覆盖重装） */
     update?: boolean
+    /** 全局 npm 安装包列表（`npm install -g <pkgs>`）：非空时服务端执行全局安装，不进任何 profile */
+    globalNpm?: string[]
   }) => {
     // 防重复入队：同一目标已在排队/执行中则忽略
     if (queueRef.current.some((q) => q.kind === 'install' && q.target === input.repo)) return
@@ -426,7 +431,13 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       const res = await fetch('/dsh-plugin-hub/install', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ repo: input.target, display: input.repo, source: input.source, mode: input.update ? 'update' : undefined }),
+        body: JSON.stringify({
+          repo: input.target,
+          display: input.repo,
+          source: input.source,
+          mode: input.update ? 'update' : undefined,
+          ...(input.globalNpm && input.globalNpm.length > 0 ? { globalNpm: input.globalNpm } : {}),
+        }),
         signal: controller.signal,
       })
       const data = await res.json() as { ok?: boolean; task?: number; error?: string; attempts?: string[] }
@@ -495,6 +506,22 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       repo,
       command: `pnpm add ${target}`,
       source: 'custom',
+      update: opts?.update,
+    })
+  }
+
+  /** 全局 npm 安装（官方 README 的 `npm install -g <pkgs>`）：不进任何 profile、无需宿主重启。
+   *  队列展示/防重用包列表空格拼接的身份（与服务端 target 同口径）。 */
+  const installGlobalNpm = async (pkgs: string[], opts?: { update?: boolean }) => {
+    const list = (pkgs ?? []).map((p) => p.trim()).filter((p) => p !== '')
+    if (list.length === 0) return
+    const identity = list.join(' ')
+    await submitInstall({
+      target: identity,
+      repo: identity,
+      command: `npm install -g ${identity}`,
+      source: 'custom',
+      globalNpm: list,
       update: opts?.update,
     })
   }
@@ -576,10 +603,12 @@ export function useTaskQueue(opts: TaskQueueOptions) {
 
   // 弹窗对应任务：优先当前弹窗发起任务，其次按目标匹配（重新打开弹窗 / 目标已在队列时也能展示实时进度）
   // 目录插件按 source.repo 匹配；命令行安装（custom）按归一化后的仓库身份/包名匹配；
+  // 全局 npm 安装按包列表身份（空格拼接）匹配；
   // 排除 cancelling：取消中的任务不再关联到弹窗，弹窗回到「确认」态可重新操作
   const installModalTarget = installPlugin?.source?.repo
     ?? (installCustomTarget ? repoFromInstallTarget(installCustomTarget) : null)
-  const installModalTask = (installPlugin || installCustomTarget)
+    ?? installGlobalTarget ?? null
+  const installModalTask = (installPlugin || installCustomTarget || installGlobalTarget)
     ? (queue.find((q) => q.id === modalTaskRef.current && q.kind === 'install' && q.status !== 'cancelling')
       ?? queue.find((q) => q.kind === 'install' && q.target === installModalTarget && q.status !== 'cancelling')
       ?? null)
@@ -598,6 +627,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     submitting,
     installNow,
     installCustom,
+    installGlobalNpm,
     uninstallNow,
     uninstallItem,
     cancelTask,

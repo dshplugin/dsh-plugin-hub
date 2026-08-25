@@ -14,8 +14,6 @@ import { profileDirectory } from './profile/profile.ts'
 export interface HubSettings {
   /** 启动时检查目录插件更新，发现可更新时在通知中心提示（安装不自动进行） */
   checkUpdatesOnStart: boolean
-  /** 检查到可用更新后自动安装（装完需重启宿主生效；默认关，规避「装完重启即崩」风险） */
-  autoInstallUpdates: boolean
   /** npm 镜像源 registry 地址（空串 = 官方 https://registry.npmjs.org） */
   npmRegistry: string
   /** HTTP(S) 代理地址，用于 npm / git / 目录请求（空串 = 直连） */
@@ -24,17 +22,19 @@ export interface HubSettings {
   enableNpmInstall: boolean
   /** 启用命令行安装 GitHub 源码（默认开；关掉后输入 GitHub 地址安装被拦截） */
   enableGitInstall: boolean
+  /** 启用命令行粘贴 dsh plugin 命令安装（默认开；关掉后命令输入被禁用） */
+  enableDshInstall: boolean
   /** 日志存放位置覆盖（空串 = 默认 ~/.dsh/profiles/<profile>/hub.log；可填目录或 .log 文件路径） */
   logPath: string
 }
 
 export const DEFAULT_SETTINGS: HubSettings = {
   checkUpdatesOnStart: true,
-  autoInstallUpdates: false,
   npmRegistry: '',
   proxy: '',
   enableNpmInstall: true,
   enableGitInstall: true,
+  enableDshInstall: true,
   logPath: '',
 }
 

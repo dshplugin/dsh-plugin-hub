@@ -28,8 +28,15 @@ export function normalize(raw: Record<string, unknown>): HubPlugin {
             npmPackage: typeof (raw.r as { npmPackage?: unknown }).npmPackage === 'string' ? (raw.r as { npmPackage: string }).npmPackage : undefined,
           }
           : undefined,
-      // 能否网页一键安装：API 仅在 false 时下发 wi（缺省视为 true），据此禁用一键安装、只提示命令行
-      install: raw.wi === false ? { webInstallable: false } : undefined,
+      // 安装信息：wi 仅在 false 时下发（缺省视为 true 可一键安装）；
+      // ic/igc = 目录下发的权威安装命令（npm/git 通道各一条，CLI-only 插件如 dsh-tui 必须用）
+      install: raw.wi === false || typeof raw.ic === 'string' || typeof raw.igc === 'string'
+        ? {
+          webInstallable: raw.wi === false ? false : undefined,
+          command: typeof raw.ic === 'string' ? raw.ic : undefined,
+          githubCommand: typeof raw.igc === 'string' ? raw.igc : undefined,
+        }
+        : undefined,
       compatibility: typeof raw.v === 'string' ? { status: raw.v } : undefined,
       dates: {
         repoUpdatedAt: typeof raw.u === 'string' ? raw.u : undefined,

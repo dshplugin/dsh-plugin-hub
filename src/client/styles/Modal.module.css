@@ -53,9 +53,11 @@
 }
 
 /* 系统日志查看器弹窗：比错误弹窗更宽 —— 日志行带时间/级别/类别/事件/描述，
-   加上筛选栏与底部操作栏后需要横向空间，窄了长行容易折行 */
+   加上筛选栏与底部操作栏后需要横向空间，窄了长行容易折行。
+   高度固定（540px，小视口才让位给窗口上限）：内容多寡不再让弹窗忽高忽低 */
 .logModal {
   width: 780px;
+  height: min(540px, calc(100vh - 64px));
   max-width: calc(100vw - 48px);
 }
 
@@ -949,6 +951,52 @@
 
 .noticeRowOk .noticeTime {
   margin-left: auto;
+}
+
+/* 更新提醒通知：整行可点击直达更新确认弹窗 —— 卡片 hover 提亮 + 指针手型 */
+.noticeRowUpdate {
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.noticeRowUpdate:hover {
+  border-color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+}
+
+/* 更新提醒：新版本号小徽标（紧随标题之后，品牌蓝浅底） */
+.noticeVersion {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--hub-brand);
+  background: var(--hub-brand-tint);
+  border: 1px solid var(--hub-brand-border);
+  border-radius: 5px;
+  padding: 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 更新提醒：行尾「去更新」小按钮（品牌蓝实底白字） */
+.noticeUpdateGo {
+  flex-shrink: 0;
+  margin-left: 2px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--hub-brand);
+  border: none;
+  border-radius: 5px;
+  padding: 2px 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease;
+}
+
+.noticeUpdateGo:hover {
+  background: var(--hub-brand-hover);
 }
 
 /* 操作类型徽标：安装失败红 / 卸载失败黄 */

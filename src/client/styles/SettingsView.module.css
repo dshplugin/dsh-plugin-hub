@@ -208,9 +208,8 @@
 
 /* —— 恢复默认：独立设置卡片内的危险按钮 —— */
 
-/* 默认态：红字描边次级按钮；确认态：红底白字实心，醒目提示这是破坏性操作 */
-.resetBtn,
-.resetBtnArmed {
+/* 恢复默认按钮：红字描边次级按钮，点击弹出确认窗后再真正重置 */
+.resetBtn {
   flex: none;
   height: 28px;
   padding: 0 14px;
@@ -230,14 +229,4 @@
 .resetBtn:hover {
   background: var(--hub-danger-tint);
   border-color: var(--hub-danger-text);
-}
-
-.resetBtnArmed {
-  color: #ffffff;
-  background: var(--hub-danger);
-  border: 1px solid var(--hub-danger);
-}
-
-.resetBtnArmed:hover {
-  background: var(--hub-danger-hover);
 }

@@ -13,13 +13,15 @@
  */
 export interface NotificationRecord {
   id: number
-  kind: 'install' | 'uninstall'
+  kind: 'install' | 'uninstall' | 'update'
   /** true = 成功（轻量记录）；false = 失败（message 携带完整错误日志） */
   ok: boolean
   /** owner/repo（可能为空：请求层失败但拿不到仓库时） */
   repo: string
   /** 失败时的完整错误日志；成功记录为空串 */
   message: string
+  /** 更新提醒：目录里的新版本号（展示用；其余通知省略） */
+  version?: string
   /** 实际执行的安装/卸载命令（issue 预填时如实展示）；历史记录可能缺失 */
   command?: string
   /** 尝试过的安装方式（npm registry 反查 + 实际执行命令，按先后顺序）：失败提 Issue 时贴给作者，便于反推正确的 npm 包名 */
@@ -82,6 +84,11 @@ export function addSuccess(record: Omit<NotificationRecord, 'id' | 'at' | 'ok' |
   return addNotification({ ...record, ok: true, message: '' })
 }
 
+/** 记录一条「发现新版本」更新提醒：成功类轻量记录，携带目录新版本号供通知中心展示。 */
+export function addUpdateNotice(record: Omit<NotificationRecord, 'id' | 'at' | 'ok' | 'message'>): NotificationRecord[] {
+  return addNotification({ ...record, ok: true, message: '' })
+}
+
 /** 清空全部通知记录，返回空列表。 */
 export function clearNotifications(): NotificationRecord[] {
   save([])
@@ -95,12 +102,15 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
+export type FailureKind = 'npmTooOld' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
 
 /**
- * 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+ * 失败归类，四态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
  * 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
- * 一律引导提 Issue：
+ * 一律引导提 Issue；唯一例外是本机 npm 自身版本过低导致的内部崩溃（见 npmTooOld）：
+ * - npmTooOld：失败输出含 npm arborist 的 `edgesOut` 崩溃特征（build-ideal-tree.js 解 peer 依赖时
+ *   内部抛错，npm 11.6.0 前必现的已知缺陷，npm/cli#8261、#9787），或服务端已核实本机版本低于
+ *   阈值并打了 `[npm-too-low]` 标记 —— 是本机 npm 版本过低/自身缺陷，不是插件问题 → 引导升级 npm
  * - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
  *   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
  *   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
@@ -109,6 +119,10 @@ export type FailureKind = 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
  * - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
  */
 export function classifyFailure(message: string): FailureKind {
+  // npm 内部崩溃（edgesOut）或服务端 [npm-too-low] 标记：是本机 npm 版本过低/自身缺陷，
+  // 不是插件问题 —— 必须最先判，否则该报错会被外层 ERR_PNPM_PREPARE_PACKAGE 吞成
+  // 「插件打包分发问题」，误导用户去提 Issue
+  if (/\[npm-too-low\]|edgesOut/i.test(message)) return 'npmTooOld'
   // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
@@ -119,6 +133,13 @@ export function classifyFailure(message: string): FailureKind {
   if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return 'pluginPrepare'
   // 其余失败（含 git prepare 被 pnpm 白名单拦截）：当前通道装不上 = 插件分发/依赖的问题，一律提 Issue
   return 'repo'
+}
+
+/** 从服务端 `[npm-too-low]` 标记行提取本机 npm 版本（如 `[npm-too-low] npm@11.3.0` → "11.3.0"）；
+ *  历史记录无标记时返回 null，前端据此决定提示文案是否带具体版本。 */
+export function npmTooLowVersion(message: string): string | null {
+  const m = message.match(/\[npm-too-low\]\s*npm@(\d+\.\d+\.\d+)/i)
+  return m ? m[1] : null
 }
 
 /** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */

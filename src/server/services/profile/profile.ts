@@ -42,6 +42,23 @@ export function installTargetOf(value: string): string {
   return match !== null ? match[1].trim() : input
 }
 
+/**
+ * npm 全局安装命令（官方 README 的 `npm install -g <pkgs>`，如 dsh-tui 的安装命令）——
+ * 提取 -g 之后的包列表。支持 `npm install|i` 与 `-g|--global`；任一包名非法（或格式
+ * 不匹配）返回 null，由调用方按「不支持的目标」处理。与客户端 CustomInstallView 同口径。
+ */
+const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i
+
+export function globalNpmPackagesOf(value: string): string[] | null {
+  const input = typeof value === 'string' ? value.trim() : ''
+  const match = NPM_GLOBAL_CMD_RE.exec(input)
+  if (match === null) return null
+  const packages = match[1].trim().split(/\s+/).filter((p) => p !== '')
+  // 包名逐个校验 + 拒绝以 - 开头的 token（npm 会把 --xxx 当参数而非包名，防注入任意 CLI 参数）
+  if (packages.length === 0 || packages.some((p) => !validPackageName(p) || p.startsWith('-'))) return null
+  return packages
+}
+
 /** Extract an owner/repo identity from a catalog value or an installed Git spec. */
 export function githubRepoOf(value: string): string | null {
   if (typeof value !== 'string') return null

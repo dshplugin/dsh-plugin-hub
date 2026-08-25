@@ -6,10 +6,11 @@
  * Custom install view: a standalone top-level section for manually
  * installing npm packages or GitHub sources outside the catalog. Three
  * installer cards, one per channel — npm package, GitHub source and a raw
- * DSH command (`dsh plugin ... add <target>`) — each with a placeholder
- * example above the input and its own format check. The cards stay
- * separate so a user never has to guess which format goes where. Finished
- * installs surface in the Installed view, marked as custom.
+ * install command (a `dsh plugin ... add <target>` or the official global
+ * `npm install -g <pkgs>`) — each with a placeholder example above the
+ * input and its own format check. The cards stay separate so a user never
+ * has to guess which format goes where. Finished installs surface in the
+ * Installed view, marked as custom.
  *
  * Pure presentational: owns only the three local input/error states; the
  * actual install (custom source, gated by the security toggles) bubbles up
@@ -22,9 +23,9 @@ import type { Translate } from '../../types.ts'
 
 /* —— 自定义安装输入预检 ——
  * 提交前校验「输入是否符合该通道格式」，识别不了的输入不发请求，就地提示推荐格式。
- * 三个通道严格分开：npm 框只认包名，git 框只认 GitHub 地址，DSH 命令框只认完整命令
- * （`dsh plugin [--profile|-p <p>] add <target>`）。这里只做格式校验，
- * 真正归一化/安装由服务端完成。 */
+ * 三个通道严格分开：npm 框只认包名，git 框只认 GitHub 地址，命令框认两种完整命令
+ * （`dsh plugin [--profile|-p <p>] add <target>` 与官方全局安装 `npm install -g <pkgs>`）。
+ * 这里只做格式校验，真正归一化/安装由服务端完成。 */
 
 /** GitHub 地址（带前缀形态）：github:、https://github.com/、git+https://github.com/、git@github.com: */
 const GITHUB_URL_RE = /^(?:github:|https?:\/\/github\.com\/|git\+https?:\/\/github\.com\/|git@github\.com:)([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?:\.git)?$/
@@ -37,10 +38,24 @@ const NPM_PACKAGE_RE = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/
  * 命令大小写不敏感，支持 `-p` 简写与 `--profile=web` 等号形式，与 server 端 installTargetOf 口径一致。 */
 const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+(?:(?:--profile|-p)(?:=|\s+)\S+\s*)?add\s+(.+)$/i
 
+/** npm 全局安装命令（官方 README 格式，如 `npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui`）——
+ * 提取 -g 之后的包列表；任一包名非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 口径一致。 */
+const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i
+
 function installTargetOf(raw: string): string {
   const input = raw.trim()
   const match = DSH_PLUGIN_CMD_RE.exec(input)
   return match !== null ? match[1].trim() : input
+}
+
+function parseNpmGlobalPackages(raw: string): string[] | null {
+  const input = raw.trim()
+  const match = NPM_GLOBAL_CMD_RE.exec(input)
+  if (match === null) return null
+  const packages = match[1].trim().split(/\s+/).filter((p) => p !== '')
+  // 包名逐个校验 + 拒绝以 - 开头的 token（npm 会把 --xxx 当参数而非包名），与 server 端同口径
+  if (packages.length === 0 || packages.some((p) => !NPM_PACKAGE_RE.test(p) || p.startsWith('-'))) return null
+  return packages
 }
 
 function isGitHubInput(raw: string): boolean {
@@ -56,10 +71,17 @@ function isDshCommand(raw: string): boolean {
   return DSH_PLUGIN_CMD_RE.test(raw.trim())
 }
 
-export function CustomInstallView({ t, onInstallCustom }: {
+export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, enableDsh, onOpenSettings }: {
   t: Translate
-  /** 命令行安装：输入 npm 包名 / GitHub 地址 / dsh plugin 命令即装（custom 源，受安全设置两开关控制） */
-  onInstallCustom: (raw: string) => void
+  /** 命令行安装：输入 npm 包名 / GitHub 地址 / 安装命令（dsh plugin add 或 npm install -g）即装
+   *  （custom 源，受安全设置开关控制）；opts.globalNpm 表示官方 npm 全局安装命令，附带解析出的包列表 */
+  onInstallCustom: (raw: string, opts?: { globalNpm?: string[] }) => void
+  /** 安全信任三通道开关：关掉后对应输入卡片禁用（不提交），并引导去设置打开 */
+  enableNpm: boolean
+  enableGit: boolean
+  enableDsh: boolean
+  /** 引导去「设置 → 安全信任」打开被关闭的通道开关 */
+  onOpenSettings: () => void
 }) {
   /** 自定义安装：NPM 包输入与格式错误（'' = 无错误） */
   const [npmQuery, setNpmQuery] = useState('')
@@ -71,8 +93,19 @@ export function CustomInstallView({ t, onInstallCustom }: {
   const [cmdQuery, setCmdQuery] = useState('')
   const [cmdError, setCmdError] = useState('')
 
+  /** 通道关闭提示行：开关关掉后替代示例与输入行，引导去设置打开 */
+  const channelOffRow = h('div', { className: styles.channelOff },
+    h('span', { className: styles.channelOffText }, t('channelDisabledHint')),
+    h('button', {
+      type: 'button',
+      className: styles.channelOffBtn,
+      onClick: onOpenSettings,
+    }, t('goToSettings')),
+  )
+
   // 三个通道分开校验 —— 识别不了的输入不发请求，就地提示推荐写法。
-  // NPM / GitHub 框只认各自裸目标；DSH 命令框只认完整命令，提交时剥成裸目标发给服务端。
+  // NPM / GitHub 框只认各自裸目标；命令框认两种完整命令（dsh plugin add / npm install -g），
+  // 提交时 dsh 命令剥成裸目标发给服务端，npm install -g 解析成包列表走全局安装通道。
   const submitNpm = () => {
     const target = npmQuery.trim()
     if (!target) return
@@ -92,6 +125,14 @@ export function CustomInstallView({ t, onInstallCustom }: {
   const submitCmd = () => {
     const raw = cmdQuery.trim()
     if (!raw) return
+    // 官方 npm 全局安装命令（npm install -g <pkgs>）优先识别：解析出包列表走全局安装通道
+    const globalPkgs = parseNpmGlobalPackages(raw)
+    if (globalPkgs !== null) {
+      onInstallCustom(raw, { globalNpm: globalPkgs })
+      setCmdQuery('')
+      setCmdError('')
+      return
+    }
     if (!isDshCommand(raw)) { setCmdError(t('dshCmdInvalid')); return }
     onInstallCustom(installTargetOf(raw))
     setCmdQuery('')
@@ -101,94 +142,108 @@ export function CustomInstallView({ t, onInstallCustom }: {
   return h('div', { className: styles.root },
     // 页面说明：独立一级导航，交代「装完去哪看」
     h('p', { className: styles.desc }, t('customViewDesc')),
-    // 三块卡片（一行一个）：label + 文本框上方示例 + 输入行 + 错误区
+    // 三块卡片（一行一个）：label + 文本框上方示例 + 输入行 + 错误区；
+    // 安全信任开关关掉对应通道时，卡片禁用并显示「前往设置」提示行
     h('div', { className: styles.installCards },
       // NPM 包：输入包名即装
-      h('div', { className: styles.installCard },
+      h('div', { className: enableNpm ? styles.installCard : `${styles.installCard} ${styles.installCardDisabled}` },
         h('div', { className: styles.installCardHead },
           h('span', { className: styles.installLabel }, t('npmInstallLabel')),
         ),
-        // 文本框上方的示例：告诉用户怎么写
-        h('div', { className: styles.installExample }, t('npmInstallExample')),
-        h('div', { className: styles.installRow },
-          h('input', {
-            className: npmError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
-            type: 'text',
-            placeholder: t('npmInstallPlaceholder'),
-            value: npmQuery,
-            spellCheck: false,
-            onInput: (e: FormEvent<HTMLInputElement>) => {
-              setNpmQuery((e.target as HTMLInputElement).value)
-              // 重新输入即清掉格式错误提示
-              setNpmError('')
-            },
-            onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') submitNpm() },
-          }),
-          h('button', {
-            className: styles.installBtn,
-            type: 'button',
-            disabled: npmQuery.trim() === '',
-            onClick: submitNpm,
-          }, t('installCliBtn')),
-        ),
-        // 格式错误：识别不了的包名就地说明，并给出推荐写法
-        npmError ? h('div', { className: styles.installError }, npmError) : null,
+        !enableNpm
+          ? channelOffRow
+          : [
+            // 文本框上方的示例：告诉用户怎么写
+            h('div', { className: styles.installExample }, t('npmInstallExample')),
+            h('div', { className: styles.installRow },
+              h('input', {
+                className: npmError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
+                type: 'text',
+                placeholder: t('npmInstallPlaceholder'),
+                value: npmQuery,
+                spellCheck: false,
+                onInput: (e: FormEvent<HTMLInputElement>) => {
+                  setNpmQuery((e.target as HTMLInputElement).value)
+                  // 重新输入即清掉格式错误提示
+                  setNpmError('')
+                },
+                onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') submitNpm() },
+              }),
+              h('button', {
+                className: styles.installBtn,
+                type: 'button',
+                disabled: npmQuery.trim() === '',
+                onClick: submitNpm,
+              }, t('installCliBtn')),
+            ),
+            // 格式错误：识别不了的包名就地说明，并给出推荐写法
+            npmError ? h('div', { className: styles.installError }, npmError) : null,
+          ],
       ),
       // GitHub 源码：输入仓库地址即装
-      h('div', { className: styles.installCard },
+      h('div', { className: enableGit ? styles.installCard : `${styles.installCard} ${styles.installCardDisabled}` },
         h('div', { className: styles.installCardHead },
           h('span', { className: styles.installLabel }, t('gitInstallLabel')),
         ),
-        h('div', { className: styles.installExample }, t('gitInstallExample')),
-        h('div', { className: styles.installRow },
-          h('input', {
-            className: gitError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
-            type: 'text',
-            placeholder: t('gitInstallPlaceholder'),
-            value: gitQuery,
-            spellCheck: false,
-            onInput: (e: FormEvent<HTMLInputElement>) => {
-              setGitQuery((e.target as HTMLInputElement).value)
-              setGitError('')
-            },
-            onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') submitGit() },
-          }),
-          h('button', {
-            className: styles.installBtn,
-            type: 'button',
-            disabled: gitQuery.trim() === '',
-            onClick: submitGit,
-          }, t('installCliBtn')),
-        ),
-        gitError ? h('div', { className: styles.installError }, gitError) : null,
+        !enableGit
+          ? channelOffRow
+          : [
+            h('div', { className: styles.installExample }, t('gitInstallExample')),
+            h('div', { className: styles.installRow },
+              h('input', {
+                className: gitError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
+                type: 'text',
+                placeholder: t('gitInstallPlaceholder'),
+                value: gitQuery,
+                spellCheck: false,
+                onInput: (e: FormEvent<HTMLInputElement>) => {
+                  setGitQuery((e.target as HTMLInputElement).value)
+                  setGitError('')
+                },
+                onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') submitGit() },
+              }),
+              h('button', {
+                className: styles.installBtn,
+                type: 'button',
+                disabled: gitQuery.trim() === '',
+                onClick: submitGit,
+              }, t('installCliBtn')),
+            ),
+            gitError ? h('div', { className: styles.installError }, gitError) : null,
+          ],
       ),
-      // DeepSeek Harness 命令：粘贴完整 dsh plugin 命令即装（可含 --profile 段）
-      h('div', { className: styles.installCard },
+      // 命令卡片：粘贴完整安装命令即装 —— 官方全局安装 `npm install -g <pkgs>`（装系统级 CLI 工具）
+      // 或完整 dsh plugin 命令（可含 --profile 段，剥成裸目标安装）
+      h('div', { className: enableDsh ? styles.installCard : `${styles.installCard} ${styles.installCardDisabled}` },
         h('div', { className: styles.installCardHead },
           h('span', { className: styles.installLabel }, t('dshCmdLabel')),
         ),
-        h('div', { className: styles.installExample }, t('dshCmdExample')),
-        h('div', { className: styles.installRow },
-          h('input', {
-            className: cmdError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
-            type: 'text',
-            placeholder: t('dshCmdPlaceholder'),
-            value: cmdQuery,
-            spellCheck: false,
-            onInput: (e: FormEvent<HTMLInputElement>) => {
-              setCmdQuery((e.target as HTMLInputElement).value)
-              setCmdError('')
-            },
-            onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') submitCmd() },
-          }),
-          h('button', {
-            className: styles.installBtn,
-            type: 'button',
-            disabled: cmdQuery.trim() === '',
-            onClick: submitCmd,
-          }, t('installCliBtn')),
-        ),
-        cmdError ? h('div', { className: styles.installError }, cmdError) : null,
+        !enableDsh
+          ? channelOffRow
+          : [
+            h('div', { className: styles.installExample }, t('dshCmdExample')),
+            h('div', { className: styles.installRow },
+              h('input', {
+                className: cmdError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
+                type: 'text',
+                placeholder: t('dshCmdPlaceholder'),
+                value: cmdQuery,
+                spellCheck: false,
+                onInput: (e: FormEvent<HTMLInputElement>) => {
+                  setCmdQuery((e.target as HTMLInputElement).value)
+                  setCmdError('')
+                },
+                onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter') submitCmd() },
+              }),
+              h('button', {
+                className: styles.installBtn,
+                type: 'button',
+                disabled: cmdQuery.trim() === '',
+                onClick: submitCmd,
+              }, t('installCliBtn')),
+            ),
+            cmdError ? h('div', { className: styles.installError }, cmdError) : null,
+          ],
       ),
     ),
   )

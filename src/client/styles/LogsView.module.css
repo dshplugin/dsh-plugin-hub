@@ -12,7 +12,7 @@
   min-width: 0;
 }
 
-/* 头部：说明文字独占一行，操作按钮组独立一行靠左（打开查看器 / 复制 / 导出 / 刷新） */
+/* 头部：说明文字独占一行，操作按钮组独立一行靠左（打开查看器 / 导出日志 / 刷新日志） */
 .head {
   display: flex;
   flex-direction: column;
@@ -289,11 +289,19 @@
   background: var(--hub-bg-hover);
 }
 
-.filterChipActive {
+/* 选中 chip 悬浮时保持品牌蓝语义：hover 规则特异性更高，若不单独覆盖会把
+   蓝色选中态冲成灰色，颜色搭配就乱了 */
+.filterChipActive,
+.filterChipActive:hover {
   color: var(--hub-brand);
   background: var(--hub-brand-tint);
   border-color: var(--hub-brand-border-soft);
   font-weight: 500;
+}
+
+.filterChipActive:hover {
+  background: var(--hub-brand-tint-strong);
+  border-color: var(--hub-brand-border);
 }
 
 /* 搜索框：占满筛选行剩余宽度 */

@@ -130,6 +130,55 @@
   cursor: default;
 }
 
+/* 通道关闭（安全信任开关关掉）：卡片整体压暗，输入行换成提示行 */
+.installCardDisabled {
+  opacity: 0.8;
+}
+
+/* 通道关闭提示行：琥珀色提示 + 「前往设置」按钮，替代示例与输入行 */
+.channelOff {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 9px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--hub-warn);
+  background: var(--hub-warn-tint);
+  border: 1px solid var(--hub-warn-border);
+  border-radius: 6px;
+}
+
+.channelOffText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.channelOffBtn {
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--hub-warn-strong);
+  background: transparent;
+  border: 1px solid var(--hub-warn-border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.channelOffBtn:hover {
+  background: var(--hub-warn-tint);
+  color: var(--hub-warn);
+}
+
 /* 格式错误：输入框红边框 + 卡片下方红字提示（给出该通道的推荐写法） */
 .installError {
   font-size: 12px;

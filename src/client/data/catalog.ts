@@ -10,8 +10,11 @@
 import type { HubPlugin, LocaleId } from '../types.ts'
 import { normalize } from '../logic/normalize.ts'
 
-const PLUGINS_URL = (lang: LocaleId) => `https://dsh-plugin.org/api/plugins.${lang}.json`
-const STATS_URL = 'https://dsh-plugin.org/api/stats.json'
+// 目录/统计数据经服务端 /catalog 代理路由获取（curl 子进程注入设置里的代理），
+// 与 npm / git 安装通道同一代理口径 —— 浏览器不再直连 dsh-plugin.org。
+const PROXY_BASE = '/dsh-plugin-hub/catalog'
+const PLUGINS_URL = (lang: LocaleId) => `${PROXY_BASE}?lang=${lang}`
+const STATS_URL = `${PROXY_BASE}?stats=1`
 
 async function fetchJson(url: string): Promise<unknown> {
   const res = await fetch(url, { cache: 'no-store' })

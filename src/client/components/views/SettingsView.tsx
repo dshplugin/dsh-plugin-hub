@@ -9,21 +9,22 @@
  * sidebar entry.
  *
  * Sections mirror what the local server actually enforces:
- *   Updates & Sources — startup update check / auto-install / npm mirror /
- *                        HTTP proxy (all wired into the install command path)
+ *   Updates & Sources — startup update check / npm mirror / HTTP proxy
+ *                        (all wired into the install command path)
  *   Security & Trust  — restricted custom installs (server 403 gate)
  *   Diagnostics       — live connectivity probe + environment snapshot
  *   Logs              — system log viewer + storage location
  */
-import { createElement as h, useRef, useState } from 'react'
-import type { ChangeEvent, ReactNode } from 'react'
+import { createElement as h, useState } from 'react'
+import type { ChangeEvent, MouseEvent, ReactNode } from 'react'
 import styles from '../../styles/SettingsView.module.css'
+import modalStyles from '../../styles/Modal.module.css'
 import { Dropdown } from '../ui/Dropdown.tsx'
 import { Toggle } from '../ui/Toggle.tsx'
 import { DiagnosticsView } from './DiagnosticsView.tsx'
 import { LogsView } from './LogsView.tsx'
 import {
-  DiagnosticsIcon, LogsIcon, ResetIcon, SecurityIcon, UpdatesIcon,
+  CloseIcon, DiagnosticsIcon, LogsIcon, ResetIcon, SecurityIcon, UpdatesIcon,
 } from '../ui/icons.tsx'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { HubSettings } from '../../hooks/useSettings.ts'
@@ -72,20 +73,8 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
 }) {
   /** 当前激活的分组：左侧导航点击切换，右侧只渲染这一组 */
   const [section, setSection] = useState<SettingsSection>('updates')
-  /** 重置按钮两段式确认：首次点击进入确认态，4 秒内再点才真正重置，超时自动复原 */
-  const [resetArmed, setResetArmed] = useState(false)
-  const resetTimer = useRef(0)
-  const onResetClick = () => {
-    if (!resetArmed) {
-      setResetArmed(true)
-      window.clearTimeout(resetTimer.current)
-      resetTimer.current = window.setTimeout(() => setResetArmed(false), 4000)
-      return
-    }
-    window.clearTimeout(resetTimer.current)
-    setResetArmed(false)
-    reset()
-  }
+  /** 恢复默认确认弹窗：点按钮先弹窗询问，确认后才真正 reset（不做两段式按钮） */
+  const [resetConfirm, setResetConfirm] = useState(false)
 
   const mirrorCustom = !MIRROR_PRESETS.some((p) => p.value === settings.npmRegistry)
   const onMirrorChange = (value: string) => {
@@ -115,15 +104,6 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
         checked: settings.checkUpdatesOnStart,
         onChange: (v) => update({ checkUpdatesOnStart: v }),
         title: t('settingsCheckOnStart'),
-      }),
-    }),
-    h(SettingRow, {
-      title: t('settingsAutoInstall'),
-      desc: t('settingsAutoInstallDesc'),
-      children: h(Toggle, {
-        checked: settings.autoInstallUpdates,
-        onChange: (v) => update({ autoInstallUpdates: v }),
-        title: t('settingsAutoInstall'),
       }),
     }),
     h(SettingRow, {
@@ -170,8 +150,9 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
   )
 
   const securityCard = h('div', { className: styles.card },
-    // 安全与信任：命令行安装的两个通道开关（服务端按通道门禁 403 拦截）——
-    // 关掉 NPM 安装后输入 npm 包名被拒，关掉 GitHub 源码安装后输入 GitHub 地址被拒；
+    // 安全与信任：命令行安装的三个通道开关（NPM 包 / GitHub 源码 / DSH 命令）——
+    // 服务端按通道门禁 403 拦截（npm 目标吃 enableNpmInstall、git 目标吃 enableGitInstall），
+    // DSH 命令框为纯客户端通道：关掉后命令输入卡片禁用并引导去设置打开；
     // 目录内收录的插件安装不受影响（默认全部开启）
     h(SettingRow, {
       title: t('settingsEnableNpm'),
@@ -191,6 +172,15 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
         title: t('settingsEnableGit'),
       }),
     }),
+    h(SettingRow, {
+      title: t('settingsEnableDsh'),
+      desc: t('settingsEnableDshDesc'),
+      children: h(Toggle, {
+        checked: settings.enableDshInstall,
+        onChange: (v) => update({ enableDshInstall: v }),
+        title: t('settingsEnableDsh'),
+      }),
+    }),
   )
 
   const diagnosticsCard = h('div', { className: styles.card },
@@ -203,7 +193,6 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
     // 日志存放位置可设置（留空用默认），改动会写入设置并立即生效
     h(LogsView, {
       t,
-      onCopy,
       logPath: settings.logPath,
       onLogPathSaved: (v: string) => update({ logPath: v }),
     }),
@@ -215,9 +204,9 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
       desc: t('settingsResetDetail'),
       children: h('button', {
         type: 'button',
-        className: resetArmed ? styles.resetBtnArmed : styles.resetBtn,
-        onClick: onResetClick,
-      }, resetArmed ? t('settingsResetConfirm') : t('settingsResetRun')),
+        className: styles.resetBtn,
+        onClick: () => setResetConfirm(true),
+      }, t('settingsResetRun')),
     }),
   )
 
@@ -247,6 +236,38 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
           : section === 'diagnostics' ? diagnosticsCard
             : section === 'logs' ? logsCard
               : resetCard,
+    ),
+    // 恢复默认确认弹窗：点「恢复默认」先弹窗确认，确认后才真正 reset（替代两段式按钮）
+    resetConfirm && h('div', {
+      className: modalStyles.overlay,
+      onClick: (e: MouseEvent<HTMLDivElement>) => { if (e.target === e.currentTarget) setResetConfirm(false) },
+    },
+      h('div', { className: modalStyles.modal, role: 'dialog', 'aria-modal': 'true' },
+        h('div', { className: modalStyles.modalHead },
+          h('div', { className: modalStyles.modalTitle }, t('settingsReset')),
+          h('button', {
+            className: modalStyles.modalClose,
+            type: 'button',
+            'aria-label': t('errorClose'),
+            onClick: () => setResetConfirm(false),
+          }, h(CloseIcon)),
+        ),
+        h('div', { className: modalStyles.modalBody },
+          h('div', { className: modalStyles.failPrepareHint }, t('settingsResetConfirmDetail')),
+          h('div', { className: modalStyles.modalActions },
+            h('button', {
+              className: modalStyles.restartLater,
+              type: 'button',
+              onClick: () => setResetConfirm(false),
+            }, t('cancel')),
+            h('button', {
+              className: modalStyles.restartNowWarning,
+              type: 'button',
+              onClick: () => { setResetConfirm(false); reset() },
+            }, t('settingsResetConfirm')),
+          ),
+        ),
+      ),
     ),
   )
 }

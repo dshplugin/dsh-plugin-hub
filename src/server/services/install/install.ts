@@ -18,5 +18,5 @@ export type { InstallResult, InstallTask, Invocation, PendingRestart, QueueItem 
 export type { LoaderHandle } from '../loader.ts'
 export { addPendingRestart, clearPendingRestart, listPendingRestarts } from '../profile/pending-restart.ts'
 export { dumpLoaderEntries, removeLoadedEntry } from '../loader.ts'
-export { addAllowBuildsKey, githubRepoOf, githubTarget, installTargetOf, parseAllowBuildsKey, readProfileArg, validPackageName } from '../profile/profile.ts'
+export { addAllowBuildsKey, githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf, parseAllowBuildsKey, readProfileArg, validPackageName } from '../profile/profile.ts'
 export { activeTask, cancelTask, getTask, hasQueuedTarget, hasRunningTask, runPluginMutation, startPluginMutation } from './task-queue.ts'

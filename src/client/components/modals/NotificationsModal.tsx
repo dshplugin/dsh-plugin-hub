@@ -18,7 +18,7 @@ import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { NotificationRecord } from '../../logic/failures.ts'
-import { classifyFailure } from '../../logic/failures.ts'
+import { classifyFailure, npmTooLowVersion } from '../../logic/failures.ts'
 import type { PendingRestart, QueueTask } from '../../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
 import { CloseIcon } from '../ui/icons.tsx'
@@ -55,7 +55,7 @@ function BadgeGlyph({ ok }: { ok: boolean }) {
     }))
 }
 
-export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, cancelTask, restarting, onRestart }: {
+export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, cancelTask, restarting, onRestart }: {
   records: NotificationRecord[]
   /** 进行中的安装/卸载任务（实时进度，与队列弹窗同一数据源） */
   tasks: QueueTask[]
@@ -68,6 +68,8 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
   onClear: () => void
   /** 删除单条通知记录 */
   onRemove: (id: number) => void
+  /** 更新提醒通知点击：跳去该插件的更新确认弹窗 */
+  onUpdate: (repo: string) => void
   cancelTask: (id: number) => void
   restarting: boolean
   onRestart: () => void
@@ -160,9 +162,14 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
           ? h('div', { className: styles.failEmpty }, t('notificationsEmpty'))
           : h('div', { className: styles.noticeList },
             records.map((r) => {
+              const isUpdate = r.kind === 'update'
               return h('div', {
                 key: r.id,
-                className: r.ok ? `${styles.noticeRow} ${styles.noticeRowOk}` : styles.noticeRow,
+                // 更新提醒：整行可点击直达更新确认弹窗；install/uninstall 记录维持原交互
+                className: r.ok
+                  ? `${styles.noticeRow} ${styles.noticeRowOk}${isUpdate ? ` ${styles.noticeRowUpdate}` : ''}`
+                  : styles.noticeRow,
+                ...(isUpdate ? { onClick: () => onUpdate(r.repo), title: t('updateNoticeGo') } : {}),
               },
               h('div', { className: styles.noticeRowMain },
                 h('div', {
@@ -173,17 +180,23 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     h('span', {
                       className: r.ok ? styles.noticeTextOk : styles.noticeTextFail,
                     }, r.ok
-                      ? (r.kind === 'install' ? t('installDone') : t('uninstallDone'))
+                      ? (isUpdate ? t('updateNoticeTitle') : (r.kind === 'install' ? t('installDone') : t('uninstallDone')))
                       : (r.kind === 'install' ? t('errorTitleInstall') : t('errorTitleUninstall'))),
+                    // 更新提醒：新版本号紧随标题展示；repo 为纯文本（整行点击即去更新，不跳官网外链）
+                    isUpdate && r.version
+                      ? h('span', { className: styles.noticeVersion, title: r.version }, `v${r.version}`)
+                      : null,
                     r.repo
-                      ? h('a', {
-                        className: styles.failRepo,
-                        // 跳转到官网详情页（含插件收录信息），不在通知弹窗直接跳 GitHub
-                        href: pluginSiteUrl(r.repo),
-                        target: '_blank',
-                        rel: 'noopener noreferrer',
-                        title: r.repo,
-                      }, r.repo)
+                      ? (isUpdate
+                        ? h('span', { className: styles.failRepo, title: r.repo }, r.repo)
+                        : h('a', {
+                          className: styles.failRepo,
+                          // 跳转到官网详情页（含插件收录信息），不在通知弹窗直接跳 GitHub
+                          href: pluginSiteUrl(r.repo),
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                          title: r.repo,
+                        }, r.repo))
                       : null,
                     !r.ok && h('button', {
                       className: styles.failCopy,
@@ -197,6 +210,13 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                         title: new Date(r.at).toLocaleString(),
                       }, fmtTime(r.at))
                       : null,
+                    // 更新提醒：行尾「去更新」按钮直达更新确认弹窗（整行也可点击）
+                    isUpdate
+                      ? h('button', {
+                        className: styles.noticeUpdateGo,
+                        onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onUpdate(r.repo) },
+                      }, t('updateNoticeGo'))
+                      : null,
                     // 每条通知右侧的删除按钮：单独移除这一条
                     h('button', {
                       className: styles.noticeRemove,
@@ -209,6 +229,13 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                   // 卡片不展示错误日志预览，完整日志靠「复制完整日志」按钮带走，避免每条卡片被日志撑高
                   !r.ok && (() => {
                     const kind = classifyFailure(r.message)
+                    if (kind === 'npmTooOld') {
+                      // npm 内部崩溃（edgesOut）＋ 本机 npm 版本过低：npm 自身已知缺陷，不是插件问题 ——
+                      // 直接给升级指引，不引导提 Issue
+                      const v = npmTooLowVersion(r.message)
+                      return h('div', { className: styles.failPrepareHint },
+                        t(v ? 'failNpmTooLowV' : 'failNpmTooLow', v ? { v } : undefined))
+                    }
                     if (kind === 'pluginPrepare' || kind === 'pnpmIgnoredBuild') {
                       // [packaging]（预检/装后校验拦截：git 分发缺产物）与
                       // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交

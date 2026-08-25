@@ -12,7 +12,7 @@ import { createElement as h, useEffect, useRef, useState } from 'react'
 import styles from '../styles/Header.module.css'
 import type { EnvInfo, HubPlugin, SectionProps, ToastState } from '../types.ts'
 import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
-import { HUB_REPO, PLUGIN_VERSION } from '../logic/constants.ts'
+import { PLUGIN_VERSION } from '../logic/constants.ts'
 import { getEnv, revealInstallFolder } from '../data/host.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
 import { useLanguage } from '../hooks/useLanguage.ts'
@@ -23,7 +23,7 @@ import { AboutModal } from './modals/AboutModal.tsx'
 import { HubUpdateModal } from './modals/HubUpdateModal.tsx'
 import { InstalledDetailModal } from './modals/InstalledDetailModal.tsx'
 import { NotificationsModal } from './modals/NotificationsModal.tsx'
-import { addFailure, addSuccess, clearNotifications, loadNotifications, removeNotification } from '../logic/failures.ts'
+import { addFailure, addSuccess, addUpdateNotice, clearNotifications, loadNotifications, removeNotification } from '../logic/failures.ts'
 import type { NotificationRecord } from '../logic/failures.ts'
 import { CatalogHeader } from './layout/CatalogHeader.tsx'
 import { MarketView } from './views/MarketView.tsx'
@@ -55,6 +55,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   /** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名 / GitHub 地址，DSH 命令已剥成裸目标）——
    *  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
   const [confirmCustomTarget, setConfirmCustomTarget] = useState<string | null>(null)
+  /** 全局 npm 安装确认弹窗（官方 `npm install -g <pkgs>`）：记录原始命令 + 解析出的包列表，
+   *  走与应用商店同一套确认/进度/结果弹窗（plugin 传 null，InstallModal 走 globalNpm 模式） */
+  const [confirmGlobalNpm, setConfirmGlobalNpm] = useState<{ raw: string; pkgs: string[] } | null>(null)
   /** Hub 自我更新说明弹窗：点「可更新」徽标先展示版本 + Markdown 变更记录，确认后再进安装弹窗 */
   const [showHubUpdate, setShowHubUpdate] = useState(false)
   /** 「关注我们」弹窗：GitHub 图标后按钮点击打开，展示平台介绍 + 用户反馈群二维码（Worker /about 推送） */
@@ -114,6 +117,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     },
     installPlugin: confirmPlugin,
     installCustomTarget: confirmCustomTarget,
+    installGlobalTarget: confirmGlobalNpm ? confirmGlobalNpm.pkgs.join(' ') : null,
     uninstallPlugin,
     uninstallName: uninstallItem ? uninstallItem.name : null,
     installedName: catalog.installedName,
@@ -125,7 +129,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   })
 
   // 启动更新策略：目录数据与设置都就绪后触发一次 —— 开启「启动时检查更新」→ 发现可更新插件
-  // 即 toast 提示；同时开启「有更新时自动安装」→ 直接入队覆盖重装（进度走队列条，装完重启生效）。
+  // 即写入通知中心（每条一条，点击可去更新），toast 同步提示已入通知。
+  // 绝不自动安装：是否更新完全由用户决定。
   // ref 守卫保证只跑一次，后续目录刷新/设置变化不会重复打扰。
   const startupCheckedRef = useRef(false)
   useEffect(() => {
@@ -135,23 +140,21 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     if (!hubSettings.checkUpdatesOnStart) return
     const updatable = catalog.installedItems.filter((i) => i.hasUpdate && i.plugin)
     if (updatable.length === 0) return
-    if (hubSettings.autoInstallUpdates) {
-      for (const item of updatable) {
-        if (item.plugin) void queue.installNow(item.plugin, { update: true })
-      }
-      setToast({ id: Date.now(), kind: 'updatesAuto', n: updatable.length })
-    } else {
-      setToast({ id: Date.now(), kind: 'updates', n: updatable.length })
+    for (const item of updatable) {
+      if (item.repo) addUpdateNotice({ kind: 'update', repo: item.repo, version: item.catalogVersion ?? undefined })
     }
+    setNotifications(loadNotifications())
+    setToast({ id: Date.now(), kind: 'updates', n: updatable.length })
   }, [settingsReady, hubSettings, catalog.plugins, catalog.failed, catalog.installedItems, queue])
 
   // 信任/卸载/更新说明弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
   useEffect(() => {
-    if (!confirmPlugin && !confirmCustomTarget && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return
+    if (!confirmPlugin && !confirmCustomTarget && !confirmGlobalNpm && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
         setConfirmCustomTarget(null)
+        setConfirmGlobalNpm(null)
         setUninstallPlugin(null)
         setUninstallItem(null)
         setDetailItem(null)
@@ -282,8 +285,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const count = catalog.visible.length
 
   // Hub 自身条目（目录数据里的 dshplugin/dsh-plugin-hub）：头部「可更新」徽标的更新目标。
-  // 目录可能尚未加载（此时 hubEntry 为 null，徽标不渲染，加载完成后自然出现）。
-  const hubEntry = catalog.plugins?.find((p) => p.source?.repo === HUB_REPO) ?? null
+  // useCatalog 在过滤目录（自身不进插件列表）前单独保留该条目；目录可能尚未加载（此时为 null，徽标不渲染）。
+  const hubEntry = catalog.hubPlugin
 
   return h('div', { className: styles.root },
     h(CatalogHeader, {
@@ -372,15 +375,29 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
           ? h(CustomInstallView, {
               t,
               // 命令行安装：与应用商店同一套确认/进度/结果弹窗 —— 输入 npm 包名 / GitHub 地址 /
-              // dsh plugin 命令即装（custom 源，受安全设置两开关控制）。点安装先弹确认窗，
+              // dsh plugin 命令即装（custom 源，受安全设置三开关控制）。点安装先弹确认窗，
               // 确认后走队列安装（实时进度 + 成功结果视图）；目标已安装 → 弹窗转「更新」覆盖重装，
               // 不再撞「already installed」报错（第一次安装没有反馈才导致用户重复点击）。
-              onInstallCustom: (raw) => {
+              // 安全信任开关关掉对应通道 → 卡片禁用并提示去设置打开（onOpenSettings 跳到设置页）。
+              enableNpm: hubSettings.enableNpmInstall,
+              enableGit: hubSettings.enableGitInstall,
+              enableDsh: hubSettings.enableDshInstall,
+              onOpenSettings: () => setView('settings'),
+              onInstallCustom: (raw, opts) => {
                 const target = raw.trim()
                 if (!target) return
                 setInstallDone(false)
                 // 与目录安装一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务
                 queue.clearModalTask()
+                // 官方全局 npm 安装（npm install -g <pkgs>）：弹窗走 globalNpm 模式（系统级 CLI 工具，
+                // 不进插件列表，不做「已安装→更新」判定 —— npm install -g 对已装包是原位覆盖更新，天然幂等）
+                if (opts?.globalNpm && opts.globalNpm.length > 0) {
+                  setConfirmCustomTarget(null)
+                  setConfirmIsUpdate(false)
+                  setConfirmGlobalNpm({ raw, pkgs: opts.globalNpm })
+                  return
+                }
+                setConfirmGlobalNpm(null)
                 setConfirmIsUpdate(customTargetInstalled(target))
                 setConfirmCustomTarget(target)
               },
@@ -439,6 +456,16 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       },
       onClear: () => setNotifications(clearNotifications()),
       onRemove: (id: number) => setNotifications(removeNotification(id)),
+      // 更新提醒通知：点击直接进该插件的更新确认弹窗（与已安装列表「更新」同一流程）
+      onUpdate: (repo: string) => {
+        const plugin = catalog.installedItems.find((i) => i.repo === repo)?.plugin
+        if (!plugin) return
+        setShowNotifications(false)
+        setInstallDone(false)
+        setConfirmIsUpdate(true)
+        queue.clearModalTask()
+        setConfirmPlugin(plugin)
+      },
       cancelTask: queue.cancelTask,
       restarting,
       onRestart: () => { void requestRestart() },
@@ -484,6 +511,32 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setToast({ id: Date.now(), kind: 'copied' })
       },
       onInstall: () => void queue.installCustom(confirmCustomTarget, confirmIsUpdate ? { update: true } : undefined),
+      onRestart: () => { void requestRestart() },
+    }),
+    // 全局 npm 安装确认弹窗（官方 `npm install -g <pkgs>`）：与应用商店同一套确认/进度/结果流程。
+    // 装的是系统级 CLI 工具（如 @deepseek-ai/dsh），不进任何 profile、无需宿主重启；
+    // 服务端任务终态 needsRestart=false → 结果视图仅「完成」。
+    confirmGlobalNpm && h(InstallModal, {
+      plugin: null,
+      globalNpm: confirmGlobalNpm.pkgs,
+      done: installDone,
+      task: queue.installModalTask,
+      t,
+      langPath,
+      restarting,
+      update: false,
+      cliOnly: false,
+      submitting: queue.submitting,
+      needsRestart: installNeedsRestart,
+      onClose: () => {
+        setInstallDone(false)
+        setConfirmGlobalNpm(null)
+      },
+      onCopy: () => {
+        doCopy(`npm install -g ${confirmGlobalNpm.pkgs.join(' ')}`)
+        setToast({ id: Date.now(), kind: 'copied' })
+      },
+      onInstall: () => void queue.installGlobalNpm(confirmGlobalNpm.pkgs),
       onRestart: () => { void requestRestart() },
     }),
     // 卸载确认弹窗：确认/进度/结果视图逻辑收敛在 modals.tsx。

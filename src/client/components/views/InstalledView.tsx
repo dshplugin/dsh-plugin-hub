@@ -218,9 +218,10 @@ export function InstalledView({ items, t, langKey, platform, onOpenDetail, onRev
   onRestart: () => void
 }) {
   const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<InstalledSortKey>('sortName')
-  /** 当前排序方向：点同一个排序按钮切换 正序/倒序；点新排序用该排序的默认方向 */
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+  /** 默认按「最近安装」排序（最新在前）；点其他排序按钮用该排序的默认方向（Star/Fork 最多在前、名称正序） */
+  const [sort, setSort] = useState<InstalledSortKey>('sortInstalledAt')
+  /** 当前排序方向：点同一个排序按钮切换 正/倒序；点新排序用该排序的默认方向 */
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   /** 已安装列表的来源筛选：全部 / 目录收录 / 自定义安装（单选按钮组） */
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
 

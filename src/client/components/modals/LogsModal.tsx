@@ -105,9 +105,8 @@ export function LogEntryRow({ e, t }: { e: LogEntryView; t: Translate }) {
   )
 }
 
-export function LogsModal({ t, onCopy, onClose }: {
+export function LogsModal({ t, onClose }: {
   t: Translate
-  onCopy: (text: string) => void
   onClose: () => void
 }) {
   const [category, setCategory] = useState<LogCategoryFilter>('all')
@@ -196,18 +195,9 @@ export function LogsModal({ t, onCopy, onClose }: {
     if (!ok) setOpenFailed(true)
   }
 
-  /** 已加载条目的纯文本：分析 bug 时复制粘贴给作者。 */
-  const entriesText = (): string =>
-    entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join('\n')
-
-  const copyAll = () => {
-    const text = entriesText()
-    if (text !== '') onCopy(text)
-  }
-
   /** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
   const exportFile = () => {
-    const text = entriesText()
+    const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join('\n')
     if (text === '') return
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -283,7 +273,7 @@ export function LogsModal({ t, onCopy, onClose }: {
             : h('div', { className: view.moreEnd }, t('logNoMore', { n: total }))),
         ),
       ),
-      // 底部：日志真实路径 + 打开文件 / 复制 / 导出
+      // 底部：日志真实路径 + 打开文件 / 导出日志
       h('div', { className: view.foot },
         h('span', { className: view.footPath, title: path },
           `${t('logPathLabel')}: ${path === '' ? '…' : path}`),
@@ -298,12 +288,6 @@ export function LogsModal({ t, onCopy, onClose }: {
             title: t('logOpenFileTip'),
             onClick: () => void openFile(),
           }, t('logOpenFile')),
-          h('button', {
-            type: 'button',
-            className: view.btn,
-            disabled: entries.length === 0,
-            onClick: copyAll,
-          }, t('logsCopy')),
           h('button', {
             type: 'button',
             className: `${view.btn} ${view.btnPrimary}`,

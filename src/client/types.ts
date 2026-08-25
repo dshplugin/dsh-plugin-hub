@@ -51,8 +51,11 @@ export interface HubPlugin {
   features?: string[]
   description?: string
   source?: { repo?: string; npmPackage?: string }
-  /** 能否网页一键安装：false = 仅支持命令行/git/本地构建安装（缺省视为 true 可安装） */
-  install?: { webInstallable?: boolean }
+  /** 安装信息：能否网页一键安装（false = 仅支持命令行/专属 profile，缺省视为 true）；
+   *  command/githubCommand = 目录下发的权威安装命令（npm/git 通道各一条），
+   *  仅供展示/复制 —— CLI-only 插件（如 dsh-tui）需专属 profile（--profile dsh-tui），
+   *  无法从 repo/npm 包名推断，必须用目录命令。 */
+  install?: { webInstallable?: boolean; command?: string; githubCommand?: string }
   compatibility?: { status?: string }
   dates?: { repoUpdatedAt?: string; addedAt?: string }
   stats?: { stargazers_count?: number; forks_count?: number }
@@ -67,7 +70,7 @@ export interface TaskState {
   lines: string[]
 }
 
-export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail' | 'updates' | 'updatesAuto'
+export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail' | 'updates'
 
 export interface ToastState {
   id: number

@@ -57,11 +57,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			gitInstallExample: "例如：owner/repo 或 https://github.com/owner/repo",
 			gitInstallInvalid: "请输入 GitHub 仓库地址，例如：owner/repo 或 https://github.com/owner/repo",
 			dshCmdLabel: "DeepSeek Harness 命令",
-			dshCmdPlaceholder: "粘贴 dsh plugin 命令",
-			dshCmdExample: "例如：dsh plugin --profile web add github:owner/repo",
-			dshCmdInvalid: "请输入完整的 dsh plugin 命令，例如：dsh plugin --profile web add github:owner/repo",
+			dshCmdPlaceholder: "粘贴安装命令（npm install -g 或 dsh plugin add）",
+			dshCmdExample: "例如：npm install -g @scope/cli 或 dsh plugin add github:owner/repo",
+			dshCmdInvalid: "支持 npm install -g <包名> 全局安装，或完整 dsh plugin 命令。例如：npm install -g @scope/cli",
+			globalNpmHint: "将全局安装 CLI 工具（npm install -g），不会出现在「已安装」列表，无需重启宿主",
 			installCliBtn: "安装",
-			customViewDesc: "手动安装目录外的 NPM 包或 GitHub 源码。装完的条目会出现在「已安装」列表，并标记为自定义安装。",
+			channelDisabledHint: "该安装通道已关闭，请在「设置 → 安全信任」中打开开关",
+			goToSettings: "前往设置",
+			customViewDesc: "手动安装目录外的 NPM 包、GitHub 源码，或粘贴官方安装命令（npm install -g / dsh plugin add）。装完的条目会出现在「已安装」列表，并标记为自定义安装。",
 			customLabel: "自定义安装",
 			installedSearch: "搜索已安装的插件…",
 			installedFilterCatalog: "目录插件",
@@ -98,8 +101,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			settingsUpdateDesc: "更新检查方式与安装走到的网络通道",
 			settingsCheckOnStart: "启动时检查更新",
 			settingsCheckOnStartDesc: "打开插件中心时检查已安装插件是否有新版，发现更新会提示",
-			settingsAutoInstall: "有更新时自动安装",
-			settingsAutoInstallDesc: "检查到更新后直接后台安装，无需逐个确认（装完需重启宿主生效）",
 			settingsMirror: "npm 镜像源",
 			settingsMirrorDesc: "npm 安装与版本反查走自定义镜像，网络不佳时更稳定；留空使用官方源",
 			mirrorOfficial: "官方源 registry.npmjs.org",
@@ -109,18 +110,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			settingsProxy: "HTTP 代理",
 			settingsProxyDesc: "npm / git / 目录数据请求统一走该代理；留空直连",
 			settingsSecurity: "安全信任",
-			settingsSecurityDesc: "命令行安装的两个通道开关：NPM 包与 GitHub 源码",
+			settingsSecurityDesc: "命令行安装的三个通道开关：NPM 包、GitHub 源码与 DSH 命令",
 			settingsEnableNpm: "启用 NPM 安装",
 			settingsEnableNpmDesc: "允许通过命令行安装 npm 包；关闭后输入包名安装会被拦截",
 			settingsEnableGit: "启用 GitHub 源码安装",
 			settingsEnableGitDesc: "允许通过命令行安装 GitHub 源码；关闭后输入仓库地址安装会被拦截",
+			settingsEnableDsh: "启用 DSH 命令安装",
+			settingsEnableDshDesc: "允许通过命令行粘贴 dsh plugin 命令安装；关闭后命令输入会被禁用",
 			settingsDiagnostics: "系统诊断",
 			settingsDiagnosticsDesc: "检测 npm 源 / GitHub / 目录站点等安装通道的连通状态",
 			settingsLogs: "系统日志",
 			settingsLogsDesc: "本地记录的安装 / 卸载 / 设置变更与诊断结果，可导出全文排查问题",
 			logsHeadHint: "记录安装、卸载、设置变更与诊断结果，保留最近 2000 条",
-			logsRefresh: "刷新",
-			logsCopy: "复制全文",
+			logsRefresh: "刷新日志",
 			logsExport: "导出日志",
 			logsLoading: "正在读取日志…",
 			logsEmpty: "暂无日志记录",
@@ -182,9 +184,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			settingsResetDesc: "更新策略、镜像源、代理与安全限制一次性恢复为出厂默认值",
 			settingsResetDetail: "恢复更新策略、镜像源、代理与安全限制为出厂默认值",
 			settingsResetRun: "恢复默认",
-			settingsResetConfirm: "确认恢复？",
-			updatesFound: "发现 {n} 个插件可更新，去「已安装」查看",
-			updatesAutoQueued: "有 {n} 个插件可更新，已开始自动更新（装完重启宿主生效）",
+			settingsResetConfirm: "确认恢复",
+			settingsResetConfirmDetail: "确定要恢复默认设置吗？更新策略、镜像源、代理与安全限制将全部回到出厂默认值。",
+			updatesFound: "发现 {n} 个插件可更新，已加入通知中心",
+			updateNoticeTitle: "发现新版本",
+			updateNoticeGo: "去更新",
 			uninstall: "卸载",
 			uninstalling: "卸载中…",
 			uninstallTitle: "确认卸载？",
@@ -228,8 +232,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			sectionPendingRestart: "待重启",
 			sectionInProgress: "进行中",
 			notifications: "通知",
-			notificationsHint: "查看安装/卸载通知（含失败记录）",
-			notificationsDesc: "安装、卸载任务的成败都会记录在这里，即使错过提示也能随时回来查看。",
+			notificationsHint: "查看安装/卸载/更新通知",
+			notificationsDesc: "安装、卸载任务与更新提醒都会记录在这里，即使错过提示也能随时回来查看。",
 			notificationsEmpty: "暂无通知记录",
 			notificationsClear: "清空通知",
 			removeNotification: "删除这条通知",
@@ -251,6 +255,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			failPrepareHint: "该插件安装时的构建脚本执行失败（git 分发常缺失子模块或构建产物），属插件打包分发问题。请向作者仓库提交 Issue 反馈。",
 			failPackagingHint: "该插件不支持官方默认安装方式：其 git 分发缺少构建产物（package.json 声明的入口文件在仓库中不存在），说明作者未适配官方安装流程。请到作者仓库提交 Issue 反馈，请其提交构建产物或发布 npm 版。",
 			failIgnoredBuild: "该插件依赖了需要编译的原生模块（如 node-pty），pnpm 默认拦截这类构建脚本导致安装失败 —— 其他插件不受影响，属该插件的依赖/打包问题。建议向作者仓库一键反馈，请作者改用预编译版本（如 node-pty-prebuilt-multiarch）。",
+			failNpmTooLow: "怀疑本机 npm 版本过低：npm 解析插件依赖时内部崩溃（这是 npm 自身的已知缺陷，不是插件问题）。请升级 npm 后重试：npm install -g npm@latest",
+			failNpmTooLowV: "本机 npm 版本过低（当前 v{v}）：npm 解析插件依赖时内部崩溃（这是 npm 自身的已知缺陷，不是插件问题）。请升级 npm 后重试：npm install -g npm@latest",
 			reportIssue: "去插件仓库提交 Issue",
 			detail: "打开详情",
 			noResult: "没有找到匹配的插件",
@@ -331,11 +337,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			gitInstallExample: "e.g. owner/repo or https://github.com/owner/repo",
 			gitInstallInvalid: "Enter a GitHub repository address, e.g. owner/repo or https://github.com/owner/repo",
 			dshCmdLabel: "DeepSeek Harness command",
-			dshCmdPlaceholder: "Paste a dsh plugin command",
-			dshCmdExample: "e.g. dsh plugin --profile web add github:owner/repo",
-			dshCmdInvalid: "Enter a full dsh plugin command, e.g. dsh plugin --profile web add github:owner/repo",
+			dshCmdPlaceholder: "Paste an install command (npm install -g or dsh plugin add)",
+			dshCmdExample: "e.g. npm install -g @scope/cli or dsh plugin add github:owner/repo",
+			dshCmdInvalid: "Paste a global npm install (npm install -g <pkgs>) or a full dsh plugin command, e.g. npm install -g @scope/cli",
+			globalNpmHint: "This installs CLI tools globally (npm install -g). They won't appear in Installed and no host restart is needed.",
 			installCliBtn: "Install",
-			customViewDesc: "Manually install an npm package or a GitHub source outside the catalog. Finished installs appear in Installed, marked as custom.",
+			channelDisabledHint: "This install channel is disabled — enable it in Settings → Security & Trust",
+			goToSettings: "Go to Settings",
+			customViewDesc: "Manually install an npm package, a GitHub source, or paste an official install command (npm install -g / dsh plugin add). Finished installs appear in Installed, marked as custom.",
 			customLabel: "Custom install",
 			installedSearch: "Search installed plugins…",
 			installedFilterCatalog: "Catalog",
@@ -383,18 +392,19 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			settingsProxy: "HTTP proxy",
 			settingsProxyDesc: "Route npm, git and catalog requests through this proxy; leave empty to connect directly",
 			settingsSecurity: "Security & Trust",
-			settingsSecurityDesc: "Toggles for the two command-line install channels: npm packages and GitHub sources",
+			settingsSecurityDesc: "Toggles for the three command-line install channels: npm packages, GitHub sources and DSH commands",
 			settingsEnableNpm: "Enable npm installs",
 			settingsEnableNpmDesc: "Allow installing npm packages from the command line; turning this off rejects package-name installs",
 			settingsEnableGit: "Enable GitHub source installs",
 			settingsEnableGitDesc: "Allow installing from GitHub sources on the command line; turning this off rejects repository-address installs",
+			settingsEnableDsh: "Enable DSH command installs",
+			settingsEnableDshDesc: "Allow pasting a dsh plugin command to install; turning this off disables the command input",
 			settingsDiagnostics: "System Diagnostics",
 			settingsDiagnosticsDesc: "Check the connectivity of install channels: npm registry, GitHub and the catalog site",
 			settingsLogs: "System Logs",
 			settingsLogsDesc: "Local record of installs / uninstalls, settings changes and diagnostics — export the full log to troubleshoot",
 			logsHeadHint: "Records installs, uninstalls, settings changes and diagnostics; keeps the latest 2,000 entries",
-			logsRefresh: "Refresh",
-			logsCopy: "Copy all",
+			logsRefresh: "Refresh log",
 			logsExport: "Export log",
 			logsLoading: "Reading log…",
 			logsEmpty: "No log entries yet",
@@ -456,9 +466,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			settingsResetDesc: "Restore update policy, npm mirror, proxy and security restrictions to factory defaults in one go",
 			settingsResetDetail: "Reset update policy, npm mirror, proxy and security restrictions to factory defaults",
 			settingsResetRun: "Restore Defaults",
-			settingsResetConfirm: "Confirm restore?",
-			updatesFound: "{n} plugin(s) have updates — check the Installed tab",
-			updatesAutoQueued: "{n} plugin(s) can update — auto-update started (restart the host to apply)",
+			settingsResetConfirm: "Restore Defaults",
+			settingsResetConfirmDetail: "Reset all settings to factory defaults? Update policy, npm mirror, proxy and security restrictions will be cleared.",
+			updatesFound: "{n} plugin(s) have updates — check the notification center",
+			updateNoticeTitle: "Update available",
+			updateNoticeGo: "Update",
 			uninstall: "Uninstall",
 			uninstalling: "Removing…",
 			uninstallTitle: "Confirm uninstall?",
@@ -502,8 +514,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			sectionPendingRestart: "Pending restart",
 			sectionInProgress: "In progress",
 			notifications: "Notifications",
-			notificationsHint: "View install/remove notifications (including failures)",
-			notificationsDesc: "Every install and remove result is logged here — even if you missed the prompt, you can always check back.",
+			notificationsHint: "View install/remove/update notifications",
+			notificationsDesc: "Every install, remove and update notice is logged here — even if you missed the prompt, you can always check back.",
 			notificationsEmpty: "No notifications yet",
 			notificationsClear: "Clear notifications",
 			removeNotification: "Remove this notification",
@@ -511,6 +523,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			queuedUninstallTitle: "Queued for removal…",
 			queuedHint: "Queued — starts automatically after earlier tasks finish. You may close this window.",
 			cancelTask: "Cancel task",
+			cancel: "Cancel",
 			cancelling: "Cancelling…",
 			errorTitle: "Operation failed",
 			errorTitleInstall: "Install failed",
@@ -525,6 +538,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			failPrepareHint: "This plugin failed while running its build scripts during install (git tarballs often miss submodules or build output). This is a packaging issue of the plugin itself — please report it to the author repository.",
 			failPackagingHint: "This plugin does not support the official default install method: its git distribution lacks the build output (the entry file declared in package.json is not in the repository), so it has not been adapted to the official install flow. Please file an Issue on the author's repo asking for committed build output or an npm release.",
 			failIgnoredBuild: "This plugin depends on a native module (e.g. node-pty) whose build script pnpm blocks by default, so the install fails — other plugins are unaffected. This is a dependency/packaging issue of the plugin itself. Please report it to the author repository and ask the author to switch to a prebuilt variant (e.g. node-pty-prebuilt-multiarch).",
+			failNpmTooLow: "Your local npm may be too old: npm crashed internally while resolving the plugin's dependencies (a known npm bug — not a plugin issue). Please upgrade npm and retry: npm install -g npm@latest",
+			failNpmTooLowV: "Your local npm is too old (v{v}): npm crashed internally while resolving the plugin's dependencies (a known npm bug — not a plugin issue). Please upgrade npm and retry: npm install -g npm@latest",
 			reportIssue: "Report an Issue to the plugin repo",
 			detail: "Open details",
 			noResult: "No plugins match your search",
@@ -572,42 +587,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Header_module_css_default = {
-			"search": "qikqja_search",
-			"tagline": "qikqja_tagline",
-			"githubLink": "qikqja_githubLink",
-			"headerTitleRow": "qikqja_headerTitleRow",
 			"adText": "qikqja_adText",
-			"headerRight": "qikqja_headerRight",
-			"resultCount": "qikqja_resultCount",
-			"tab": "qikqja_tab",
-			"langBtn": "qikqja_langBtn",
-			"segLabel": "qikqja_segLabel",
-			"version": "qikqja_version",
-			"adArrow": "qikqja_adArrow",
-			"adBanner": "qikqja_adBanner",
-			"versionBtn": "qikqja_versionBtn",
-			"copyIcon": "qikqja_copyIcon",
-			"sortGroup": "qikqja_sortGroup",
-			"tabCount": "qikqja_tabCount",
-			"segBtn": "qikqja_segBtn",
-			"title": "qikqja_title",
-			"tabsRow": "qikqja_tabsRow",
-			"brandTitle": "qikqja_brandTitle",
-			"githubIcon": "qikqja_githubIcon",
-			"resultSeg": "qikqja_resultSeg",
-			"searchRow": "qikqja_searchRow",
-			"tabActive": "qikqja_tabActive",
-			"adBadge": "qikqja_adBadge",
-			"segGroup": "qikqja_segGroup",
-			"root": "qikqja_root",
-			"aboutBtn": "qikqja_aboutBtn",
-			"tabs": "qikqja_tabs",
-			"header": "qikqja_header",
 			"controls": "qikqja_controls",
+			"githubIcon": "qikqja_githubIcon",
+			"searchRow": "qikqja_searchRow",
+			"resultCount": "qikqja_resultCount",
+			"header": "qikqja_header",
+			"tagline": "qikqja_tagline",
+			"segBtn": "qikqja_segBtn",
+			"root": "qikqja_root",
+			"versionBtn": "qikqja_versionBtn",
+			"tabsRow": "qikqja_tabsRow",
+			"tab": "qikqja_tab",
+			"segLabel": "qikqja_segLabel",
 			"segBtnActive": "qikqja_segBtnActive",
-			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"adBanner": "qikqja_adBanner",
 			"logoIcon": "qikqja_logoIcon",
-			"taglineLink": "qikqja_taglineLink"
+			"aboutBtn": "qikqja_aboutBtn",
+			"tabActive": "qikqja_tabActive",
+			"tabCount": "qikqja_tabCount",
+			"brandTitle": "qikqja_brandTitle",
+			"version": "qikqja_version",
+			"sortGroup": "qikqja_sortGroup",
+			"tabs": "qikqja_tabs",
+			"headerRight": "qikqja_headerRight",
+			"search": "qikqja_search",
+			"title": "qikqja_title",
+			"adBadge": "qikqja_adBadge",
+			"taglineLink": "qikqja_taglineLink",
+			"langBtn": "qikqja_langBtn",
+			"headerTitleRow": "qikqja_headerTitleRow",
+			"githubLink": "qikqja_githubLink",
+			"copyIcon": "qikqja_copyIcon",
+			"adArrow": "qikqja_adArrow",
+			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"resultSeg": "qikqja_resultSeg",
+			"segGroup": "qikqja_segGroup"
 		};
 		//#endregion
 		//#region src/client/logic/install-command.ts
@@ -628,9 +643,18 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				via: "github"
 			};
 		}
-		/** 展示用安装命令（复制/弹窗）：npm 通道显示包名，git 通道显示显式 HTTPS URL。 */
+		/** 展示用安装命令（复制/弹窗）：目录下发的权威命令优先（CLI-only 插件如 dsh-tui
+		*  需专属 profile（--profile dsh-tui），无法从 repo/npm 包名推断，必须用官方命令）；
+		*  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。 */
 		function installCommandOf(p, withProfile = false) {
 			const { target, via } = installTargetOf$1(p);
+			if (via === "npm") {
+				const cmd = p.install?.command;
+				if (cmd) return cmd;
+			} else {
+				const cmd = p.install?.githubCommand;
+				if (cmd) return cmd;
+			}
 			return via === "npm" ? `dsh plugin${withProfile ? " --profile web" : ""} add ${target}` : `dsh plugin${withProfile ? " --profile web" : ""} add git+https://github.com/${target}.git`;
 		}
 		/** Normalize a task/install target to its owner/repo display identity. */
@@ -873,7 +897,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					repo: typeof raw.r.repo === "string" ? raw.r.repo : void 0,
 					npmPackage: typeof raw.r.npmPackage === "string" ? raw.r.npmPackage : void 0
 				} : void 0,
-				install: raw.wi === false ? { webInstallable: false } : void 0,
+				install: raw.wi === false || typeof raw.ic === "string" || typeof raw.igc === "string" ? {
+					webInstallable: raw.wi === false ? false : void 0,
+					command: typeof raw.ic === "string" ? raw.ic : void 0,
+					githubCommand: typeof raw.igc === "string" ? raw.igc : void 0
+				} : void 0,
 				compatibility: typeof raw.v === "string" ? { status: raw.v } : void 0,
 				dates: {
 					repoUpdatedAt: typeof raw.u === "string" ? raw.u : void 0,
@@ -888,8 +916,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region src/client/data/catalog.ts
-		const PLUGINS_URL = (lang) => `https://dsh-plugin.org/api/plugins.${lang}.json`;
-		const STATS_URL = "https://dsh-plugin.org/api/stats.json";
+		const PROXY_BASE = "/dsh-plugin-hub/catalog";
+		const PLUGINS_URL = (lang) => `${PROXY_BASE}?lang=${lang}`;
+		const STATS_URL = `${PROXY_BASE}?stats=1`;
 		async function fetchJson(url) {
 			const res = await fetch(url, { cache: "no-store" });
 			if (!res.ok) throw new Error(String(res.status));
@@ -1089,6 +1118,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		function useCatalog(lang) {
 			/** 目录插件（仅保留人工验证通过的条目） */
 			const [plugins, setPlugins] = (0, react.useState)(null);
+			/** Hub 自身目录条目（dshplugin/dsh-plugin-hub）：目录过滤会排除自身（不进插件列表），
+			*  此处单独保留，供头部「可更新」徽标 → 「直接更新」覆盖重装使用。 */
+			const [hubPlugin, setHubPlugin] = (0, react.useState)(null);
 			/** 收录/精选统计（官网 /api/stats.json 实时拉取） */
 			const [stats, setStats] = (0, react.useState)(null);
 			const [failed, setFailed] = (0, react.useState)(false);
@@ -1124,12 +1156,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			(0, react.useEffect)(() => {
 				let cancelled = false;
 				setPlugins(null);
+				setHubPlugin(null);
 				setStats(null);
 				setFailed(false);
 				const load = () => Promise.all([fetchCatalog(lang), fetchStats()]);
 				load().then(([list, stats]) => {
 					if (cancelled) return;
 					const hadSelf = list.some((p) => p.source?.repo === SELF_REPO);
+					setHubPlugin(list.find((p) => p.source?.repo === SELF_REPO) ?? null);
 					setPlugins(list.filter((p) => p.compatibility?.status === "verified" && p.source?.repo !== SELF_REPO));
 					if (stats) setStats(hadSelf ? {
 						total: stats.total - 1,
@@ -1220,10 +1254,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				});
 				const dir = sortDir === "asc" ? 1 : -1;
 				return [...list].sort((a, b) => {
-					if (sort === "sortStars") return ((b.stats?.stargazers_count ?? 0) - (a.stats?.stargazers_count ?? 0)) * dir;
-					if (sort === "sortForks") return ((b.stats?.forks_count ?? 0) - (a.stats?.forks_count ?? 0)) * dir;
-					if (sort === "sortNewest") return (b.dates?.addedAt ?? "").localeCompare(a.dates?.addedAt ?? "") * dir;
-					return (b.dates?.repoUpdatedAt ?? "").localeCompare(a.dates?.repoUpdatedAt ?? "") * dir;
+					if (sort === "sortStars") return ((a.stats?.stargazers_count ?? 0) - (b.stats?.stargazers_count ?? 0)) * dir;
+					if (sort === "sortForks") return ((a.stats?.forks_count ?? 0) - (b.stats?.forks_count ?? 0)) * dir;
+					if (sort === "sortNewest") return (a.dates?.addedAt ?? "").localeCompare(b.dates?.addedAt ?? "") * dir;
+					return (a.dates?.repoUpdatedAt ?? "").localeCompare(b.dates?.repoUpdatedAt ?? "") * dir;
 				});
 			}, [
 				plugins,
@@ -1241,6 +1275,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, [plugins]);
 			return {
 				plugins,
+				hubPlugin,
 				stats,
 				failed,
 				reload: () => setReloadKey((k) => k + 1),
@@ -1321,6 +1356,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				message: ""
 			});
 		}
+		/** 记录一条「发现新版本」更新提醒：成功类轻量记录，携带目录新版本号供通知中心展示。 */
+		function addUpdateNotice(record) {
+			return addNotification({
+				...record,
+				ok: true,
+				message: ""
+			});
+		}
 		/** 清空全部通知记录，返回空列表。 */
 		function clearNotifications() {
 			save([]);
@@ -1333,9 +1376,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			return next;
 		}
 		/**
-		* 失败归类，三态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+		* 失败归类，四态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
 		* 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
-		* 一律引导提 Issue：
+		* 一律引导提 Issue；唯一例外是本机 npm 自身版本过低导致的内部崩溃（见 npmTooOld）：
+		* - npmTooOld：失败输出含 npm arborist 的 `edgesOut` 崩溃特征（build-ideal-tree.js 解 peer 依赖时
+		*   内部抛错，npm 11.6.0 前必现的已知缺陷，npm/cli#8261、#9787），或服务端已核实本机版本低于
+		*   阈值并打了 `[npm-too-low]` 标记 —— 是本机 npm 版本过低/自身缺陷，不是插件问题 → 引导升级 npm
 		* - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
 		*   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
 		*   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
@@ -1344,10 +1390,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
 		*/
 		function classifyFailure(message) {
+			if (/\[npm-too-low\]|edgesOut/i.test(message)) return "npmTooOld";
 			if (/\[packaging\]|entry file missing/i.test(message)) return "pluginPrepare";
 			if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return "pnpmIgnoredBuild";
 			if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return "pluginPrepare";
 			return "repo";
+		}
+		/** 从服务端 `[npm-too-low]` 标记行提取本机 npm 版本（如 `[npm-too-low] npm@11.3.0` → "11.3.0"）；
+		*  历史记录无标记时返回 null，前端据此决定提示文案是否带具体版本。 */
+		function npmTooLowVersion(message) {
+			const m = message.match(/\[npm-too-low\]\s*npm@(\d+\.\d+\.\d+)/i);
+			return m ? m[1] : null;
 		}
 		/** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */
 		const CORE_LINE_RE = /ERR_[A-Z_]+|ELIFECYCLE|Command failed|prepare-guard|Failed to prepare|exit code|\bprepare\b|pnpm failed in profile|git-hosted plugins build|submodule|not found|cannot find|no such|unable to|fatal|missing|error/i;
@@ -1529,11 +1582,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*/
 		const DEFAULT_SETTINGS = {
 			checkUpdatesOnStart: true,
-			autoInstallUpdates: false,
 			npmRegistry: "",
 			proxy: "",
 			enableNpmInstall: true,
 			enableGitInstall: true,
+			enableDshInstall: true,
 			logPath: ""
 		};
 		async function loadRemote() {
@@ -1607,7 +1660,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*  给足余量；超时主动中止，避免服务端 preflight 网络挂起时前端永久卡「安装中 0%」。 */
 		const REQUEST_TIMEOUT_MS = 6e4;
 		function useTaskQueue(opts) {
-			const { t, refreshInstalled, onInstallDone, onUninstallDone, onError, installPlugin, installCustomTarget, uninstallPlugin, uninstallName, installedName, resolvePending } = opts;
+			const { t, refreshInstalled, onInstallDone, onUninstallDone, onError, installPlugin, installCustomTarget, installGlobalTarget, uninstallPlugin, uninstallName, installedName, resolvePending } = opts;
 			const [queue, setQueue] = (0, react.useState)([]);
 			const queueRef = (0, react.useRef)([]);
 			/** 待重启列表（服务端内存态 + 本地展示信息补齐）；与 queue 一样以 ref 为唯一事实来源。 */
@@ -1914,7 +1967,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 							repo: input.target,
 							display: input.repo,
 							source: input.source,
-							mode: input.update ? "update" : void 0
+							mode: input.update ? "update" : void 0,
+							...input.globalNpm && input.globalNpm.length > 0 ? { globalNpm: input.globalNpm } : {}
 						}),
 						signal: controller.signal
 					});
@@ -1976,6 +2030,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					repo,
 					command: `pnpm add ${target}`,
 					source: "custom",
+					update: opts?.update
+				});
+			};
+			/** 全局 npm 安装（官方 README 的 `npm install -g <pkgs>`）：不进任何 profile、无需宿主重启。
+			*  队列展示/防重用包列表空格拼接的身份（与服务端 target 同口径）。 */
+			const installGlobalNpm = async (pkgs, opts) => {
+				const list = (pkgs ?? []).map((p) => p.trim()).filter((p) => p !== "");
+				if (list.length === 0) return;
+				const identity = list.join(" ");
+				await submitInstall({
+					target: identity,
+					repo: identity,
+					command: `npm install -g ${identity}`,
+					source: "custom",
+					globalNpm: list,
 					update: opts?.update
 				});
 			};
@@ -2059,15 +2128,16 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const clearModalTask = () => {
 				modalTaskRef.current = null;
 			};
-			const installModalTarget = installPlugin?.source?.repo ?? (installCustomTarget ? repoFromInstallTarget(installCustomTarget) : null);
+			const installModalTarget = installPlugin?.source?.repo ?? (installCustomTarget ? repoFromInstallTarget(installCustomTarget) : null) ?? installGlobalTarget ?? null;
 			return {
 				queue,
 				pendingRestarts,
-				installModalTask: installPlugin || installCustomTarget ? queue.find((q) => q.id === modalTaskRef.current && q.kind === "install" && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === installModalTarget && q.status !== "cancelling") ?? null : null,
+				installModalTask: installPlugin || installCustomTarget || installGlobalTarget ? queue.find((q) => q.id === modalTaskRef.current && q.kind === "install" && q.status !== "cancelling") ?? queue.find((q) => q.kind === "install" && q.target === installModalTarget && q.status !== "cancelling") ?? null : null,
 				uninstallModalTask: uninstallPlugin || uninstallName ? queue.find((q) => q.id === modalTaskRef.current && q.status !== "cancelling") ?? queue.find((q) => q.kind === "uninstall" && q.target === (uninstallName ?? installedName(uninstallPlugin) ?? "") && q.status !== "cancelling") ?? null : null,
 				submitting,
 				installNow,
 				installCustom,
+				installGlobalNpm,
 				uninstallNow,
 				uninstallItem,
 				cancelTask,
@@ -2076,7 +2146,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
-		const css$10 = ".BiQ1zG_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out BiQ1zG_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.BiQ1zG_modal,.BiQ1zG_errorModal{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out BiQ1zG_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.BiQ1zG_errorModal{width:640px;max-width:calc(100vw - 48px)}.BiQ1zG_modalWide{width:560px;max-width:calc(100vw - 48px)}.BiQ1zG_logModal{width:780px;max-width:calc(100vw - 48px)}.BiQ1zG_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.BiQ1zG_modalTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_modalTitleBusy{color:var(--hub-brand)}.BiQ1zG_modalTitleQueued{color:var(--hub-warning)}.BiQ1zG_modalClose{width:24px;height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.BiQ1zG_modalClose:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.BiQ1zG_modalDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_trustHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_cliOnlyHint{color:var(--hub-text-secondary);background:var(--hub-bg-hover);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_failedCopyHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.BiQ1zG_modalLabel{min-width:64px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);font-weight:500;overflow:hidden}.BiQ1zG_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.BiQ1zG_modalLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_linkIcon{flex-shrink:0}.BiQ1zG_modalCmd{color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_modalCmd:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.BiQ1zG_modalCmdCopy{color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_modalCmdCopy:hover{color:var(--hub-brand-hover);background:var(--hub-bg-2)}.BiQ1zG_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.BiQ1zG_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.BiQ1zG_toast{z-index:1000;background:var(--hub-btn-fill);color:var(--hub-text-on-fill);pointer-events:none;white-space:nowrap;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out BiQ1zG_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes BiQ1zG_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.BiQ1zG_toastFail{background:var(--hub-danger);color:#fff;border-color:#ffffff3d}.BiQ1zG_queueSection{flex-direction:column;gap:6px;display:flex}.BiQ1zG_queueSectionTitle{color:var(--hub-text-secondary);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_pendingRowStatus{color:var(--hub-warn);flex-shrink:0;font-weight:500}.BiQ1zG_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.BiQ1zG_queueRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.BiQ1zG_queueRow:hover{background:var(--hub-brand-tint)}.BiQ1zG_queueRowHead{align-items:center;gap:10px;display:flex}.BiQ1zG_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.BiQ1zG_queueRowDesc{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.BiQ1zG_queueRowBody{align-items:center;gap:8px;display:flex}.BiQ1zG_queueRowStatus{color:var(--hub-brand);flex-shrink:0;font-weight:500}.BiQ1zG_queueRowTrack{flex:1;min-width:0}.BiQ1zG_queueRowPct{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0}.BiQ1zG_stripCancel{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,color .12s}.BiQ1zG_stripCancel:hover{background:var(--hub-danger-tint);color:var(--hub-danger-text)}.BiQ1zG_stripCancel:disabled{opacity:.45;cursor:default}.BiQ1zG_queuedHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.BiQ1zG_errorTitle{color:var(--hub-danger-text);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_errorBox{border:1px solid var(--hub-danger-border);background:var(--hub-danger-tint-weak);max-height:240px;color:var(--hub-text-primary);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.BiQ1zG_errorCopySoft{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_errorCopySoft:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_errorHint{color:var(--hub-text-tertiary);font-size:12px;line-height:18px}.BiQ1zG_modalCancel,.BiQ1zG_modalCopy{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_modalCancel:hover,.BiQ1zG_modalCopy:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalInstall{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_modalInstall:hover{background:var(--hub-btn-hover)}.BiQ1zG_modalCopy:disabled,.BiQ1zG_modalInstall:disabled,.BiQ1zG_modalCancel:disabled,.BiQ1zG_modalClose:disabled,.BiQ1zG_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_uninstallConfirm{color:#fff;background:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_uninstallConfirm:hover{background:var(--hub-danger-hover)}.BiQ1zG_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.BiQ1zG_resultCheck{background:var(--hub-success-tint);width:40px;height:40px;color:var(--hub-success);border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.BiQ1zG_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.BiQ1zG_resultTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_resultDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_resultRestarting{color:var(--hub-text-tertiary);padding:12px 0 6px;font-size:12px;line-height:18px}.BiQ1zG_restartLater{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_restartLater:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_restartNow{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNow:hover{background:var(--hub-btn-hover)}.BiQ1zG_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_restartNowWarning{color:#fff;background:var(--hub-warning);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNowWarning:hover{background:var(--hub-warning-hover)}.BiQ1zG_restartNowWarning:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_result .BiQ1zG_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartLater,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNow,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNowWarning{min-width:100px}.BiQ1zG_progress{margin:10px 0 2px}.BiQ1zG_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.BiQ1zG_progressText{color:var(--hub-text-secondary);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.BiQ1zG_progressTrack{background:var(--hub-border-2);border-radius:2px;height:4px;overflow:hidden}.BiQ1zG_progressFill{background:var(--hub-brand);border-radius:2px;height:100%;transition:width .32s}.BiQ1zG_progressFillFail{background:var(--hub-danger)}@keyframes BiQ1zG_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes BiQ1zG_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.BiQ1zG_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.BiQ1zG_failRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.BiQ1zG_failHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeList{flex-direction:column;gap:10px;padding-right:2px;display:flex}.BiQ1zG_noticeRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;display:flex}.BiQ1zG_noticeRowMain{align-items:center;gap:10px;width:100%;min-width:0;display:flex}.BiQ1zG_noticeBadgeOk,.BiQ1zG_noticeBadgeFail{border-radius:50%;flex-shrink:0;justify-content:center;align-items:center;width:28px;height:28px;display:inline-flex;box-shadow:0 2px 6px #0000002e}.BiQ1zG_noticeBadgeOk{background:var(--hub-success)}.BiQ1zG_noticeBadgeFail{background:var(--hub-danger)}.BiQ1zG_noticeBadgeIcon{flex-shrink:0;width:12px;height:12px}.BiQ1zG_noticeMain{flex-direction:column;flex:1;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeTextOk{color:var(--hub-success);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeTextFail{color:var(--hub-danger-text);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeFoot{justify-content:flex-end;align-items:center;display:flex}.BiQ1zG_noticeTime{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.BiQ1zG_noticeRemove{width:22px;height:22px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:5px;flex-shrink:0;justify-content:center;align-items:center;margin-left:auto;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_noticeRemove:hover{color:var(--hub-danger-text);background:var(--hub-danger-tint)}.BiQ1zG_noticeRowOk .BiQ1zG_noticeRemove{margin-left:0}.BiQ1zG_noticeRowOk .BiQ1zG_noticeTime{margin-left:auto}.BiQ1zG_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.BiQ1zG_failKindInstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}.BiQ1zG_failKindUninstall{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}.BiQ1zG_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.BiQ1zG_failRepo:hover{text-decoration:underline}.BiQ1zG_failCopy{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_failCopy:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_failEmpty{text-align:center;color:var(--hub-text-tertiary);padding:24px 0;font-size:12px;line-height:18px}.BiQ1zG_failClear{color:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_failClear:hover{color:#fff;background:var(--hub-danger)}.BiQ1zG_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.BiQ1zG_failBigIssue:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover);box-shadow:0 3px 10px #d1242f59}.BiQ1zG_failPrepareHint{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}.BiQ1zG_aboutModal{width:460px;max-width:calc(100vw - 48px)}.BiQ1zG_aboutContent{min-height:0;max-height:340px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_aboutContent>:first-child{margin-top:0}.BiQ1zG_aboutContent>:last-child{margin-bottom:0}.BiQ1zG_aboutContent h2,.BiQ1zG_aboutContent h3,.BiQ1zG_aboutContent h4,.BiQ1zG_aboutContent h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_aboutContent h2{font-size:14px}.BiQ1zG_aboutContent p{margin:4px 0}.BiQ1zG_aboutContent ul,.BiQ1zG_aboutContent ol{margin:4px 0;padding-left:18px}.BiQ1zG_aboutContent li{margin:2px 0}.BiQ1zG_aboutContent code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_aboutContent pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_aboutContent pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_aboutContent blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_aboutContent a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_aboutContent a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_aboutContent img{border-radius:8px;max-width:100%;max-height:220px;margin:8px auto;display:block;box-shadow:0 2px 8px #0000001f}.BiQ1zG_aboutMeta{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}.BiQ1zG_hubUpdateModal{width:520px;max-width:calc(100vw - 48px)}.BiQ1zG_hubUpdateMeta{flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:12px;line-height:18px;display:flex}.BiQ1zG_hubUpdateMetaItem{color:var(--hub-text-tertiary)}.BiQ1zG_hubUpdateNotes{min-height:0;max-height:300px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_hubUpdateNotes>:first-child{margin-top:0}.BiQ1zG_hubUpdateNotes>:last-child{margin-bottom:0}.BiQ1zG_hubUpdateNotes h2,.BiQ1zG_hubUpdateNotes h3,.BiQ1zG_hubUpdateNotes h4,.BiQ1zG_hubUpdateNotes h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_hubUpdateNotes h2{font-size:14px}.BiQ1zG_hubUpdateNotes p{margin:4px 0}.BiQ1zG_hubUpdateNotes ul,.BiQ1zG_hubUpdateNotes ol{margin:4px 0;padding-left:18px}.BiQ1zG_hubUpdateNotes li{margin:2px 0}.BiQ1zG_hubUpdateNotes code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_hubUpdateNotes pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_hubUpdateNotes pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_hubUpdateNotes blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_hubUpdateNotes a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_hubUpdateNotes a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_detailModal{width:480px;max-width:calc(100vw - 48px)}.BiQ1zG_detailUpdateHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_detailGrid{flex-direction:column;gap:6px;display:flex}.BiQ1zG_detailRow{align-items:baseline;gap:10px;min-width:0;font-size:12px;line-height:20px;display:flex}.BiQ1zG_detailLabel{text-align:right;width:76px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_detailValue{min-width:0;color:var(--hub-text-primary);flex-wrap:wrap;flex:auto;align-items:baseline;gap:4px 6px;font-weight:500;display:flex}.BiQ1zG_detailMono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:500}.BiQ1zG_detailArrow{color:var(--hub-text-tertiary);align-items:baseline;gap:4px;display:inline-flex}.BiQ1zG_detailDim{color:var(--hub-text-tertiary);font-size:11px;font-weight:400}.BiQ1zG_detailLink{min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex}.BiQ1zG_detailLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_detailStars{color:#b45309;font-weight:600}.BiQ1zG_detailPath{min-width:0;color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:6px;flex:auto;justify-content:space-between;align-items:center;gap:6px;padding:3px 3px 3px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_detailPath:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_detailPathText{text-overflow:ellipsis;white-space:nowrap;cursor:pointer;-webkit-user-select:none;user-select:none;min-width:0;overflow:hidden}.BiQ1zG_detailPathActions{flex-shrink:0;align-items:center;gap:4px;display:inline-flex}.BiQ1zG_detailPathBtn{width:28px;height:28px;color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:center;align-items:center;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.BiQ1zG_detailPathBtn svg{width:15px;height:15px}.BiQ1zG_detailPathBtn:hover{color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}.BiQ1zG_detailStatusRunning,.BiQ1zG_detailStatusPending{border-radius:50%;flex-shrink:0;align-self:center;width:8px;height:8px}.BiQ1zG_detailStatusRunning{background:var(--hub-success)}.BiQ1zG_detailStatusPending{background:var(--hub-warning)}.BiQ1zG_detailStatusText{font-weight:500}";
+		const css$10 = ".BiQ1zG_overlay{z-index:998;-webkit-user-select:none;user-select:none;background:#00000061;justify-content:center;align-items:center;animation:.16s ease-out BiQ1zG_overlayIn;display:flex;position:fixed;top:0;bottom:0;left:0;right:0}.BiQ1zG_modal,.BiQ1zG_errorModal{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:10px;flex-direction:column;gap:10px;width:420px;max-width:calc(100vw - 32px);max-height:calc(100vh - 64px);padding:14px 16px;animation:.18s ease-out BiQ1zG_modalIn;display:flex;box-shadow:0 12px 40px #0000003d}.BiQ1zG_errorModal{width:640px;max-width:calc(100vw - 48px)}.BiQ1zG_modalWide{width:560px;max-width:calc(100vw - 48px)}.BiQ1zG_logModal{width:780px;max-width:calc(100vw - 48px);height:min(540px,100vh - 64px)}.BiQ1zG_modalHead{flex-shrink:0;justify-content:space-between;align-items:center;gap:8px;display:flex}.BiQ1zG_modalTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_modalTitleBusy{color:var(--hub-brand)}.BiQ1zG_modalTitleQueued{color:var(--hub-warning)}.BiQ1zG_modalClose{width:24px;height:24px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;justify-content:center;align-items:center;font-size:16px;line-height:1;display:inline-flex}.BiQ1zG_modalClose:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalCloseIcon{flex-shrink:0;width:14px;height:14px}.BiQ1zG_modalDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_trustHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_cliOnlyHint{color:var(--hub-text-secondary);background:var(--hub-bg-hover);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_failedCopyHint{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:500;line-height:18px}.BiQ1zG_modalRow{align-items:baseline;gap:8px;min-width:0;font-size:12px;line-height:18px;display:flex}.BiQ1zG_modalLabel{min-width:64px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_modalValue{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);font-weight:500;overflow:hidden}.BiQ1zG_modalLink{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex;overflow:hidden}.BiQ1zG_modalLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_linkIcon{flex-shrink:0}.BiQ1zG_modalCmd{color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 6px 6px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_modalCmd:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_modalCmdText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.BiQ1zG_modalCmdCopy{color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;gap:3px;padding:1px 7px;font-family:inherit;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_modalCmdCopy:hover{color:var(--hub-brand-hover);background:var(--hub-bg-2)}.BiQ1zG_modalActions{justify-content:flex-end;align-items:center;gap:8px;margin-top:2px;display:flex}.BiQ1zG_modalBody{flex-direction:column;flex:auto;gap:10px;min-height:0;display:flex;overflow-y:auto}.BiQ1zG_toast{z-index:1000;background:var(--hub-btn-fill);color:var(--hub-text-on-fill);pointer-events:none;white-space:nowrap;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:500;line-height:18px;animation:.22s ease-out BiQ1zG_toastIn;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 6px 24px #00000047}@keyframes BiQ1zG_toastIn{0%{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}.BiQ1zG_toastFail{background:var(--hub-danger);color:#fff;border-color:#ffffff3d}.BiQ1zG_queueSection{flex-direction:column;gap:6px;display:flex}.BiQ1zG_queueSectionTitle{color:var(--hub-text-secondary);padding:4px 2px 0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_pendingRowStatus{color:var(--hub-warn);flex-shrink:0;font-weight:500}.BiQ1zG_pendingRowActions{flex-shrink:0;gap:8px;margin-left:auto;display:flex}.BiQ1zG_queueRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;flex-direction:column;gap:5px;padding:8px 10px;font-size:12px;line-height:18px;transition:background .12s;display:flex}.BiQ1zG_queueRow:hover{background:var(--hub-brand-tint)}.BiQ1zG_queueRowHead{align-items:center;gap:10px;display:flex}.BiQ1zG_queueRowTarget{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-text-primary);flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}.BiQ1zG_queueRowDesc{color:var(--hub-text-tertiary);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.BiQ1zG_queueRowBody{align-items:center;gap:8px;display:flex}.BiQ1zG_queueRowStatus{color:var(--hub-brand);flex-shrink:0;font-weight:500}.BiQ1zG_queueRowTrack{flex:1;min-width:0}.BiQ1zG_queueRowPct{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0}.BiQ1zG_stripCancel{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;flex-shrink:0;padding:2px 10px;font-size:12px;line-height:18px;transition:background .12s,color .12s}.BiQ1zG_stripCancel:hover{background:var(--hub-danger-tint);color:var(--hub-danger-text)}.BiQ1zG_stripCancel:disabled{opacity:.45;cursor:default}.BiQ1zG_queuedHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:5px 10px;font-size:12px;line-height:18px}.BiQ1zG_errorTitle{color:var(--hub-danger-text);font-size:14px;font-weight:600;line-height:20px}.BiQ1zG_errorBox{border:1px solid var(--hub-danger-border);background:var(--hub-danger-tint-weak);max-height:240px;color:var(--hub-text-primary);white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;border-radius:6px;margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:17px;overflow:auto}.BiQ1zG_errorCopySoft{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_errorCopySoft:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_errorHint{color:var(--hub-text-tertiary);font-size:12px;line-height:18px}.BiQ1zG_modalCancel,.BiQ1zG_modalCopy{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_modalCancel:hover,.BiQ1zG_modalCopy:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_modalInstall{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_modalInstall:hover{background:var(--hub-btn-hover)}.BiQ1zG_modalCopy:disabled,.BiQ1zG_modalInstall:disabled,.BiQ1zG_modalCancel:disabled,.BiQ1zG_modalClose:disabled,.BiQ1zG_uninstallConfirm:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_uninstallConfirm{color:#fff;background:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_uninstallConfirm:hover{background:var(--hub-danger-hover)}.BiQ1zG_result{text-align:center;flex-direction:column;align-items:center;gap:5px;padding:10px 0 2px;display:flex}.BiQ1zG_resultCheck{background:var(--hub-success-tint);width:40px;height:40px;color:var(--hub-success);border-radius:50%;justify-content:center;align-items:center;margin-bottom:3px;display:inline-flex}.BiQ1zG_resultCheckIcon{flex-shrink:0;width:20px;height:20px}.BiQ1zG_resultTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_resultDesc{color:var(--hub-text-secondary);font-size:12px;line-height:18px}.BiQ1zG_resultRestarting{color:var(--hub-text-tertiary);padding:12px 0 6px;font-size:12px;line-height:18px}.BiQ1zG_restartLater{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_restartLater:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}.BiQ1zG_restartNow{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNow:hover{background:var(--hub-btn-hover)}.BiQ1zG_restartNow:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_restartNowWarning{color:#fff;background:var(--hub-warning);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;line-height:18px;transition:background .12s}.BiQ1zG_restartNowWarning:hover{background:var(--hub-warning-hover)}.BiQ1zG_restartNowWarning:disabled{opacity:.55;cursor:not-allowed;pointer-events:none}.BiQ1zG_result .BiQ1zG_modalActions{justify-content:center;gap:10px;margin-top:0;padding:6px 0 2px}.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartLater,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNow,.BiQ1zG_result .BiQ1zG_modalActions .BiQ1zG_restartNowWarning{min-width:100px}.BiQ1zG_progress{margin:10px 0 2px}.BiQ1zG_progressHead{justify-content:flex-end;align-items:center;margin-bottom:3px;display:flex}.BiQ1zG_progressText{color:var(--hub-text-secondary);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:14px}.BiQ1zG_progressTrack{background:var(--hub-border-2);border-radius:2px;height:4px;overflow:hidden}.BiQ1zG_progressFill{background:var(--hub-brand);border-radius:2px;height:100%;transition:width .32s}.BiQ1zG_progressFillFail{background:var(--hub-danger)}@keyframes BiQ1zG_overlayIn{0%{opacity:0}to{opacity:1}}@keyframes BiQ1zG_modalIn{0%{opacity:0;transform:translateY(6px)scale(.98)}to{opacity:1;transform:translateY(0)scale(1)}}.BiQ1zG_failList{flex-direction:column;gap:12px;padding-right:2px;display:flex}.BiQ1zG_failRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;gap:8px;padding:10px 12px;display:flex}.BiQ1zG_failHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeList{flex-direction:column;gap:10px;padding-right:2px;display:flex}.BiQ1zG_noticeRow{border:1px solid var(--hub-border-2);background:var(--hub-bg-2);border-radius:8px;flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px;display:flex}.BiQ1zG_noticeRowMain{align-items:center;gap:10px;width:100%;min-width:0;display:flex}.BiQ1zG_noticeBadgeOk,.BiQ1zG_noticeBadgeFail{border-radius:50%;flex-shrink:0;justify-content:center;align-items:center;width:28px;height:28px;display:inline-flex;box-shadow:0 2px 6px #0000002e}.BiQ1zG_noticeBadgeOk{background:var(--hub-success)}.BiQ1zG_noticeBadgeFail{background:var(--hub-danger)}.BiQ1zG_noticeBadgeIcon{flex-shrink:0;width:12px;height:12px}.BiQ1zG_noticeMain{flex-direction:column;flex:1;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeHead{align-items:center;gap:8px;min-width:0;display:flex}.BiQ1zG_noticeTextOk{color:var(--hub-success);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeTextFail{color:var(--hub-danger-text);flex-shrink:0;font-size:12px;font-weight:600;line-height:18px}.BiQ1zG_noticeFoot{justify-content:flex-end;align-items:center;display:flex}.BiQ1zG_noticeTime{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex-shrink:0;font-size:11px;line-height:16px}.BiQ1zG_noticeRemove{width:22px;height:22px;color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:5px;flex-shrink:0;justify-content:center;align-items:center;margin-left:auto;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_noticeRemove:hover{color:var(--hub-danger-text);background:var(--hub-danger-tint)}.BiQ1zG_noticeRowOk .BiQ1zG_noticeRemove{margin-left:0}.BiQ1zG_noticeRowOk .BiQ1zG_noticeTime{margin-left:auto}.BiQ1zG_noticeRowUpdate{cursor:pointer;transition:border-color .12s,background .12s}.BiQ1zG_noticeRowUpdate:hover{border-color:var(--hub-brand);background:var(--hub-brand-tint)}.BiQ1zG_noticeVersion{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border);font-variant-numeric:tabular-nums;border-radius:5px;flex-shrink:0;padding:0 6px;font-size:11px;font-weight:600;line-height:18px}.BiQ1zG_noticeUpdateGo{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:5px;flex-shrink:0;margin-left:2px;padding:2px 8px;font-size:11px;font-weight:600;line-height:16px;transition:background .12s}.BiQ1zG_noticeUpdateGo:hover{background:var(--hub-brand-hover)}.BiQ1zG_failKind{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}.BiQ1zG_failKindInstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}.BiQ1zG_failKindUninstall{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}.BiQ1zG_failRepo{text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:18px;text-decoration:none;overflow:hidden}.BiQ1zG_failRepo:hover{text-decoration:underline}.BiQ1zG_failCopy{color:var(--hub-text-tertiary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:4px;flex-shrink:0;align-items:center;padding:2px 8px;font-size:11px;line-height:16px;transition:color .12s,background .12s;display:inline-flex}.BiQ1zG_failCopy:hover{color:var(--hub-text-secondary);background:var(--hub-bg-2)}.BiQ1zG_failEmpty{text-align:center;color:var(--hub-text-tertiary);padding:24px 0;font-size:12px;line-height:18px}.BiQ1zG_failClear{color:var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:5px 14px;font-size:12px;line-height:18px;transition:color .12s,background .12s}.BiQ1zG_failClear:hover{color:#fff;background:var(--hub-danger)}.BiQ1zG_failBigIssue{box-sizing:border-box;text-align:center;color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;width:100%;margin-top:4px;padding:3px 16px;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:background .12s,border-color .12s,box-shadow .12s;display:block}.BiQ1zG_failBigIssue:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover);box-shadow:0 3px 10px #d1242f59}.BiQ1zG_failPrepareHint{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);border-radius:6px;margin-top:6px;padding:8px 12px;font-size:12px;line-height:18px}.BiQ1zG_aboutModal{width:460px;max-width:calc(100vw - 48px)}.BiQ1zG_aboutContent{min-height:0;max-height:340px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_aboutContent>:first-child{margin-top:0}.BiQ1zG_aboutContent>:last-child{margin-bottom:0}.BiQ1zG_aboutContent h2,.BiQ1zG_aboutContent h3,.BiQ1zG_aboutContent h4,.BiQ1zG_aboutContent h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_aboutContent h2{font-size:14px}.BiQ1zG_aboutContent p{margin:4px 0}.BiQ1zG_aboutContent ul,.BiQ1zG_aboutContent ol{margin:4px 0;padding-left:18px}.BiQ1zG_aboutContent li{margin:2px 0}.BiQ1zG_aboutContent code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_aboutContent pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_aboutContent pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_aboutContent blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_aboutContent a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_aboutContent a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_aboutContent img{border-radius:8px;max-width:100%;max-height:220px;margin:8px auto;display:block;box-shadow:0 2px 8px #0000001f}.BiQ1zG_aboutMeta{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}.BiQ1zG_hubUpdateModal{width:520px;max-width:calc(100vw - 48px)}.BiQ1zG_hubUpdateMeta{flex-wrap:wrap;align-items:center;gap:4px 14px;font-size:12px;line-height:18px;display:flex}.BiQ1zG_hubUpdateMetaItem{color:var(--hub-text-tertiary)}.BiQ1zG_hubUpdateNotes{min-height:0;max-height:300px;color:var(--hub-text-secondary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:8px;flex:auto;padding:10px 12px;font-size:12px;line-height:18px;overflow-y:auto}.BiQ1zG_hubUpdateNotes>:first-child{margin-top:0}.BiQ1zG_hubUpdateNotes>:last-child{margin-bottom:0}.BiQ1zG_hubUpdateNotes h2,.BiQ1zG_hubUpdateNotes h3,.BiQ1zG_hubUpdateNotes h4,.BiQ1zG_hubUpdateNotes h5{color:var(--hub-text-primary);margin:10px 0 4px;font-size:13px;font-weight:600;line-height:20px}.BiQ1zG_hubUpdateNotes h2{font-size:14px}.BiQ1zG_hubUpdateNotes p{margin:4px 0}.BiQ1zG_hubUpdateNotes ul,.BiQ1zG_hubUpdateNotes ol{margin:4px 0;padding-left:18px}.BiQ1zG_hubUpdateNotes li{margin:2px 0}.BiQ1zG_hubUpdateNotes code{background:var(--hub-bg-hover);color:var(--hub-text-primary);border-radius:4px;padding:1px 4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}.BiQ1zG_hubUpdateNotes pre{background:var(--hub-bg-1);border:1px solid var(--hub-border-2);border-radius:6px;margin:6px 0;padding:8px 10px;overflow-x:auto}.BiQ1zG_hubUpdateNotes pre code{background:0 0;border-radius:0;padding:0}.BiQ1zG_hubUpdateNotes blockquote{border-left:3px solid var(--hub-brand);background:var(--hub-bg-hover);color:var(--hub-text-tertiary);border-radius:0 6px 6px 0;margin:6px 0;padding:2px 10px}.BiQ1zG_hubUpdateNotes a{color:var(--hub-brand);text-decoration:none}.BiQ1zG_hubUpdateNotes a:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_detailModal{width:480px;max-width:calc(100vw - 48px)}.BiQ1zG_detailUpdateHint{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:6px;padding:6px 10px;font-size:12px;line-height:18px}.BiQ1zG_detailGrid{flex-direction:column;gap:6px;display:flex}.BiQ1zG_detailRow{align-items:baseline;gap:10px;min-width:0;font-size:12px;line-height:20px;display:flex}.BiQ1zG_detailLabel{text-align:right;width:76px;color:var(--hub-text-tertiary);flex-shrink:0}.BiQ1zG_detailValue{min-width:0;color:var(--hub-text-primary);flex-wrap:wrap;flex:auto;align-items:baseline;gap:4px 6px;font-weight:500;display:flex}.BiQ1zG_detailMono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;font-weight:500}.BiQ1zG_detailArrow{color:var(--hub-text-tertiary);align-items:baseline;gap:4px;display:inline-flex}.BiQ1zG_detailDim{color:var(--hub-text-tertiary);font-size:11px;font-weight:400}.BiQ1zG_detailLink{min-width:0;color:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;align-items:center;gap:4px;font-weight:500;text-decoration:none;transition:color .12s;display:inline-flex}.BiQ1zG_detailLink:hover{color:var(--hub-brand-hover);text-decoration:underline}.BiQ1zG_detailStars{color:#b45309;font-weight:600}.BiQ1zG_detailPath{min-width:0;color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:6px;flex:auto;justify-content:space-between;align-items:center;gap:6px;padding:3px 3px 3px 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:18px;transition:border-color .12s,background .12s;display:flex}.BiQ1zG_detailPath:hover{border-color:var(--hub-border-ghost);background:var(--hub-bg-3)}.BiQ1zG_detailPathText{text-overflow:ellipsis;white-space:nowrap;cursor:pointer;-webkit-user-select:none;user-select:none;min-width:0;overflow:hidden}.BiQ1zG_detailPathActions{flex-shrink:0;align-items:center;gap:4px;display:inline-flex}.BiQ1zG_detailPathBtn{width:28px;height:28px;color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;justify-content:center;align-items:center;transition:color .12s,background .12s,border-color .12s;display:inline-flex}.BiQ1zG_detailPathBtn svg{width:15px;height:15px}.BiQ1zG_detailPathBtn:hover{color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}.BiQ1zG_detailStatusRunning,.BiQ1zG_detailStatusPending{border-radius:50%;flex-shrink:0;align-self:center;width:8px;height:8px}.BiQ1zG_detailStatusRunning{background:var(--hub-success)}.BiQ1zG_detailStatusPending{background:var(--hub-warning)}.BiQ1zG_detailStatusText{font-weight:500}";
 		const tagId$10 = "dsh-plugin/Modal.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$10) + "]") === null) {
 			const tag = document.createElement("style");
@@ -2086,124 +2156,127 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Modal_module_css_default = {
+			"aboutContent": "BiQ1zG_aboutContent",
+			"progress": "BiQ1zG_progress",
+			"resultCheck": "BiQ1zG_resultCheck",
 			"noticeRow": "BiQ1zG_noticeRow",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"errorModal": "BiQ1zG_errorModal",
-			"detailRow": "BiQ1zG_detailRow",
-			"failList": "BiQ1zG_failList",
-			"noticeRowOk": "BiQ1zG_noticeRowOk",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
-			"toast": "BiQ1zG_toast",
-			"modalIn": "BiQ1zG_modalIn",
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"detailGrid": "BiQ1zG_detailGrid",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"toastIn": "BiQ1zG_toastIn",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"progressFill": "BiQ1zG_progressFill",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"result": "BiQ1zG_result",
+			"detailPathBtn": "BiQ1zG_detailPathBtn",
+			"modalTitle": "BiQ1zG_modalTitle",
 			"failedCopyHint": "BiQ1zG_failedCopyHint",
+			"modalRow": "BiQ1zG_modalRow",
+			"toastFail": "BiQ1zG_toastFail",
+			"failList": "BiQ1zG_failList",
+			"detailModal": "BiQ1zG_detailModal",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"detailRow": "BiQ1zG_detailRow",
+			"modalActions": "BiQ1zG_modalActions",
 			"aboutMeta": "BiQ1zG_aboutMeta",
-			"restartLater": "BiQ1zG_restartLater",
-			"errorTitle": "BiQ1zG_errorTitle",
+			"modalLink": "BiQ1zG_modalLink",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
+			"modalClose": "BiQ1zG_modalClose",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"detailStars": "BiQ1zG_detailStars",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"errorHint": "BiQ1zG_errorHint",
+			"failRow": "BiQ1zG_failRow",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"detailLink": "BiQ1zG_detailLink",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"aboutModal": "BiQ1zG_aboutModal",
+			"errorBox": "BiQ1zG_errorBox",
+			"modalValue": "BiQ1zG_modalValue",
+			"overlay": "BiQ1zG_overlay",
+			"queueRowHead": "BiQ1zG_queueRowHead",
 			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"detailStatusText": "BiQ1zG_detailStatusText",
+			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"queueRow": "BiQ1zG_queueRow",
+			"trustHint": "BiQ1zG_trustHint",
 			"modalWide": "BiQ1zG_modalWide",
-			"failRepo": "BiQ1zG_failRepo",
+			"failCopy": "BiQ1zG_failCopy",
+			"detailPathActions": "BiQ1zG_detailPathActions",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"detailArrow": "BiQ1zG_detailArrow",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"detailMono": "BiQ1zG_detailMono",
+			"failKind": "BiQ1zG_failKind",
+			"modal": "BiQ1zG_modal",
+			"modalHead": "BiQ1zG_modalHead",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"progressHead": "BiQ1zG_progressHead",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"failClear": "BiQ1zG_failClear",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"detailPathText": "BiQ1zG_detailPathText",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"modalIn": "BiQ1zG_modalIn",
+			"modalBody": "BiQ1zG_modalBody",
+			"detailLabel": "BiQ1zG_detailLabel",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"detailStatusPending": "BiQ1zG_detailStatusPending",
+			"noticeList": "BiQ1zG_noticeList",
+			"detailValue": "BiQ1zG_detailValue",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"progressText": "BiQ1zG_progressText",
+			"noticeVersion": "BiQ1zG_noticeVersion",
+			"toast": "BiQ1zG_toast",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"failHead": "BiQ1zG_failHead",
+			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"detailDim": "BiQ1zG_detailDim",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"restartLater": "BiQ1zG_restartLater",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"progressFillFail": "BiQ1zG_progressFillFail",
 			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
 			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"trustHint": "BiQ1zG_trustHint",
-			"resultDesc": "BiQ1zG_resultDesc",
-			"progressText": "BiQ1zG_progressText",
-			"progressHead": "BiQ1zG_progressHead",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"restartNow": "BiQ1zG_restartNow",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"failCopy": "BiQ1zG_failCopy",
-			"detailMono": "BiQ1zG_detailMono",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"modalRow": "BiQ1zG_modalRow",
-			"modalClose": "BiQ1zG_modalClose",
-			"noticeList": "BiQ1zG_noticeList",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"progress": "BiQ1zG_progress",
-			"detailLink": "BiQ1zG_detailLink",
-			"errorHint": "BiQ1zG_errorHint",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"queueRow": "BiQ1zG_queueRow",
-			"detailArrow": "BiQ1zG_detailArrow",
-			"detailStars": "BiQ1zG_detailStars",
-			"failRow": "BiQ1zG_failRow",
-			"detailPathBtn": "BiQ1zG_detailPathBtn",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"detailDim": "BiQ1zG_detailDim",
-			"detailModal": "BiQ1zG_detailModal",
-			"logModal": "BiQ1zG_logModal",
-			"aboutModal": "BiQ1zG_aboutModal",
-			"overlay": "BiQ1zG_overlay",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"errorBox": "BiQ1zG_errorBox",
-			"failHead": "BiQ1zG_failHead",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"modalBody": "BiQ1zG_modalBody",
-			"queueRowBody": "BiQ1zG_queueRowBody",
 			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
-			"detailStatusPending": "BiQ1zG_detailStatusPending",
-			"progressFill": "BiQ1zG_progressFill",
-			"modalValue": "BiQ1zG_modalValue",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"aboutContent": "BiQ1zG_aboutContent",
-			"detailLabel": "BiQ1zG_detailLabel",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"errorTitle": "BiQ1zG_errorTitle",
 			"progressTrack": "BiQ1zG_progressTrack",
-			"detailPathText": "BiQ1zG_detailPathText",
-			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
-			"result": "BiQ1zG_result",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"toastIn": "BiQ1zG_toastIn",
-			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"restartNowWarning": "BiQ1zG_restartNowWarning",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"detailPathActions": "BiQ1zG_detailPathActions",
-			"failKind": "BiQ1zG_failKind",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"modalLink": "BiQ1zG_modalLink",
-			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"queueSection": "BiQ1zG_queueSection",
-			"detailGrid": "BiQ1zG_detailGrid",
 			"detailPath": "BiQ1zG_detailPath",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"modalDesc": "BiQ1zG_modalDesc",
+			"queueSection": "BiQ1zG_queueSection",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"errorModal": "BiQ1zG_errorModal",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"failRepo": "BiQ1zG_failRepo",
+			"queuedHint": "BiQ1zG_queuedHint",
 			"noticeMain": "BiQ1zG_noticeMain",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
-			"toastFail": "BiQ1zG_toastFail",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"detailStatusText": "BiQ1zG_detailStatusText",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"modal": "BiQ1zG_modal",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"modalHead": "BiQ1zG_modalHead",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"detailValue": "BiQ1zG_detailValue",
-			"failClear": "BiQ1zG_failClear",
-			"modalActions": "BiQ1zG_modalActions"
+			"restartNow": "BiQ1zG_restartNow",
+			"logModal": "BiQ1zG_logModal"
 		};
 		//#endregion
 		//#region src/client/components/ui/icons.tsx
@@ -2659,9 +2732,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* 目录插件与命令行安装（customTarget 模式）共用同一套确认/进度/结果流程。
 		*/
 		function InstallModal(props) {
-			const { plugin, customTarget, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props;
+			const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props;
 			const busy = submitting || task !== null && (task.status === "pending" || task.status === "running");
-			const name = customTarget ?? plugin?.displayName ?? plugin?.slug ?? "";
+			const name = customTarget ?? (globalNpm !== void 0 && globalNpm.length > 0 ? globalNpm.join(" ") : void 0) ?? plugin?.displayName ?? plugin?.slug ?? "";
 			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
 			const title = busy ? task && task.status === "pending" ? busyTitle(update ? t("queuedUpdateTitle") : t("queuedTitle")) : busyTitle(update ? t("updating") : t("installing")) : done ? update ? t("updateResultTitle") : t("installResultTitle") : update ? t("confirmUpdateTitle") : t("confirmTitle");
 			return (0, react.createElement)("div", {
@@ -2700,7 +2773,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("copyInstallCommand"),
 				role: "button",
 				tabIndex: 0
-			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin)), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), cliOnly ? (0, react.createElement)("div", { className: Modal_module_css_default.cliOnlyHint }, t("cliOnlyHint")) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, task && task.status === "failed" ? (0, react.createElement)("div", { className: Modal_module_css_default.failedCopyHint }, t("failedCopyHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+			}, (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdText }, globalNpm !== void 0 && globalNpm.length > 0 ? `npm install -g ${globalNpm.join(" ")}` : customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin)), (0, react.createElement)("span", { className: Modal_module_css_default.modalCmdCopy }, (0, react.createElement)(CopyIcon), t("copyCmdLabel"))), globalNpm !== void 0 && globalNpm.length > 0 ? (0, react.createElement)("div", { className: Modal_module_css_default.cliOnlyHint }, t("globalNpmHint")) : null, cliOnly ? (0, react.createElement)("div", { className: Modal_module_css_default.cliOnlyHint }, t("cliOnlyHint")) : null, task && task.status === "pending" ? (0, react.createElement)("div", { className: Modal_module_css_default.queuedHint }, t("queuedHint")) : null, task ? (0, react.createElement)(ProgressView, { task }) : null, task && task.status === "failed" ? (0, react.createElement)("div", { className: Modal_module_css_default.failedCopyHint }, t("failedCopyHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
 				className: Modal_module_css_default.modalCopy,
 				disabled: busy,
 				onClick: onCopy
@@ -2764,6 +2837,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
 		function ErrorModal({ message, repo, kind, command, attempts, t, env, onCopy, onClose }) {
 			const failureKind = classifyFailure(message);
+			const npmVersion = npmTooLowVersion(message);
 			const copyText = [
 				...command ? [command] : [],
 				...attempts ?? [],
@@ -2791,7 +2865,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, repo) : null, (0, react.createElement)("button", {
 				className: Modal_module_css_default.errorCopySoft,
 				onClick: () => onCopy(copyText)
-			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Modal_module_css_default.errorBox }, message), failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(message) ? t("failPackagingHint") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
+			}, t("errorCopy"))), (0, react.createElement)("pre", { className: Modal_module_css_default.errorBox }, message), failureKind === "npmTooOld" ? (0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, t(npmVersion ? "failNpmTooLowV" : "failNpmTooLow", npmVersion ? { v: npmVersion } : void 0)) : failureKind === "pluginPrepare" || failureKind === "pnpmIgnoredBuild" ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, failureKind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(message) ? t("failPackagingHint") : t("failPrepareHint")), repo ? (0, react.createElement)("a", {
 				className: Modal_module_css_default.failBigIssue,
 				href: pluginIssueUrl(repo, message, env, command, attempts),
 				target: "_blank",
@@ -2810,7 +2884,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 全局反馈 Toast：复制成功（反色）/ 安装完成（反色）/ 安装失败（红色）/ 卸载结果 */
 		function Toast({ toast, t }) {
-			const text = toast.kind === "copied" ? t("toastCopied") : toast.kind === "errCopied" ? t("errCopied") : toast.kind === "done" ? t("installDone") : toast.kind === "fail" ? t("installFail") : toast.kind === "removed" ? t("uninstallDone") : toast.kind === "revealFail" ? t("openFolderFail") : toast.kind === "updates" ? t("updatesFound", { n: toast.n ?? 0 }) : toast.kind === "updatesAuto" ? t("updatesAutoQueued", { n: toast.n ?? 0 }) : t("uninstallFail");
+			const text = toast.kind === "copied" ? t("toastCopied") : toast.kind === "errCopied" ? t("errCopied") : toast.kind === "done" ? t("installDone") : toast.kind === "fail" ? t("installFail") : toast.kind === "removed" ? t("uninstallDone") : toast.kind === "revealFail" ? t("openFolderFail") : toast.kind === "updates" ? t("updatesFound", { n: toast.n ?? 0 }) : t("uninstallFail");
 			const fail = toast.kind === "fail" || toast.kind === "removeFail" || toast.kind === "revealFail";
 			return (0, react.createElement)("div", {
 				key: toast.id,
@@ -3173,7 +3247,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeLinecap: "round"
 			}));
 		}
-		function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, cancelTask, restarting, onRestart }) {
+		function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, cancelTask, restarting, onRestart }) {
 			return (0, react.createElement)("div", {
 				className: Modal_module_css_default.overlay,
 				onClick: (e) => {
@@ -3224,10 +3298,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: Modal_module_css_default.progressFill,
 				style: { width: `${q.progress}%` }
 			})), (0, react.createElement)("span", { className: Modal_module_css_default.queueRowPct }, `${q.progress}%`))))) : null]) : null, records.length === 0 ? (0, react.createElement)("div", { className: Modal_module_css_default.failEmpty }, t("notificationsEmpty")) : (0, react.createElement)("div", { className: Modal_module_css_default.noticeList }, records.map((r) => {
+				const isUpdate = r.kind === "update";
 				return (0, react.createElement)("div", {
 					key: r.id,
-					className: r.ok ? `${Modal_module_css_default.noticeRow} ${Modal_module_css_default.noticeRowOk}` : Modal_module_css_default.noticeRow
-				}, (0, react.createElement)("div", { className: Modal_module_css_default.noticeRowMain }, (0, react.createElement)("div", { className: r.ok ? Modal_module_css_default.noticeBadgeOk : Modal_module_css_default.noticeBadgeFail }, (0, react.createElement)(BadgeGlyph, { ok: r.ok })), (0, react.createElement)("div", { className: Modal_module_css_default.noticeMain }, (0, react.createElement)("div", { className: Modal_module_css_default.noticeHead }, (0, react.createElement)("span", { className: r.ok ? Modal_module_css_default.noticeTextOk : Modal_module_css_default.noticeTextFail }, r.ok ? r.kind === "install" ? t("installDone") : t("uninstallDone") : r.kind === "install" ? t("errorTitleInstall") : t("errorTitleUninstall")), r.repo ? (0, react.createElement)("a", {
+					className: r.ok ? `${Modal_module_css_default.noticeRow} ${Modal_module_css_default.noticeRowOk}${isUpdate ? ` ${Modal_module_css_default.noticeRowUpdate}` : ""}` : Modal_module_css_default.noticeRow,
+					...isUpdate ? {
+						onClick: () => onUpdate(r.repo),
+						title: t("updateNoticeGo")
+					} : {}
+				}, (0, react.createElement)("div", { className: Modal_module_css_default.noticeRowMain }, (0, react.createElement)("div", { className: r.ok ? Modal_module_css_default.noticeBadgeOk : Modal_module_css_default.noticeBadgeFail }, (0, react.createElement)(BadgeGlyph, { ok: r.ok })), (0, react.createElement)("div", { className: Modal_module_css_default.noticeMain }, (0, react.createElement)("div", { className: Modal_module_css_default.noticeHead }, (0, react.createElement)("span", { className: r.ok ? Modal_module_css_default.noticeTextOk : Modal_module_css_default.noticeTextFail }, r.ok ? isUpdate ? t("updateNoticeTitle") : r.kind === "install" ? t("installDone") : t("uninstallDone") : r.kind === "install" ? t("errorTitleInstall") : t("errorTitleUninstall")), isUpdate && r.version ? (0, react.createElement)("span", {
+					className: Modal_module_css_default.noticeVersion,
+					title: r.version
+				}, `v${r.version}`) : null, r.repo ? isUpdate ? (0, react.createElement)("span", {
+					className: Modal_module_css_default.failRepo,
+					title: r.repo
+				}, r.repo) : (0, react.createElement)("a", {
 					className: Modal_module_css_default.failRepo,
 					href: pluginSiteUrl(r.repo),
 					target: "_blank",
@@ -3239,7 +3324,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				}, t("failCopy")), r.ok ? (0, react.createElement)("span", {
 					className: Modal_module_css_default.noticeTime,
 					title: new Date(r.at).toLocaleString()
-				}, fmtTime(r.at)) : null, (0, react.createElement)("button", {
+				}, fmtTime(r.at)) : null, isUpdate ? (0, react.createElement)("button", {
+					className: Modal_module_css_default.noticeUpdateGo,
+					onClick: (e) => {
+						e.stopPropagation();
+						onUpdate(r.repo);
+					}
+				}, t("updateNoticeGo")) : null, (0, react.createElement)("button", {
 					className: Modal_module_css_default.noticeRemove,
 					"aria-label": t("removeNotification"),
 					title: t("removeNotification"),
@@ -3249,6 +3340,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					}
 				}, (0, react.createElement)(CloseIcon))), !r.ok && (() => {
 					const kind = classifyFailure(r.message);
+					if (kind === "npmTooOld") {
+						const v = npmTooLowVersion(r.message);
+						return (0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, t(v ? "failNpmTooLowV" : "failNpmTooLow", v ? { v } : void 0));
+					}
 					if (kind === "pluginPrepare" || kind === "pnpmIgnoredBuild") return (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, kind === "pnpmIgnoredBuild" ? t("failIgnoredBuild") : /\[packaging\]/i.test(r.message) ? t("failPackagingHint") : t("failPrepareHint")), r.repo ? (0, react.createElement)("a", {
 						className: Modal_module_css_default.failBigIssue,
 						href: pluginIssueUrl(r.repo, r.message, env, r.command, r.attempts),
@@ -3416,38 +3511,38 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var List_module_css_default = {
-			"footLink": "_3XaZHa_footLink",
-			"state": "_3XaZHa_state",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"stats": "_3XaZHa_stats",
 			"stateDesc": "_3XaZHa_stateDesc",
+			"fork": "_3XaZHa_fork",
+			"moreSentinel": "_3XaZHa_moreSentinel",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"installBtn": "_3XaZHa_installBtn",
 			"body": "_3XaZHa_body",
 			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"desc": "_3XaZHa_desc",
-			"date": "_3XaZHa_date",
+			"star": "_3XaZHa_star",
+			"topic": "_3XaZHa_topic",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"cardMain": "_3XaZHa_cardMain",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"cardHead": "_3XaZHa_cardHead",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"state": "_3XaZHa_state",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"stats": "_3XaZHa_stats",
 			"actions": "_3XaZHa_actions",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"desc": "_3XaZHa_desc",
+			"footer": "_3XaZHa_footer",
+			"list": "_3XaZHa_list",
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
 			"verified": "_3XaZHa_verified",
 			"cardSide": "_3XaZHa_cardSide",
-			"moreSentinel": "_3XaZHa_moreSentinel",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"list": "_3XaZHa_list",
-			"star": "_3XaZHa_star",
-			"footer": "_3XaZHa_footer",
-			"cardMain": "_3XaZHa_cardMain",
-			"cardHead": "_3XaZHa_cardHead",
-			"topic": "_3XaZHa_topic",
-			"detailBtn": "_3XaZHa_detailBtn",
-			"card": "_3XaZHa_card",
-			"installBtn": "_3XaZHa_installBtn",
-			"fork": "_3XaZHa_fork",
-			"topics": "_3XaZHa_topics",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"footLink": "_3XaZHa_footLink",
 			"updateBadge": "_3XaZHa_updateBadge",
-			"categoryBadge": "_3XaZHa_categoryBadge"
+			"topics": "_3XaZHa_topics",
+			"date": "_3XaZHa_date",
+			"card": "_3XaZHa_card"
 		};
 		//#endregion
 		//#region src/client/hooks/useIncrementalList.ts
@@ -3646,13 +3741,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		var SectionTabs_module_css_default = {
 			"tabCountActive": "_7tvizq_tabCountActive",
 			"root": "_7tvizq_root",
-			"noticeIcon": "_7tvizq_noticeIcon",
-			"tabIcon": "_7tvizq_tabIcon",
-			"noticeBtn": "_7tvizq_noticeBtn",
-			"tabActive": "_7tvizq_tabActive",
 			"tabCount": "_7tvizq_tabCount",
+			"noticeBtn": "_7tvizq_noticeBtn",
 			"noticeCount": "_7tvizq_noticeCount",
-			"tab": "_7tvizq_tab"
+			"tab": "_7tvizq_tab",
+			"tabActive": "_7tvizq_tabActive",
+			"tabIcon": "_7tvizq_tabIcon",
+			"noticeIcon": "_7tvizq_noticeIcon"
 		};
 		//#endregion
 		//#region src/client/components/layout/SectionTabs.tsx
@@ -3724,42 +3819,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var InstalledView_module_css_default = {
-			"searchWrap": "_1nXeGW_searchWrap",
-			"segRow": "_1nXeGW_segRow",
-			"emptyTitle": "_1nXeGW_emptyTitle",
-			"segGroup": "_1nXeGW_segGroup",
 			"rowDetail": "_1nXeGW_rowDetail",
-			"statusInactive": "_1nXeGW_statusInactive",
-			"rowMeta": "_1nXeGW_rowMeta",
-			"searchInput": "_1nXeGW_searchInput",
-			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
-			"root": "_1nXeGW_root",
-			"rowTitleLine": "_1nXeGW_rowTitleLine",
-			"rowUpdate": "_1nXeGW_rowUpdate",
-			"rowDesc": "_1nXeGW_rowDesc",
-			"rowUninstall": "_1nXeGW_rowUninstall",
-			"rowMain": "_1nXeGW_rowMain",
+			"toolbar": "_1nXeGW_toolbar",
 			"segBtnActive": "_1nXeGW_segBtnActive",
-			"segBtn": "_1nXeGW_segBtn",
-			"list": "_1nXeGW_list",
 			"empty": "_1nXeGW_empty",
-			"statusPending": "_1nXeGW_statusPending",
-			"rowRepo": "_1nXeGW_rowRepo",
-			"updateBadge": "_1nXeGW_updateBadge",
-			"rowCategory": "_1nXeGW_rowCategory",
+			"statusInactive": "_1nXeGW_statusInactive",
+			"list": "_1nXeGW_list",
+			"emptyTitle": "_1nXeGW_emptyTitle",
+			"rowDesc": "_1nXeGW_rowDesc",
+			"segRow": "_1nXeGW_segRow",
 			"rowActions": "_1nXeGW_rowActions",
 			"exampleRow": "_1nXeGW_exampleRow",
-			"toolbar": "_1nXeGW_toolbar",
-			"row": "_1nXeGW_row",
-			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
-			"emptyDesc": "_1nXeGW_emptyDesc",
-			"versionBadge": "_1nXeGW_versionBadge",
-			"exampleBadge": "_1nXeGW_exampleBadge",
-			"statusDot": "_1nXeGW_statusDot",
-			"rowSourceTag": "_1nXeGW_rowSourceTag",
 			"segLabel": "_1nXeGW_segLabel",
+			"rowMeta": "_1nXeGW_rowMeta",
+			"rowUpdate": "_1nXeGW_rowUpdate",
+			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
+			"searchInput": "_1nXeGW_searchInput",
+			"updateBadge": "_1nXeGW_updateBadge",
+			"statusDot": "_1nXeGW_statusDot",
+			"rowRepo": "_1nXeGW_rowRepo",
+			"rowMain": "_1nXeGW_rowMain",
+			"rowUninstall": "_1nXeGW_rowUninstall",
+			"statusPending": "_1nXeGW_statusPending",
+			"rowSourceTag": "_1nXeGW_rowSourceTag",
+			"searchWrap": "_1nXeGW_searchWrap",
+			"row": "_1nXeGW_row",
+			"segGroup": "_1nXeGW_segGroup",
+			"rowTitleLine": "_1nXeGW_rowTitleLine",
 			"rowTitle": "_1nXeGW_rowTitle",
-			"rowRestart": "_1nXeGW_rowRestart"
+			"versionBadge": "_1nXeGW_versionBadge",
+			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
+			"rowRestart": "_1nXeGW_rowRestart",
+			"segBtn": "_1nXeGW_segBtn",
+			"exampleBadge": "_1nXeGW_exampleBadge",
+			"emptyDesc": "_1nXeGW_emptyDesc",
+			"root": "_1nXeGW_root",
+			"rowCategory": "_1nXeGW_rowCategory"
 		};
 		//#endregion
 		//#region src/client/components/views/InstalledView.tsx
@@ -3891,9 +3986,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		function InstalledView({ items, t, langKey, platform, onOpenDetail, onReveal, onUpdate, onUninstall, onRestart }) {
 			const [query, setQuery] = (0, react.useState)("");
-			const [sort, setSort] = (0, react.useState)("sortName");
-			/** 当前排序方向：点同一个排序按钮切换 正序/倒序；点新排序用该排序的默认方向 */
-			const [sortDir, setSortDir] = (0, react.useState)("asc");
+			/** 默认按「最近安装」排序（最新在前）；点其他排序按钮用该排序的默认方向（Star/Fork 最多在前、名称正序） */
+			const [sort, setSort] = (0, react.useState)("sortInstalledAt");
+			/** 当前排序方向：点同一个排序按钮切换 正/倒序；点新排序用该排序的默认方向 */
+			const [sortDir, setSortDir] = (0, react.useState)("desc");
 			/** 已安装列表的来源筛选：全部 / 目录收录 / 自定义安装（单选按钮组） */
 			const [sourceFilter, setSourceFilter] = (0, react.useState)("all");
 			/** 点击排序按钮：同一按钮切换正/倒序，新按钮用默认方向 */
@@ -3989,7 +4085,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/CustomInstallView.module.css.mjs
-		const css$6 = ".zISxCG_root{flex-direction:column;gap:10px;min-width:0;max-width:560px;display:flex}.zISxCG_desc{color:var(--hub-text-tertiary);margin:0;font-size:12px;line-height:18px}.zISxCG_installCards{flex-direction:column;flex-shrink:0;gap:10px;min-width:0;display:flex}.zISxCG_installCard{background:var(--hub-bg-1);border:1px solid var(--hub-border-1);border-radius:8px;flex-direction:column;gap:8px;min-width:0;padding:10px 12px;display:flex}.zISxCG_installCardHead{align-items:center;min-width:0;display:flex}.zISxCG_installLabel{color:var(--hub-text-primary);font-size:12px;font-weight:600;line-height:18px}.zISxCG_installExample{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-size:11px;line-height:16px;overflow:hidden}.zISxCG_installRow{align-items:center;gap:8px;min-width:0;display:flex}.zISxCG_installInput{min-width:0;height:28px;color:var(--hub-text-primary);border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;flex:auto;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}.zISxCG_installInput::placeholder{color:var(--hub-text-tertiary)}.zISxCG_installInput:focus{border-color:var(--hub-brand)}.zISxCG_installInputError,.zISxCG_installInputError:focus{border-color:var(--hub-danger-text)}.zISxCG_installBtn{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;padding:5px 14px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,opacity .12s}.zISxCG_installBtn:hover{background:var(--hub-brand-hover)}.zISxCG_installBtn:disabled{opacity:.45;cursor:default}.zISxCG_installError{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border);border-radius:6px;padding:5px 8px;font-size:12px;line-height:16px}";
+		const css$6 = ".zISxCG_root{flex-direction:column;gap:10px;min-width:0;max-width:560px;display:flex}.zISxCG_desc{color:var(--hub-text-tertiary);margin:0;font-size:12px;line-height:18px}.zISxCG_installCards{flex-direction:column;flex-shrink:0;gap:10px;min-width:0;display:flex}.zISxCG_installCard{background:var(--hub-bg-1);border:1px solid var(--hub-border-1);border-radius:8px;flex-direction:column;gap:8px;min-width:0;padding:10px 12px;display:flex}.zISxCG_installCardHead{align-items:center;min-width:0;display:flex}.zISxCG_installLabel{color:var(--hub-text-primary);font-size:12px;font-weight:600;line-height:18px}.zISxCG_installExample{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-size:11px;line-height:16px;overflow:hidden}.zISxCG_installRow{align-items:center;gap:8px;min-width:0;display:flex}.zISxCG_installInput{min-width:0;height:28px;color:var(--hub-text-primary);border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;flex:auto;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}.zISxCG_installInput::placeholder{color:var(--hub-text-tertiary)}.zISxCG_installInput:focus{border-color:var(--hub-brand)}.zISxCG_installInputError,.zISxCG_installInputError:focus{border-color:var(--hub-danger-text)}.zISxCG_installBtn{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;flex-shrink:0;padding:5px 14px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,opacity .12s}.zISxCG_installBtn:hover{background:var(--hub-brand-hover)}.zISxCG_installBtn:disabled{opacity:.45;cursor:default}.zISxCG_installCardDisabled{opacity:.8}.zISxCG_channelOff{min-width:0;color:var(--hub-warn);background:var(--hub-warn-tint);border:1px solid var(--hub-warn-border);border-radius:6px;justify-content:space-between;align-items:center;gap:8px;padding:6px 9px;font-size:12px;line-height:16px;display:flex}.zISxCG_channelOffText{text-overflow:ellipsis;white-space:nowrap;min-width:0;overflow:hidden}.zISxCG_channelOffBtn{color:var(--hub-warn-strong);border:1px solid var(--hub-warn-border);cursor:pointer;white-space:nowrap;background:0 0;border-radius:6px;flex-shrink:0;padding:3px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s,color .12s}.zISxCG_channelOffBtn:hover{background:var(--hub-warn-tint);color:var(--hub-warn)}.zISxCG_installError{color:var(--hub-danger-text);background:var(--hub-danger-tint);border:1px solid var(--hub-danger-border);border-radius:6px;padding:5px 8px;font-size:12px;line-height:16px}";
 		const tagId$6 = "dsh-plugin/CustomInstallView.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$6) + "]") === null) {
 			const tag = document.createElement("style");
@@ -3999,18 +4095,22 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var CustomInstallView_module_css_default = {
-			"root": "zISxCG_root",
-			"installLabel": "zISxCG_installLabel",
-			"desc": "zISxCG_desc",
-			"installExample": "zISxCG_installExample",
-			"installInput": "zISxCG_installInput",
-			"installCardHead": "zISxCG_installCardHead",
-			"installBtn": "zISxCG_installBtn",
-			"installInputError": "zISxCG_installInputError",
-			"installRow": "zISxCG_installRow",
-			"installCards": "zISxCG_installCards",
+			"installCardDisabled": "zISxCG_installCardDisabled",
+			"channelOffText": "zISxCG_channelOffText",
+			"channelOffBtn": "zISxCG_channelOffBtn",
 			"installError": "zISxCG_installError",
-			"installCard": "zISxCG_installCard"
+			"installBtn": "zISxCG_installBtn",
+			"installCardHead": "zISxCG_installCardHead",
+			"desc": "zISxCG_desc",
+			"installCard": "zISxCG_installCard",
+			"installInput": "zISxCG_installInput",
+			"installCards": "zISxCG_installCards",
+			"installExample": "zISxCG_installExample",
+			"installInputError": "zISxCG_installInputError",
+			"channelOff": "zISxCG_channelOff",
+			"installRow": "zISxCG_installRow",
+			"installLabel": "zISxCG_installLabel",
+			"root": "zISxCG_root"
 		};
 		//#endregion
 		//#region src/client/components/views/CustomInstallView.tsx
@@ -4022,10 +4122,11 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* Custom install view: a standalone top-level section for manually
 		* installing npm packages or GitHub sources outside the catalog. Three
 		* installer cards, one per channel — npm package, GitHub source and a raw
-		* DSH command (`dsh plugin ... add <target>`) — each with a placeholder
-		* example above the input and its own format check. The cards stay
-		* separate so a user never has to guess which format goes where. Finished
-		* installs surface in the Installed view, marked as custom.
+		* install command (a `dsh plugin ... add <target>` or the official global
+		* `npm install -g <pkgs>`) — each with a placeholder example above the
+		* input and its own format check. The cards stay separate so a user never
+		* has to guess which format goes where. Finished installs surface in the
+		* Installed view, marked as custom.
 		*
 		* Pure presentational: owns only the three local input/error states; the
 		* actual install (custom source, gated by the security toggles) bubbles up
@@ -4040,10 +4141,21 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		/** DSH 命令行前缀（`dsh plugin [--profile|-p <p>] add <target>`）—— 提取其中的安装目标；
 		* 命令大小写不敏感，支持 `-p` 简写与 `--profile=web` 等号形式，与 server 端 installTargetOf 口径一致。 */
 		const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+(?:(?:--profile|-p)(?:=|\s+)\S+\s*)?add\s+(.+)$/i;
+		/** npm 全局安装命令（官方 README 格式，如 `npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui`）——
+		* 提取 -g 之后的包列表；任一包名非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 口径一致。 */
+		const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i;
 		function installTargetOf(raw) {
 			const input = raw.trim();
 			const match = DSH_PLUGIN_CMD_RE.exec(input);
 			return match !== null ? match[1].trim() : input;
+		}
+		function parseNpmGlobalPackages(raw) {
+			const input = raw.trim();
+			const match = NPM_GLOBAL_CMD_RE.exec(input);
+			if (match === null) return null;
+			const packages = match[1].trim().split(/\s+/).filter((p) => p !== "");
+			if (packages.length === 0 || packages.some((p) => !NPM_PACKAGE_RE.test(p) || p.startsWith("-"))) return null;
+			return packages;
 		}
 		function isGitHubInput(raw) {
 			const input = raw.trim();
@@ -4055,7 +4167,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		function isDshCommand(raw) {
 			return DSH_PLUGIN_CMD_RE.test(raw.trim());
 		}
-		function CustomInstallView({ t, onInstallCustom }) {
+		function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, enableDsh, onOpenSettings }) {
 			/** 自定义安装：NPM 包输入与格式错误（'' = 无错误） */
 			const [npmQuery, setNpmQuery] = (0, react.useState)("");
 			const [npmError, setNpmError] = (0, react.useState)("");
@@ -4065,6 +4177,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			/** 自定义安装：DSH 命令输入与格式错误（'' = 无错误） */
 			const [cmdQuery, setCmdQuery] = (0, react.useState)("");
 			const [cmdError, setCmdError] = (0, react.useState)("");
+			/** 通道关闭提示行：开关关掉后替代示例与输入行，引导去设置打开 */
+			const channelOffRow = (0, react.createElement)("div", { className: CustomInstallView_module_css_default.channelOff }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.channelOffText }, t("channelDisabledHint")), (0, react.createElement)("button", {
+				type: "button",
+				className: CustomInstallView_module_css_default.channelOffBtn,
+				onClick: onOpenSettings
+			}, t("goToSettings")));
 			const submitNpm = () => {
 				const target = npmQuery.trim();
 				if (!target) return;
@@ -4090,6 +4208,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const submitCmd = () => {
 				const raw = cmdQuery.trim();
 				if (!raw) return;
+				const globalPkgs = parseNpmGlobalPackages(raw);
+				if (globalPkgs !== null) {
+					onInstallCustom(raw, { globalNpm: globalPkgs });
+					setCmdQuery("");
+					setCmdError("");
+					return;
+				}
 				if (!isDshCommand(raw)) {
 					setCmdError(t("dshCmdInvalid"));
 					return;
@@ -4098,65 +4223,77 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				setCmdQuery("");
 				setCmdError("");
 			};
-			return (0, react.createElement)("div", { className: CustomInstallView_module_css_default.root }, (0, react.createElement)("p", { className: CustomInstallView_module_css_default.desc }, t("customViewDesc")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCards }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCard }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("npmInstallLabel"))), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("npmInstallExample")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
-				className: npmError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
-				type: "text",
-				placeholder: t("npmInstallPlaceholder"),
-				value: npmQuery,
-				spellCheck: false,
-				onInput: (e) => {
-					setNpmQuery(e.target.value);
-					setNpmError("");
-				},
-				onKeyDown: (e) => {
-					if (e.key === "Enter") submitNpm();
-				}
-			}), (0, react.createElement)("button", {
-				className: CustomInstallView_module_css_default.installBtn,
-				type: "button",
-				disabled: npmQuery.trim() === "",
-				onClick: submitNpm
-			}, t("installCliBtn"))), npmError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, npmError) : null), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCard }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("gitInstallLabel"))), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("gitInstallExample")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
-				className: gitError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
-				type: "text",
-				placeholder: t("gitInstallPlaceholder"),
-				value: gitQuery,
-				spellCheck: false,
-				onInput: (e) => {
-					setGitQuery(e.target.value);
-					setGitError("");
-				},
-				onKeyDown: (e) => {
-					if (e.key === "Enter") submitGit();
-				}
-			}), (0, react.createElement)("button", {
-				className: CustomInstallView_module_css_default.installBtn,
-				type: "button",
-				disabled: gitQuery.trim() === "",
-				onClick: submitGit
-			}, t("installCliBtn"))), gitError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, gitError) : null), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCard }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("dshCmdLabel"))), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("dshCmdExample")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
-				className: cmdError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
-				type: "text",
-				placeholder: t("dshCmdPlaceholder"),
-				value: cmdQuery,
-				spellCheck: false,
-				onInput: (e) => {
-					setCmdQuery(e.target.value);
-					setCmdError("");
-				},
-				onKeyDown: (e) => {
-					if (e.key === "Enter") submitCmd();
-				}
-			}), (0, react.createElement)("button", {
-				className: CustomInstallView_module_css_default.installBtn,
-				type: "button",
-				disabled: cmdQuery.trim() === "",
-				onClick: submitCmd
-			}, t("installCliBtn"))), cmdError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, cmdError) : null)));
+			return (0, react.createElement)("div", { className: CustomInstallView_module_css_default.root }, (0, react.createElement)("p", { className: CustomInstallView_module_css_default.desc }, t("customViewDesc")), (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCards }, (0, react.createElement)("div", { className: enableNpm ? CustomInstallView_module_css_default.installCard : `${CustomInstallView_module_css_default.installCard} ${CustomInstallView_module_css_default.installCardDisabled}` }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("npmInstallLabel"))), !enableNpm ? channelOffRow : [
+				(0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("npmInstallExample")),
+				(0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
+					className: npmError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
+					type: "text",
+					placeholder: t("npmInstallPlaceholder"),
+					value: npmQuery,
+					spellCheck: false,
+					onInput: (e) => {
+						setNpmQuery(e.target.value);
+						setNpmError("");
+					},
+					onKeyDown: (e) => {
+						if (e.key === "Enter") submitNpm();
+					}
+				}), (0, react.createElement)("button", {
+					className: CustomInstallView_module_css_default.installBtn,
+					type: "button",
+					disabled: npmQuery.trim() === "",
+					onClick: submitNpm
+				}, t("installCliBtn"))),
+				npmError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, npmError) : null
+			]), (0, react.createElement)("div", { className: enableGit ? CustomInstallView_module_css_default.installCard : `${CustomInstallView_module_css_default.installCard} ${CustomInstallView_module_css_default.installCardDisabled}` }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("gitInstallLabel"))), !enableGit ? channelOffRow : [
+				(0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("gitInstallExample")),
+				(0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
+					className: gitError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
+					type: "text",
+					placeholder: t("gitInstallPlaceholder"),
+					value: gitQuery,
+					spellCheck: false,
+					onInput: (e) => {
+						setGitQuery(e.target.value);
+						setGitError("");
+					},
+					onKeyDown: (e) => {
+						if (e.key === "Enter") submitGit();
+					}
+				}), (0, react.createElement)("button", {
+					className: CustomInstallView_module_css_default.installBtn,
+					type: "button",
+					disabled: gitQuery.trim() === "",
+					onClick: submitGit
+				}, t("installCliBtn"))),
+				gitError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, gitError) : null
+			]), (0, react.createElement)("div", { className: enableDsh ? CustomInstallView_module_css_default.installCard : `${CustomInstallView_module_css_default.installCard} ${CustomInstallView_module_css_default.installCardDisabled}` }, (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installCardHead }, (0, react.createElement)("span", { className: CustomInstallView_module_css_default.installLabel }, t("dshCmdLabel"))), !enableDsh ? channelOffRow : [
+				(0, react.createElement)("div", { className: CustomInstallView_module_css_default.installExample }, t("dshCmdExample")),
+				(0, react.createElement)("div", { className: CustomInstallView_module_css_default.installRow }, (0, react.createElement)("input", {
+					className: cmdError ? `${CustomInstallView_module_css_default.installInput} ${CustomInstallView_module_css_default.installInputError}` : CustomInstallView_module_css_default.installInput,
+					type: "text",
+					placeholder: t("dshCmdPlaceholder"),
+					value: cmdQuery,
+					spellCheck: false,
+					onInput: (e) => {
+						setCmdQuery(e.target.value);
+						setCmdError("");
+					},
+					onKeyDown: (e) => {
+						if (e.key === "Enter") submitCmd();
+					}
+				}), (0, react.createElement)("button", {
+					className: CustomInstallView_module_css_default.installBtn,
+					type: "button",
+					disabled: cmdQuery.trim() === "",
+					onClick: submitCmd
+				}, t("installCliBtn"))),
+				cmdError ? (0, react.createElement)("div", { className: CustomInstallView_module_css_default.installError }, cmdError) : null
+			])));
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/SettingsView.module.css.mjs
-		const css$5 = "._506LLG_root{flex:1;align-items:stretch;min-width:0;min-height:0;display:flex}._506LLG_sidebar{border-right:1px solid var(--hub-border-1);flex-direction:column;flex:none;gap:2px;padding:8px 6px;display:flex;overflow-y:auto}._506LLG_navItem,._506LLG_navItemActive{box-sizing:border-box;text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:7px;align-items:center;gap:8px;width:100%;padding:7px 10px;font-size:12.5px;line-height:18px;transition:color .12s,background-color .12s;display:flex}._506LLG_navItem{color:var(--hub-text-secondary);background:0 0}._506LLG_navItem:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._506LLG_navItemActive{color:var(--hub-brand);background:var(--hub-brand-tint);font-weight:600}._506LLG_navIcon{flex:none;display:inline-flex}._506LLG_content{flex-direction:column;flex:1;min-width:0;min-height:0;padding:14px 16px 18px;display:flex;overflow-y:auto}._506LLG_pageHeader{margin-bottom:12px}._506LLG_pageTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}._506LLG_pageDesc{color:var(--hub-text-tertiary);margin-top:3px;font-size:11.5px;line-height:16px}._506LLG_card{border:1px solid var(--hub-border-1);background:var(--hub-bg-1);border-radius:8px;flex-direction:column;min-width:0;display:flex}._506LLG_settingRow{border-bottom:1px solid var(--hub-border-1);justify-content:space-between;align-items:center;gap:16px;min-width:0;padding:10px 12px;display:flex}._506LLG_settingRow:last-child{border-bottom:none}._506LLG_settingLabel{flex:1;min-width:0}._506LLG_settingTitle{color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;font-size:12.5px;font-weight:500;line-height:18px;overflow:hidden}._506LLG_settingDesc{color:var(--hub-text-tertiary);margin-top:2px;font-size:11px;line-height:15px}._506LLG_settingControl{flex:none;align-items:center;display:flex}._506LLG_settingRowStack{border-bottom:1px solid var(--hub-border-1);flex-direction:column;align-items:stretch;gap:8px;min-width:0;padding:10px 12px;display:flex}._506LLG_settingRowStack:last-child{border-bottom:none}._506LLG_settingControlStack{align-items:center;display:flex}._506LLG_settingControlStack ._506LLG_textInput{width:100%}._506LLG_controlDropdown{min-width:180px}._506LLG_textInput{width:240px;height:28px;color:var(--hub-text-primary);background:var(--hub-bg-1);border:1px solid var(--hub-border-input);border-radius:6px;outline:none;padding:0 9px;font-family:inherit;font-size:12px;transition:border-color .15s}._506LLG_textInput:focus{border-color:var(--hub-brand-border)}._506LLG_textInput::placeholder{color:var(--hub-text-disabled)}._506LLG_resetBtn,._506LLG_resetBtnArmed{cursor:pointer;border-radius:6px;flex:none;height:28px;padding:0 14px;font-size:12px;font-weight:500;transition:background-color .15s,border-color .15s,color .15s}._506LLG_resetBtn{color:var(--hub-danger-text);border:1px solid var(--hub-danger-border);background:0 0}._506LLG_resetBtn:hover{background:var(--hub-danger-tint);border-color:var(--hub-danger-text)}._506LLG_resetBtnArmed{color:#fff;background:var(--hub-danger);border:1px solid var(--hub-danger)}._506LLG_resetBtnArmed:hover{background:var(--hub-danger-hover)}";
+		const css$5 = "._506LLG_root{flex:1;align-items:stretch;min-width:0;min-height:0;display:flex}._506LLG_sidebar{border-right:1px solid var(--hub-border-1);flex-direction:column;flex:none;gap:2px;padding:8px 6px;display:flex;overflow-y:auto}._506LLG_navItem,._506LLG_navItemActive{box-sizing:border-box;text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:7px;align-items:center;gap:8px;width:100%;padding:7px 10px;font-size:12.5px;line-height:18px;transition:color .12s,background-color .12s;display:flex}._506LLG_navItem{color:var(--hub-text-secondary);background:0 0}._506LLG_navItem:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._506LLG_navItemActive{color:var(--hub-brand);background:var(--hub-brand-tint);font-weight:600}._506LLG_navIcon{flex:none;display:inline-flex}._506LLG_content{flex-direction:column;flex:1;min-width:0;min-height:0;padding:14px 16px 18px;display:flex;overflow-y:auto}._506LLG_pageHeader{margin-bottom:12px}._506LLG_pageTitle{color:var(--hub-text-primary);font-size:14px;font-weight:600;line-height:20px}._506LLG_pageDesc{color:var(--hub-text-tertiary);margin-top:3px;font-size:11.5px;line-height:16px}._506LLG_card{border:1px solid var(--hub-border-1);background:var(--hub-bg-1);border-radius:8px;flex-direction:column;min-width:0;display:flex}._506LLG_settingRow{border-bottom:1px solid var(--hub-border-1);justify-content:space-between;align-items:center;gap:16px;min-width:0;padding:10px 12px;display:flex}._506LLG_settingRow:last-child{border-bottom:none}._506LLG_settingLabel{flex:1;min-width:0}._506LLG_settingTitle{color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;font-size:12.5px;font-weight:500;line-height:18px;overflow:hidden}._506LLG_settingDesc{color:var(--hub-text-tertiary);margin-top:2px;font-size:11px;line-height:15px}._506LLG_settingControl{flex:none;align-items:center;display:flex}._506LLG_settingRowStack{border-bottom:1px solid var(--hub-border-1);flex-direction:column;align-items:stretch;gap:8px;min-width:0;padding:10px 12px;display:flex}._506LLG_settingRowStack:last-child{border-bottom:none}._506LLG_settingControlStack{align-items:center;display:flex}._506LLG_settingControlStack ._506LLG_textInput{width:100%}._506LLG_controlDropdown{min-width:180px}._506LLG_textInput{width:240px;height:28px;color:var(--hub-text-primary);background:var(--hub-bg-1);border:1px solid var(--hub-border-input);border-radius:6px;outline:none;padding:0 9px;font-family:inherit;font-size:12px;transition:border-color .15s}._506LLG_textInput:focus{border-color:var(--hub-brand-border)}._506LLG_textInput::placeholder{color:var(--hub-text-disabled)}._506LLG_resetBtn{cursor:pointer;height:28px;color:var(--hub-danger-text);border:1px solid var(--hub-danger-border);background:0 0;border-radius:6px;flex:none;padding:0 14px;font-size:12px;font-weight:500;transition:background-color .15s,border-color .15s,color .15s}._506LLG_resetBtn:hover{background:var(--hub-danger-tint);border-color:var(--hub-danger-text)}";
 		const tagId$5 = "dsh-plugin/SettingsView.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$5) + "]") === null) {
 			const tag = document.createElement("style");
@@ -4166,27 +4303,26 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var SettingsView_module_css_default = {
-			"navIcon": "_506LLG_navIcon",
-			"navItemActive": "_506LLG_navItemActive",
-			"pageDesc": "_506LLG_pageDesc",
-			"controlDropdown": "_506LLG_controlDropdown",
-			"settingRow": "_506LLG_settingRow",
 			"settingDesc": "_506LLG_settingDesc",
-			"content": "_506LLG_content",
-			"card": "_506LLG_card",
-			"root": "_506LLG_root",
-			"navItem": "_506LLG_navItem",
-			"pageTitle": "_506LLG_pageTitle",
-			"settingTitle": "_506LLG_settingTitle",
-			"resetBtnArmed": "_506LLG_resetBtnArmed",
-			"settingControl": "_506LLG_settingControl",
-			"sidebar": "_506LLG_sidebar",
-			"pageHeader": "_506LLG_pageHeader",
-			"settingLabel": "_506LLG_settingLabel",
-			"settingRowStack": "_506LLG_settingRowStack",
+			"settingRow": "_506LLG_settingRow",
 			"textInput": "_506LLG_textInput",
 			"resetBtn": "_506LLG_resetBtn",
-			"settingControlStack": "_506LLG_settingControlStack"
+			"navIcon": "_506LLG_navIcon",
+			"root": "_506LLG_root",
+			"sidebar": "_506LLG_sidebar",
+			"settingLabel": "_506LLG_settingLabel",
+			"settingTitle": "_506LLG_settingTitle",
+			"settingControl": "_506LLG_settingControl",
+			"settingControlStack": "_506LLG_settingControlStack",
+			"controlDropdown": "_506LLG_controlDropdown",
+			"pageDesc": "_506LLG_pageDesc",
+			"pageTitle": "_506LLG_pageTitle",
+			"pageHeader": "_506LLG_pageHeader",
+			"navItemActive": "_506LLG_navItemActive",
+			"navItem": "_506LLG_navItem",
+			"settingRowStack": "_506LLG_settingRowStack",
+			"card": "_506LLG_card",
+			"content": "_506LLG_content"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
@@ -4200,17 +4336,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Dropdown_module_css_default = {
-			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
 			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdown": "B_Gxsq_dropdown",
+			"dropdownItem": "B_Gxsq_dropdownItem",
 			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdownBtn": "B_Gxsq_dropdownBtn",
 			"dropdownArrow": "B_Gxsq_dropdownArrow",
-			"dropdownLabel": "B_Gxsq_dropdownLabel"
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownBtn": "B_Gxsq_dropdownBtn",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownLabel": "B_Gxsq_dropdownLabel",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive"
 		};
 		//#endregion
 		//#region src/client/components/ui/Dropdown.tsx
@@ -4283,9 +4419,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var Toggle_module_css_default = {
-			"toggleOn": "k-cD4G_toggleOn",
+			"toggle": "k-cD4G_toggle",
 			"knob": "k-cD4G_knob",
-			"toggle": "k-cD4G_toggle"
+			"toggleOn": "k-cD4G_toggleOn"
 		};
 		//#endregion
 		//#region src/client/components/ui/Toggle.tsx
@@ -4321,29 +4457,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var DiagnosticsView_module_css_default = {
-			"row": "k9eRya_row",
-			"envTitle": "k9eRya_envTitle",
+			"runBtn": "k9eRya_runBtn",
 			"display": "k9eRya_display",
+			"envTitle": "k9eRya_envTitle",
+			"envRow": "k9eRya_envRow",
+			"summary": "k9eRya_summary",
+			"headHint": "k9eRya_headHint",
+			"badgeFail": "k9eRya_badgeFail",
+			"name": "k9eRya_name",
 			"badgeOk": "k9eRya_badgeOk",
+			"envCopyBtn": "k9eRya_envCopyBtn",
+			"badgeIdle": "k9eRya_badgeIdle",
+			"badgeRunning": "k9eRya_badgeRunning",
+			"envDesc": "k9eRya_envDesc",
 			"summaryFail": "k9eRya_summaryFail",
+			"envLabel": "k9eRya_envLabel",
+			"row": "k9eRya_row",
 			"head": "k9eRya_head",
 			"panel": "k9eRya_panel",
-			"headHint": "k9eRya_headHint",
-			"envRow": "k9eRya_envRow",
-			"envLabel": "k9eRya_envLabel",
-			"envCopyBtn": "k9eRya_envCopyBtn",
-			"badgeRunning": "k9eRya_badgeRunning",
 			"diagPulse": "k9eRya_diagPulse",
 			"summaryOk": "k9eRya_summaryOk",
-			"runBtn": "k9eRya_runBtn",
-			"summary": "k9eRya_summary",
-			"badge": "k9eRya_badge",
 			"summaryRunning": "k9eRya_summaryRunning",
-			"badgeFail": "k9eRya_badgeFail",
 			"meta": "k9eRya_meta",
-			"badgeIdle": "k9eRya_badgeIdle",
-			"name": "k9eRya_name",
-			"envDesc": "k9eRya_envDesc"
+			"badge": "k9eRya_badge"
 		};
 		//#endregion
 		//#region src/client/components/views/DiagnosticsView.tsx
@@ -4491,7 +4627,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/LogsView.module.css.mjs
-		const css$1 = "._3j77BW_panel{flex-direction:column;min-width:0;display:flex}._3j77BW_head{border-bottom:1px solid var(--hub-border-1);flex-direction:column;align-items:stretch;gap:6px;padding:8px 12px;display:flex}._3j77BW_headHint{min-width:0;color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_actions{flex:none;justify-content:flex-start;align-items:center;gap:6px;display:flex}._3j77BW_btn{height:24px;color:var(--hub-text-secondary);background:var(--hub-bg-hover);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;padding:0 10px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_btn:hover:not(:disabled){color:var(--hub-text-primary);background:var(--hub-bg-2)}._3j77BW_btn:disabled{opacity:.55;cursor:default}._3j77BW_btnPrimary{color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}._3j77BW_btnPrimary:hover:not(:disabled){background:var(--hub-brand-hover);border-color:var(--hub-brand-hover)}._3j77BW_list{flex-direction:column;max-height:340px;display:flex;overflow-y:auto}._3j77BW_entry{align-items:baseline;gap:8px;min-width:0;padding:5px 12px;font-size:11px;line-height:16px;display:flex}._3j77BW_entry:hover{background:var(--hub-bg-hover)}._3j77BW_time{font-variant-numeric:tabular-nums;color:var(--hub-text-tertiary);white-space:nowrap;flex:none}._3j77BW_event{color:var(--hub-text-tertiary);white-space:nowrap;flex:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px}._3j77BW_message{min-width:0;color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;flex:1;overflow:hidden}._3j77BW_pathRow{border-bottom:1px solid var(--hub-border-1);align-items:center;gap:8px;padding:6px 12px;display:flex}._3j77BW_pathLabel{color:var(--hub-text-tertiary);flex:none;font-size:11px;line-height:16px}._3j77BW_pathText{min-width:0;color:var(--hub-text-secondary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;line-height:16px;overflow:hidden}._3j77BW_footFail{color:var(--hub-danger-text);flex:none;font-size:11px;line-height:16px}._3j77BW_pathDialog{flex-direction:column;gap:10px;display:flex}._3j77BW_pathDialogDesc{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_pathDialogRow{align-items:center;gap:6px;display:flex}._3j77BW_pathDialogReset{justify-content:space-between;align-items:center;gap:8px;display:flex}._3j77BW_pathDialogHint{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_linkBtn{color:var(--hub-brand);cursor:pointer;background:0 0;border:none;flex:none;padding:0;font-size:11.5px;font-weight:500;line-height:16px}._3j77BW_linkBtn:hover{text-decoration:underline}._3j77BW_pathDraft{min-width:0;height:26px;color:var(--hub-text-primary);background:var(--hub-bg-1);border:1px solid var(--hub-border-input);border-radius:6px;outline:none;flex:1;padding:0 9px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;transition:border-color .12s}._3j77BW_pathDraft:focus{border-color:var(--hub-brand-border)}._3j77BW_pathDraft::placeholder{color:var(--hub-text-disabled)}._3j77BW_pathDialogFoot{justify-content:flex-end;gap:6px;display:flex}._3j77BW_previewRow{text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;width:100%;padding:0;display:block}._3j77BW_filterBar{flex-wrap:wrap;align-items:center;gap:6px;padding:2px 0 0;display:flex}._3j77BW_filterChip{height:22px;color:var(--hub-text-secondary);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:11px;flex:none;padding:0 10px;font-size:11px;line-height:20px;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_filterChip:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3j77BW_filterChipActive{color:var(--hub-brand);background:var(--hub-brand-tint);border-color:var(--hub-brand-border-soft);font-weight:500}._3j77BW_search{flex:1;min-width:140px}._3j77BW_searchInput{width:100%;height:24px;color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:6px;outline:none;padding:0 8px;font-size:11px;line-height:16px;transition:border-color .12s,background-color .12s}._3j77BW_searchInput:focus{border-color:var(--hub-brand);background:var(--hub-bg-1)}._3j77BW_searchInput::placeholder{color:var(--hub-text-tertiary)}._3j77BW_logList{flex-direction:column;flex:auto;min-height:0;padding:4px 0 6px;display:flex;overflow-y:auto}._3j77BW_more{height:26px;color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;align-self:center;margin:10px 0 4px;padding:0 18px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_more:hover:not(:disabled){color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}._3j77BW_more:disabled{opacity:.55;cursor:default}._3j77BW_moreEnd{text-align:center;color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;padding:12px 0 4px;font-size:11px;line-height:16px}._3j77BW_foot{border-top:1px solid var(--hub-border-1);align-items:center;gap:8px;padding:8px 12px;display:flex}._3j77BW_footPath{min-width:0;color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;line-height:16px;overflow:hidden}._3j77BW_footCount{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;font-size:11px;line-height:16px}._3j77BW_footActions{flex:none;align-items:center;gap:6px;display:inline-flex}._3j77BW_badge{letter-spacing:.3px;flex:none;font-size:10px;font-weight:600}._3j77BW_badgeSuccess{color:var(--hub-success)}._3j77BW_badgeError{color:var(--hub-danger-text)}._3j77BW_badgeWarn{color:var(--hub-warning)}._3j77BW_badgeInfo{color:var(--hub-text-secondary)}._3j77BW_badgeDebug{color:var(--hub-text-tertiary)}._3j77BW_catBadge{border:1px solid #0000;border-radius:4px;flex:none;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}._3j77BW_catInstall{color:var(--hub-brand);border-color:var(--hub-brand-border-soft);background:var(--hub-brand-tint)}._3j77BW_catUninstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}._3j77BW_catUpdate{color:var(--hub-warning);border-color:var(--hub-warning-border);background:var(--hub-warning-tint)}._3j77BW_catDiagnostics{color:var(--hub-success);border-color:var(--hub-success-border);background:var(--hub-success-tint)}._3j77BW_catSettings{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3j77BW_catSystem{color:var(--hub-text-secondary);border-color:var(--hub-border-2);background:var(--hub-bg-hover)}._3j77BW_empty{text-align:center;color:var(--hub-text-tertiary);padding:28px 12px;font-size:11.5px}";
+		const css$1 = "._3j77BW_panel{flex-direction:column;min-width:0;display:flex}._3j77BW_head{border-bottom:1px solid var(--hub-border-1);flex-direction:column;align-items:stretch;gap:6px;padding:8px 12px;display:flex}._3j77BW_headHint{min-width:0;color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_actions{flex:none;justify-content:flex-start;align-items:center;gap:6px;display:flex}._3j77BW_btn{height:24px;color:var(--hub-text-secondary);background:var(--hub-bg-hover);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;padding:0 10px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_btn:hover:not(:disabled){color:var(--hub-text-primary);background:var(--hub-bg-2)}._3j77BW_btn:disabled{opacity:.55;cursor:default}._3j77BW_btnPrimary{color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}._3j77BW_btnPrimary:hover:not(:disabled){background:var(--hub-brand-hover);border-color:var(--hub-brand-hover)}._3j77BW_list{flex-direction:column;max-height:340px;display:flex;overflow-y:auto}._3j77BW_entry{align-items:baseline;gap:8px;min-width:0;padding:5px 12px;font-size:11px;line-height:16px;display:flex}._3j77BW_entry:hover{background:var(--hub-bg-hover)}._3j77BW_time{font-variant-numeric:tabular-nums;color:var(--hub-text-tertiary);white-space:nowrap;flex:none}._3j77BW_event{color:var(--hub-text-tertiary);white-space:nowrap;flex:none;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px}._3j77BW_message{min-width:0;color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;flex:1;overflow:hidden}._3j77BW_pathRow{border-bottom:1px solid var(--hub-border-1);align-items:center;gap:8px;padding:6px 12px;display:flex}._3j77BW_pathLabel{color:var(--hub-text-tertiary);flex:none;font-size:11px;line-height:16px}._3j77BW_pathText{min-width:0;color:var(--hub-text-secondary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;line-height:16px;overflow:hidden}._3j77BW_footFail{color:var(--hub-danger-text);flex:none;font-size:11px;line-height:16px}._3j77BW_pathDialog{flex-direction:column;gap:10px;display:flex}._3j77BW_pathDialogDesc{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_pathDialogRow{align-items:center;gap:6px;display:flex}._3j77BW_pathDialogReset{justify-content:space-between;align-items:center;gap:8px;display:flex}._3j77BW_pathDialogHint{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._3j77BW_linkBtn{color:var(--hub-brand);cursor:pointer;background:0 0;border:none;flex:none;padding:0;font-size:11.5px;font-weight:500;line-height:16px}._3j77BW_linkBtn:hover{text-decoration:underline}._3j77BW_pathDraft{min-width:0;height:26px;color:var(--hub-text-primary);background:var(--hub-bg-1);border:1px solid var(--hub-border-input);border-radius:6px;outline:none;flex:1;padding:0 9px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;transition:border-color .12s}._3j77BW_pathDraft:focus{border-color:var(--hub-brand-border)}._3j77BW_pathDraft::placeholder{color:var(--hub-text-disabled)}._3j77BW_pathDialogFoot{justify-content:flex-end;gap:6px;display:flex}._3j77BW_previewRow{text-align:left;cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;width:100%;padding:0;display:block}._3j77BW_filterBar{flex-wrap:wrap;align-items:center;gap:6px;padding:2px 0 0;display:flex}._3j77BW_filterChip{height:22px;color:var(--hub-text-secondary);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:11px;flex:none;padding:0 10px;font-size:11px;line-height:20px;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_filterChip:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3j77BW_filterChipActive,._3j77BW_filterChipActive:hover{color:var(--hub-brand);background:var(--hub-brand-tint);border-color:var(--hub-brand-border-soft);font-weight:500}._3j77BW_filterChipActive:hover{background:var(--hub-brand-tint-strong);border-color:var(--hub-brand-border)}._3j77BW_search{flex:1;min-width:140px}._3j77BW_searchInput{width:100%;height:24px;color:var(--hub-text-primary);background:var(--hub-bg-2);border:1px solid var(--hub-border-2);border-radius:6px;outline:none;padding:0 8px;font-size:11px;line-height:16px;transition:border-color .12s,background-color .12s}._3j77BW_searchInput:focus{border-color:var(--hub-brand);background:var(--hub-bg-1)}._3j77BW_searchInput::placeholder{color:var(--hub-text-tertiary)}._3j77BW_logList{flex-direction:column;flex:auto;min-height:0;padding:4px 0 6px;display:flex;overflow-y:auto}._3j77BW_more{height:26px;color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;flex:none;align-self:center;margin:10px 0 4px;padding:0 18px;font-size:11.5px;font-weight:500;transition:color .12s,background-color .12s,border-color .12s}._3j77BW_more:hover:not(:disabled){color:#fff;background:var(--hub-brand);border-color:var(--hub-brand)}._3j77BW_more:disabled{opacity:.55;cursor:default}._3j77BW_moreEnd{text-align:center;color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;padding:12px 0 4px;font-size:11px;line-height:16px}._3j77BW_foot{border-top:1px solid var(--hub-border-1);align-items:center;gap:8px;padding:8px 12px;display:flex}._3j77BW_footPath{min-width:0;color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px;line-height:16px;overflow:hidden}._3j77BW_footCount{color:var(--hub-text-tertiary);font-variant-numeric:tabular-nums;flex:none;font-size:11px;line-height:16px}._3j77BW_footActions{flex:none;align-items:center;gap:6px;display:inline-flex}._3j77BW_badge{letter-spacing:.3px;flex:none;font-size:10px;font-weight:600}._3j77BW_badgeSuccess{color:var(--hub-success)}._3j77BW_badgeError{color:var(--hub-danger-text)}._3j77BW_badgeWarn{color:var(--hub-warning)}._3j77BW_badgeInfo{color:var(--hub-text-secondary)}._3j77BW_badgeDebug{color:var(--hub-text-tertiary)}._3j77BW_catBadge{border:1px solid #0000;border-radius:4px;flex:none;padding:0 6px;font-size:10px;font-weight:500;line-height:16px}._3j77BW_catInstall{color:var(--hub-brand);border-color:var(--hub-brand-border-soft);background:var(--hub-brand-tint)}._3j77BW_catUninstall{color:var(--hub-danger-text);border-color:var(--hub-danger-border);background:var(--hub-danger-tint)}._3j77BW_catUpdate{color:var(--hub-warning);border-color:var(--hub-warning-border);background:var(--hub-warning-tint)}._3j77BW_catDiagnostics{color:var(--hub-success);border-color:var(--hub-success-border);background:var(--hub-success-tint)}._3j77BW_catSettings{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3j77BW_catSystem{color:var(--hub-text-secondary);border-color:var(--hub-border-2);background:var(--hub-bg-hover)}._3j77BW_empty{text-align:center;color:var(--hub-text-tertiary);padding:28px 12px;font-size:11.5px}";
 		const tagId$1 = "dsh-plugin/LogsView.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$1) + "]") === null) {
 			const tag = document.createElement("style");
@@ -4501,56 +4637,56 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			document.head.appendChild(tag);
 		}
 		var LogsView_module_css_default = {
-			"filterChip": "_3j77BW_filterChip",
-			"badgeDebug": "_3j77BW_badgeDebug",
-			"foot": "_3j77BW_foot",
-			"catUpdate": "_3j77BW_catUpdate",
-			"pathDraft": "_3j77BW_pathDraft",
-			"pathDialog": "_3j77BW_pathDialog",
-			"pathDialogDesc": "_3j77BW_pathDialogDesc",
-			"linkBtn": "_3j77BW_linkBtn",
-			"empty": "_3j77BW_empty",
-			"headHint": "_3j77BW_headHint",
-			"list": "_3j77BW_list",
-			"searchInput": "_3j77BW_searchInput",
-			"catInstall": "_3j77BW_catInstall",
-			"entry": "_3j77BW_entry",
-			"pathDialogReset": "_3j77BW_pathDialogReset",
-			"filterChipActive": "_3j77BW_filterChipActive",
-			"pathDialogFoot": "_3j77BW_pathDialogFoot",
-			"footFail": "_3j77BW_footFail",
-			"btnPrimary": "_3j77BW_btnPrimary",
-			"pathDialogRow": "_3j77BW_pathDialogRow",
-			"footActions": "_3j77BW_footActions",
-			"previewRow": "_3j77BW_previewRow",
-			"logList": "_3j77BW_logList",
-			"footPath": "_3j77BW_footPath",
-			"filterBar": "_3j77BW_filterBar",
-			"time": "_3j77BW_time",
-			"badgeSuccess": "_3j77BW_badgeSuccess",
-			"badgeError": "_3j77BW_badgeError",
-			"badgeInfo": "_3j77BW_badgeInfo",
-			"panel": "_3j77BW_panel",
-			"head": "_3j77BW_head",
-			"catUninstall": "_3j77BW_catUninstall",
-			"search": "_3j77BW_search",
-			"catDiagnostics": "_3j77BW_catDiagnostics",
-			"catSystem": "_3j77BW_catSystem",
-			"pathRow": "_3j77BW_pathRow",
-			"catBadge": "_3j77BW_catBadge",
-			"catSettings": "_3j77BW_catSettings",
-			"btn": "_3j77BW_btn",
-			"event": "_3j77BW_event",
-			"actions": "_3j77BW_actions",
 			"pathLabel": "_3j77BW_pathLabel",
-			"message": "_3j77BW_message",
-			"pathDialogHint": "_3j77BW_pathDialogHint",
-			"more": "_3j77BW_more",
-			"badgeWarn": "_3j77BW_badgeWarn",
-			"pathText": "_3j77BW_pathText",
+			"foot": "_3j77BW_foot",
+			"actions": "_3j77BW_actions",
+			"filterChipActive": "_3j77BW_filterChipActive",
+			"btn": "_3j77BW_btn",
+			"time": "_3j77BW_time",
+			"footFail": "_3j77BW_footFail",
+			"badge": "_3j77BW_badge",
+			"logList": "_3j77BW_logList",
+			"footActions": "_3j77BW_footActions",
 			"moreEnd": "_3j77BW_moreEnd",
+			"linkBtn": "_3j77BW_linkBtn",
+			"pathDialogFoot": "_3j77BW_pathDialogFoot",
+			"footPath": "_3j77BW_footPath",
+			"catUpdate": "_3j77BW_catUpdate",
+			"catDiagnostics": "_3j77BW_catDiagnostics",
 			"footCount": "_3j77BW_footCount",
-			"badge": "_3j77BW_badge"
+			"catSettings": "_3j77BW_catSettings",
+			"pathDialogDesc": "_3j77BW_pathDialogDesc",
+			"previewRow": "_3j77BW_previewRow",
+			"badgeInfo": "_3j77BW_badgeInfo",
+			"more": "_3j77BW_more",
+			"catSystem": "_3j77BW_catSystem",
+			"btnPrimary": "_3j77BW_btnPrimary",
+			"event": "_3j77BW_event",
+			"pathDialogReset": "_3j77BW_pathDialogReset",
+			"pathDialogHint": "_3j77BW_pathDialogHint",
+			"filterChip": "_3j77BW_filterChip",
+			"catBadge": "_3j77BW_catBadge",
+			"panel": "_3j77BW_panel",
+			"list": "_3j77BW_list",
+			"entry": "_3j77BW_entry",
+			"searchInput": "_3j77BW_searchInput",
+			"pathDialog": "_3j77BW_pathDialog",
+			"catUninstall": "_3j77BW_catUninstall",
+			"empty": "_3j77BW_empty",
+			"badgeDebug": "_3j77BW_badgeDebug",
+			"message": "_3j77BW_message",
+			"pathText": "_3j77BW_pathText",
+			"catInstall": "_3j77BW_catInstall",
+			"filterBar": "_3j77BW_filterBar",
+			"badgeSuccess": "_3j77BW_badgeSuccess",
+			"headHint": "_3j77BW_headHint",
+			"search": "_3j77BW_search",
+			"pathRow": "_3j77BW_pathRow",
+			"head": "_3j77BW_head",
+			"badgeError": "_3j77BW_badgeError",
+			"badgeWarn": "_3j77BW_badgeWarn",
+			"pathDraft": "_3j77BW_pathDraft",
+			"pathDialogRow": "_3j77BW_pathDialogRow"
 		};
 		//#endregion
 		//#region src/client/components/modals/LogsModal.tsx
@@ -4667,7 +4803,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: e.message
 			}, (0, react.createElement)("span", { className: LogsView_module_css_default.time }, fmtLogTime(e.at)), (0, react.createElement)("span", { className: `${LogsView_module_css_default.badge} ${LogsView_module_css_default[`badge${e.level}`]}` }, t(LEVEL_LABEL[e.level])), (0, react.createElement)("span", { className: `${LogsView_module_css_default.catBadge} ${LogsView_module_css_default[`cat${e.category}`]}` }, t(CAT_LABEL[e.category])), (0, react.createElement)("span", { className: LogsView_module_css_default.event }, e.event), (0, react.createElement)("span", { className: LogsView_module_css_default.message }, e.message));
 		}
-		function LogsModal({ t, onCopy, onClose }) {
+		function LogsModal({ t, onClose }) {
 			const [category, setCategory] = (0, react.useState)("all");
 			const [level, setLevel] = (0, react.useState)("all");
 			const [query, setQuery] = (0, react.useState)("");
@@ -4756,15 +4892,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				setOpening(false);
 				if (!ok) setOpenFailed(true);
 			};
-			/** 已加载条目的纯文本：分析 bug 时复制粘贴给作者。 */
-			const entriesText = () => entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
-			const copyAll = () => {
-				const text = entriesText();
-				if (text !== "") onCopy(text);
-			};
 			/** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
 			const exportFile = () => {
-				const text = entriesText();
+				const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
 				if (text === "") return;
 				const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
 				const url = URL.createObjectURL(blob);
@@ -4825,11 +4955,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				title: t("logOpenFileTip"),
 				onClick: () => void openFile()
 			}, t("logOpenFile")), (0, react.createElement)("button", {
-				type: "button",
-				className: LogsView_module_css_default.btn,
-				disabled: entries.length === 0,
-				onClick: copyAll
-			}, t("logsCopy")), (0, react.createElement)("button", {
 				type: "button",
 				className: `${LogsView_module_css_default.btn} ${LogsView_module_css_default.btnPrimary}`,
 				disabled: entries.length === 0,
@@ -4965,7 +5090,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*/
 		/** 设置页预览条数：只放最近一小段，给用户快速感观，完整内容进查看器。 */
 		const PREVIEW = 12;
-		function LogsView({ t, onCopy, logPath, onLogPathSaved }) {
+		function LogsView({ t, logPath, onLogPathSaved }) {
 			const [entries, setEntries] = (0, react.useState)([]);
 			const [path, setPath] = (0, react.useState)("");
 			const [defaultPath, setDefaultPath] = (0, react.useState)("");
@@ -5001,11 +5126,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					mountedRef.current = false;
 				};
 			}, [load]);
-			/** 复制全文：完整日志的纯文本，粘贴给作者分析 bug。 */
-			const copyAll = () => {
-				const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
-				if (text !== "") onCopy(text);
-			};
 			/** 导出：拼纯文本 → Blob → 触发浏览器下载 .log 文件 */
 			const exportFile = () => {
 				const text = entries.map((e) => `[${fmtLogTime(e.at)}] [${e.level}] [${e.category}] [${e.event}] ${e.message}`).join("\n");
@@ -5035,11 +5155,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: `${LogsView_module_css_default.btn} ${LogsView_module_css_default.btnPrimary}`,
 				onClick: () => setOpen(true)
 			}, t("logViewerOpen")), (0, react.createElement)("button", {
-				type: "button",
-				className: LogsView_module_css_default.btn,
-				disabled: entries.length === 0,
-				onClick: copyAll
-			}, t("logsCopy")), (0, react.createElement)("button", {
 				type: "button",
 				className: LogsView_module_css_default.btn,
 				disabled: entries.length === 0,
@@ -5073,7 +5188,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				t
 			})))), open && (0, react.createElement)(LogsModal, {
 				t,
-				onCopy,
 				onClose: () => setOpen(false)
 			}), showPathModal && (0, react.createElement)(LogsPathModal, {
 				t,
@@ -5099,8 +5213,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* sidebar entry.
 		*
 		* Sections mirror what the local server actually enforces:
-		*   Updates & Sources — startup update check / auto-install / npm mirror /
-		*                        HTTP proxy (all wired into the install command path)
+		*   Updates & Sources — startup update check / npm mirror / HTTP proxy
+		*                        (all wired into the install command path)
 		*   Security & Trust  — restricted custom installs (server 403 gate)
 		*   Diagnostics       — live connectivity probe + environment snapshot
 		*   Logs              — system log viewer + storage location
@@ -5155,20 +5269,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		function SettingsView({ t, settings, update, reset, env, onCopy }) {
 			/** 当前激活的分组：左侧导航点击切换，右侧只渲染这一组 */
 			const [section, setSection] = (0, react.useState)("updates");
-			/** 重置按钮两段式确认：首次点击进入确认态，4 秒内再点才真正重置，超时自动复原 */
-			const [resetArmed, setResetArmed] = (0, react.useState)(false);
-			const resetTimer = (0, react.useRef)(0);
-			const onResetClick = () => {
-				if (!resetArmed) {
-					setResetArmed(true);
-					window.clearTimeout(resetTimer.current);
-					resetTimer.current = window.setTimeout(() => setResetArmed(false), 4e3);
-					return;
-				}
-				window.clearTimeout(resetTimer.current);
-				setResetArmed(false);
-				reset();
-			};
+			/** 恢复默认确认弹窗：点按钮先弹窗询问，确认后才真正 reset（不做两段式按钮） */
+			const [resetConfirm, setResetConfirm] = (0, react.useState)(false);
 			const mirrorCustom = !MIRROR_PRESETS.some((p) => p.value === settings.npmRegistry);
 			const onMirrorChange = (value) => {
 				if (value === "custom") return;
@@ -5192,14 +5294,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					checked: settings.checkUpdatesOnStart,
 					onChange: (v) => update({ checkUpdatesOnStart: v }),
 					title: t("settingsCheckOnStart")
-				})
-			}), (0, react.createElement)(SettingRow, {
-				title: t("settingsAutoInstall"),
-				desc: t("settingsAutoInstallDesc"),
-				children: (0, react.createElement)(Toggle, {
-					checked: settings.autoInstallUpdates,
-					onChange: (v) => update({ autoInstallUpdates: v }),
-					title: t("settingsAutoInstall")
 				})
 			}), (0, react.createElement)(SettingRow, {
 				title: t("settingsMirror"),
@@ -5257,6 +5351,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					onChange: (v) => update({ enableGitInstall: v }),
 					title: t("settingsEnableGit")
 				})
+			}), (0, react.createElement)(SettingRow, {
+				title: t("settingsEnableDsh"),
+				desc: t("settingsEnableDshDesc"),
+				children: (0, react.createElement)(Toggle, {
+					checked: settings.enableDshInstall,
+					onChange: (v) => update({ enableDshInstall: v }),
+					title: t("settingsEnableDsh")
+				})
 			}));
 			const diagnosticsCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(DiagnosticsView, {
 				t,
@@ -5265,7 +5367,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}));
 			const logsCard = (0, react.createElement)("div", { className: SettingsView_module_css_default.card }, (0, react.createElement)(LogsView, {
 				t,
-				onCopy,
 				logPath: settings.logPath,
 				onLogPathSaved: (v) => update({ logPath: v })
 			}));
@@ -5274,9 +5375,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				desc: t("settingsResetDetail"),
 				children: (0, react.createElement)("button", {
 					type: "button",
-					className: resetArmed ? SettingsView_module_css_default.resetBtnArmed : SettingsView_module_css_default.resetBtn,
-					onClick: onResetClick
-				}, resetArmed ? t("settingsResetConfirm") : t("settingsResetRun"))
+					className: SettingsView_module_css_default.resetBtn,
+					onClick: () => setResetConfirm(true)
+				}, t("settingsResetRun"))
 			}));
 			return (0, react.createElement)("div", { className: SettingsView_module_css_default.root }, (0, react.createElement)("nav", {
 				className: SettingsView_module_css_default.sidebar,
@@ -5288,7 +5389,32 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onClick: () => setSection(item.key),
 				"aria-current": section === item.key ? "page" : void 0,
 				title: t(item.labelKey)
-			}, (0, react.createElement)("span", { className: SettingsView_module_css_default.navIcon }, (0, react.createElement)(item.icon)), (0, react.createElement)("span", { className: SettingsView_module_css_default.navLabel }, t(item.labelKey))))), (0, react.createElement)("div", { className: SettingsView_module_css_default.content }, (0, react.createElement)("div", { className: SettingsView_module_css_default.pageHeader }, (0, react.createElement)("div", { className: SettingsView_module_css_default.pageTitle }, t(activeNav.labelKey)), (0, react.createElement)("div", { className: SettingsView_module_css_default.pageDesc }, pageDesc[section])), section === "updates" ? updatesCard : section === "security" ? securityCard : section === "diagnostics" ? diagnosticsCard : section === "logs" ? logsCard : resetCard));
+			}, (0, react.createElement)("span", { className: SettingsView_module_css_default.navIcon }, (0, react.createElement)(item.icon)), (0, react.createElement)("span", { className: SettingsView_module_css_default.navLabel }, t(item.labelKey))))), (0, react.createElement)("div", { className: SettingsView_module_css_default.content }, (0, react.createElement)("div", { className: SettingsView_module_css_default.pageHeader }, (0, react.createElement)("div", { className: SettingsView_module_css_default.pageTitle }, t(activeNav.labelKey)), (0, react.createElement)("div", { className: SettingsView_module_css_default.pageDesc }, pageDesc[section])), section === "updates" ? updatesCard : section === "security" ? securityCard : section === "diagnostics" ? diagnosticsCard : section === "logs" ? logsCard : resetCard), resetConfirm && (0, react.createElement)("div", {
+				className: Modal_module_css_default.overlay,
+				onClick: (e) => {
+					if (e.target === e.currentTarget) setResetConfirm(false);
+				}
+			}, (0, react.createElement)("div", {
+				className: Modal_module_css_default.modal,
+				role: "dialog",
+				"aria-modal": "true"
+			}, (0, react.createElement)("div", { className: Modal_module_css_default.modalHead }, (0, react.createElement)("div", { className: Modal_module_css_default.modalTitle }, t("settingsReset")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.modalClose,
+				type: "button",
+				"aria-label": t("errorClose"),
+				onClick: () => setResetConfirm(false)
+			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, t("settingsResetConfirmDetail")), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartLater,
+				type: "button",
+				onClick: () => setResetConfirm(false)
+			}, t("cancel")), (0, react.createElement)("button", {
+				className: Modal_module_css_default.restartNowWarning,
+				type: "button",
+				onClick: () => {
+					setResetConfirm(false);
+					reset();
+				}
+			}, t("settingsResetConfirm")))))));
 		}
 		//#endregion
 		//#region src/client/components/PluginHubSection.tsx
@@ -5320,6 +5446,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			/** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名 / GitHub 地址，DSH 命令已剥成裸目标）——
 			*  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
 			const [confirmCustomTarget, setConfirmCustomTarget] = (0, react.useState)(null);
+			/** 全局 npm 安装确认弹窗（官方 `npm install -g <pkgs>`）：记录原始命令 + 解析出的包列表，
+			*  走与应用商店同一套确认/进度/结果弹窗（plugin 传 null，InstallModal 走 globalNpm 模式） */
+			const [confirmGlobalNpm, setConfirmGlobalNpm] = (0, react.useState)(null);
 			/** Hub 自我更新说明弹窗：点「可更新」徽标先展示版本 + Markdown 变更记录，确认后再进安装弹窗 */
 			const [showHubUpdate, setShowHubUpdate] = (0, react.useState)(false);
 			/** 「关注我们」弹窗：GitHub 图标后按钮点击打开，展示平台介绍 + 用户反馈群二维码（Worker /about 推送） */
@@ -5404,6 +5533,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				},
 				installPlugin: confirmPlugin,
 				installCustomTarget: confirmCustomTarget,
+				installGlobalTarget: confirmGlobalNpm ? confirmGlobalNpm.pkgs.join(" ") : null,
 				uninstallPlugin,
 				uninstallName: uninstallItem ? uninstallItem.name : null,
 				installedName: catalog.installedName,
@@ -5423,14 +5553,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				if (!hubSettings.checkUpdatesOnStart) return;
 				const updatable = catalog.installedItems.filter((i) => i.hasUpdate && i.plugin);
 				if (updatable.length === 0) return;
-				if (hubSettings.autoInstallUpdates) {
-					for (const item of updatable) if (item.plugin) queue.installNow(item.plugin, { update: true });
-					setToast({
-						id: Date.now(),
-						kind: "updatesAuto",
-						n: updatable.length
-					});
-				} else setToast({
+				for (const item of updatable) if (item.repo) addUpdateNotice({
+					kind: "update",
+					repo: item.repo,
+					version: item.catalogVersion ?? void 0
+				});
+				setNotifications(loadNotifications());
+				setToast({
 					id: Date.now(),
 					kind: "updates",
 					n: updatable.length
@@ -5444,11 +5573,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				queue
 			]);
 			(0, react.useEffect)(() => {
-				if (!confirmPlugin && !confirmCustomTarget && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return;
+				if (!confirmPlugin && !confirmCustomTarget && !confirmGlobalNpm && !uninstallPlugin && !uninstallItem && !detailItem && !showHubUpdate && !showAbout && !showNotifications) return;
 				const onKey = (e) => {
 					if (e.key === "Escape") {
 						setConfirmPlugin(null);
 						setConfirmCustomTarget(null);
+						setConfirmGlobalNpm(null);
 						setUninstallPlugin(null);
 						setUninstallItem(null);
 						setDetailItem(null);
@@ -5574,7 +5704,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const statsTotal = catalog.stats?.total ?? total;
 			const statsVerified = catalog.stats?.verified ?? 0;
 			const count = catalog.visible.length;
-			const hubEntry = catalog.plugins?.find((p) => p.source?.repo === "dshplugin/dsh-plugin-hub") ?? null;
+			const hubEntry = catalog.hubPlugin;
 			return (0, react.createElement)("div", { className: Header_module_css_default.root }, (0, react.createElement)(CatalogHeader, {
 				t,
 				langPath,
@@ -5635,11 +5765,25 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				onRestart: () => setShowRestartConfirm(true)
 			}) : view === "custom" ? (0, react.createElement)(CustomInstallView, {
 				t,
-				onInstallCustom: (raw) => {
+				enableNpm: hubSettings.enableNpmInstall,
+				enableGit: hubSettings.enableGitInstall,
+				enableDsh: hubSettings.enableDshInstall,
+				onOpenSettings: () => setView("settings"),
+				onInstallCustom: (raw, opts) => {
 					const target = raw.trim();
 					if (!target) return;
 					setInstallDone(false);
 					queue.clearModalTask();
+					if (opts?.globalNpm && opts.globalNpm.length > 0) {
+						setConfirmCustomTarget(null);
+						setConfirmIsUpdate(false);
+						setConfirmGlobalNpm({
+							raw,
+							pkgs: opts.globalNpm
+						});
+						return;
+					}
+					setConfirmGlobalNpm(null);
 					setConfirmIsUpdate(customTargetInstalled(target));
 					setConfirmCustomTarget(target);
 				}
@@ -5692,6 +5836,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				},
 				onClear: () => setNotifications(clearNotifications()),
 				onRemove: (id) => setNotifications(removeNotification(id)),
+				onUpdate: (repo) => {
+					const plugin = catalog.installedItems.find((i) => i.repo === repo)?.plugin;
+					if (!plugin) return;
+					setShowNotifications(false);
+					setInstallDone(false);
+					setConfirmIsUpdate(true);
+					queue.clearModalTask();
+					setConfirmPlugin(plugin);
+				},
 				cancelTask: queue.cancelTask,
 				restarting,
 				onRestart: () => {
@@ -5738,6 +5891,33 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					});
 				},
 				onInstall: () => void queue.installCustom(confirmCustomTarget, confirmIsUpdate ? { update: true } : void 0),
+				onRestart: () => {
+					requestRestart();
+				}
+			}), confirmGlobalNpm && (0, react.createElement)(InstallModal, {
+				plugin: null,
+				globalNpm: confirmGlobalNpm.pkgs,
+				done: installDone,
+				task: queue.installModalTask,
+				t,
+				langPath,
+				restarting,
+				update: false,
+				cliOnly: false,
+				submitting: queue.submitting,
+				needsRestart: installNeedsRestart,
+				onClose: () => {
+					setInstallDone(false);
+					setConfirmGlobalNpm(null);
+				},
+				onCopy: () => {
+					doCopy(`npm install -g ${confirmGlobalNpm.pkgs.join(" ")}`);
+					setToast({
+						id: Date.now(),
+						kind: "copied"
+					});
+				},
+				onInstall: () => void queue.installGlobalNpm(confirmGlobalNpm.pkgs),
 				onRestart: () => {
 					requestRestart();
 				}

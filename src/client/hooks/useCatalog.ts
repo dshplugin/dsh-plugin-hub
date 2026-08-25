@@ -33,6 +33,9 @@ const SORT_DEFAULT_DIR: Record<SortKey, 'asc' | 'desc'> = {
 export function useCatalog(lang: LocaleId) {
   /** 目录插件（仅保留人工验证通过的条目） */
   const [plugins, setPlugins] = useState<HubPlugin[] | null>(null)
+  /** Hub 自身目录条目（dshplugin/dsh-plugin-hub）：目录过滤会排除自身（不进插件列表），
+   *  此处单独保留，供头部「可更新」徽标 → 「直接更新」覆盖重装使用。 */
+  const [hubPlugin, setHubPlugin] = useState<HubPlugin | null>(null)
   /** 收录/精选统计（官网 /api/stats.json 实时拉取） */
   const [stats, setStats] = useState<{ total: number; verified: number } | null>(null)
   const [failed, setFailed] = useState(false)
@@ -68,6 +71,7 @@ export function useCatalog(lang: LocaleId) {
   useEffect(() => {
     let cancelled = false
     setPlugins(null)
+    setHubPlugin(null)
     setStats(null)
     setFailed(false)
     // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口；
@@ -80,6 +84,8 @@ export function useCatalog(lang: LocaleId) {
         // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
         // 主站数据已同步排除自身，此处为 CDN 缓存期的兜底。
         const hadSelf = list.some((p) => p.source?.repo === SELF_REPO)
+        // 过滤前单独保留 hub 自身条目：它不进目录列表，但「可更新」徽标的直接更新需要它作为重装目标
+        setHubPlugin(list.find((p) => p.source?.repo === SELF_REPO) ?? null)
         setPlugins(list.filter((p) => p.compatibility?.status === 'verified' && p.source?.repo !== SELF_REPO))
         if (stats) {
           setStats(hadSelf
@@ -178,10 +184,11 @@ export function useCatalog(lang: LocaleId) {
     })
     const dir = sortDir === 'asc' ? 1 : -1
     return [...list].sort((a, b) => {
-      if (sort === 'sortStars') return ((b.stats?.stargazers_count ?? 0) - (a.stats?.stargazers_count ?? 0)) * dir
-      if (sort === 'sortForks') return ((b.stats?.forks_count ?? 0) - (a.stats?.forks_count ?? 0)) * dir
-      if (sort === 'sortNewest') return (b.dates?.addedAt ?? '').localeCompare(a.dates?.addedAt ?? '') * dir
-      return (b.dates?.repoUpdatedAt ?? '').localeCompare(a.dates?.repoUpdatedAt ?? '') * dir
+      // 比较器统一用「升序写法」再乘 dir：desc 时 dir=-1 翻成降序（Star/Fork 最多、更新/收录最近在前）
+      if (sort === 'sortStars') return ((a.stats?.stargazers_count ?? 0) - (b.stats?.stargazers_count ?? 0)) * dir
+      if (sort === 'sortForks') return ((a.stats?.forks_count ?? 0) - (b.stats?.forks_count ?? 0)) * dir
+      if (sort === 'sortNewest') return (a.dates?.addedAt ?? '').localeCompare(b.dates?.addedAt ?? '') * dir
+      return (a.dates?.repoUpdatedAt ?? '').localeCompare(b.dates?.repoUpdatedAt ?? '') * dir
     })
   }, [plugins, category, query, sort, sortDir, installed])
 
@@ -196,6 +203,7 @@ export function useCatalog(lang: LocaleId) {
 
   return {
     plugins,
+    hubPlugin,
     stats,
     failed,
     reload: () => setReloadKey((k) => k + 1),
