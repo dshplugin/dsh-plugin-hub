@@ -67,12 +67,12 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 | 一键安装 | 一键卸载 |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-zh.png" alt="一键安装" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-uninstall-zh.png" alt="一键卸载" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-install-zh.png" alt="一键安装" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-zh.png" alt="一键卸载" width="400"> |
 | 后台队列串行执行，弹窗实时显示安装进度，可随时取消 | 卸载全程可视化，实时进度一目了然，成功即生效 |
 
 | 一键更新 | 通知中心 |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-update-zh.png" alt="一键更新" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications-zh.png" alt="可视化消息通知" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-update-zh.png" alt="一键更新" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-zh.png" alt="可视化消息通知" width="400"> |
 | 检测到新版本自动提示「更新」，一键覆盖安装完成升级 | 进行中任务、待重启项与成功/失败历史集中管理，失败可一键提交 Issue |
 
 ## 官网一览
@@ -81,7 +81,7 @@ DSH-Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 | 官网首页 | 分类展示 |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-site-home.png" alt="DSH-Plugin 官网首页" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH-Plugin 分类展示" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-site-home.png" alt="DSH-Plugin 官网首页" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH-Plugin 分类展示" width="400"> |
 | 数据与插件中心同源，人工精选验证、每日更新 | 按分类浏览全部收录插件，支持搜索直达 |
 
 ## 为什么选择 DSH-Plugin Hub

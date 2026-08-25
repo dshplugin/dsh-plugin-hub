@@ -67,12 +67,12 @@ DSH-Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 | One-click install | One-click uninstall |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-install-en.png" alt="One-click install with live progress" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-uninstall-en.png" alt="One-click uninstall with live progress" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-install-en.png" alt="One-click install with live progress" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-en.png" alt="One-click uninstall with live progress" width="400"> |
 | A serial background queue with live progress in the dialog, cancellable anytime | Fully visualized with live progress; changes take effect immediately |
 
 | One-click update | Notification center |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-update-en.png" alt="One-click update with overwrite install" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-notifications-en.png" alt="Visual notifications" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-update-en.png" alt="One-click update with overwrite install" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-en.png" alt="Visual notifications" width="400"> |
 | New versions detected automatically; the card turns into "Update" and overwrite-installs in one click | Running tasks, pending restarts and full success / failure history in one place; failed installs can be filed as a GitHub Issue in one click |
 
 ## Website Overview
@@ -81,7 +81,7 @@ The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugi
 
 | Homepage | Browse by category |
 | :---: | :---: |
-| <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-site-home.png" alt="DSH-Plugin website homepage" width="400"> | <img src="https://dsh-plugin.org/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH-Plugin category browsing" width="400"> |
+| <img src="docs/screenshots/dsh-plugin-hub-site-home.png" alt="DSH-Plugin website homepage" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH-Plugin category browsing" width="400"> |
 | Same data source as the hub — human-verified, updated daily | Browse every indexed plugin by category, search straight to it |
 
 ## Why DSH-Plugin Hub
