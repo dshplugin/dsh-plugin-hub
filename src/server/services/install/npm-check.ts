@@ -23,7 +23,8 @@ export const NPM_MIN_VERSION = [11, 6, 0]
 /** 读本机 npm 版本（major.minor.patch）；npm 不在 PATH 或执行失败/超时时返回 null（不妄下结论）。 */
 export function npmVersionOf(env: NodeJS.ProcessEnv | undefined): [number, number, number] | null {
   try {
-    const res = spawnSync('npm', ['-v'], { env, encoding: 'utf8', timeout: 10_000, stdio: ['ignore', 'pipe', 'pipe'] })
+    // Windows 下 npm 是 npm.cmd：spawn 直接 exec 会拒绝，须 shell:true 解析（与 task-queue 的 useShell 一致）
+    const res = spawnSync('npm', ['-v'], { env, encoding: 'utf8', timeout: 10_000, stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' })
     if (res.error !== undefined || res.status !== 0) return null
     const m = /(\d+)\.(\d+)\.(\d+)/.exec(res.stdout ?? '')
     return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null

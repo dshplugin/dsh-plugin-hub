@@ -22,6 +22,62 @@ import { isDshPlugin, isEntryLoaded } from '../services/loader.ts'
 import { loadSettings, saveSettings, resetSettings, type HubSettings } from '../services/settings.ts'
 import { appendLog, clearLog, readLog, logFilePath, defaultLogFilePath, customLogFile } from '../services/log.ts'
 
+/**
+ * 跨平台宿主重启脚本（以 `node -e` 运行，独立于宿主进程）。
+ * 取代原先的 `/bin/sh -c`：Windows 无 /bin/sh，且 lsof/nohup 仅 POSIX 存在。
+ * 由 `spawn(process.execPath, ['-e', SCRIPT, port], { detached, stdio:'ignore' })` 孵化，
+ * 宿主进程被 kill 后仍能完成「停旧 → 等端口释放 → 拉起新 dsh web」。
+ */
+const HOST_RESTART_SCRIPT = String.raw`const C = require('node:child_process')
+const F = require('node:fs')
+const P = require('node:path')
+const O = require('node:os')
+const win = process.platform === 'win32'
+const port = Number(process.argv[1])
+
+function findPids() {
+  if (win) {
+    const out = C.spawnSync('netstat', ['-ano', '-p', 'tcp'], { encoding: 'utf8' })
+    const found = []
+    for (const line of String(out.stdout || '').split(/\r?\n/)) {
+      if (!/LISTENING/i.test(line)) continue
+      const parts = line.trim().split(/\s+/)
+      const addr = parts[1] || ''
+      if (!addr.endsWith(':' + port)) continue
+      const pid = parts[parts.length - 1]
+      if (pid && /\d+/.test(pid)) found.push(pid)
+    }
+    return found
+  }
+  const out = C.spawnSync('lsof', ['-ti', 'tcp:' + port, '-sTCP:LISTEN'], { encoding: 'utf8' })
+  return String(out.stdout || '').split(/\s+/).filter(Boolean)
+}
+
+for (const pid of findPids()) {
+  try {
+    if (win) C.spawnSync('taskkill', ['/pid', pid, '/t', '/f'])
+    else process.kill(Number(pid), 'SIGTERM')
+  } catch {}
+}
+
+let tries = 0
+;(function waitForStop() {
+  if (findPids().length === 0 || ++tries > 20) return startHost()
+  setTimeout(waitForStop, 250)
+})()
+
+function startHost() {
+  const dir = P.join(O.homedir(), '.dsh', 'logs')
+  F.mkdirSync(dir, { recursive: true })
+  const fd = F.openSync(P.join(dir, 'dsh-web-' + port + '.log'), 'a')
+  const child = C.spawn('dsh', ['web', '--port', String(port)], {
+    detached: true,
+    shell: win,
+    stdio: ['ignore', fd, fd],
+  })
+  child.unref()
+}`
+
 export interface WebRoute {
   kind: 'exact'
   path: string
@@ -792,16 +848,12 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         const host = request.headers.host ?? ''
         const portMatch = host.match(/:(\d+)$/)
         const port = portMatch ? Number(portMatch[1]) : 7923
-        // detached 子 shell 完成「停旧进程 → 等端口释放 → 后台拉起 dsh web」，
-        // 即使当前宿主（即本插件所在进程）被 kill，重启仍会继续执行
-        const script = [
-          `pids=$(lsof -ti tcp:${port} -sTCP:LISTEN 2>/dev/null)`,
-          '[ -n "$pids" ] && kill -TERM $pids 2>/dev/null || true',
-          `i=0; while [ -n "$(lsof -ti tcp:${port} -sTCP:LISTEN 2>/dev/null)" ] && [ $i -lt 20 ]; do sleep 0.25; i=$((i + 1)); done`,
-          'mkdir -p "$HOME/.dsh/logs"',
-          `nohup dsh web --port ${port} >>"$HOME/.dsh/logs/dsh-web-${port}.log" 2>&1 &`,
-        ].join('\n')
-        spawn('/bin/sh', ['-c', script], { detached: true, stdio: 'ignore' }).unref()
+        // detached 子进程完成「停旧进程 → 等端口释放 → 后台拉起 dsh web」，
+        // 即使当前宿主（即本插件所在进程）被 kill，重启仍会继续执行。
+        // 不用 /bin/sh：Windows 无此路径，且 lsof/nohup 等仅 POSIX 存在，
+        // 故孵化 node(process.execPath) 跑跨平台脚本 —— Windows 用
+        // netstat + taskkill + shell:true 解析 dsh.cmd，POSIX 用 lsof + SIGTERM。
+        spawn(process.execPath, ['-e', HOST_RESTART_SCRIPT, String(port)], { detached: true, stdio: 'ignore' }).unref()
         sendJson(response, 200, { ok: true, port })
       },
     }),
