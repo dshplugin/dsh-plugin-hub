@@ -110,7 +110,7 @@ const HELP_CARDS = {
 
 type HelpTarget = keyof typeof HELP_CARDS
 
-export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, enableDsh, onOpenSettings }: {
+export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, enableDsh, onOpenSettings, profile }: {
   t: Translate
   /** 命令行安装：输入 npm 包名 / npm、pnpm 安装命令 / GitHub 地址 / dsh plugin 命令即装
    *  （custom 源，受安全设置开关控制）；opts.globalNpm 表示官方 npm 全局安装命令（npm install -g），附带解析出的包列表 */
@@ -121,6 +121,8 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
   enableDsh: boolean
   /** 引导去「设置 → 安全信任」打开被关闭的通道开关 */
   onOpenSettings: () => void
+  /** 当前 dsh profile 名（宿主 /env 快照）：一键插入的更新命令用它拼 --profile */
+  profile: string
 }) {
   /** 自定义安装：NPM 包输入与格式错误（'' = 无错误） */
   const [npmQuery, setNpmQuery] = useState('')
@@ -177,6 +179,11 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
     // 未安装时即为普通安装 —— 粘贴 `dsh plugin --profile web update dsh-plugin` 这类命令即可更新到最新
     onInstallCustom(parsed.target)
     setCmdQuery('')
+    setCmdError('')
+  }
+  /** 一键插入 DSH Plugin Hub 自身的更新命令：按当前 profile 拼官方命令填进输入框，用户确认后提交 */
+  const insertHubUpdate = () => {
+    setCmdQuery(`dsh plugin --profile ${profile} update dsh-plugin`)
     setCmdError('')
   }
 
@@ -281,6 +288,15 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
             'aria-label': t('installHelp'),
             onClick: () => setHelpFor('cmd'),
           }, h(HelpIcon)),
+          // 一键插入 Hub 自身的更新命令：按当前 profile 拼 `dsh plugin --profile <p> update dsh-plugin`
+          // 填入输入框（命令卡片被安全开关禁用时不显示，插入后也提交不了）
+          enableDsh
+            ? h('button', {
+              type: 'button',
+              className: styles.installInsertBtn,
+              onClick: insertHubUpdate,
+            }, t('dshCmdInsertHubUpdate'))
+            : null,
         ),
         !enableDsh
           ? channelOffRow

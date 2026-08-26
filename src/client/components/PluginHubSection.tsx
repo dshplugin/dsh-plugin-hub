@@ -427,6 +427,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               enableGit: hubSettings.enableGitInstall,
               enableDsh: hubSettings.enableDshInstall,
               onOpenSettings: () => setView('settings'),
+              // 当前 profile：一键插入的 Hub 更新命令用它拼 --profile
+              profile: env?.profile ?? 'web',
               onInstallCustom: (raw, opts) => {
                 const target = raw.trim()
                 if (!target) return

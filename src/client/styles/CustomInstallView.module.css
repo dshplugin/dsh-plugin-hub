@@ -84,6 +84,31 @@
   border-color: var(--hub-brand-border-soft);
 }
 
+/* 命令卡片标题旁的「一键插入更新命令」：右对齐小号描边按钮，弱化但可点，hover 提亮品牌色 */
+.installInsertBtn {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--hub-text-secondary);
+  background: transparent;
+  border: 1px solid var(--hub-border-2);
+  border-radius: 6px;
+  padding: 2px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.installInsertBtn:hover {
+  color: var(--hub-brand);
+  border-color: var(--hub-brand-border-soft);
+  background: var(--hub-brand-tint);
+}
+
 /* 文本框上方的示例：灰字小字，告诉用户该通道的推荐写法 */
 .installExample {
   font-size: 11px;
