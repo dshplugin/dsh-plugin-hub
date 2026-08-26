@@ -28,6 +28,9 @@ export interface QueueTask {
   desc?: string
   /** 所属插件仓库（owner/repo）：失败时错误弹窗据此提供「去仓库反馈」入口；卸载为 null */
   repo: string | null
+  /** 实际动作（add/update/remove）：成功通知据此区分「安装成功」与「更新成功」。
+   *  服务端 /active 带回真实动作；本地乐观入队按 update 标记推断。 */
+  action?: 'add' | 'update' | 'remove'
   /** 安装时的目录信号快照（版本 + 仓库更新时间）：任务成功后在本地记录，供「有更新」比对 */
   version?: string
   updatedAt?: string
@@ -63,11 +66,12 @@ export interface TaskQueueOptions {
   t: Translate
   refreshInstalled: () => void
   /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录；
-   *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）。 */
-  onInstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean) => void
+   *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）。
+   *  update 表示实际执行的是更新（覆盖重装）而非首次安装：通知中心据此显示「更新成功」而非「安装成功」。 */
+  onInstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean, update?: boolean) => void
   onUninstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean) => void
-  /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 尝试过的安装方式（npm 反查/执行命令，可缺省）。 */
-  onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[]) => void
+  /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 尝试过的安装方式（npm 反查/执行命令，可缺省）+ 是否更新。 */
+  onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[], update?: boolean) => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
   installPlugin: HubPlugin | null
   /** 当前打开的自定义安装（命令行）确认弹窗目标：与应用商店同一弹窗机制，匹配进行中的 custom 安装任务。 */
@@ -195,14 +199,14 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         // 同时缓存展示信息，待重启列表（服务端已登记）合并时直接补齐简介/版本
         void syncInstalledVersion(q.repo, q.version, q.updatedAt)
         pendingInfoRef.current.set(q.target, { desc: q.desc, version: q.version })
-        onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart)
+        onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.action === 'update')
       }
     } else {
       // 失败：完整展示全部输出行（最新在前，逆序为日志阅读顺序），不裁剪
       const detail = lines.length > 0
         ? [...lines].reverse().join('\n')
         : q.kind === 'uninstall' ? t('uninstallFail') : t('installFail')
-      onError(detail, q.repo, q.kind, q.command, q.attempts)
+      onError(detail, q.repo, q.kind, q.command, q.attempts, q.action === 'update')
     }
     maybeStopPoll()
   }
@@ -367,6 +371,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
               kind: (isRemove ? 'uninstall' : 'install') as 'install' | 'uninstall',
               target: isRemove ? fallback : (display || fallback),
               repo: isRemove ? null : (display || fallback),
+              action: (a.action === 'add' || a.action === 'update' || a.action === 'remove') ? a.action : 'add',
               status: a.status === 'running' ? 'running' : 'pending',
               progress: typeof a.progress === 'number' ? a.progress : 0,
               lines: Array.isArray(a.lines) ? (a.lines as string[]) : [],
@@ -421,6 +426,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       version: input.version, updatedAt: input.updatedAt,
       status: 'running', progress: 0, lines: [], optimistic: true,
       command: input.command,
+      action: input.update ? 'update' : 'add',
       // 服务端登记后 /active 会带回真实尝试记录（npm 反查 + 执行命令），先占位空列表
       attempts: [], needsRestart: true,
     }])

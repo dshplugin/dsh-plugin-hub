@@ -141,7 +141,15 @@ The plugin hub notifies you when a new version is available; if an older build's
 dsh plugin --profile web update dsh-plugin
 ```
 
-**Option 2: reinstall the latest (most reliable)**
+**Option 2: force upgrade (when an older build cannot update)**
+
+If the old build's updater cannot pull the latest version, force-reinstall the newest release with an explicit version:
+
+```bash
+dsh plugin --profile web add dsh-plugin@latest
+```
+
+**Option 3: reinstall the latest (most reliable)**
 
 `add` does not overwrite an already-installed copy, so removing first and re-adding always fetches the newest version:
 

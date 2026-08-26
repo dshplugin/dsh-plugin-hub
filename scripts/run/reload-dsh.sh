@@ -81,17 +81,22 @@ stop_existing() {
   done
 }
 
-# The profile installs dsh-plugin from a `file:` dep, but pnpm (hoisted
-# linker) *copies* it into node_modules and does not refresh that copy
-# after rebuilds — a stale lib/ makes the plugin fail to boot. Mirror the
-# built artifacts over the copy so reloads always run the current build.
-# Set DSH_RELOAD_SKIP_SYNC=1 to skip.
+# The profile installs dsh-plugin either from a `file:` dep or as a real npm
+# package; pnpm *copies* it into node_modules in both cases and does not
+# refresh that copy after rebuilds — a stale lib/ makes the plugin fail to
+# boot or keeps serving old code. Mirror the built artifacts over the copy so
+# reloads always run the current build. Set DSH_RELOAD_SKIP_SYNC=1 to skip.
 sync_profile_plugin() {
   [[ -n "${DSH_RELOAD_SKIP_SYNC:-}" ]] && return 0
   local pkg="$PROFILE_DIR/package.json"
   [[ -f "$pkg" ]] || return 0
-  grep -q "dsh-plugin.*file:${REPO_DIR//\//\\/}" "$pkg" 2>/dev/null || return 0
   local target="$PROFILE_DIR/node_modules/dsh-plugin"
+  # 目标拷贝不存在时：只有 profile 依赖是 file: 指向本仓库才补装（pnpm 装出的拷贝
+  # 随后被覆盖成最新构建）；npm 装的旧版连拷贝都缺失属异常，交给安装流程处理，
+  # 这里不越界重装。拷贝存在（无论 file: 还是 npm 装）一律用本地构建覆盖。
+  if [[ ! -d "$target" ]] && ! grep -q "dsh-plugin.*file:${REPO_DIR//\//\\/}" "$pkg" 2>/dev/null; then
+    return 0
+  fi
   echo "[reload] syncing $PROFILE plugin copy from $REPO_DIR …"
   if [[ ! -d "$target" ]]; then
     echo "[reload] plugin copy missing — reinstalling…"

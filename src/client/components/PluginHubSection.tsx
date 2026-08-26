@@ -107,12 +107,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const queue = useTaskQueue({
     t,
     refreshInstalled: catalog.refreshInstalled,
-    onInstallDone: (viaModal, repo, needsRestart) => {
+    onInstallDone: (viaModal, repo, needsRestart, update) => {
       setInstallNeedsRestart(needsRestart)
       if (viaModal) setInstallDone(true)
       else setToast({ id: Date.now(), kind: 'done' })
-      // 安装成功也写入通知记录：通知中心里成功与失败都能看到
-      setNotifications(addSuccess({ kind: 'install', repo: repo ?? '' }))
+      // 安装成功也写入通知记录：通知中心里成功与失败都能看到。
+      // action 区分「安装成功」与「更新成功」（更新 = 覆盖重装，同一执行通道）
+      setNotifications(addSuccess({ kind: 'install', action: update ? 'update' : 'install', repo: repo ?? '' }))
     },
     onUninstallDone: (viaModal, repo, needsRestart) => {
       setUninstallNeedsRestart(needsRestart)
@@ -120,13 +121,16 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       else setToast({ id: Date.now(), kind: 'removed' })
       setNotifications(addSuccess({ kind: 'uninstall', repo: repo ?? '' }))
     },
-    onError: (message, repo, kind, command, attempts) => {
+    onError: (message, repo, kind, command, attempts, update) => {
       // 提 Issue 目标先反查仓库身份：npm 包名能在已安装表/目录里反查到 owner/repo 才保留，
-      // 反查不到置 null —— 错误弹窗/通知中心据此不显示「一键提 Issue」按钮（防提到错误仓库）
+      // 反查不到置 null —— 错误弹窗据此不显示「一键提 Issue」按钮（防提到错误仓库）
       const issueRepo = issueRepoOf(repo ?? '', catalog.installedItems, catalog.plugins)
       setErrorMsg({ message, repo: issueRepo, kind, command, attempts })
-      // 失败自动写入通知记录：任务在后台结束时没人盯着也能留痕
-      setNotifications(addFailure({ kind, repo: issueRepo ?? '', message, command, attempts }))
+      // 失败自动写入通知记录：任务在后台结束时没人盯着也能留痕。
+      // 存原始 repo（可能只是裸包名）而非反查结果 —— 反查只服务于提 Issue，
+      // 通知中心的展示反查由 NotificationsModal 做、查不到会回退显示原始值，
+      // 若这里就丢掉原始值，通知里会连名字都看不到；action 区分「安装失败/更新失败」
+      setNotifications(addFailure({ kind, action: update ? 'update' : 'install', repo: repo ?? '', message, command, attempts }))
     },
     installPlugin: confirmPlugin,
     installCustomTarget: confirmCustomTarget,

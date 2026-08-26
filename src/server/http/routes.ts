@@ -184,12 +184,12 @@ function hostEnv(profile: string): Record<string, string | null> {
   }
 }
 
-/** 安装/卸载 CLI 的子进程环境：透传宿主环境，并按设置注入 npm 镜像源与 HTTP(S) 代理。
+/** 安装/卸载 CLI 的子进程环境：透传宿主环境，并按设置注入 HTTP(S) 代理。
+ *  npm registry 不再注入 —— 安装完全沿用用户本机 npm 配置（~/.npmrc / 全局配置）。
  *  代理优先级：设置里的代理 → 系统代理（macOS scutil / Windows 注册表）→ 宿主 env 原有值。
  *  使安装通道与诊断使用相同的代理来源。 */
 function mutationEnv(settings: HubSettings): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...process.env, CI: 'true' }
-  if (settings.npmRegistry !== '') env.npm_config_registry = settings.npmRegistry
   const proxy = settings.proxy !== '' ? settings.proxy : (systemProxy() ?? '')
   if (proxy !== '') {
     env.HTTP_PROXY = proxy
@@ -488,11 +488,14 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           // 空 body / 非 JSON：视为全量探测
         }
         const settings = loadSettings(profile)
+        // npm 通道：设置里配置了镜像源就探测该镜像（安装通道吃同一个 registry）；
+        // 未配置（空串）时探测官方源作为「跟随本机 npm 配置」的基础连通性参考。
         const registry = settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org'
         // 连通性自检直接打安装通道真实访问的轻量资源：npm 源拉包元数据、git 通道探
         // 仓库主页、目录站探 badge 小文件，避免拉取目录全量 JSON。
+        // npm 行 display：配置了镜像就显示镜像地址；未配置置空 —— 客户端显示「未配置（跟随本机 npm 配置）」。
         const allChecks: Array<{ key: string; url: string; display: string; cmd: string }> = [
-          { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? settings.npmRegistry : 'registry.npmjs.org', cmd: `npm view dsh-plugin version --registry ${registry}` },
+          { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? registry : '', cmd: `npm view dsh-plugin version --registry ${registry}` },
           { key: 'github', url: 'https://github.com/dshplugin/dsh-plugin-hub', display: 'github.com', cmd: 'git ls-remote https://github.com/dshplugin/dsh-plugin-hub' },
           { key: 'catalog', url: 'https://api.dsh-plugin.org/stats.json', display: 'api.dsh-plugin.org', cmd: 'curl -s https://api.dsh-plugin.org/stats.json' },
         ]

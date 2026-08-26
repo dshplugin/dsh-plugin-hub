@@ -18,9 +18,10 @@
 import { createElement as h, useState } from 'react'
 import type { ChangeEvent, MouseEvent, ReactNode } from 'react'
 import styles from '../../styles/SettingsView.module.css'
+import dropdownStyles from '../../styles/Dropdown.module.css'
 import modalStyles from '../../styles/Modal.module.css'
-import { Dropdown } from '../ui/Dropdown.tsx'
 import { Toggle } from '../ui/Toggle.tsx'
+import { Dropdown } from '../ui/Dropdown.tsx'
 import { DiagnosticsView } from './DiagnosticsView.tsx'
 import { LogsView } from './LogsView.tsx'
 import {
@@ -31,6 +32,16 @@ import type { HubSettings } from '../../hooks/useSettings.ts'
 
 type SettingsSection = 'updates' | 'security' | 'diagnostics' | 'logs' | 'reset'
 
+/** npm 镜像源预设：空串 = 未配置（跟随用户本机 npm 配置，本插件不注入任何 registry）。
+ *  只提供常见国内顶级镜像下拉，不做自定义输入 —— 想用其它镜像直接在 ~/.npmrc 配置即可。 */
+const MIRROR_PRESETS: Array<{ value: string; labelKey: string }> = [
+  { value: '', labelKey: 'mirrorNone' },
+  { value: 'https://registry.npmjs.org', labelKey: 'mirrorOfficial' },
+  { value: 'https://registry.npmmirror.com', labelKey: 'mirrorNpmmirror' },
+  { value: 'https://mirrors.cloud.tencent.com/npm/', labelKey: 'mirrorTencent' },
+  { value: 'https://mirrors.tuna.tsinghua.edu.cn/npm/', labelKey: 'mirrorTsinghua' },
+]
+
 /** 左侧导航：顺序即展示顺序；labelKey 是分组标题，icon 是行内小图标。 */
 const NAV: Array<{ key: SettingsSection; labelKey: string; icon: () => ReturnType<typeof h> }> = [
   { key: 'updates', labelKey: 'settingsUpdate', icon: UpdatesIcon },
@@ -38,13 +49,6 @@ const NAV: Array<{ key: SettingsSection; labelKey: string; icon: () => ReturnTyp
   { key: 'diagnostics', labelKey: 'settingsDiagnostics', icon: DiagnosticsIcon },
   { key: 'logs', labelKey: 'settingsLogs', icon: LogsIcon },
   { key: 'reset', labelKey: 'settingsReset', icon: ResetIcon },
-]
-
-/** npm 镜像源预设：空串 = 官方源；值相等即视为选中对应预设，其余进入「自定义」输入。 */
-const MIRROR_PRESETS: Array<{ value: string; labelKey: string }> = [
-  { value: '', labelKey: 'mirrorOfficial' },
-  { value: 'https://registry.npmmirror.com', labelKey: 'mirrorNpmmirror' },
-  { value: 'https://mirrors.cloud.tencent.com/npm/', labelKey: 'mirrorTencent' },
 ]
 
 /** 设置行：默认标签左控件右；stack=true 时控件独占一行（文本框整行显示），hairline 分隔。 */
@@ -76,13 +80,8 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
   /** 恢复默认确认弹窗：点按钮先弹窗询问，确认后才真正 reset（不做两段式按钮） */
   const [resetConfirm, setResetConfirm] = useState(false)
 
-  const mirrorCustom = !MIRROR_PRESETS.some((p) => p.value === settings.npmRegistry)
-  const onMirrorChange = (value: string) => {
-    if (value === 'custom') return // 进入自定义输入：保持当前值，下方出现输入框
-    update({ npmRegistry: value })
-  }
-  const onMirrorInput = (e: ChangeEvent<HTMLInputElement>) => update({ npmRegistry: e.target.value })
   const onProxyChange = (e: ChangeEvent<HTMLInputElement>) => update({ proxy: e.target.value })
+  const onMirrorChange = (value: string) => update({ npmRegistry: value })
 
   /** 每个分组的页面副标题（导航标题之上再补一句说明，保持桌面设置质感） */
   const pageDesc: Record<SettingsSection, string> = {
@@ -106,31 +105,19 @@ export function SettingsView({ t, settings, update, reset, env, onCopy }: {
         title: t('settingsCheckOnStart'),
       }),
     }),
+    // npm 镜像源：预设下拉（默认未配置跟随本机），选国内顶级镜像可加速安装；
+    // 不做自定义输入，其它镜像写在 ~/.npmrc 即可被天然尊重。
+    // 独占一行（同代理文本框）：标签在上、下拉在下整行展开，长描述不会挤压控件
     h(SettingRow, {
       title: t('settingsMirror'),
       desc: t('settingsMirrorDesc'),
+      stack: true,
       children: h(Dropdown, {
-        value: mirrorCustom ? 'custom' : settings.npmRegistry,
-        options: [
-          ...MIRROR_PRESETS.map((p) => ({ value: p.value, label: t(p.labelKey) })),
-          { value: 'custom', label: t('mirrorCustom') },
-        ],
+        value: settings.npmRegistry,
+        options: MIRROR_PRESETS.map((m) => ({ value: m.value, label: t(m.labelKey) })),
         onChange: onMirrorChange,
         title: t('settingsMirror'),
-        className: styles.controlDropdown,
-      }),
-    }),
-    // 自定义镜像源：下拉选中「自定义」或已存非预设值时，追加一行输入框（文本框独占一行）
-    mirrorCustom && h(SettingRow, {
-      title: t('mirrorCustom'),
-      stack: true,
-      children: h('input', {
-        className: styles.textInput,
-        type: 'url',
-        value: settings.npmRegistry,
-        placeholder: 'https://registry.npmjs.org',
-        spellCheck: false,
-        onChange: onMirrorInput,
+        className: `${styles.controlDropdown} ${dropdownStyles.dropdownFill}`,
       }),
     }),
     // 代理地址：文本框独占一行，整行输入，便于粘贴长代理地址

@@ -141,7 +141,15 @@ dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
 dsh plugin --profile web update dsh-plugin
 ```
 
-**方式二：卸载重装到最新（最稳）**
+**方式二：强制升级（旧版更新不上时）**
+
+`update` 若受旧版缺陷影响无法拉取最新版，用显式版本号强制重装最新版：
+
+```bash
+dsh plugin --profile web add dsh-plugin@latest
+```
+
+**方式三：卸载重装到最新（最稳）**
 
 `add` 对已安装的实例不覆盖版本，先卸载再安装必然拿到最新版：
 

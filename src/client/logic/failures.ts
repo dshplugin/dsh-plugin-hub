@@ -18,6 +18,9 @@ export interface NotificationRecord {
   ok: boolean
   /** owner/repo（可能为空：请求层失败但拿不到仓库时） */
   repo: string
+  /** 实际动作（install/update/uninstall）：成功/失败通知据此区分「安装成功」与「更新成功」。
+   *  缺省按 kind 兜底（历史记录可能没有该字段）。更新提醒（kind='update'）不用此字段。 */
+  action?: 'install' | 'update' | 'uninstall'
   /** 失败时的完整错误日志；成功记录为空串 */
   message: string
   /** 更新提醒：目录里的新版本号（展示用；其余通知省略） */

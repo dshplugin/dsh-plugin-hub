@@ -33,6 +33,15 @@ export function pluginSiteUrl(repo: string): string {
   return `${SITE_URL}plugins/${repo}`
 }
 
+/** 根据实际执行的命令判定失败动作标签（安装/更新/卸载）：
+ *  命令形如 `dsh plugin --profile web add|update|remove <target>`，
+ *  出现 remove/update 动词即对应归类，其余（add、全局 npm 命令、未知）一律算安装。 */
+function actionLabelOf(command: string | undefined): string {
+  if (command && /\s+remove\s+/i.test(command)) return 'Remove'
+  if (command && /\s+update\s+/i.test(command)) return 'Update'
+  return 'Install'
+}
+
 /**
  * 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
  * 核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
@@ -43,7 +52,9 @@ export function pluginSiteUrl(repo: string): string {
  * 组织 scope 与 GitHub 用户名不一致时也能直接指认正确的 npm 包名。
  */
 export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | null, command?: string, attempts?: string[]): string {
-  const title = `[dsh-plugin.org | dsh-plugin-hub] Install/Remove failed: ${repo}`
+  // 标题按实际执行的动作区分（安装/更新/卸载），避免作者误读 —— 旧版固定写死
+  // 「Install/Remove」会让更新失败被当成删除失败。
+  const title = `[dsh-plugin.org | dsh-plugin-hub] ${actionLabelOf(command)} failed: ${repo}`
   // 原因判定：按失败类型归类，便于作者判断问题是否出在插件侧。
   // [packaging]（预检/装后校验拦截）单独列：无论走 npm 还是 git 通道，都是分发物不完整
   // （package.json 声明的入口文件在发布物里缺失），作者照此补齐即可。

@@ -193,8 +193,12 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     h('span', {
                       className: r.ok ? styles.noticeTextOk : styles.noticeTextFail,
                     }, r.ok
-                      ? (isUpdate ? t('updateNoticeTitle') : (r.kind === 'install' ? t('installDone') : t('uninstallDone')))
-                      : (r.kind === 'install' ? t('errorTitleInstall') : t('errorTitleUninstall'))),
+                      ? (isUpdate
+                        ? t('updateNoticeTitle')
+                        : (r.action === 'update' ? t('updateDone') : (r.kind === 'install' ? t('installDone') : t('uninstallDone'))))
+                      : (r.action === 'update'
+                        ? t('errorTitleUpdate')
+                        : (r.kind === 'install' ? t('errorTitleInstall') : t('errorTitleUninstall')))),
                     // 更新提醒：新版本号紧随标题展示；repo 为纯文本（整行点击即去更新，不跳官网外链）
                     isUpdate && r.version
                       ? h('span', { className: styles.noticeVersion, title: r.version }, `v${r.version}`)
@@ -211,7 +215,9 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                             rel: 'noopener noreferrer',
                             title: shownRepo,
                           }, shownRepo)
-                          : null)
+                          // 反查不到仓库身份（如命令行安装的裸 npm 包名）：回退显示记录里的原始值，
+                          // 保证通知永不只剩一句「安装/更新成功」没有名字 —— 只是不给官网外链（查不到不敢乱跳）
+                          : h('span', { className: styles.failRepo, title: r.repo }, r.repo))
                       : null,
                     !r.ok && h('button', {
                       className: styles.failCopy,

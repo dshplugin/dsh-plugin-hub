@@ -12,6 +12,16 @@
   flex-shrink: 0;
 }
 
+/* 全宽变体：设置页「独占一行」的下拉与文本框同宽，按钮铺满整行 */
+.dropdownFill {
+  width: 100%;
+}
+
+.dropdownFill > .dropdownBtn {
+  width: 100%;
+  justify-content: space-between;
+}
+
 /* 触发器：工具栏按钮风格 —— 细边框 + 次级灰底，与通知入口按钮同一视觉语言，
    只占一个按钮位，给工具栏后续新增按钮留空间 */
 .dropdownBtn {

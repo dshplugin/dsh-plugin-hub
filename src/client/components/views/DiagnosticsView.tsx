@@ -40,7 +40,8 @@ interface RowState {
 }
 
 const INITIAL_ROWS: RowState[] = [
-  { key: 'npm', display: 'registry.npmjs.org', nameKey: 'diagNpm', status: 'idle', ms: null, statusCode: null },
+  // npm 行 display 初始置空：设置里未配置镜像时显示「未配置（跟随本机）」，探测结果回来再用服务端 display 覆盖
+  { key: 'npm', display: '', nameKey: 'diagNpm', status: 'idle', ms: null, statusCode: null },
   { key: 'github', display: 'github.com', nameKey: 'diagGithub', status: 'idle', ms: null, statusCode: null },
   { key: 'catalog', display: 'api.dsh-plugin.org', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
 ]
@@ -87,12 +88,14 @@ export function DiagnosticsView({ t, env, onCopy }: {
             const raw = buf.slice(0, nl).trim()
             buf = buf.slice(nl + 1)
             if (raw !== '') {
-              const ev = JSON.parse(raw) as { type?: string; key?: string; ms?: number | null; status?: number | null }
+              const ev = JSON.parse(raw) as { type?: string; key?: string; ms?: number | null; status?: number | null; display?: string }
               if (ev.type === 'ok' || ev.type === 'fail') {
                 patchRows(ev.key as ProbeKey, {
                   status: ev.type === 'ok' ? 'ok' : 'fail',
                   ms: typeof ev.ms === 'number' ? ev.ms : null,
                   statusCode: typeof ev.status === 'number' ? ev.status : null,
+                  // 服务端带出实际使用的源地址（配置镜像 → 镜像地址；未配置 → 空串）
+                  display: typeof ev.display === 'string' ? ev.display : '',
                 })
               }
             }
@@ -159,7 +162,8 @@ export function DiagnosticsView({ t, env, onCopy }: {
         title: t('diagRecheck'),
       },
         h('span', { className: styles.name }, t(r.nameKey)),
-        h('span', { className: styles.display }, r.display),
+        // npm 行未配置镜像：display 为空 → 显示「未配置（跟随本机）」，不误导成官方源
+        h('span', { className: styles.display }, r.display !== '' ? r.display : t('diagNpmUnset')),
         h('span', { className: styles.meta }, r.status === 'ok' && r.ms !== null ? `${r.ms} ms` : ''),
         badge,
       )

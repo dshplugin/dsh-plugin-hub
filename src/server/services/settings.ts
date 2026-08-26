@@ -14,10 +14,10 @@ import { profileDirectory } from './profile/profile.ts'
 export interface HubSettings {
   /** 启动时检查目录插件更新，发现可更新时在通知中心提示（安装不自动进行） */
   checkUpdatesOnStart: boolean
-  /** npm 镜像源 registry 地址（空串 = 官方 https://registry.npmjs.org） */
-  npmRegistry: string
   /** HTTP(S) 代理地址，用于 npm / git / 目录请求（空串 = 直连） */
   proxy: string
+  /** npm 镜像源 registry 地址（空串 = 未配置，跟随用户本机 npm 配置，本插件不注入任何 registry） */
+  npmRegistry: string
   /** 启用命令行安装 NPM 包（默认开；关掉后输入 npm 包名安装被拦截） */
   enableNpmInstall: boolean
   /** 启用命令行安装 GitHub 源码（默认开；关掉后输入 GitHub 地址安装被拦截） */
@@ -30,8 +30,8 @@ export interface HubSettings {
 
 export const DEFAULT_SETTINGS: HubSettings = {
   checkUpdatesOnStart: true,
-  npmRegistry: '',
   proxy: '',
+  npmRegistry: '',
   enableNpmInstall: true,
   enableGitInstall: true,
   enableDshInstall: true,

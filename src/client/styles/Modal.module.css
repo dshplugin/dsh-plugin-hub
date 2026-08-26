@@ -1355,6 +1355,17 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+/* 用户反馈群二维码（renderMarkdown 对 dsh-plugin-user-group-qr- 前缀图片加了
+   width/height="250"）：固定 250×250 正方形。必须显式覆盖通用 max-height 上限 ——
+   CSS max-height 对 height 有最终裁决权，不覆盖的话高度被压成 220 而宽度保持 250，
+   图片就会变成非正方形（看起来像「250×250 没生效」） */
+.aboutContent img[width="250"] {
+  width: 250px;
+  height: 250px;
+  max-height: 250px;
+  object-fit: contain;
+}
+
 /* 更新时间小字：弱化展示在内容区下方 */
 .aboutMeta {
   font-size: 11px;
