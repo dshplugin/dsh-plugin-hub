@@ -29,7 +29,7 @@
 DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="docs/screenshots/dsh-plugin-hub-home-en-v1.3.5.png" alt="DSH Plugin Hub inside DeepSeek Harness" width="840">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-market-en.png" alt="DSH Plugin Hub plugin market UI" width="840">
 </p>
 
 ## Plugin Hub Features
@@ -73,20 +73,25 @@ Questions, feature ideas or just want to talk plugins? Scan the QR code to join 
 
 ## Feature Highlights
 
-| One-click install | One-click uninstall |
+| Installed plugins | Custom install |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-install-en-v1.2.1.png" alt="One-click install with live progress" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-uninstall-en-v1.2.1.png" alt="One-click uninstall with live progress" width="400" height="280"> |
-| A serial background queue with live progress in the dialog, cancellable anytime | Fully visualized with live progress; changes take effect immediately |
+| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-installed-en.png" alt="Installed plugins" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400"> |
+| Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row | Installs any plugin outside the catalog via three channels: npm package, GitHub source and DSH command |
 
-| One-click update | Notification center |
+| Settings | System logs |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-update-en-v1.2.1.png" alt="One-click update with overwrite install" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-notifications-en-v1.2.1.png" alt="Visual notifications" width="400" height="280"> |
-| New versions detected automatically; the card turns into "Update" and overwrite-installs in one click | Running tasks, pending restarts and full success / failure history in one place; failed installs can be filed as a GitHub Issue in one click |
+| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-settings-en.png" alt="Settings" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-system-logs-en.png" alt="System logs" width="400"> |
+| Centralizes update checks, npm mirror, proxy channel, trust toggles and log location | Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer |
 
-| Settings | Custom install |
+| Confirm install | Confirm uninstall |
 | :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-settings-en-v1.2.1.png" alt="Settings" width="400" height="280"> | <img src="docs/screenshots/dsh-plugin-hub-custom-install-en-v1.2.1.png" alt="Custom install" width="400" height="280"> |
-| Update checks, npm mirror and proxy channel, command-line install toggles and log location — managed in one place | Install any npm package or GitHub source outside the catalog, or paste an official install command; finished installs are marked as custom |
+| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-install-confirm-en.png" alt="Confirm install" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-uninstall-confirm-en.png" alt="Confirm uninstall" width="400"> |
+| Shows the plugin, its source repo and the command before anything runs; the install starts only after confirmation | Shows what will be removed and its source; nothing is removed until the user confirms |
+
+| Confirm update | Notifications |
+| :---: | :---: |
+| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-update-confirm-en.png" alt="Confirm update" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-notifications-en.png" alt="Notifications" width="400"> |
+| Pops up when a newer version is found; confirming overwrite-installs in place to the latest release | Gathers install / remove / update history, live task progress and pending-restart reminders in one place |
 
 ## Website Overview
 
