@@ -63,6 +63,14 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 - 数据与官网同源，安装后自动获取最新目录，无需手动升级
 - 仅浏览器端注入，无宿主服务依赖，无遥测、无隐私采集
 
+## 加入用户群 · 反馈问题
+
+遇到使用问题、功能建议或想交流插件？扫码加入 DSH Plugin Hub 用户群，反馈问题、提交建议，与社区一起改进。群二维码定期更新，此码有效期至 2026-09-02。
+
+<p align="center">
+  <img src="docs/screenshots/dsh-plugin-user-group-qr-2026-09-02.png" alt="DSH Plugin Hub 用户群二维码" width="260">
+</p>
+
 ## 功能一览
 
 | 一键安装 | 一键卸载 |

@@ -63,6 +63,14 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 - Same data source as the website; the catalog updates automatically, no manual upgrade needed
 - Browser-side only, no host dependencies, no telemetry, no data collection
 
+## Join the User Group · Feedback
+
+Questions, feature ideas or just want to talk plugins? Scan the QR code to join the DSH Plugin Hub user group — report issues, share suggestions, and improve the hub with the community. The QR code is refreshed periodically; this one is valid until 2026-09-02.
+
+<p align="center">
+  <img src="docs/screenshots/dsh-plugin-user-group-qr-2026-09-02.png" alt="DSH Plugin Hub user group QR code" width="260">
+</p>
+
 ## Feature Highlights
 
 | One-click install | One-click uninstall |
