@@ -131,6 +131,27 @@ dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
 
 > **Note**: the browser bundle ships with the package, so installing from GitHub needs no build step or authorization — just restart `dsh web` and open Settings → Plugin Hub.
 
+## Update DSH Plugin Hub
+
+The plugin hub notifies you when a new version is available; if an older build's in-panel updater cannot pull the latest release, upgrade from the command line:
+
+**Option 1: update in place (recommended)**
+
+```bash
+dsh plugin --profile web update dsh-plugin
+```
+
+**Option 2: reinstall the latest (most reliable)**
+
+`add` does not overwrite an already-installed copy, so removing first and re-adding always fetches the newest version:
+
+```bash
+dsh plugin --profile web remove dsh-plugin
+dsh plugin --profile web add dsh-plugin
+```
+
+> Restart `dsh web` after updating for the changes to take effect.
+
 ## Getting Started: browse & install in DeepSeek Harness
 
 Restart `dsh web` after installing, then open **Settings → Plugin Hub** to browse and install plugins. The catalog is same-source and in sync with [dsh-plugin.org](https://dsh-plugin.org).

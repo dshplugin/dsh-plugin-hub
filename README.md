@@ -131,6 +131,27 @@ dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
 
 > **提示**：插件已内置浏览器端 bundle，从 GitHub 安装无需任何构建与授权；装完重启 `dsh web`，在「设置 → 插件中心」即可使用。
 
+## 更新 DSH Plugin Hub
+
+插件中心检测到新版本时会提示一键更新；如果旧版本存在更新缺陷导致拉取不到最新版，请直接用命令行升级：
+
+**方式一：直接更新到最新（推荐）**
+
+```bash
+dsh plugin --profile web update dsh-plugin
+```
+
+**方式二：卸载重装到最新（最稳）**
+
+`add` 对已安装的实例不覆盖版本，先卸载再安装必然拿到最新版：
+
+```bash
+dsh plugin --profile web remove dsh-plugin
+dsh plugin --profile web add dsh-plugin
+```
+
+> 更新后重启 `dsh web` 即可生效。
+
 ## 快速开始：在 DeepSeek Harness 中使用
 
 安装完成后重启 `dsh web`，打开 **设置 → 插件中心**，即可浏览并安装插件。插件市场与 [dsh-plugin.org](https://dsh-plugin.org) 官网数据同源、实时同步。
