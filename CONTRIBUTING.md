@@ -16,7 +16,7 @@ npm run check        # typecheck + test + build, run this before opening a PR
 
 - Node.js >= 22.6 (type stripping) is required for `npm test`.
 - The harness must be restarted to pick up client changes:
-  `npm run reload` (or `bash scripts/run/reload-dsh.sh`).
+  `npm run reload` (or `bash scripts/run/restart-dev.sh`).
 
 ## How the project is organised
 

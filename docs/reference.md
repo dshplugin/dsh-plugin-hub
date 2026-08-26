@@ -91,7 +91,7 @@
 2. **只用官方 seam**：注入 `webServer`、`loader`、`clientModules` 等服务，不修改官方包、不打内部补丁、不依赖未公开的私有字段。
 3. **机制结论必须带出处**：在代码注释或本文档中写明"官方 API / 源码 Lxxx"，方便后来者复核与升级 dsh 后重新验证。
 4. **HTTP 接口一律 `cache: no-store`**：`dsh-client-modules` 的 index 注入图、本插件的 `/dsh-plugin-hub/*` 接口，都依赖实时状态；浏览器 HTTP 缓存会给出过期数据（本项目曾因此"插件不显示版本"）。
-5. **改动 profile 相关文件要小心**：`~/.dsh/profiles/web/` 下的 `cordis.yml`（每次启动被重写为 `[]`）、`package.json`、`cordis.patch.yml`、`pnpm-workspace.yaml` 都是宿主命脉；沙箱/脚本不得私自改动，调试由用户在自己终端执行 `bash scripts/run/reload-dsh.sh`。
+5. **改动 profile 相关文件要小心**：`~/.dsh/profiles/web/` 下的 `cordis.yml`（每次启动被重写为 `[]`）、`package.json`、`cordis.patch.yml`、`pnpm-workspace.yaml` 都是宿主命脉；沙箱/脚本不得私自改动，调试由用户在自己终端执行 `bash scripts/run/restart-dev.sh`。
 6. **测试先行**：纯输入/输出逻辑（解析、校验、估算）必须配单测（`tests/`，Node 内置 runner）。
 
 ---
