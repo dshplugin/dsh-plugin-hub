@@ -73,34 +73,54 @@ Questions, feature ideas or just want to talk plugins? Scan the QR code to join 
 
 ## Feature Highlights
 
-| Installed plugins | Custom install |
-| :---: | :---: |
-| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-installed-en.png" alt="Installed plugins" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400"> |
-| Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row | Installs any plugin outside the catalog via three channels: npm package, GitHub source and DSH command |
+**Installed plugins · Custom install**
 
-| Settings | System logs |
-| :---: | :---: |
-| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-settings-en.png" alt="Settings" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-system-logs-en.png" alt="System logs" width="400"> |
-| Centralizes update checks, npm mirror, proxy channel, trust toggles and log location | Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer |
+<p align="center">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-installed-en.png" alt="Installed plugins" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400">
+</p>
 
-| Confirm install | Confirm uninstall |
-| :---: | :---: |
-| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-install-confirm-en.png" alt="Confirm install" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-uninstall-confirm-en.png" alt="Confirm uninstall" width="400"> |
-| Shows the plugin, its source repo and the command before anything runs; the install starts only after confirmation | Shows what will be removed and its source; nothing is removed until the user confirms |
+Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row · Installs any plugin outside the catalog via three channels: npm package, GitHub source and DSH command
 
-| Confirm update | Notifications |
-| :---: | :---: |
-| <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-update-confirm-en.png" alt="Confirm update" width="400"> | <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-notifications-en.png" alt="Notifications" width="400"> |
-| Pops up when a newer version is found; confirming overwrite-installs in place to the latest release | Gathers install / remove / update history, live task progress and pending-restart reminders in one place |
+**Settings · System logs**
+
+<p align="center">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-settings-en.png" alt="Settings" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-system-logs-en.png" alt="System logs" width="400">
+</p>
+
+Centralizes update checks, npm mirror, proxy channel, trust toggles and log location · Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer
+
+**Confirm install · Confirm uninstall**
+
+<p align="center">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-install-confirm-en.png" alt="Confirm install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-uninstall-confirm-en.png" alt="Confirm uninstall" width="400">
+</p>
+
+Shows the plugin, its source repo and the command before anything runs; the install starts only after confirmation · Shows what will be removed and its source; nothing is removed until the user confirms
+
+**Confirm update · Notifications**
+
+<p align="center">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-update-confirm-en.png" alt="Confirm update" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-6/dsh-plugin-hub-notifications-en.png" alt="Notifications" width="400">
+</p>
+
+Pops up when a newer version is found; confirming overwrite-installs in place to the latest release · Gathers install / remove / update history, live task progress and pending-restart reminders in one place
 
 ## Website Overview
 
 The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugin.org) and stays in sync with the site; on the website you can also see plugin details, ratings and links back to their GitHub sources.
 
-| Homepage | Browse by category |
-| :---: | :---: |
-| <img src="docs/screenshots/dsh-plugin-hub-site-home.png" alt="DSH Plugin website homepage" width="400"> | <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH Plugin category browsing" width="400"> |
-| Same data source as the hub — human-verified, updated daily | Browse every indexed plugin by category, search straight to it |
+**Homepage · Browse by category**
+
+<p align="center">
+  <img src="docs/screenshots/dsh-plugin-hub-site-home.png" alt="DSH Plugin website homepage" width="400">
+  <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH Plugin category browsing" width="400">
+</p>
+
+Same data source as the hub — human-verified, updated daily · Browse every indexed plugin by category, search straight to it
 
 ## Why DSH Plugin Hub
 
