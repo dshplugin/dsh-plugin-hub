@@ -33,12 +33,12 @@ function inline(s: string): string {
     return `\u0000${codeSpans.length - 1}\u0000`
   })
   // 图片 ![alt](url)：仅放行 http(s)，用于展示反馈群二维码等；limited by CSS
-  // 文件名为 dsh-plugin-user-group-qr- 前缀的视为用户反馈群二维码，固定 250×250 不撑破弹窗。
+  // 文件名为 dsh-plugin-user-group-qr- 前缀的视为用户反馈群二维码，固定 100×100 不撑破弹窗。
   out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (m, alt, url) => {
     const src = String(url)
     if (!/^https?:\/\//i.test(src) || /[\u0000]/.test(src)) return m
     if (/\/dsh-plugin-user-group-qr-[^/]*$/i.test(src)) {
-      return `<img src="${src}" alt="${String(alt)}" width="250" height="250" loading="lazy">`
+      return `<img src="${src}" alt="${String(alt)}" width="100" height="100" loading="lazy">`
     }
     return `<img src="${src}" alt="${String(alt)}" loading="lazy">`
   })

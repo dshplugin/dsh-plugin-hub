@@ -1356,13 +1356,13 @@
 }
 
 /* 用户反馈群二维码（renderMarkdown 对 dsh-plugin-user-group-qr- 前缀图片加了
-   width/height="250"）：固定 250×250 正方形。必须显式覆盖通用 max-height 上限 ——
-   CSS max-height 对 height 有最终裁决权，不覆盖的话高度被压成 220 而宽度保持 250，
-   图片就会变成非正方形（看起来像「250×250 没生效」） */
-.aboutContent img[width="250"] {
-  width: 250px;
-  height: 250px;
-  max-height: 250px;
+   width/height="100"）：固定 100×100 正方形。必须显式覆盖通用 max-height 上限 ——
+   CSS max-height 对 height 有最终裁决权，不覆盖的话高度被 max-height 规则压掉，
+   图片就会变成非正方形（看起来像「尺寸没生效」） */
+.aboutContent img[width="100"] {
+  width: 100px;
+  height: 100px;
+  max-height: 100px;
   object-fit: contain;
 }
 
