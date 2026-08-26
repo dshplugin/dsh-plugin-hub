@@ -27,7 +27,7 @@ export interface InstallTask {
   attempts: string[]
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时任务执行全局 npm 安装，不进任何 profile */
   globalNpm?: string[]
-  action: 'add' | 'remove'
+  action: 'add' | 'remove' | 'update'
   /** 队列语义：pending 排队中 / running 执行中 / done / failed / cancelled（用户取消） */
   status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'
   timedOut: boolean
@@ -51,7 +51,7 @@ export interface Invocation {
 /** 排队中的变更任务及其启动参数。 */
 export interface QueueItem {
   task: InstallTask
-  options: { action: 'add' | 'remove'; profile: string; target: string; timeoutMs?: number; env?: NodeJS.ProcessEnv; globalNpm?: string[] }
+  options: { action: 'add' | 'remove' | 'update'; profile: string; target: string; timeoutMs?: number; env?: NodeJS.ProcessEnv; globalNpm?: string[] }
 }
 
 /**

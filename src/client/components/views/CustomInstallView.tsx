@@ -26,7 +26,8 @@ import { CloseIcon, HelpIcon } from '../ui/icons.tsx'
 /* —— 自定义安装输入预检 ——
  * 提交前校验「输入是否符合该通道格式」，识别不了的输入不发请求，就地提示推荐格式。
  * 三个通道严格分开：npm 框认裸包名或完整 npm/pnpm 安装命令（含全局 `npm install -g`），
- * git 框只认 GitHub 地址，命令框只认官方 `dsh plugin --profile <name> add <target>`（--profile 必填，无 -p 简写）。
+ * git 框只认 GitHub 地址，命令框只认官方 `dsh plugin --profile <name> <add|update> <target>`
+ * （--profile 必填，无 -p 简写；update = 更新已安装目标到最新）。
  * 这里只做格式校验，真正归一化/安装由服务端完成。 */
 
 /** GitHub 地址（带前缀形态）：github:、https://github.com/、git+https://github.com/、git@github.com: */
@@ -36,10 +37,12 @@ const GITHUB_BARE_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/
 /** npm 包名（含 @scope/pkg） */
 const NPM_PACKAGE_RE = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/
 
-/** DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> add <target>`）—— 提取其中的安装目标。
+/** DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> <add|update> <target>`）—— 提取其中的动作与目标。
  * 官方 CLI（apps/cli/src/args.ts，commander）：--profile 为必填长选项（无 -p 简写，省略即报错），
- * 支持 `--profile=<name>` 等号形式；命令大小写不敏感。与 server 端 installTargetOf 口径一致。 */
-const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+add\s+(.+)$/i
+ * 支持 `--profile=<name>` 等号形式；命令大小写不敏感。update = 已安装目标覆盖更新到最新；
+ * remove 不走这里（卸载由「已安装」列表的卸载按钮执行，命令框不认卸载动词）。
+ * 与 server 端 installTargetOf 口径一致。 */
+const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+(add|update)\s+(.+)$/i
 
 /** npm 全局安装命令（官方 README 格式，如 `npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui`）——
  * 提取 -g 之后的包列表；任一包名非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 口径一致。 */
@@ -49,10 +52,12 @@ const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i
  * 提取命令后的包列表；包列表在 splitPackages 里逐个校验。 */
 const NPM_INSTALL_CMD_RE = /^(?:npm\s+(?:install|i)|pnpm\s+(?:add|i|install))\s+(.+)$/i
 
-function installTargetOf(raw: string): string {
+/** 解析 DSH 命令：返回 { action, target }；非官方命令返回 null（交给格式错误提示）。 */
+function parseDshCommand(raw: string): { action: 'add' | 'update'; target: string } | null {
   const input = raw.trim()
   const match = DSH_PLUGIN_CMD_RE.exec(input)
-  return match !== null ? match[1].trim() : input
+  if (match === null) return null
+  return { action: match[1].toLowerCase() as 'add' | 'update', target: match[2].trim() }
 }
 
 /** 空格分隔的包列表：逐个按 npm 包名语法校验 + 拒绝以 - 开头的 token（npm 会把 --xxx 当参数而非包名），
@@ -94,10 +99,6 @@ function parseNpmInput(raw: string): NpmInputParse | null {
 function isGitHubInput(raw: string): boolean {
   const input = raw.trim()
   return GITHUB_URL_RE.test(input) || GITHUB_BARE_RE.test(input)
-}
-
-function isDshCommand(raw: string): boolean {
-  return DSH_PLUGIN_CMD_RE.test(raw.trim())
 }
 
 /** 卡片标题旁的「帮助」弹窗：三块卡片各自的标题与格式清单语言包 key。 */
@@ -170,8 +171,11 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
   const submitCmd = () => {
     const raw = cmdQuery.trim()
     if (!raw) return
-    if (!isDshCommand(raw)) { setCmdError(t('dshCmdInvalid')); return }
-    onInstallCustom(installTargetOf(raw))
+    const parsed = parseDshCommand(raw)
+    if (parsed === null) { setCmdError(t('dshCmdInvalid')); return }
+    // add / update 统一走安装流程：目标已安装时弹窗自动转「更新」覆盖重装（服务端 mode=update 放行），
+    // 未安装时即为普通安装 —— 粘贴 `dsh plugin --profile web update dsh-plugin` 这类命令即可更新到最新
+    onInstallCustom(parsed.target)
     setCmdQuery('')
     setCmdError('')
   }
@@ -265,7 +269,8 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
             gitError ? h('div', { className: styles.installError }, gitError) : null,
           ],
       ),
-      // 命令卡片：粘贴官方 dsh plugin 命令即装 —— 只认完整命令（--profile 必填，可含 = 等号，剥成裸目标安装）
+      // 命令卡片：粘贴官方 dsh plugin 命令即装/即更新 —— 只认完整命令
+      // （--profile 必填，可含 = 等号，动词 add/update，剥成裸目标走安装流程）
       h('div', { className: enableDsh ? styles.installCard : `${styles.installCard} ${styles.installCardDisabled}` },
         h('div', { className: styles.installCardHead },
           h('span', { className: styles.installLabel }, t('dshCmdLabel')),

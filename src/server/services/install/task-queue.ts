@@ -38,7 +38,7 @@ export function getTask(id: number): InstallTask | undefined {
 export interface ActiveTaskInfo {
   id: number
   target: string
-  action: 'add' | 'remove'
+  action: 'add' | 'remove' | 'update'
   status: 'pending' | 'running'
   progress: number
   lines: string[]
@@ -158,13 +158,23 @@ function stopChild(child: ReturnType<typeof spawn>): void {
   child.kill('SIGKILL')
 }
 
+/** 系统日志类别：安装/卸载/更新三分，针对性地判断「哪一步不兼容」。 */
+function mutationCategory(action: 'add' | 'remove' | 'update'): 'install' | 'uninstall' | 'update' {
+  return action === 'remove' ? 'uninstall' : action === 'update' ? 'update' : 'install'
+}
+
+/** 系统日志动作词：开始安装/开始卸载/开始更新。 */
+function mutationVerb(action: 'add' | 'remove' | 'update'): string {
+  return action === 'remove' ? '开始卸载' : action === 'update' ? '开始更新' : '开始安装'
+}
+
 /**
  * Enqueue a plugin mutation and return its task. Tasks run strictly serially:
  * the queue worker starts the next one only after the previous finishes.
  * Progress is visible through `getTask(id)` / `activeTask()` until done.
  */
 export function startPluginMutation(options: {
-  action: 'add' | 'remove'
+  action: 'add' | 'remove' | 'update'
   profile: string
   target: string
   timeoutMs?: number
@@ -193,14 +203,14 @@ export function startPluginMutation(options: {
     })
   }
   queue.push({ task, options: { ...options } })
-  // 系统日志：记录任务入队（安装/卸载开始）
-  const category = options.action === 'add' ? 'install' : 'uninstall'
+  // 系统日志：记录任务入队（安装/卸载/更新开始）
+  const category = mutationCategory(options.action)
   appendLog(options.profile, {
     at: Date.now(),
     level: 'info',
     category,
     event: `${category}.start`,
-    message: `${options.action === 'add' ? '开始安装' : '开始卸载'} ${options.displayTarget ?? options.target}`,
+    message: `${mutationVerb(options.action)} ${options.displayTarget ?? options.target}`,
   })
   pumpQueue()
   return task
@@ -215,16 +225,17 @@ function pumpQueue(): void {
   task.status = 'running'
   void runPluginMutation({ ...options, task }).finally(() => {
     runningChildren.delete(task.id)
-    // 系统日志：任务终态（成功/失败/取消），按动作归类安装/卸载日志
+    // 系统日志：任务终态（成功/失败/取消），按动作归类安装/卸载/更新日志
     const show = task.displayTarget ?? task.target
-    const category = task.action === 'add' ? 'install' : 'uninstall'
+    const category = mutationCategory(task.action)
+    const verb = (v: '成功' | '失败') => task.action === 'remove' ? `卸载${v}` : task.action === 'update' ? `更新${v}` : `安装${v}`
     if (task.status === 'done') {
       appendLog(options.profile, {
         at: Date.now(),
         level: 'success',
         category,
         event: `${category}.done`,
-        message: `${task.action === 'add' ? '安装成功' : '卸载成功'} ${show}${task.needsRestart ? '（待重启生效）' : ''}`,
+        message: `${verb('成功')} ${show}${task.needsRestart ? '（待重启生效）' : ''}`,
       })
     } else if (task.status === 'failed') {
       appendLog(options.profile, {
@@ -232,7 +243,7 @@ function pumpQueue(): void {
         level: 'error',
         category,
         event: `${category}.fail`,
-        message: `${task.action === 'add' ? '安装失败' : '卸载失败'} ${show}`,
+        message: `${verb('失败')} ${show}`,
       })
     } else if (task.status === 'cancelled') {
       appendLog(options.profile, {
@@ -256,7 +267,7 @@ function pumpQueue(): void {
  * Never rejects; failures surface through the result / task state.
  */
 function spawnMutation(options: {
-  action: 'add' | 'remove'
+  action: 'add' | 'remove' | 'update'
   profile: string
   target: string
   timeoutMs?: number
@@ -280,17 +291,21 @@ function spawnMutation(options: {
   // 更新已安装的 npm 包：显式指定 @latest。pnpm add <pkg>（无版本）对已存在依赖
   // （尤其精确 spec 如 "1.3.0"）是幂等的 —— 输出 "Already up to date" 且不改 package.json，
   // 导致「更新成功」但实际仍停留在旧版本；git 地址与全局安装不受此影响。
-  const npmUpdateTarget = updateNpm && !isGlobalNpm && githubRepoOf(target) === null
+  // update 动作实际执行 `add <target>@latest`（pnpm 对已存在依赖带显式版本即原位覆盖升级），
+  // CLI 动词仍透传 add —— 不执行官方 update 动词，避免与既有覆盖重装机制分叉。
+  const isUpdate = action === 'update' || updateNpm === true
+  const cliAction = action === 'update' ? 'add' : action
+  const npmUpdateTarget = isUpdate && !isGlobalNpm && githubRepoOf(target) === null
     ? `${target}@latest`
     : target
   const args = isGlobalNpm
     ? ['install', '-g', ...(globalNpm ?? [])]
-    : [...invocation.prefixArgs, 'plugin', '--profile', profile, action, npmUpdateTarget]
+    : [...invocation.prefixArgs, 'plugin', '--profile', profile, cliAction, npmUpdateTarget]
   // 记录实际执行的命令（npm 通道显示包名，git 通道显示 HTTPS 源），
   // 失败提 Issue 时作为「已尝试的安装方式」随附
   const executed = isGlobalNpm
     ? `npm install -g ${(globalNpm ?? []).join(' ')}`
-    : `dsh plugin --profile ${profile} ${action} ${npmUpdateTarget}`
+    : `dsh plugin --profile ${profile} ${cliAction} ${npmUpdateTarget}`
   if (task && !task.attempts.includes(executed)) {
     task.attempts.push(executed)
   }
@@ -443,10 +458,10 @@ function spawnMutation(options: {
             if (removed) clearPendingRestart(displayTarget ?? target)
             else addPendingRestart(displayTarget ?? target, 'uninstall')
           } else {
-            // 安装成功（或卸载但无 loader 引用）→ 登记待重启：
+            // 安装/更新成功（或卸载但无 loader 引用）→ 登记待重启：
             // 插件要宿主重启才会挂载/卸载干净，重启前一直提醒；展示目标用 displayTarget（owner/repo）
             task.needsRestart = true
-            addPendingRestart(displayTarget ?? target, action === 'add' ? 'install' : 'uninstall')
+            addPendingRestart(displayTarget ?? target, action === 'remove' ? 'uninstall' : 'install')
           }
         }
         pushLine(task, result.timedOut ? '[timed out]' : `[exit ${result.exitCode ?? '?'}]`)
@@ -513,11 +528,11 @@ function ignoredBuildKeys(output: string): string[] {
  *  前端据此展示「本机 npm 版本过低」的准确原因 —— 避免该报错被外层 ERR_PNPM_PREPARE_PACKAGE
  *  误判成插件打包/分发问题、误导用户提 Issue。检测逻辑在独立的 npm-check.ts（本机 npm 环境职责）。 */
 function annotateNpmTooLow(result: InstallResult, options: {
-  action: 'add' | 'remove'
+  action: 'add' | 'remove' | 'update'
   task?: InstallTask
   env?: NodeJS.ProcessEnv
 }): InstallResult {
-  if (options.action !== 'add' || result.exitCode === 0 || result.timedOut) return result
+  if (options.action === 'remove' || result.exitCode === 0 || result.timedOut) return result
   const line = npmTooLowMarker(`${result.stderr}\n${result.stdout}`, options.env)
   if (line === null) return result
   if (options.task && options.task.status !== 'cancelled') pushLine(options.task, line)
@@ -534,7 +549,7 @@ function annotateNpmTooLow(result: InstallResult, options: {
  * Other failures fall through to the single-spawn result.
  */
 export async function runPluginMutation(options: {
-  action: 'add' | 'remove'
+  action: 'add' | 'remove' | 'update'
   profile: string
   target: string
   timeoutMs?: number
@@ -550,7 +565,8 @@ export async function runPluginMutation(options: {
   let result = await spawnMutation(options)
   // allowBuilds 放行 / 装后入口校验都是 profile 专属（pnpm 装进 profile 的场景）；
   // 全局 npm 安装直接走 npm，无 pnpm allowBuilds 拦截、也不进 profile，跳过这两类恢复
-  if (options.action === 'add' && result.exitCode !== 0 && !result.timedOut && (options.globalNpm ?? []).length === 0) {
+  // 安装与更新（同为 add 通道执行）共享同一套恢复路径；卸载不适用
+  if (options.action !== 'remove' && result.exitCode !== 0 && !result.timedOut && (options.globalNpm ?? []).length === 0) {
     const output = `${result.stderr}\n${result.stdout}`
     // git 源：pnpm 打印的 key@url 提示
     if (output.includes('ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED')) {
@@ -588,7 +604,7 @@ export async function runPluginMutation(options: {
   // pnpm 安装本身成功，但目标包入口文件缺失（git 分发缺构建产物）→ 判为失败：
   // 撤销刚登记的待重启，避免用户重启时宿主加载残缺包直接崩溃。
   // 全局 npm 安装不进 profile（profile deps 里没有这些包），跳过入口校验
-  if (options.action === 'add' && result.exitCode === 0 && !result.timedOut && (options.globalNpm ?? []).length === 0) {
+  if (options.action !== 'remove' && result.exitCode === 0 && !result.timedOut && (options.globalNpm ?? []).length === 0) {
     const verified = verifyInstalledEntry(options.profile, options.target)
     if (verified.name !== null && verified.missing !== null) {
       clearPendingRestart(options.displayTarget ?? options.target)

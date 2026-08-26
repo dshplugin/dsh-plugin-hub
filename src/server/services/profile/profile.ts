@@ -30,17 +30,18 @@ export function githubTarget(repo: string): string | null {
 }
 
 /**
- * DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> add <target>`）—— 提取其中的安装目标；
+ * DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> <add|update> <target>`）—— 提取其中的安装目标；
  * 非命令输入原样返回。兼容「直接粘贴完整命令」（防用户输错）：--profile 必填且只有长选项
  * （官方 CLI 无 -p 简写，省略即报错），支持 `--profile=<name>` 等号形式，命令大小写不敏感。
+ * update = 更新已安装目标到最新；remove 不在此列（卸载走 /uninstall 路由，按已装包名直卸）。
  * 与客户端 CustomInstallView 口径一致。
  */
-const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+add\s+(.+)$/i
+const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+(add|update)\s+(.+)$/i
 
 export function installTargetOf(value: string): string {
   const input = typeof value === 'string' ? value.trim() : ''
   const match = DSH_PLUGIN_CMD_RE.exec(input)
-  return match !== null ? match[1].trim() : input
+  return match !== null ? match[2].trim() : input
 }
 
 /**

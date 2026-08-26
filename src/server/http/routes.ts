@@ -725,7 +725,9 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           }
           // Kick off the CLI in the background; the client polls /status for progress
           const task = startPluginMutation({
-            action: 'add',
+            // mode=update（已安装目标的覆盖更新）以 update 动作入队：
+            // 日志按 update 类别落盘（update.start/done/fail），实际 CLI 执行仍是 add <target>@latest
+            action: mode === 'update' ? 'update' : 'add',
             profile,
             target,
             // npm 安装时 target 是包名：displayTarget 固定展示仓库名，待重启行/前端恢复不受通道变化影响

@@ -59,13 +59,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			gitInstallInvalid: "请输入 GitHub 仓库地址，例如：owner/repo 或 https://github.com/owner/repo",
 			dshCmdLabel: "DeepSeek Harness 命令",
 			dshCmdPlaceholder: "粘贴官方 dsh plugin 命令",
-			dshCmdExample: "例如：dsh plugin --profile web add github:owner/repo",
-			dshCmdInvalid: "请输入官方 dsh plugin 安装命令（--profile 必填）。例如：dsh plugin --profile web add github:owner/repo",
+			dshCmdExample: "例如：dsh plugin --profile web add github:owner/repo，或 dsh plugin --profile web update dsh-plugin",
+			dshCmdInvalid: "请输入官方 dsh plugin 命令（--profile 必填，支持 add / update）。例如：dsh plugin --profile web update dsh-plugin",
 			installHelp: "帮助",
 			helpModalTitle: "支持的命令格式",
 			npmInstallHelp: "lodash、@scope/pkg	直接输入包名\nnpm install lodash\nnpm i lodash\npnpm add @scope/pkg\npnpm i @scope/pkg\nnpm install -g @scope/cli	全局安装 CLI 工具，不进「已安装」列表",
 			gitInstallHelp: "owner/repo\nhttps://github.com/owner/repo\ngithub:owner/repo\ngit+https://github.com/owner/repo.git\ngit@github.com:owner/repo.git",
-			dshCmdHelp: "dsh plugin --profile web add <目标>\ndsh plugin --profile=web add <目标>\n	--profile 必填，官方 CLI 无 -p 简写；<目标> 可为 npm 包名或 github:owner/repo",
+			dshCmdHelp: "dsh plugin --profile web add <目标>	安装\ndsh plugin --profile web update <目标>	更新已安装目标到最新版本\ndsh plugin --profile=web add <目标>\ndsh plugin --profile=web update <目标>\n	--profile 必填，官方 CLI 无 -p 简写；<目标> 可为 npm 包名或 github:owner/repo；卸载请用「已安装」列表",
 			globalNpmHint: "将全局安装 CLI 工具（npm install -g），不会出现在「已安装」列表，无需重启宿主",
 			installCliBtn: "安装",
 			channelDisabledHint: "该安装通道已关闭，请在「设置 → 安全信任」中打开开关",
@@ -359,13 +359,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			gitInstallInvalid: "Enter a GitHub repository address, e.g. owner/repo or https://github.com/owner/repo",
 			dshCmdLabel: "DeepSeek Harness command",
 			dshCmdPlaceholder: "Paste an official dsh plugin command",
-			dshCmdExample: "e.g. dsh plugin --profile web add github:owner/repo",
-			dshCmdInvalid: "Paste an official dsh plugin install command (--profile required), e.g. dsh plugin --profile web add github:owner/repo",
+			dshCmdExample: "e.g. dsh plugin --profile web add github:owner/repo, or dsh plugin --profile web update dsh-plugin",
+			dshCmdInvalid: "Paste an official dsh plugin command (--profile required, add / update), e.g. dsh plugin --profile web update dsh-plugin",
 			installHelp: "Help",
 			helpModalTitle: "Supported command formats",
 			npmInstallHelp: "lodash or @scope/pkg	just type the package name\nnpm install lodash\nnpm i lodash\npnpm add @scope/pkg\npnpm i @scope/pkg\nnpm install -g @scope/cli	installs the CLI globally, not shown in Installed",
 			gitInstallHelp: "owner/repo\nhttps://github.com/owner/repo\ngithub:owner/repo\ngit+https://github.com/owner/repo.git\ngit@github.com:owner/repo.git",
-			dshCmdHelp: "dsh plugin --profile web add <target>\ndsh plugin --profile=web add <target>\n	--profile is required and there is no -p shorthand; <target> can be an npm package or github:owner/repo",
+			dshCmdHelp: "dsh plugin --profile web add <target>	install\ndsh plugin --profile web update <target>	update an installed target to the latest version\ndsh plugin --profile=web add <target>\ndsh plugin --profile=web update <target>\n	--profile is required and there is no -p shorthand; <target> can be an npm package or github:owner/repo; uninstall from the Installed list",
 			globalNpmHint: "This installs CLI tools globally (npm install -g). They won't appear in Installed and no host restart is needed.",
 			installCliBtn: "Install",
 			channelDisabledHint: "This install channel is disabled — enable it in Settings → Security & Trust",
@@ -632,42 +632,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$11
 		});
 		var Header_module_css_default = {
-			"headerTitleRow": "qikqja_headerTitleRow",
-			"sortGroup": "qikqja_sortGroup",
-			"segGroup": "qikqja_segGroup",
-			"segBtn": "qikqja_segBtn",
-			"tabsRow": "qikqja_tabsRow",
-			"search": "qikqja_search",
 			"header": "qikqja_header",
-			"tabs": "qikqja_tabs",
-			"copyIcon": "qikqja_copyIcon",
-			"adBanner": "qikqja_adBanner",
 			"segBtnActive": "qikqja_segBtnActive",
-			"githubLink": "qikqja_githubLink",
-			"langBtn": "qikqja_langBtn",
-			"headerRight": "qikqja_headerRight",
-			"tabActive": "qikqja_tabActive",
-			"aboutBtn": "qikqja_aboutBtn",
-			"resultSeg": "qikqja_resultSeg",
-			"root": "qikqja_root",
-			"adBadge": "qikqja_adBadge",
-			"tagline": "qikqja_tagline",
 			"version": "qikqja_version",
-			"versionBtn": "qikqja_versionBtn",
-			"logoIcon": "qikqja_logoIcon",
-			"brandTitle": "qikqja_brandTitle",
-			"searchRow": "qikqja_searchRow",
-			"githubIcon": "qikqja_githubIcon",
-			"segLabel": "qikqja_segLabel",
-			"tab": "qikqja_tab",
-			"tabCount": "qikqja_tabCount",
-			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"headerRight": "qikqja_headerRight",
 			"resultCount": "qikqja_resultCount",
+			"aboutBtn": "qikqja_aboutBtn",
+			"tagline": "qikqja_tagline",
+			"versionBtn": "qikqja_versionBtn",
+			"tabs": "qikqja_tabs",
+			"headerTitleRow": "qikqja_headerTitleRow",
 			"title": "qikqja_title",
+			"githubIcon": "qikqja_githubIcon",
 			"taglineLink": "qikqja_taglineLink",
+			"search": "qikqja_search",
+			"searchRow": "qikqja_searchRow",
+			"tabActive": "qikqja_tabActive",
+			"root": "qikqja_root",
+			"tab": "qikqja_tab",
+			"resultSeg": "qikqja_resultSeg",
+			"segBtn": "qikqja_segBtn",
+			"adArrow": "qikqja_adArrow",
+			"copyIcon": "qikqja_copyIcon",
+			"langBtn": "qikqja_langBtn",
 			"adText": "qikqja_adText",
+			"brandTitle": "qikqja_brandTitle",
+			"segLabel": "qikqja_segLabel",
+			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"logoIcon": "qikqja_logoIcon",
 			"controls": "qikqja_controls",
-			"adArrow": "qikqja_adArrow"
+			"sortGroup": "qikqja_sortGroup",
+			"adBadge": "qikqja_adBadge",
+			"tabsRow": "qikqja_tabsRow",
+			"adBanner": "qikqja_adBanner",
+			"tabCount": "qikqja_tabCount",
+			"githubLink": "qikqja_githubLink",
+			"segGroup": "qikqja_segGroup"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
@@ -686,134 +686,134 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$10
 		});
 		var Modal_module_css_default = {
-			"resultCheck": "BiQ1zG_resultCheck",
-			"dangerConfirm": "BiQ1zG_dangerConfirm",
-			"detailModal": "BiQ1zG_detailModal",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"toast": "BiQ1zG_toast",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"queueSection": "BiQ1zG_queueSection",
-			"errorTitle": "BiQ1zG_errorTitle",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
-			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
-			"errorBox": "BiQ1zG_errorBox",
-			"detailStatusText": "BiQ1zG_detailStatusText",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"failHead": "BiQ1zG_failHead",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"progress": "BiQ1zG_progress",
-			"aboutContent": "BiQ1zG_aboutContent",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"noticeList": "BiQ1zG_noticeList",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"modalLink": "BiQ1zG_modalLink",
-			"restartNow": "BiQ1zG_restartNow",
-			"detailDim": "BiQ1zG_detailDim",
-			"detailMono": "BiQ1zG_detailMono",
-			"modalWide": "BiQ1zG_modalWide",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"overlay": "BiQ1zG_overlay",
-			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
-			"failedCopyHint": "BiQ1zG_failedCopyHint",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"detailArrow": "BiQ1zG_detailArrow",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"modalValue": "BiQ1zG_modalValue",
-			"noticeRowOk": "BiQ1zG_noticeRowOk",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"detailPathActions": "BiQ1zG_detailPathActions",
-			"trustHint": "BiQ1zG_trustHint",
-			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
-			"confirmPrimary": "BiQ1zG_confirmPrimary",
-			"progressText": "BiQ1zG_progressText",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"failClear": "BiQ1zG_failClear",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"failRepo": "BiQ1zG_failRepo",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"noticeIgnore": "BiQ1zG_noticeIgnore",
-			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
-			"errorHint": "BiQ1zG_errorHint",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"queueRow": "BiQ1zG_queueRow",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"helpModal": "BiQ1zG_helpModal",
-			"result": "BiQ1zG_result",
-			"failCopy": "BiQ1zG_failCopy",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
-			"detailPathText": "BiQ1zG_detailPathText",
-			"resultDesc": "BiQ1zG_resultDesc",
-			"failList": "BiQ1zG_failList",
-			"aboutModal": "BiQ1zG_aboutModal",
-			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
-			"progressFill": "BiQ1zG_progressFill",
-			"aboutMeta": "BiQ1zG_aboutMeta",
-			"modalRow": "BiQ1zG_modalRow",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"queueRowBody": "BiQ1zG_queueRowBody",
 			"queueRowPct": "BiQ1zG_queueRowPct",
-			"detailLink": "BiQ1zG_detailLink",
-			"modalClose": "BiQ1zG_modalClose",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"modalBody": "BiQ1zG_modalBody",
-			"toastFail": "BiQ1zG_toastFail",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"detailGrid": "BiQ1zG_detailGrid",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
 			"detailRow": "BiQ1zG_detailRow",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"restartLater": "BiQ1zG_restartLater",
-			"progressHead": "BiQ1zG_progressHead",
+			"toast": "BiQ1zG_toast",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
 			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"modal": "BiQ1zG_modal",
-			"errorModal": "BiQ1zG_errorModal",
-			"modalHead": "BiQ1zG_modalHead",
-			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
-			"noticeMain": "BiQ1zG_noticeMain",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
 			"failEmpty": "BiQ1zG_failEmpty",
-			"confirmIcon": "BiQ1zG_confirmIcon",
-			"detailValue": "BiQ1zG_detailValue",
-			"detailPathBtn": "BiQ1zG_detailPathBtn",
-			"detailLabel": "BiQ1zG_detailLabel",
-			"detailStatusPending": "BiQ1zG_detailStatusPending",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"logModal": "BiQ1zG_logModal",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
 			"modalInstall": "BiQ1zG_modalInstall",
-			"restartNowWarning": "BiQ1zG_restartNowWarning",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"failRow": "BiQ1zG_failRow",
-			"noticeVersion": "BiQ1zG_noticeVersion",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"failKind": "BiQ1zG_failKind",
-			"modalIn": "BiQ1zG_modalIn",
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
-			"toastIn": "BiQ1zG_toastIn",
-			"detailPath": "BiQ1zG_detailPath",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"dangerConfirm": "BiQ1zG_dangerConfirm",
+			"detailGrid": "BiQ1zG_detailGrid",
+			"confirmIcon": "BiQ1zG_confirmIcon",
+			"aboutModal": "BiQ1zG_aboutModal",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"modalValue": "BiQ1zG_modalValue",
+			"queueRow": "BiQ1zG_queueRow",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"detailModal": "BiQ1zG_detailModal",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"failedCopyHint": "BiQ1zG_failedCopyHint",
+			"detailLabel": "BiQ1zG_detailLabel",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"aboutContent": "BiQ1zG_aboutContent",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"modalWide": "BiQ1zG_modalWide",
+			"failKindInstall": "BiQ1zG_failKindInstall",
 			"modalActions": "BiQ1zG_modalActions",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"failCopy": "BiQ1zG_failCopy",
+			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
+			"modalLink": "BiQ1zG_modalLink",
+			"modalIn": "BiQ1zG_modalIn",
+			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"noticeIgnore": "BiQ1zG_noticeIgnore",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"failKind": "BiQ1zG_failKind",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"progressFill": "BiQ1zG_progressFill",
+			"progressText": "BiQ1zG_progressText",
+			"noticeVersion": "BiQ1zG_noticeVersion",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"detailDim": "BiQ1zG_detailDim",
+			"detailLink": "BiQ1zG_detailLink",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"detailStatusPending": "BiQ1zG_detailStatusPending",
+			"noticeList": "BiQ1zG_noticeList",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"detailArrow": "BiQ1zG_detailArrow",
+			"detailValue": "BiQ1zG_detailValue",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"confirmPrimary": "BiQ1zG_confirmPrimary",
+			"restartLater": "BiQ1zG_restartLater",
+			"modalClose": "BiQ1zG_modalClose",
+			"detailPathBtn": "BiQ1zG_detailPathBtn",
+			"detailStatusText": "BiQ1zG_detailStatusText",
+			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
+			"modalHead": "BiQ1zG_modalHead",
+			"modal": "BiQ1zG_modal",
+			"trustHint": "BiQ1zG_trustHint",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"failRepo": "BiQ1zG_failRepo",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
+			"progressHead": "BiQ1zG_progressHead",
+			"failHead": "BiQ1zG_failHead",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"modalBody": "BiQ1zG_modalBody",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"errorModal": "BiQ1zG_errorModal",
+			"logModal": "BiQ1zG_logModal",
+			"failList": "BiQ1zG_failList",
+			"failRow": "BiQ1zG_failRow",
+			"toastFail": "BiQ1zG_toastFail",
+			"modalRow": "BiQ1zG_modalRow",
+			"toastIn": "BiQ1zG_toastIn",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"queueSection": "BiQ1zG_queueSection",
 			"detailStars": "BiQ1zG_detailStars",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon"
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"detailPathText": "BiQ1zG_detailPathText",
+			"aboutMeta": "BiQ1zG_aboutMeta",
+			"restartNow": "BiQ1zG_restartNow",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"errorBox": "BiQ1zG_errorBox",
+			"detailPathActions": "BiQ1zG_detailPathActions",
+			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
+			"result": "BiQ1zG_result",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
+			"failClear": "BiQ1zG_failClear",
+			"errorHint": "BiQ1zG_errorHint",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"progress": "BiQ1zG_progress",
+			"detailPath": "BiQ1zG_detailPath",
+			"detailMono": "BiQ1zG_detailMono",
+			"helpModal": "BiQ1zG_helpModal",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
+			"overlay": "BiQ1zG_overlay"
 		};
 		//#endregion
 		//#region src/client/logic/install-command.ts
@@ -822,7 +822,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* （走 npm registry tarball，更快、与 GitHub 网络无关）；无 npm 包名 → git 直装。
 		* 返回值 target 即传给后端 /install 的安装目标（npm 包名 或 owner/repo）。
 		*/
-		function installTargetOf$1(p) {
+		function installTargetOf(p) {
 			const pkg = (p.source?.npmPackage ?? "").trim();
 			const repo = (p.source?.repo ?? "").trim();
 			if (pkg && repo) return {
@@ -838,7 +838,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*  需专属 profile（--profile dsh-tui），无法从 repo/npm 包名推断，必须用官方命令）；
 		*  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。 */
 		function installCommandOf(p, withProfile = false) {
-			const { target, via } = installTargetOf$1(p);
+			const { target, via } = installTargetOf(p);
 			if (via === "npm") {
 				const cmd = p.install?.command;
 				if (cmd) return cmd;
@@ -2323,7 +2323,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const installNow = async (p, opts) => {
 				const repo = p.source?.repo ?? "";
 				if (!repo) return;
-				const { target } = installTargetOf$1(p);
+				const { target } = installTargetOf(p);
 				if (!target) return;
 				await submitInstall({
 					target,
@@ -3236,7 +3236,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				codeSpans.push(String(code));
 				return `\u0000${codeSpans.length - 1}\u0000`;
 			});
-			out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (m, alt, url) => /^https?:\/\//i.test(String(url)) && !/[\u0000]/.test(String(url)) ? `<img src="${String(url)}" alt="${String(alt)}" loading="lazy">` : m);
+			out = out.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (m, alt, url) => {
+				const src = String(url);
+				if (!/^https?:\/\//i.test(src) || /[\u0000]/.test(src)) return m;
+				if (/\/dsh-plugin-user-group-qr-[^/]*$/i.test(src)) return `<img src="${src}" alt="${String(alt)}" width="250" height="250" loading="lazy">`;
+				return `<img src="${src}" alt="${String(alt)}" loading="lazy">`;
+			});
 			out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => /^https?:\/\//i.test(String(url)) && !/[\u0000]/.test(String(url)) ? `<a href="${String(url)}" target="_blank" rel="noopener noreferrer">${String(text)}</a>` : m);
 			out = out.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 			out = out.replace(/(^|[^*])\*([^*]+)\*/g, "$1<em>$2</em>");
@@ -3879,37 +3884,37 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$9
 		});
 		var List_module_css_default = {
-			"desc": "_3XaZHa_desc",
-			"cardHead": "_3XaZHa_cardHead",
-			"moreSentinel": "_3XaZHa_moreSentinel",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"installBtn": "_3XaZHa_installBtn",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"cardSide": "_3XaZHa_cardSide",
-			"footLink": "_3XaZHa_footLink",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"cardMain": "_3XaZHa_cardMain",
-			"verified": "_3XaZHa_verified",
-			"topic": "_3XaZHa_topic",
-			"card": "_3XaZHa_card",
-			"body": "_3XaZHa_body",
-			"fork": "_3XaZHa_fork",
-			"list": "_3XaZHa_list",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"stats": "_3XaZHa_stats",
-			"state": "_3XaZHa_state",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"topics": "_3XaZHa_topics",
 			"star": "_3XaZHa_star",
-			"actions": "_3XaZHa_actions",
 			"footer": "_3XaZHa_footer",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"fork": "_3XaZHa_fork",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"actions": "_3XaZHa_actions",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"stats": "_3XaZHa_stats",
+			"cardHead": "_3XaZHa_cardHead",
+			"verified": "_3XaZHa_verified",
+			"moreSentinel": "_3XaZHa_moreSentinel",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"cardSide": "_3XaZHa_cardSide",
+			"card": "_3XaZHa_card",
+			"installBtn": "_3XaZHa_installBtn",
+			"footLink": "_3XaZHa_footLink",
+			"topics": "_3XaZHa_topics",
 			"detailBtn": "_3XaZHa_detailBtn",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"topic": "_3XaZHa_topic",
+			"list": "_3XaZHa_list",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"stateDesc": "_3XaZHa_stateDesc",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"body": "_3XaZHa_body",
+			"cardMain": "_3XaZHa_cardMain",
+			"state": "_3XaZHa_state",
+			"desc": "_3XaZHa_desc",
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
 			"date": "_3XaZHa_date"
 		};
 		//#endregion
@@ -4112,15 +4117,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$8
 		});
 		var SectionTabs_module_css_default = {
-			"root": "_7tvizq_root",
-			"tabIcon": "_7tvizq_tabIcon",
+			"tabActive": "_7tvizq_tabActive",
 			"noticeBtn": "_7tvizq_noticeBtn",
 			"noticeIcon": "_7tvizq_noticeIcon",
-			"tabActive": "_7tvizq_tabActive",
-			"tabCount": "_7tvizq_tabCount",
-			"tab": "_7tvizq_tab",
 			"tabCountActive": "_7tvizq_tabCountActive",
-			"noticeCount": "_7tvizq_noticeCount"
+			"tab": "_7tvizq_tab",
+			"noticeCount": "_7tvizq_noticeCount",
+			"root": "_7tvizq_root",
+			"tabCount": "_7tvizq_tabCount",
+			"tabIcon": "_7tvizq_tabIcon"
 		};
 		//#endregion
 		//#region src/client/components/layout/SectionTabs.tsx
@@ -4197,42 +4202,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$7
 		});
 		var InstalledView_module_css_default = {
-			"root": "_1nXeGW_root",
-			"empty": "_1nXeGW_empty",
-			"segGroup": "_1nXeGW_segGroup",
-			"toolbar": "_1nXeGW_toolbar",
-			"statusDot": "_1nXeGW_statusDot",
-			"list": "_1nXeGW_list",
-			"segBtnActive": "_1nXeGW_segBtnActive",
-			"emptyDesc": "_1nXeGW_emptyDesc",
-			"rowSourceTag": "_1nXeGW_rowSourceTag",
-			"searchInput": "_1nXeGW_searchInput",
-			"segBtn": "_1nXeGW_segBtn",
 			"emptyTitle": "_1nXeGW_emptyTitle",
-			"row": "_1nXeGW_row",
-			"exampleBadge": "_1nXeGW_exampleBadge",
-			"exampleRow": "_1nXeGW_exampleRow",
-			"rowTitleLine": "_1nXeGW_rowTitleLine",
-			"rowRestart": "_1nXeGW_rowRestart",
+			"statusDot": "_1nXeGW_statusDot",
 			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
-			"rowRepo": "_1nXeGW_rowRepo",
-			"segRow": "_1nXeGW_segRow",
-			"rowDesc": "_1nXeGW_rowDesc",
-			"updateBadge": "_1nXeGW_updateBadge",
-			"rowActions": "_1nXeGW_rowActions",
-			"statusPending": "_1nXeGW_statusPending",
-			"searchWrap": "_1nXeGW_searchWrap",
-			"rowDetail": "_1nXeGW_rowDetail",
-			"statusInactive": "_1nXeGW_statusInactive",
-			"versionBadge": "_1nXeGW_versionBadge",
-			"rowCategory": "_1nXeGW_rowCategory",
-			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
-			"rowMeta": "_1nXeGW_rowMeta",
-			"rowUninstall": "_1nXeGW_rowUninstall",
-			"segLabel": "_1nXeGW_segLabel",
+			"toolbar": "_1nXeGW_toolbar",
+			"empty": "_1nXeGW_empty",
 			"rowTitle": "_1nXeGW_rowTitle",
+			"versionBadge": "_1nXeGW_versionBadge",
+			"segGroup": "_1nXeGW_segGroup",
+			"segBtn": "_1nXeGW_segBtn",
+			"statusInactive": "_1nXeGW_statusInactive",
+			"rowActions": "_1nXeGW_rowActions",
+			"rowRestart": "_1nXeGW_rowRestart",
+			"segBtnActive": "_1nXeGW_segBtnActive",
+			"searchWrap": "_1nXeGW_searchWrap",
+			"emptyDesc": "_1nXeGW_emptyDesc",
+			"row": "_1nXeGW_row",
+			"rowRepo": "_1nXeGW_rowRepo",
+			"searchInput": "_1nXeGW_searchInput",
+			"list": "_1nXeGW_list",
+			"rowMain": "_1nXeGW_rowMain",
+			"rowMeta": "_1nXeGW_rowMeta",
+			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
+			"exampleRow": "_1nXeGW_exampleRow",
+			"rowDetail": "_1nXeGW_rowDetail",
+			"rowDesc": "_1nXeGW_rowDesc",
+			"rowTitleLine": "_1nXeGW_rowTitleLine",
+			"segRow": "_1nXeGW_segRow",
+			"updateBadge": "_1nXeGW_updateBadge",
+			"rowSourceTag": "_1nXeGW_rowSourceTag",
+			"statusPending": "_1nXeGW_statusPending",
+			"rowCategory": "_1nXeGW_rowCategory",
+			"segLabel": "_1nXeGW_segLabel",
+			"root": "_1nXeGW_root",
+			"exampleBadge": "_1nXeGW_exampleBadge",
 			"rowUpdate": "_1nXeGW_rowUpdate",
-			"rowMain": "_1nXeGW_rowMain"
+			"rowUninstall": "_1nXeGW_rowUninstall"
 		};
 		//#endregion
 		//#region src/client/components/views/InstalledView.tsx
@@ -4479,25 +4484,25 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		});
 		var CustomInstallView_module_css_default = {
 			"installError": "zISxCG_installError",
-			"installInputError": "zISxCG_installInputError",
-			"installCards": "zISxCG_installCards",
-			"helpNote": "zISxCG_helpNote",
-			"installBtn": "zISxCG_installBtn",
 			"installExample": "zISxCG_installExample",
-			"installCardDisabled": "zISxCG_installCardDisabled",
-			"channelOffText": "zISxCG_channelOffText",
-			"channelOffBtn": "zISxCG_channelOffBtn",
-			"helpLine": "zISxCG_helpLine",
-			"root": "zISxCG_root",
+			"helpNote": "zISxCG_helpNote",
+			"installHelpBtn": "zISxCG_installHelpBtn",
 			"channelOff": "zISxCG_channelOff",
-			"installLabel": "zISxCG_installLabel",
-			"installInput": "zISxCG_installInput",
+			"channelOffBtn": "zISxCG_channelOffBtn",
+			"installInputError": "zISxCG_installInputError",
 			"installCardHead": "zISxCG_installCardHead",
-			"helpBody": "zISxCG_helpBody",
-			"installCard": "zISxCG_installCard",
 			"installRow": "zISxCG_installRow",
 			"desc": "zISxCG_desc",
-			"installHelpBtn": "zISxCG_installHelpBtn",
+			"installCard": "zISxCG_installCard",
+			"installCardDisabled": "zISxCG_installCardDisabled",
+			"channelOffText": "zISxCG_channelOffText",
+			"installLabel": "zISxCG_installLabel",
+			"installCards": "zISxCG_installCards",
+			"installInput": "zISxCG_installInput",
+			"installBtn": "zISxCG_installBtn",
+			"helpBody": "zISxCG_helpBody",
+			"root": "zISxCG_root",
+			"helpLine": "zISxCG_helpLine",
 			"helpCmd": "zISxCG_helpCmd"
 		};
 		//#endregion
@@ -4526,20 +4531,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		const GITHUB_BARE_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
 		/** npm 包名（含 @scope/pkg） */
 		const NPM_PACKAGE_RE = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/;
-		/** DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> add <target>`）—— 提取其中的安装目标。
+		/** DSH 命令行前缀（官方唯一形式 `dsh plugin --profile <name> <add|update> <target>`）—— 提取其中的动作与目标。
 		* 官方 CLI（apps/cli/src/args.ts，commander）：--profile 为必填长选项（无 -p 简写，省略即报错），
-		* 支持 `--profile=<name>` 等号形式；命令大小写不敏感。与 server 端 installTargetOf 口径一致。 */
-		const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+add\s+(.+)$/i;
+		* 支持 `--profile=<name>` 等号形式；命令大小写不敏感。update = 已安装目标覆盖更新到最新；
+		* remove 不走这里（卸载由「已安装」列表的卸载按钮执行，命令框不认卸载动词）。
+		* 与 server 端 installTargetOf 口径一致。 */
+		const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+(add|update)\s+(.+)$/i;
 		/** npm 全局安装命令（官方 README 格式，如 `npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui`）——
 		* 提取 -g 之后的包列表；任一包名非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 口径一致。 */
 		const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i;
 		/** 常规 npm/pnpm 安装命令（装进当前 profile，如 `npm install lodash`、`pnpm add @scope/pkg`）——
 		* 提取命令后的包列表；包列表在 splitPackages 里逐个校验。 */
 		const NPM_INSTALL_CMD_RE = /^(?:npm\s+(?:install|i)|pnpm\s+(?:add|i|install))\s+(.+)$/i;
-		function installTargetOf(raw) {
+		/** 解析 DSH 命令：返回 { action, target }；非官方命令返回 null（交给格式错误提示）。 */
+		function parseDshCommand(raw) {
 			const input = raw.trim();
 			const match = DSH_PLUGIN_CMD_RE.exec(input);
-			return match !== null ? match[1].trim() : input;
+			if (match === null) return null;
+			return {
+				action: match[1].toLowerCase(),
+				target: match[2].trim()
+			};
 		}
 		/** 空格分隔的包列表：逐个按 npm 包名语法校验 + 拒绝以 - 开头的 token（npm 会把 --xxx 当参数而非包名），
 		* 任一非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 同口径。 */
@@ -4577,9 +4589,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		function isGitHubInput(raw) {
 			const input = raw.trim();
 			return GITHUB_URL_RE.test(input) || GITHUB_BARE_RE.test(input);
-		}
-		function isDshCommand(raw) {
-			return DSH_PLUGIN_CMD_RE.test(raw.trim());
 		}
 		/** 卡片标题旁的「帮助」弹窗：三块卡片各自的标题与格式清单语言包 key。 */
 		const HELP_CARDS = {
@@ -4641,11 +4650,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const submitCmd = () => {
 				const raw = cmdQuery.trim();
 				if (!raw) return;
-				if (!isDshCommand(raw)) {
+				const parsed = parseDshCommand(raw);
+				if (parsed === null) {
 					setCmdError(t("dshCmdInvalid"));
 					return;
 				}
-				onInstallCustom(installTargetOf(raw));
+				onInstallCustom(parsed.target);
 				setCmdQuery("");
 				setCmdError("");
 			};
@@ -4771,26 +4781,26 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$5
 		});
 		var SettingsView_module_css_default = {
-			"pageHeader": "_506LLG_pageHeader",
-			"navItemActive": "_506LLG_navItemActive",
-			"controlDropdown": "_506LLG_controlDropdown",
-			"settingRow": "_506LLG_settingRow",
-			"textInput": "_506LLG_textInput",
-			"settingLabel": "_506LLG_settingLabel",
-			"root": "_506LLG_root",
-			"pageDesc": "_506LLG_pageDesc",
 			"settingRowStack": "_506LLG_settingRowStack",
+			"settingLabel": "_506LLG_settingLabel",
+			"controlDropdown": "_506LLG_controlDropdown",
 			"navIcon": "_506LLG_navIcon",
-			"sidebar": "_506LLG_sidebar",
-			"navItem": "_506LLG_navItem",
-			"settingControlStack": "_506LLG_settingControlStack",
-			"content": "_506LLG_content",
 			"settingDesc": "_506LLG_settingDesc",
+			"settingControlStack": "_506LLG_settingControlStack",
+			"settingRow": "_506LLG_settingRow",
 			"resetBtn": "_506LLG_resetBtn",
-			"card": "_506LLG_card",
+			"navItem": "_506LLG_navItem",
+			"pageHeader": "_506LLG_pageHeader",
+			"root": "_506LLG_root",
 			"settingTitle": "_506LLG_settingTitle",
+			"content": "_506LLG_content",
+			"pageDesc": "_506LLG_pageDesc",
 			"settingControl": "_506LLG_settingControl",
-			"pageTitle": "_506LLG_pageTitle"
+			"pageTitle": "_506LLG_pageTitle",
+			"sidebar": "_506LLG_sidebar",
+			"textInput": "_506LLG_textInput",
+			"navItemActive": "_506LLG_navItemActive",
+			"card": "_506LLG_card"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
@@ -4809,17 +4819,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$4
 		});
 		var Dropdown_module_css_default = {
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdown": "B_Gxsq_dropdown",
-			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
 			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
+			"dropdownLabel": "B_Gxsq_dropdownLabel",
 			"dropdownArrow": "B_Gxsq_dropdownArrow",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel"
+			"dropdownItem": "B_Gxsq_dropdownItem",
+			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
+			"dropdown": "B_Gxsq_dropdown"
 		};
 		//#endregion
 		//#region src/client/components/ui/Dropdown.tsx
@@ -4897,9 +4907,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$3
 		});
 		var Toggle_module_css_default = {
+			"toggleOn": "k-cD4G_toggleOn",
 			"toggle": "k-cD4G_toggle",
-			"knob": "k-cD4G_knob",
-			"toggleOn": "k-cD4G_toggleOn"
+			"knob": "k-cD4G_knob"
 		};
 		//#endregion
 		//#region src/client/components/ui/Toggle.tsx
@@ -4940,29 +4950,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$2
 		});
 		var DiagnosticsView_module_css_default = {
-			"summaryRunning": "k9eRya_summaryRunning",
+			"runBtn": "k9eRya_runBtn",
+			"envRow": "k9eRya_envRow",
+			"envLabel": "k9eRya_envLabel",
+			"badgeFail": "k9eRya_badgeFail",
+			"panel": "k9eRya_panel",
+			"badgeRunning": "k9eRya_badgeRunning",
+			"summaryFail": "k9eRya_summaryFail",
+			"badgeOk": "k9eRya_badgeOk",
+			"display": "k9eRya_display",
+			"badge": "k9eRya_badge",
 			"envDesc": "k9eRya_envDesc",
-			"name": "k9eRya_name",
+			"head": "k9eRya_head",
+			"badgeIdle": "k9eRya_badgeIdle",
+			"envCopyBtn": "k9eRya_envCopyBtn",
+			"headHint": "k9eRya_headHint",
 			"row": "k9eRya_row",
 			"meta": "k9eRya_meta",
-			"badge": "k9eRya_badge",
-			"badgeOk": "k9eRya_badgeOk",
-			"envRow": "k9eRya_envRow",
-			"badgeIdle": "k9eRya_badgeIdle",
-			"badgeRunning": "k9eRya_badgeRunning",
 			"summary": "k9eRya_summary",
 			"envTitle": "k9eRya_envTitle",
-			"runBtn": "k9eRya_runBtn",
 			"diagPulse": "k9eRya_diagPulse",
-			"head": "k9eRya_head",
-			"envCopyBtn": "k9eRya_envCopyBtn",
-			"panel": "k9eRya_panel",
-			"headHint": "k9eRya_headHint",
-			"display": "k9eRya_display",
 			"summaryOk": "k9eRya_summaryOk",
-			"summaryFail": "k9eRya_summaryFail",
-			"badgeFail": "k9eRya_badgeFail",
-			"envLabel": "k9eRya_envLabel"
+			"name": "k9eRya_name",
+			"summaryRunning": "k9eRya_summaryRunning"
 		};
 		//#endregion
 		//#region src/client/components/views/DiagnosticsView.tsx
@@ -5125,57 +5135,57 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$1
 		});
 		var LogsView_module_css_default = {
+			"pathRow": "_3j77BW_pathRow",
+			"footPath": "_3j77BW_footPath",
 			"filterBar": "_3j77BW_filterBar",
-			"pathDialogRow": "_3j77BW_pathDialogRow",
-			"more": "_3j77BW_more",
+			"footCount": "_3j77BW_footCount",
 			"catBadge": "_3j77BW_catBadge",
-			"panel": "_3j77BW_panel",
-			"footFail": "_3j77BW_footFail",
-			"filterChipActive": "_3j77BW_filterChipActive",
-			"pathLabel": "_3j77BW_pathLabel",
-			"catInstall": "_3j77BW_catInstall",
+			"event": "_3j77BW_event",
 			"catSettings": "_3j77BW_catSettings",
-			"pathDialogDesc": "_3j77BW_pathDialogDesc",
+			"pathDialogFoot": "_3j77BW_pathDialogFoot",
+			"footActions": "_3j77BW_footActions",
 			"pathDraft": "_3j77BW_pathDraft",
-			"moreEnd": "_3j77BW_moreEnd",
+			"headActions": "_3j77BW_headActions",
+			"time": "_3j77BW_time",
+			"badgeError": "_3j77BW_badgeError",
+			"searchInput": "_3j77BW_searchInput",
+			"filterChipActive": "_3j77BW_filterChipActive",
+			"headHint": "_3j77BW_headHint",
+			"panel": "_3j77BW_panel",
+			"head": "_3j77BW_head",
+			"actions": "_3j77BW_actions",
 			"pathText": "_3j77BW_pathText",
-			"badgeWarn": "_3j77BW_badgeWarn",
+			"clearBtn": "_3j77BW_clearBtn",
+			"message": "_3j77BW_message",
+			"pathLabel": "_3j77BW_pathLabel",
+			"badgeSuccess": "_3j77BW_badgeSuccess",
+			"catUninstall": "_3j77BW_catUninstall",
+			"filterChip": "_3j77BW_filterChip",
+			"foot": "_3j77BW_foot",
+			"badgeDebug": "_3j77BW_badgeDebug",
+			"catDiagnostics": "_3j77BW_catDiagnostics",
+			"logList": "_3j77BW_logList",
+			"list": "_3j77BW_list",
+			"more": "_3j77BW_more",
+			"btn": "_3j77BW_btn",
+			"badgeInfo": "_3j77BW_badgeInfo",
+			"pathDialogDesc": "_3j77BW_pathDialogDesc",
+			"search": "_3j77BW_search",
+			"moreEnd": "_3j77BW_moreEnd",
+			"pathDialogHint": "_3j77BW_pathDialogHint",
+			"pathDialog": "_3j77BW_pathDialog",
+			"catUpdate": "_3j77BW_catUpdate",
 			"catSystem": "_3j77BW_catSystem",
 			"empty": "_3j77BW_empty",
-			"message": "_3j77BW_message",
-			"event": "_3j77BW_event",
-			"head": "_3j77BW_head",
-			"logList": "_3j77BW_logList",
-			"filterChip": "_3j77BW_filterChip",
-			"previewRow": "_3j77BW_previewRow",
-			"actions": "_3j77BW_actions",
-			"headActions": "_3j77BW_headActions",
-			"pathRow": "_3j77BW_pathRow",
-			"searchInput": "_3j77BW_searchInput",
-			"headHint": "_3j77BW_headHint",
-			"pathDialogFoot": "_3j77BW_pathDialogFoot",
-			"footPath": "_3j77BW_footPath",
-			"pathDialogHint": "_3j77BW_pathDialogHint",
-			"footCount": "_3j77BW_footCount",
-			"badgeSuccess": "_3j77BW_badgeSuccess",
-			"badgeDebug": "_3j77BW_badgeDebug",
+			"pathDialogRow": "_3j77BW_pathDialogRow",
+			"badgeWarn": "_3j77BW_badgeWarn",
+			"catInstall": "_3j77BW_catInstall",
 			"linkBtn": "_3j77BW_linkBtn",
-			"footActions": "_3j77BW_footActions",
-			"btn": "_3j77BW_btn",
-			"foot": "_3j77BW_foot",
-			"entry": "_3j77BW_entry",
-			"badgeError": "_3j77BW_badgeError",
-			"badgeInfo": "_3j77BW_badgeInfo",
-			"search": "_3j77BW_search",
-			"catUninstall": "_3j77BW_catUninstall",
-			"catUpdate": "_3j77BW_catUpdate",
-			"catDiagnostics": "_3j77BW_catDiagnostics",
-			"clearBtn": "_3j77BW_clearBtn",
-			"pathDialog": "_3j77BW_pathDialog",
 			"badge": "_3j77BW_badge",
-			"list": "_3j77BW_list",
+			"footFail": "_3j77BW_footFail",
+			"entry": "_3j77BW_entry",
 			"pathDialogReset": "_3j77BW_pathDialogReset",
-			"time": "_3j77BW_time"
+			"previewRow": "_3j77BW_previewRow"
 		};
 		//#endregion
 		//#region src/client/components/modals/LogsModal.tsx
