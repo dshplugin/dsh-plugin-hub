@@ -57,6 +57,18 @@ test('pluginIssueUrl: 无尝试记录时正文不含该段落', () => {
   assert.ok(!body.includes('Attempted install channels'))
 })
 
+test('pluginIssueUrl: 标题点明错误原因，不再用 Install/Remove 动作词', () => {
+  // 网络失败 → 标题带 network 原因
+  const netUrl = pluginIssueUrl('adoresever/graph-memory', '[ERR_PNPM_GIT_FETCH_FAILED] Failed to connect to github.com port 443 after 21027 ms: Timed out')
+  const netTitle = decodeURIComponent(netUrl.split('title=')[1].split('&')[0])
+  assert.match(netTitle, /\[dsh-plugin\.org \| dsh-plugin-hub\] network failure on the user side: adoresever\/graph-memory/)
+  assert.ok(!netTitle.includes('Install/Remove'))
+  // 构建白名单拦截 → 标题带 build scripts blocked 原因
+  const buildUrl = pluginIssueUrl('adoresever/graph-memory', '[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] needs to execute build scripts but is not in the "allowBuilds" allowlist')
+  const buildTitle = decodeURIComponent(buildUrl.split('title=')[1].split('&')[0])
+  assert.match(buildTitle, /build scripts blocked by pnpm allowlist: adoresever\/graph-memory/)
+})
+
 test('installCommandOf: GitHub source uses an explicit HTTPS URL', () => {
   const p = normalize({ s: 'aegis', n: 'Aegis', r: 'ganyuanran/aegis' })
   assert.equal(installCommandOf(p), 'dsh plugin add git+https://github.com/ganyuanran/aegis.git')

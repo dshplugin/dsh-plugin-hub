@@ -10,6 +10,7 @@
 import type { EnvInfo, HubPlugin, LocaleId } from '../types.ts'
 import { GITHUB_URL, PLUGIN_VERSION, SITE_URL } from './constants.ts'
 import { MAX_CORE_CHARS, classifyFailure, coreErrorCode, summarizeError } from './failures.ts'
+import type { FailureKind } from './failures.ts'
 
 /** dsh-plugin.org 中文页挂在 /zh/ 前缀下，英文在根路径。 */
 export function langPathOf(lang: LocaleId): string {
@@ -33,18 +34,22 @@ export function pluginSiteUrl(repo: string): string {
   return `${SITE_URL}plugins/${repo}`
 }
 
-/** 根据实际执行的命令判定失败动作标签（安装/更新/卸载）：
- *  命令形如 `dsh plugin --profile web add|update|remove <target>`，
- *  出现 remove/update 动词即对应归类，其余（add、全局 npm 命令、未知）一律算安装。 */
-function actionLabelOf(command: string | undefined): string {
-  if (command && /\s+remove\s+/i.test(command)) return 'Remove'
-  if (command && /\s+update\s+/i.test(command)) return 'Update'
-  return 'Install'
+/** 按失败类型给出简洁的错误原因标题（对外用英文）：
+ *  标题直接点明问题出在哪一侧（构建白名单/分发物/本机 npm/网络/插件侧），
+ *  作者与用户扫一眼列表就能分流 —— 不再用含糊的 Install/Remove 动作词。 */
+function reasonTitleOf(kind: FailureKind): string {
+  switch (kind) {
+    case 'npmTooOld': return 'npm too old to install'
+    case 'pnpmIgnoredBuild': return 'build scripts blocked by pnpm allowlist'
+    case 'pluginPrepare': return 'plugin distribution incomplete'
+    case 'network': return 'network failure on the user side'
+    default: return 'plugin install failed'
+  }
 }
 
 /**
- * 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识，正文只带
- * 核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
+ * 一键反馈 GitHub Issue 的预填链接：标题带「来自 dsh-plugin.org」标识 + 错误原因，
+ * 正文只带核心信息 —— 原因判定 + 关键错误代码 + 尝试过的安装方式 + 宿主机器环境快照 +
  * 错误核心摘要（完整日志太长，塞进 URL 会被 GitHub 以「request URL too long」拒绝，
  * 故只收集重点）。错误弹窗、失败记录共用此逻辑。
  * env 取不到时为 null，链接照常生成、只是少环境段。
@@ -52,13 +57,12 @@ function actionLabelOf(command: string | undefined): string {
  * 组织 scope 与 GitHub 用户名不一致时也能直接指认正确的 npm 包名。
  */
 export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | null, command?: string, attempts?: string[]): string {
-  // 标题按实际执行的动作区分（安装/更新/卸载），避免作者误读 —— 旧版固定写死
-  // 「Install/Remove」会让更新失败被当成删除失败。
-  const title = `[dsh-plugin.org | dsh-plugin-hub] ${actionLabelOf(command)} failed: ${repo}`
   // 原因判定：按失败类型归类，便于作者判断问题是否出在插件侧。
   // [packaging]（预检/装后校验拦截）单独列：无论走 npm 还是 git 通道，都是分发物不完整
   // （package.json 声明的入口文件在发布物里缺失），作者照此补齐即可。
   const kind = classifyFailure(message)
+  // 标题 = 错误原因（非动作词），让 issue 列表一眼可分流
+  const title = `[dsh-plugin.org | dsh-plugin-hub] ${reasonTitleOf(kind)}: ${repo}`
   const reason = /\[packaging\]/i.test(message)
     ? 'plugin distribution is incomplete — the entry file declared in package.json is missing from the published package (github tarball or npm package); please commit build output or publish a complete package'
       : kind === 'network'
