@@ -7,7 +7,7 @@
  * 每个任务一次 `dsh plugin --profile <profile> <action> <target>` 子进程，
  * 输出流式收集到任务上；卸载成功时尝试从运行中 loader 即时停用（见 loader.ts）。
  */
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import type { InstallResult, InstallTask, Invocation, QueueItem } from './install-types.ts'
@@ -138,6 +138,23 @@ function cliInvocation(): Invocation {
     }
   }
   return { file: 'dsh', prefixArgs: [], cwd: process.cwd(), useShell: process.platform === 'win32' }
+}
+
+/**
+ * dsh 命令存在性探测：which/where 找 PATH 里的 dsh。
+ * Windows shell 模式命令缺失时 cmd 只输出 GBK 乱码「不是内部或外部命令」（UTF-8 解码后
+ * 无法匹配），POSIX 非 shell 模式才会抛 spawn dsh ENOENT —— 两种形态都不可靠，统一在
+ * spawn 前用 which/where 探测，命令不存在则直接失败并打 ASCII 标记 [dsh-missing]（乱码免疫）。
+ * 探测自身异常（which/where 不可用等）不拦截安装，交给装后校验兜底。
+ */
+function dshOnPath(env?: NodeJS.ProcessEnv): boolean {
+  try {
+    const probe = process.platform === 'win32' ? 'where' : 'which'
+    const res = spawnSync(probe, ['dsh'], { env, encoding: 'utf8', timeout: 3000, stdio: ['ignore', 'pipe', 'pipe'] })
+    return res.status === 0 && (res.stdout ?? '').trim().length > 0
+  } catch {
+    return true
+  }
 }
 
 function stopChild(child: ReturnType<typeof spawn>): void {
@@ -319,6 +336,20 @@ function spawnMutation(options: {
     let settled = false
     let child: ReturnType<typeof spawn>
     try {
+      // 独立 CLI 场景（file: 'dsh'，宿主加载器走 node bin 不经过这里）：先探测 dsh 是否在 PATH。
+      // 命令不存在时 Windows shell 模式只回传 GBK 乱码、POSIX 才抛 spawn dsh ENOENT —— 统一前置
+      // 拦截并打 ASCII 标记 [dsh-missing]，前端据此精准提示「dsh 未加入 PATH」而不是笼统的插件失败。
+      if (invocation.file === 'dsh' && !dshOnPath(env)) {
+        const detail = '[dsh-missing] the dsh CLI was not found on this machine (DeepSeek Harness not installed, or dsh not on the PATH)'
+        if (task) {
+          task.status = 'failed'
+          task.exitCode = null
+          task.progress = 0
+          pushLine(task, detail)
+        }
+        resolveOnce({ exitCode: 1, timedOut: false, error: detail, stdout: '', stderr: detail })
+        return
+      }
       child = spawn(invocation.file, attemptArgs, {
         cwd: invocation.cwd,
         env,

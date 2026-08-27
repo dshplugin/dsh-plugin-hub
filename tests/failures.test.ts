@@ -117,6 +117,10 @@ test('classifyFailure: dsh command missing on the machine is an environment issu
   assert.equal(classifyFailure('sh: dsh: command not found'), 'dshMissing')
   // node spawn ENOENT
   assert.equal(classifyFailure('spawn dsh ENOENT'), 'dshMissing')
+  // 服务端 [dsh-missing] 标记（乱码免疫）：Windows cmd 中文版输出 GBK 被 UTF-8 误解码成乱码，
+  // 原文匹配不了，服务端 spawn 前探测后打 ASCII 标记，前端据此归类
+  assert.equal(classifyFailure('[dsh-missing] the dsh CLI was not found on this machine'), 'dshMissing')
+  assert.equal(classifyFailure("'dsh' \u951f\u62b7\u6546\u662f\u9550\u5927\u90e8\u6216\u5916\u90e8\u547d\u4ee4 \u2026\n[dsh-missing] the dsh CLI was not found"), 'dshMissing')
   // 即使被外层 "Command failed" 包裹也必须归类为环境问题，不能被吞成插件问题
   assert.equal(classifyFailure("Command failed: dsh plugin add github:owner/repo\n'dsh' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'dshMissing')
 })
