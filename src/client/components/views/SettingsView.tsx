@@ -15,7 +15,7 @@
  *   Diagnostics       — live connectivity probe + environment snapshot
  *   Logs              — system log viewer + storage location
  */
-import { createElement as h, useEffect, useState } from 'react'
+import { createElement as h, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, MouseEvent, ReactNode } from 'react'
 import styles from '../../styles/SettingsView.module.css'
 import dropdownStyles from '../../styles/Dropdown.module.css'
@@ -91,7 +91,47 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
     onConsumedOpenSection?.()
   }, [openSection, onConsumedOpenSection])
 
-  const onProxyChange = (e: ChangeEvent<HTMLInputElement>) => update({ proxy: e.target.value })
+  // —— HTTP 代理连通性：输入停笔后防抖实时探测（服务端 /proxy-check 用该代理打 github.com）。
+  // 结果只作提示、绝不阻断保存 —— 用户可能是先填地址后开代理，保存后再去开代理完全合法。
+  const [proxyProbe, setProxyProbe] = useState<'idle' | 'checking' | 'ok' | 'fail'>('idle')
+  const proxyProbeTimer = useRef<number | null>(null)
+  const proxyProbeSeq = useRef(0)
+  // 卸载时清掉未触发的防抖计时器，避免卸载后 setState
+  useEffect(() => () => {
+    if (proxyProbeTimer.current !== null) window.clearTimeout(proxyProbeTimer.current)
+    proxyProbeSeq.current += 1
+  }, [])
+  // 设置被外部重置（恢复默认/清空代理）时同步清掉探测状态，避免残留过期的「不通」提示
+  useEffect(() => {
+    if (settings.proxy === '') setProxyProbe('idle')
+  }, [settings.proxy])
+
+  const probeProxyNow = (value: string) => {
+    const v = value.trim()
+    if (v === '') { setProxyProbe('idle'); return }
+    const seq = ++proxyProbeSeq.current
+    setProxyProbe('checking')
+    void fetch('/dsh-plugin-hub/proxy-check', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ proxy: v }),
+      cache: 'no-store',
+    }).then((res) => res.json())
+      .then((data: { ok?: boolean }) => {
+        if (seq !== proxyProbeSeq.current) return
+        setProxyProbe(data.ok ? 'ok' : 'fail')
+      })
+      .catch(() => { if (seq === proxyProbeSeq.current) setProxyProbe('fail') })
+  }
+
+  const onProxyChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    // 保存照常：留空直连、填了就走该代理（先填后开代理也允许，仅提示不通）
+    update({ proxy: value })
+    if (proxyProbeTimer.current !== null) window.clearTimeout(proxyProbeTimer.current)
+    // 停笔 700ms 再探测，避免每敲一个字符都发请求
+    proxyProbeTimer.current = window.setTimeout(() => probeProxyNow(value), 700)
+  }
   const onMirrorChange = (value: string) => update({ npmRegistry: value })
 
   /** 每个分组的页面副标题（导航标题之上再补一句说明，保持桌面设置质感） */
@@ -131,19 +171,29 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
         className: `${styles.controlDropdown} ${dropdownStyles.dropdownFill}`,
       }),
     }),
-    // 代理地址：文本框独占一行，整行输入，便于粘贴长代理地址
+    // 代理地址：文本框独占一行，整行输入，便于粘贴长代理地址；停笔后实时探测连通性，
+    // 不通仅提示（可保存）—— 用户可能先填地址后开代理
     h(SettingRow, {
       title: t('settingsProxy'),
       desc: t('settingsProxyDesc'),
       stack: true,
-      children: h('input', {
-        className: styles.textInput,
-        type: 'text',
-        value: settings.proxy,
-        placeholder: 'http://127.0.0.1:7890',
-        spellCheck: false,
-        onChange: onProxyChange,
-      }),
+      children: h('div', { className: styles.proxyControl },
+        h('input', {
+          className: styles.textInput,
+          type: 'text',
+          value: settings.proxy,
+          placeholder: 'http://127.0.0.1:7890',
+          spellCheck: false,
+          onChange: onProxyChange,
+        }),
+        proxyProbe === 'checking'
+          ? h('div', { className: styles.proxyHint }, t('proxyCheckChecking'))
+          : proxyProbe === 'ok'
+            ? h('div', { className: `${styles.proxyHint} ${styles.proxyHintOk}` }, t('proxyCheckOk'))
+            : proxyProbe === 'fail'
+              ? h('div', { className: `${styles.proxyHint} ${styles.proxyHintFail}` }, t('proxyCheckFail'))
+              : null,
+      ),
     }),
   )
 
@@ -183,7 +233,7 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
 
   const diagnosticsCard = h('div', { className: styles.card },
     // 系统版本（最顶部）+ 通道状态列表：进入页面自动探测一轮，整行可点击重测单项，实时反馈
-    h(DiagnosticsView, { t, env, onCopy }),
+    h(DiagnosticsView, { t, env, proxy: settings.proxy, onCopy }),
   )
 
   const logsCard = h('div', { className: styles.card },

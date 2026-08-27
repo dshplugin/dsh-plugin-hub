@@ -494,11 +494,17 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         // 连通性自检直接打安装通道真实访问的轻量资源：npm 源拉包元数据、git 通道探
         // 仓库主页、目录站探 badge 小文件，避免拉取目录全量 JSON。
         // npm 行 display：配置了镜像就显示镜像地址；未配置置空 —— 客户端显示「未配置（跟随本机 npm 配置）」。
-        const allChecks: Array<{ key: string; url: string; display: string; cmd: string }> = [
+        const allChecks: Array<{ key: string; url: string; display: string; cmd: string; proxy?: string }> = [
           { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? registry : '', cmd: `npm view dsh-plugin version --registry ${registry}` },
           { key: 'github', url: 'https://github.com/dshplugin/dsh-plugin-hub', display: 'github.com', cmd: 'git ls-remote https://github.com/dshplugin/dsh-plugin-hub' },
           { key: 'catalog', url: 'https://api.dsh-plugin.org/stats.json', display: 'api.dsh-plugin.org', cmd: 'curl -s https://api.dsh-plugin.org/stats.json' },
         ]
+        // 配置了 HTTP 代理：追加一行代理诊断 —— 用该代理打 github.com（安装通道真实访问的地址），
+        // 验证「代理能不能把请求带出去」。与安装同口径：curl 子进程注入该代理 env。
+        // 设置里未配置代理时不显示该行（跟随系统代理/直连，无「代理本身」可验证）。
+        if (settings.proxy !== '') {
+          allChecks.push({ key: 'proxy', url: 'https://github.com', display: settings.proxy, cmd: `curl -s -o /dev/null -x ${settings.proxy} https://github.com`, proxy: settings.proxy })
+        }
         const checks = onlyKey !== '' ? allChecks.filter((c) => c.key === onlyKey) : allChecks
         response.writeHead(200, {
           'content-type': 'application/x-ndjson; charset=utf-8',
@@ -508,15 +514,16 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         // 探测走代理的优先级：设置里的代理 → 系统代理（macOS scutil / Windows 注册表）→ 环境变量 HTTPS_PROXY → 直连。
         // 与安装通道一致（npm/git 靠 HTTP_PROXY 环境变量走代理），且自动跟随系统代理 ——
         // 浏览器挂着代理能开、诊断就能测通，不用用户手动把代理填进设置。
+        // proxy 行例外：它验证的正是「设置里配的那个代理」，必须显式用它（而非 effectiveProxy）去探测。
         const effectiveProxy = settings.proxy !== ''
           ? settings.proxy
           : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
-        const probe = (url: string) => probeUrl(url, effectiveProxy, 6000)
+        const probe = (url: string, proxy?: string) => probeUrl(url, proxy ?? effectiveProxy, 6000)
         // 逐路串行：一条命令一条结果地推送给终端，保持「程序在跑」的真实感
         const results: Array<{ key: string; ok: boolean }> = []
         for (const c of checks) {
           send({ type: 'probe', key: c.key, cmd: c.cmd, display: c.display })
-          const r = await probe(c.url)
+          const r = await probe(c.url, c.proxy)
           results.push({ key: c.key, ok: r.ok })
           send({ type: r.ok ? 'ok' : 'fail', key: c.key, display: c.display, ms: r.ms, status: r.status })
         }
@@ -533,6 +540,35 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             ? `连通性检测通过（${results.length} 个通道）`
             : `连通性检测：${failed.length}/${results.length} 个通道不可达`,
         })
+      },
+    }),
+    webServer.register({
+      kind: 'exact',
+      path: '/dsh-plugin-hub/proxy-check',
+      handler: async (request, response) => {
+        if (!requireTrustedPost(request, response)) return
+        // 代理连通性校验：用待测代理打一个权威可达目标（默认 github.com），
+        // 供设置页输入代理时实时反馈「这个地址通不通」。不通过也允许保存 ——
+        // 用户可能是先填地址后开代理，因此这里只报告探测结果、不拦截保存。
+        let proxy = ''
+        let target = 'https://github.com'
+        try {
+          const body = await readJsonBody(request)
+          if (body !== null && typeof body === 'object') {
+            const b = body as { proxy?: unknown; target?: unknown }
+            if (typeof b.proxy === 'string') proxy = b.proxy.trim()
+            if (typeof b.target === 'string' && b.target.trim() !== '') target = b.target.trim()
+          }
+        } catch {
+          // 空 body / 非 JSON：按默认目标探测
+        }
+        if (proxy === '') {
+          sendJson(response, 200, { ok: false, ms: null, status: null, target, reason: 'empty' })
+          return
+        }
+        // 探测走该代理本身（不是 effectiveProxy）：验证的就是用户填的这个地址
+        const r = await probeUrl(target, proxy, 6000)
+        sendJson(response, 200, { ok: r.ok, ms: r.ms, status: r.status, target })
       },
     }),
     webServer.register({

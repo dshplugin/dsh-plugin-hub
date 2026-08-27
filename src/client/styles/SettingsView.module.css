@@ -178,6 +178,30 @@
   width: 100%;
 }
 
+/* 代理输入框列布局：输入框 + 连通性探测提示上下排列，整行展开 */
+.proxyControl {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+
+/* 代理连通性提示：检测中灰字 / 可达绿字 / 不通琥珀字（仍可保存，不阻断输入） */
+.proxyHint {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--hub-text-disabled);
+}
+
+.proxyHintOk {
+  color: var(--hub-success);
+}
+
+.proxyHintFail {
+  color: var(--hub-warning);
+}
+
 /* 下拉控件：行内固定宽度，与输入框等高 */
 .controlDropdown {
   min-width: 180px;

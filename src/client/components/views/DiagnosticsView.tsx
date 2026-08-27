@@ -15,7 +15,7 @@ import styles from '../../styles/DiagnosticsView.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
 import { PLUGIN_VERSION } from '../../logic/constants.ts'
 
-type ProbeKey = 'npm' | 'github' | 'catalog'
+type ProbeKey = 'npm' | 'github' | 'catalog' | 'proxy'
 
 /** 系统版本文本：提交 Issue 时粘贴到正文，方便作者复现。 */
 function formatEnv(env: EnvInfo): string {
@@ -46,12 +46,22 @@ const INITIAL_ROWS: RowState[] = [
   { key: 'catalog', display: 'api.dsh-plugin.org', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
 ]
 
-export function DiagnosticsView({ t, env, onCopy }: {
+export function DiagnosticsView({ t, env, proxy, onCopy }: {
   t: Translate
   env: EnvInfo | null
+  /** 设置里配置的 HTTP 代理地址；留空（未配置）不显示代理行 */
+  proxy: string
   onCopy: (text: string) => void
 }) {
-  const [rows, setRows] = useState<RowState[]>(INITIAL_ROWS)
+  // 代理行仅在配置了 HTTP 代理时出现：用该代理探测 github.com，验证「代理能不能把请求带出去」。
+  // 未配置（留空直连）没有可验证的代理，不渲染这一行，避免无意义的诊断项。
+  const [rows, setRows] = useState<RowState[]>(() => {
+    const base = INITIAL_ROWS.map((r) => ({ ...r }))
+    if (proxy.trim() !== '') {
+      base.push({ key: 'proxy', display: proxy.trim(), nameKey: 'diagProxy', status: 'idle', ms: null, statusCode: null })
+    }
+    return base
+  })
   /** 当前探测请求：重测/卸载时 abort 旧请求，避免乱序结果覆盖 */
   const runningRef = useRef<AbortController | null>(null)
 

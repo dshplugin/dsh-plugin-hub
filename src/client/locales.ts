@@ -110,6 +110,10 @@ export const zh = {
   settingsCheckOnStartDesc: '打开插件中心时检查已安装插件是否有新版，发现更新会提示',
   settingsProxy: 'HTTP 代理',
   settingsProxyDesc: 'npm / git / 目录数据请求统一走该代理；留空直连',
+  // 代理连通性实时探测：输入停笔后提示检测结果（不通仍可保存，先填地址后开代理也合法）
+  proxyCheckChecking: '正在测试该代理地址…',
+  proxyCheckOk: '测试可达，安装与目录请求将统一走该代理',
+  proxyCheckFail: '此地址测试不通，仍可保存；请确认代理已开启、地址与端口无误',
   settingsMirror: 'npm 镜像源',
   settingsMirrorDesc: '默认跟随本机 npm 配置；官方源慢可换国内镜像',
   mirrorNone: '未配置（跟随本机 npm 配置）',
@@ -186,6 +190,7 @@ export const zh = {
   diagNpmUnset: '未配置（跟随本机 npm 配置）',
   diagGithub: 'GitHub',
   diagCatalog: '目录站点',
+  diagProxy: 'HTTP 代理',
   diagOk: 'OK',
   diagChecking: '检测中…',
   diagIdle: '未检测',
@@ -451,6 +456,11 @@ export const en = {
   settingsAutoInstallDesc: 'Install detected updates in the background without asking (a host restart applies them)',
   settingsProxy: 'HTTP proxy',
   settingsProxyDesc: 'Route npm, git and catalog requests through this proxy; leave empty to connect directly',
+  // Live proxy reachability probe: reported after the user stops typing (an unreachable
+  // address can still be saved — users may fill it in before actually starting the proxy)
+  proxyCheckChecking: 'Testing this proxy address…',
+  proxyCheckOk: 'Reachable — installs and catalog requests will route through it',
+  proxyCheckFail: 'Unreachable, but you can still save it; make sure the proxy is running and the address and port are correct',
   settingsMirror: 'npm mirror',
   settingsMirrorDesc: 'Unset by default — follows local npm config; pick a domestic mirror if slow',
   mirrorNone: 'Unset (follow local npm config)',
@@ -527,6 +537,7 @@ export const en = {
   diagNpmUnset: 'Unset (follow local npm config)',
   diagGithub: 'GitHub',
   diagCatalog: 'Catalog site',
+  diagProxy: 'HTTP proxy',
   diagOk: 'OK',
   diagChecking: 'Checking…',
   diagIdle: 'Not checked',
