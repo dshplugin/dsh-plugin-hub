@@ -246,3 +246,18 @@ export function coreErrorCode(message: string): string | null {
   const m = message.match(/\[?ERR_[A-Z_]+\]?/)
   return m ? m[0].replace(/^\[|\]$/g, '') : null
 }
+
+/**
+ * 从网络类失败消息里提取「具体连不上的地址」，供弹窗精准提示（你的网络无法访问什么）。
+ * 优先取服务端 [network] 预检消息括号里的探测地址（中文「（…）」/ 英文「(…)」），
+ * 否则取消息里出现的第一个 URL（git fetch 的仓库地址、registry 域名等）。
+ * 提取不到返回 null —— 调用方据此跳过地址行。
+ */
+export function unreachableTargetOf(message: string): string | null {
+  // [network] 预检消息：`无法连接到 GitHub（https://github.com/）` / `cannot reach the npm registry (https://registry.npmjs.org/)`
+  const paren = message.match(/[（(](https?:\/\/[^\s'"`<>（)+]+)[)）]/)
+  if (paren) return paren[1]
+  // 其余网络失败（git fetch / npm 连接失败）：取第一个 URL，去掉行尾标点
+  const url = message.match(/https?:\/\/[^\s'"`<>（）()]+/)
+  return url ? url[0].replace(/[.,;:）)\]]+$/, '') : null
+}

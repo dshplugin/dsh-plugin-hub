@@ -1264,6 +1264,22 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
 }
 
+/* 网络类失败弹窗的「无法访问 …」醒目行：红色加粗，直接告诉用户具体哪个地址连不上
+   （URL 较长允许换行断词），与下方琥珀色说明区分主次 */
+.failNetworkTarget {
+  margin-top: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 700;
+  word-break: break-all;
+  color: var(--hub-danger);
+  background: var(--hub-danger-tint);
+  border: 1px solid var(--hub-danger-border);
+  border-radius: 6px;
+}
+
+
 /* —— 「关注我们」弹窗 —— */
 
 /* 关注弹窗：比普通弹窗略宽，给 Markdown 介绍 + 反馈群二维码留出阅读空间；

@@ -18,7 +18,7 @@ import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { NotificationRecord } from '../../logic/failures.ts'
-import { classifyFailure, npmTooLowVersion } from '../../logic/failures.ts'
+import { classifyFailure, npmTooLowVersion, unreachableTargetOf } from '../../logic/failures.ts'
 import type { PendingRestart, QueueTask } from '../../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
 import { CloseIcon } from '../ui/icons.tsx'
@@ -271,6 +271,8 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，
                       // 不引导提 Issue
                       return h('div', null, [
+                        // 「无法访问 …」醒目行：精准告诉用户具体哪个地址连不上（消息里取不到地址就跳过这行）
+                        (() => { const target = unreachableTargetOf(r.message); return target ? h('div', { className: styles.failNetworkTarget }, t('failNetworkTarget', { url: target })) : null })(),
                         h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
                         onRunDiagnostics ? h('button', {
                           className: styles.failDiagBtn,

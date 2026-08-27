@@ -16,7 +16,7 @@ import { CloseIcon, ConfirmIcon, CopyIcon, LinkIcon } from '../ui/icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
 import { installCommandOf } from '../../logic/install-command.ts'
 import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
-import { classifyFailure, npmTooLowVersion } from '../../logic/failures.ts'
+import { classifyFailure, npmTooLowVersion, unreachableTargetOf } from '../../logic/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述；
  *  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
@@ -392,6 +392,8 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，
               // 不引导提 Issue
               ? h('div', null, [
+                // 「无法访问 …」醒目行：精准告诉用户具体哪个地址连不上（消息里取不到地址就跳过这行）
+                (() => { const target = unreachableTargetOf(message); return target ? h('div', { className: styles.failNetworkTarget }, t('failNetworkTarget', { url: target })) : null })(),
                 h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
                 onRunDiagnostics ? h('button', {
                   className: styles.failDiagBtn,

@@ -11,7 +11,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyFailure, coreErrorCode, npmTooLowVersion, summarizeError } from '../src/client/logic/failures.ts'
+import { classifyFailure, coreErrorCode, npmTooLowVersion, summarizeError, unreachableTargetOf } from '../src/client/logic/failures.ts'
 
 const dshTailHint = 'dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in /Users/x/.dsh/profiles/web/pnpm-workspace.yaml, then re-run'
 
@@ -87,6 +87,22 @@ test('npmTooLowVersion extracts the version from the marker, null otherwise', ()
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')
+})
+
+test('unreachableTargetOf extracts the exact unreachable address for the dialog', () => {
+  // 服务端 [network] 预检消息（中/英文括号）优先取括号里的探测地址
+  assert.equal(
+    unreachableTargetOf('[network] 安装已中止：安装前无法连接到 GitHub（https://github.com/）—— 您的网络似乎不通或被拦截。'),
+    'https://github.com/')
+  assert.equal(
+    unreachableTargetOf('[network] install aborted: cannot reach the npm registry (https://registry.npmjs.org/) before install.'),
+    'https://registry.npmjs.org/')
+  // 安装日志里的连接失败：取第一个 URL（git 仓库地址）
+  assert.equal(
+    unreachableTargetOf('fatal: unable to access \'https://github.com/adoresever/graph-memory/\': Failed to connect to github.com port 443: Timed out'),
+    'https://github.com/adoresever/graph-memory/')
+  // 提取不到 URL → null（调用方据此跳过地址行）
+  assert.equal(unreachableTargetOf('pnpm error code ECONNRESET'), null)
 })
 
 test('coreErrorCode extracts the first error code', () => {
