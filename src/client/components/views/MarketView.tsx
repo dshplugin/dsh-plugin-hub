@@ -17,7 +17,7 @@ import { CatalogList } from '../catalog/CatalogList.tsx'
 
 type CatalogState = ReturnType<typeof useCatalog>
 
-export function MarketView({ catalog, t, langPath, langKey, copied, resultText, onInstall, onUninstall }: {
+export function MarketView({ catalog, t, langPath, langKey, copied, resultText, onInstall, onUninstall, hasProxy, onOpenDiagnostics }: {
   catalog: CatalogState
   t: (key: string, params?: Record<string, string | number>) => string
   langPath: string
@@ -26,6 +26,8 @@ export function MarketView({ catalog, t, langPath, langKey, copied, resultText, 
   resultText: string | null
   onInstall: (p: HubPlugin, opts?: { update?: boolean }) => void
   onUninstall: (p: HubPlugin) => void
+  hasProxy: boolean
+  onOpenDiagnostics: () => void
 }) {
   return h(Fragment, null,
     // 分类行保持原位原样：全部 + 各分类 chips
@@ -61,6 +63,8 @@ export function MarketView({ catalog, t, langPath, langKey, copied, resultText, 
       langKey,
       onInstall,
       onUninstall,
+      hasProxy,
+      onOpenDiagnostics,
     }),
   )
 }

@@ -412,6 +412,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
             queue.clearModalTask()
             setUninstallPlugin(p)
           },
+          // 目录加载失败时的精准提示：设置里配了代理 → 提示代理不可达；没配 → 提示网络不通
+          hasProxy: (hubSettings.proxy ?? '').trim() !== '',
+          // 「去系统诊断检测网络」直达（复用网络失败弹窗的同一跳转：关弹窗 → 设置 → 系统诊断自动跑连通性检测）
+          onOpenDiagnostics: openDiagnostics,
         })
       : view === 'installed'
         ? h(InstalledView, {

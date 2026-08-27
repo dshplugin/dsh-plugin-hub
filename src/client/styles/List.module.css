@@ -301,7 +301,6 @@ body[data-ds-dark-theme] .uninstallBtn:hover {
 }
 
 .retryBtn {
-  margin-top: 4px;
   font-size: 12px;
   line-height: 18px;
   color: var(--hub-text-secondary);
@@ -316,6 +315,30 @@ body[data-ds-dark-theme] .uninstallBtn:hover {
 .retryBtn:hover {
   color: var(--hub-text-primary);
   background: var(--hub-bg-hover);
+}
+
+/* 失败态按钮行：重试 + 「去系统诊断检测网络」并排 */
+.stateActions {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.diagBtn {
+  font-size: 12px;
+  line-height: 18px;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  background: var(--hub-brand);
+  cursor: pointer;
+  user-select: none;
+}
+
+.diagBtn:hover {
+  background: var(--hub-brand-hover);
 }
 
 /* —— footer —— */

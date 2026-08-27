@@ -15,7 +15,7 @@ import { SITE_URL } from '../../logic/constants.ts'
 import { useIncrementalList } from '../../hooks/useIncrementalList.ts'
 import { PluginCard } from './PluginCard.tsx'
 
-export function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall }: {
+export function CatalogList({ plugins, failed, visible, total, t, langPath, reload, category, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall, hasProxy, onOpenDiagnostics }: {
   plugins: HubPlugin[] | null
   failed: boolean
   visible: HubPlugin[]
@@ -31,6 +31,10 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
   langKey: LocaleId
   onInstall: (p: HubPlugin, opts?: { update?: boolean }) => void
   onUninstall: (p: HubPlugin) => void
+  /** 设置里是否配置了 HTTP 代理：目录拉不出来时据此精准提示（网络不通 vs 代理不可达） */
+  hasProxy: boolean
+  /** 「去系统诊断检测网络」直达：跳到设置 → 系统诊断自动跑连通性检测 */
+  onOpenDiagnostics: () => void
 }) {
   /** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
   const listRef = useRef<HTMLDivElement | null>(null)
@@ -46,8 +50,12 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
       plugins === null && !failed && h('div', { className: styles.state }, t('loading')),
       failed && h('div', { className: styles.state },
         h('div', { className: styles.stateTitle }, t('failed')),
-        h('div', { className: styles.stateDesc }, t('failedDesc')),
-        h('button', { className: styles.retryBtn, onClick: () => reload() }, t('retry')),
+        // 精准提示：配了代理 → 提示代理可能不可达；没配 → 直接提示网络不通
+        h('div', { className: styles.stateDesc }, t(hasProxy ? 'failedDescProxy' : 'failedDescNoProxy')),
+        h('div', { className: styles.stateActions },
+          h('button', { className: styles.retryBtn, onClick: () => reload() }, t('retry')),
+          h('button', { className: styles.diagBtn, onClick: onOpenDiagnostics }, t('failNetworkRunDiag')),
+        ),
       ),
       plugins !== null && !failed && visible.length === 0 && h('div', { className: styles.state },
         h('div', { className: styles.stateTitle }, t('noResult')),

@@ -25,7 +25,9 @@ export const zh = {
   fork: 'Fork',
   loading: '正在加载插件数据…',
   failed: '插件数据加载失败',
-  failedDesc: '请稍后重试，或点击右上角按钮在浏览器中打开插件中心。',
+  // 目录拉不出来时的精准提示：按「是否配置了代理」区分，引导排查网络 / 代理
+  failedDescNoProxy: '你的网络似乎不通，无法获取插件目录数据。请检查网络连接后重试；或点击右上角按钮在浏览器中打开插件中心。',
+  failedDescProxy: '你的网络似乎不通，或设置里的 HTTP 代理地址不可达，无法获取插件目录数据。请检查代理设置与网络连接后重试；或点击右上角按钮在浏览器中打开插件中心。',
   retry: '重试',
   install: '安装',
   // AI 识别可能需要命令行辅助的插件（webInstallable=false）：仍可尝试一键安装，失败时复制命令去 dsh 终端
@@ -368,7 +370,9 @@ export const en = {
   fork: 'Fork',
   loading: 'Loading plugin data…',
   failed: 'Failed to load plugin data',
-  failedDesc: 'Please retry, or open the hub in your browser with the button above.',
+  // Precise hints when the catalog cannot load: distinguished by whether a proxy is configured
+  failedDescNoProxy: 'Your network seems unreachable, so the plugin catalog could not be loaded. Please check your connection and retry; or open the hub in your browser with the button above.',
+  failedDescProxy: 'Your network seems unreachable, or the HTTP proxy in Settings is unreachable, so the plugin catalog could not be loaded. Please check the proxy address and your connection, then retry; or open the hub in your browser with the button above.',
   retry: 'Retry',
   install: 'Install',
   // AI-flagged plugins that may need command-line help (webInstallable=false): one-click install still allowed,
