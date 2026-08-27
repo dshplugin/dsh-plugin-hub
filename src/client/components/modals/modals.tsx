@@ -320,7 +320,7 @@ export function UninstallModal(props: UninstallModalProps) {
 
 /** 预填插件仓库的 GitHub Issue 链接：标题带插件名，正文附完整错误信息，方便用户一键反馈。 */
 /** 安装/卸载失败弹窗：布局与失败记录一致（类型徽标 + 仓库超链接 + 隐蔽复制按钮），报错完整展示，底部一键提交 Issue。 */
-export function ErrorModal({ message, repo, kind, command, attempts, t, env, onCopy, onClose }: {
+export function ErrorModal({ message, repo, kind, command, attempts, t, env, onCopy, onClose, onRunDiagnostics }: {
   message: string
   repo: string | null
   kind: 'install' | 'uninstall'
@@ -331,6 +331,8 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
   env: EnvInfo | null
   onCopy: (text: string) => void
   onClose: () => void
+  /** 网络不通时的「去系统诊断」直达按钮：跳到设置 → 系统诊断跑连通性检测（由宿主提供） */
+  onRunDiagnostics?: () => void
 }) {
   // 失败归类：当前安装通道（npm/git）装不上 = 插件分发/依赖的问题，一律引导提 Issue
   const failureKind = classifyFailure(message)
@@ -387,8 +389,15 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               t(npmVersion ? 'failNpmTooLowV' : 'failNpmTooLow', npmVersion ? { v: npmVersion } : undefined))
             : failureKind === 'network'
               // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
-              // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络，不引导提 Issue
-              ? h('div', { className: styles.failPrepareHint }, t('failNetworkHint'))
+              // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，
+              // 不引导提 Issue
+              ? h('div', null, [
+                h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
+                onRunDiagnostics ? h('button', {
+                  className: styles.failDiagBtn,
+                  onClick: onRunDiagnostics,
+                }, t('failNetworkRunDiag')) : null,
+              ])
               : failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
               ? h('div', null, [
                 // [packaging]（预检/装后校验拦截：git 分发缺产物）与

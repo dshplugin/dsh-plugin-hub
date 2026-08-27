@@ -1239,6 +1239,31 @@
   border-radius: 6px;
 }
 
+/* 网络不通提示下的「去系统诊断」操作按钮：品牌实底小按钮（区别于红色提 Issue 大按钮） */
+.failDiagBtn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  padding: 5px 16px;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--hub-text-on-fill);
+  background: var(--hub-btn-fill);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+.failDiagBtn:hover {
+  background: var(--hub-btn-hover);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
 /* —— 「关注我们」弹窗 —— */
 
 /* 关注弹窗：比普通弹窗略宽，给 Markdown 介绍 + 反馈群二维码留出阅读空间；

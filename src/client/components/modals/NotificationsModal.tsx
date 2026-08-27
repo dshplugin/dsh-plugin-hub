@@ -56,7 +56,7 @@ function BadgeGlyph({ ok }: { ok: boolean }) {
     }))
 }
 
-export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, onIgnoreUpdate, cancelTask, restarting, onRestart, resolveRepo }: {
+export function NotificationsModal({ records, tasks, pendingRestarts, t, env, onClose, onCopy, onClear, onRemove, onUpdate, onIgnoreUpdate, cancelTask, restarting, onRestart, onRunDiagnostics, resolveRepo }: {
   records: NotificationRecord[]
   /** 进行中的安装/卸载任务（实时进度，与队列弹窗同一数据源） */
   tasks: QueueTask[]
@@ -76,6 +76,8 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
   cancelTask: (id: number) => void
   restarting: boolean
   onRestart: () => void
+  /** 网络不通时的「去系统诊断」直达按钮：跳到设置 → 系统诊断跑连通性检测（由宿主提供） */
+  onRunDiagnostics?: () => void
   /** 失败记录 repo 反查：npm 包名（历史记录存的是裸包名）反查成 owner/repo 再显示/提 Issue；
    *  查不到返回 null，按钮与仓库链接一并隐藏（防提到错误仓库）。不传则按记录原样展示。 */
   resolveRepo?: (repo: string) => string | null
@@ -266,8 +268,15 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     }
                     if (kind === 'network') {
                       // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
-                      // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络，不引导提 Issue
-                      return h('div', { className: styles.failPrepareHint }, t('failNetworkHint'))
+                      // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，
+                      // 不引导提 Issue
+                      return h('div', null, [
+                        h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
+                        onRunDiagnostics ? h('button', {
+                          className: styles.failDiagBtn,
+                          onClick: onRunDiagnostics,
+                        }, t('failNetworkRunDiag')) : null,
+                      ])
                     }
                     if (kind === 'pluginPrepare' || kind === 'pnpmIgnoredBuild') {
                       // [packaging]（预检/装后校验拦截：git 分发缺产物）与

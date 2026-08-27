@@ -35,6 +35,7 @@ import type { SectionView } from './layout/SectionTabs.tsx'
 import { InstalledView } from './views/InstalledView.tsx'
 import { CustomInstallView } from './views/CustomInstallView.tsx'
 import { SettingsView } from './views/SettingsView.tsx'
+import type { SettingsSection } from './views/SettingsView.tsx'
 import { CloseIcon, ConfirmIcon } from './ui/icons.tsx'
 import type { InstalledItem } from '../logic/installed.ts'
 import { issueRepoOf, pluginOfItem } from '../logic/installed.ts'
@@ -47,6 +48,16 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
 
   /** 一级导航：插件中心 / 已安装 / 自定义安装 / 设置 */
   const [view, setView] = useState<SectionView>('market')
+  /** 外部跳转设置分组的一次性信号（错误弹窗「去系统诊断」→ 设置 → 系统诊断）：
+   *  传给 SettingsView 消费后即清空，避免下次进设置被强制带跳 */
+  const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null)
+  /** 网络不通提示的「去系统诊断」直达：关弹窗 → 切到设置页 → 切到系统诊断分组（自动跑连通性检测） */
+  const openDiagnostics = () => {
+    setErrorMsg(null)
+    setShowNotifications(false)
+    setView('settings')
+    setSettingsSection('diagnostics')
+  }
 
   /** 全局反馈 Toast：{id} 用于重复触发时重新走入场动画，kind 决定文案与配色 */
   const [toast, setToast] = useState<ToastState | null>(null)
@@ -464,6 +475,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               doCopy(text)
               setToast({ id: Date.now(), kind: 'copied' })
             },
+            // 网络不通提示「去系统诊断」→ 设置页并切到系统诊断分组（DiagnosticsView 挂载即自动跑探测）
+            openSection: settingsSection,
+            onConsumedOpenSection: () => setSettingsSection(null),
           }),
     // Hub 版本信息弹窗：版本号/徽标点击打开 —— 有更新显示新版本 + 变更记录 + 「直接更新」，
     // 无更新显示当前版本 + 记录 + 「已是最新」。Worker 拉取失败时兜底展示当前版本号。
@@ -523,6 +537,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       cancelTask: queue.cancelTask,
       restarting,
       onRestart: () => setShowRestartConfirm(true),
+      // 网络不通记录的「去系统诊断」直达：关通知中心 → 设置 → 系统诊断
+      onRunDiagnostics: openDiagnostics,
       // 失败记录仓库反查：历史记录可能存的是裸 npm 包名，反查成 owner/repo 才显示仓库链接
       // 与提 Issue 按钮；查不到则隐藏（防提到错误仓库）
       resolveRepo: (repo: string) => issueRepoOf(repo, catalog.installedItems, catalog.plugins),
@@ -706,6 +722,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         doCopy(text)
         setToast({ id: Date.now(), kind: 'errCopied' })
       },
+      // 网络不通错误的「去系统诊断」直达：关错误弹窗 → 设置 → 系统诊断
+      onRunDiagnostics: openDiagnostics,
       onClose: () => setErrorMsg(null),
     }),
     // 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出，稍后重启 / 立即重启

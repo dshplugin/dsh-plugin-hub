@@ -15,7 +15,7 @@
  *   Diagnostics       — live connectivity probe + environment snapshot
  *   Logs              — system log viewer + storage location
  */
-import { createElement as h, useState } from 'react'
+import { createElement as h, useEffect, useState } from 'react'
 import type { ChangeEvent, MouseEvent, ReactNode } from 'react'
 import styles from '../../styles/SettingsView.module.css'
 import dropdownStyles from '../../styles/Dropdown.module.css'
@@ -30,7 +30,8 @@ import {
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { HubSettings } from '../../hooks/useSettings.ts'
 
-type SettingsSection = 'updates' | 'security' | 'diagnostics' | 'logs' | 'reset'
+/** 设置分组导航 key：顺序即展示顺序。导出供外部（如错误弹窗「去系统诊断」）跳转指定分组。 */
+export type SettingsSection = 'updates' | 'security' | 'diagnostics' | 'logs' | 'reset'
 
 /** npm 镜像源预设：空串 = 未配置（跟随用户本机 npm 配置，本插件不注入任何 registry）。
  *  只提供常见国内顶级镜像下拉，不做自定义输入 —— 想用其它镜像直接在 ~/.npmrc 配置即可。 */
@@ -67,18 +68,28 @@ function SettingRow({ title, desc, children, stack = false }: {
   )
 }
 
-export function SettingsView({ t, settings, update, reset, env, onCopy }: {
+export function SettingsView({ t, settings, update, reset, env, onCopy, openSection, onConsumedOpenSection }: {
   t: Translate
   settings: HubSettings
   update: (patch: Partial<HubSettings>) => void
   reset: () => void
   env: EnvInfo | null
   onCopy: (text: string) => void
+  /** 外部跳转信号（如错误弹窗「去系统诊断」）：非空时切到对应分组，消费后通过 onConsumedOpenSection 清空 */
+  openSection?: SettingsSection | null
+  onConsumedOpenSection?: () => void
 }) {
   /** 当前激活的分组：左侧导航点击切换，右侧只渲染这一组 */
   const [section, setSection] = useState<SettingsSection>('updates')
   /** 恢复默认确认弹窗：点按钮先弹窗询问，确认后才真正 reset（不做两段式按钮） */
   const [resetConfirm, setResetConfirm] = useState(false)
+
+  // 外部跳转（错误弹窗「去系统诊断」→ 设置 → 系统诊断）：切到对应分组并清空信号，避免下次进入设置被强制带跳
+  useEffect(() => {
+    if (!openSection) return
+    setSection(openSection)
+    onConsumedOpenSection?.()
+  }, [openSection, onConsumedOpenSection])
 
   const onProxyChange = (e: ChangeEvent<HTMLInputElement>) => update({ proxy: e.target.value })
   const onMirrorChange = (value: string) => update({ npmRegistry: value })

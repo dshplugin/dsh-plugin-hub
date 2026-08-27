@@ -300,6 +300,8 @@ export const zh = {
   failNpmTooLowV: '本机 npm 版本过低（当前 v{v}）：npm 解析插件依赖时内部崩溃（这是 npm 自身的已知缺陷，不是插件问题）。请升级 npm 后重试：npm install -g npm@latest',
   // 安装前连通性预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：本机网络或代理问题，不是插件问题，不引导提 Issue
   failNetworkHint: '安装前检测到网络不通：无法连接到安装源（可能是断网、DNS 解析失败、被防火墙拦截，或代理配置有问题）。这不是插件本身的问题 —— 请检查网络连接，或到「设置」里确认 HTTP 代理配置，再到「系统诊断」运行一次连通性检测，然后重试。',
+  // 「去系统诊断」直达按钮：网络不通提示下方的品牌实底按钮，跳到设置 → 系统诊断跑连通性检测
+  failNetworkRunDiag: '去系统诊断检测网络',
   reportIssue: '去插件仓库提交 Issue',
   detail: '打开详情',
   noResult: '没有找到匹配的插件',
@@ -635,6 +637,8 @@ export const en = {
   failNpmTooLowV: 'Your local npm is too old (v{v}): npm crashed internally while resolving the plugin\'s dependencies (a known npm bug — not a plugin issue). Please upgrade npm and retry: npm install -g npm@latest',
   // Pre-install connectivity probe / connection failure in the install log ([network] / git fetch timeout / DNS / TLS): a local network or proxy issue, not a plugin issue — no issue link
   failNetworkHint: 'The network could not be reached before install: the install source is unreachable (offline, DNS failure, firewall block, or a misconfigured proxy). This is not a problem with the plugin itself — please check your connection, confirm the HTTP proxy in Settings, run a connectivity check under System Diagnostics, then retry.',
+  // Diagnostics shortcut button under the network-down hint: jumps to Settings → System Diagnostics
+  failNetworkRunDiag: 'Run a network diagnostic',
   reportIssue: 'Report an Issue to the plugin repo',
   detail: 'Open details',
   noResult: 'No plugins match your search',
