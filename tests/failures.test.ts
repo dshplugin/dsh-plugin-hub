@@ -15,8 +15,8 @@ import { classifyFailure, coreErrorCode, npmTooLowVersion, summarizeError, unrea
 
 const dshTailHint = 'dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in /Users/x/.dsh/profiles/web/pnpm-workspace.yaml, then re-run'
 
-test('classifyFailure: git prepare blocked by the allowlist is still the plugin repo issue (file a bug)', () => {
-  assert.equal(classifyFailure('[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] ... not in the "allowBuilds" allowlist'), 'repo')
+test('classifyFailure: git prepare blocked by the allowlist is a plugin distribution issue (pnpmIgnoredBuild)', () => {
+  assert.equal(classifyFailure('[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] ... not in the "allowBuilds" allowlist'), 'pnpmIgnoredBuild')
 })
 
 test('classifyFailure: [npm-too-low] marker from the server is a local npm issue, not a plugin issue', () => {
@@ -77,6 +77,30 @@ test('classifyFailure: DNS / connection-reset / TLS failures are network issues,
   assert.equal(classifyFailure('pnpm error code ECONNRESET\npnpm error network socket hang up'), 'network')
   assert.equal(classifyFailure('getaddrinfo ENOTFOUND registry.npmjs.org'), 'network')
   assert.equal(classifyFailure('SSL certificate problem: unable to get local issuer certificate'), 'network')
+})
+
+test('classifyFailure: allowBuilds rejection wins over trailing connection-failure noise (graph-memory #82-#84)', () => {
+  // #84：主因是插件 prepare 脚本被 allowBuilds 拦截（tarball 已下载、网络是通的），
+  // 日志尾部混着重试残留的 ETIMEDOUT / Failed to connect —— 不能误判成网络问题
+  const mixed = [
+    '[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] Failed to prepare git-hosted package fetched from "https://codeload.github.com/adoresever/graph-memory/tar.gz/66183143": The git-hosted package "graph-memory@1.6.0-beta.8" needs to execute build scripts but is not in the "allowBuilds" allowlist.',
+    '[WARN] HEAD https://github.com/adoresever/graph-memory error (ETIMEDOUT). Will retry in 500 milliseconds. 2 retries left.',
+    '[ERR_PNPM_GIT_RESOLVE_FAILED] Failed to resolve git dependency "git+https://github.com/adoresever/graph-memory.git": git ls-remote failed: fatal: unable to access \'https://github.com/adoresever/graph-memory.git/\': Failed to connect to github.com:443 after 21356 ms: Could not connect to server',
+  ].join('\n')
+  assert.equal(classifyFailure(mixed), 'pnpmIgnoredBuild')
+  // #82 / #83：PREPARE_NOT_ALLOWED + PREPARE_PACKAGE（prepare 被白名单拦截后脚本链失败）
+  assert.equal(classifyFailure('[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] ... needs to execute build scripts but is not in the "allowBuilds" allowlist.\n[ERR_PNPM_PREPARE_PACKAGE] Failed to prepare git-hosted package fetched from "...": graph-memory@1.6.0-beta.8 npm-install: `npm install`'), 'pnpmIgnoredBuild')
+  // 纯 IGNORED_BUILDS（原生模块构建被忽略）仍是 pnpmIgnoredBuild
+  assert.equal(classifyFailure('pnpm-install: [ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: node-pty, esbuild'), 'pnpmIgnoredBuild')
+})
+
+test('classifyFailure: pure git fetch timeout without allowBuilds noise stays a network issue (graph-memory #87)', () => {
+  const msg = [
+    '[WARN] HEAD https://github.com/adoresever/graph-memory error (ETIMEDOUT). Will retry in 500 milliseconds. 2 retries left.',
+    '[ERR_PNPM_GIT_FETCH_FAILED] Failed to fetch from the git repository "https://github.com/adoresever/graph-memory.git": fatal: unable to access \'https://github.com/adoresever/graph-memory.git/\': Failed to connect to github.com port 443 after 21027 ms: Timed out',
+    '[exit 1]',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'network')
 })
 
 test('npmTooLowVersion extracts the version from the marker, null otherwise', () => {

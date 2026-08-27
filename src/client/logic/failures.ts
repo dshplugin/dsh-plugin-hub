@@ -163,9 +163,10 @@ export type FailureKind = 'npmTooOld' | 'pnpmIgnoredBuild' | 'pluginPrepare' | '
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
  *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
- * - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
- *   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
- *   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
+ * - pnpmIgnoredBuild：插件自身或依赖的构建脚本被 pnpm 安全白名单（allowBuilds）默认拦截
+ *   （`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` / `ERR_PNPM_IGNORED_BUILDS`）。只影响带安装期
+ *   构建的插件，其他插件不受影响 —— 差异在插件的依赖/打包方式，属插件依赖/打包问题
+ *   → 引导去仓库提 Issue（建议改用预编译版本或关闭安装期构建）
  * - pluginPrepare：插件的 prepare/构建脚本实际执行失败（git tarball 常因缺失子模块或
  *   构建产物导致）—— 属插件打包/分发问题，应引导去仓库提 Issue
  * - repo：其余失败（含 git prepare 被 pnpm 白名单拦截等），默认按插件仓库问题引导提 Issue
@@ -175,6 +176,13 @@ export function classifyFailure(message: string): FailureKind {
   // 不是插件问题 —— 必须最先判，否则该报错会被外层 ERR_PNPM_PREPARE_PACKAGE 吞成
   // 「插件打包分发问题」，误导用户去提 Issue
   if (/\[npm-too-low\]|edgesOut/i.test(message)) return 'npmTooOld'
+  // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
+  // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
+  // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本
+  // 被拦 —— 必须在 network 判定之前：日志尾部常混着重试残留的连接失败特征
+  // （ETIMEDOUT / Failed to connect 等），若先判网络会把「插件分发问题」误报成
+  // 「你的网络不通」（graph-memory issues #82-#84：PREPARE_NOT_ALLOWED + 尾随超时）。
+  if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:|ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED/i.test(message)) return 'pnpmIgnoredBuild'
   // 网络问题（服务端 [network] 标记，或安装日志里的连接失败特征：git fetch 失败、
   // 连接超时/拒绝/重置、DNS 解析失败、TLS/SSL 握手失败）—— 是本机网络/代理问题，
   // 不是插件问题。必须在 prepare/Command failed 判定之前：git fetch 失败常被
@@ -184,9 +192,6 @@ export function classifyFailure(message: string): FailureKind {
   // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
-  // 原生模块构建被忽略（IGNORED_BUILDS）要在 prepare 判定之前：dsh 尾部固定提示语带
-  // allowBuilds/pnpm-workspace.yaml，不能据此把插件自身问题误判成通用失败
-  if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:/i.test(message)) return 'pnpmIgnoredBuild'
   // 再判 prepare 实际执行失败：只有构建脚本真的跑挂了才是插件问题
   if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return 'pluginPrepare'
   // 其余失败（含 git prepare 被 pnpm 白名单拦截）：当前通道装不上 = 插件分发/依赖的问题，一律提 Issue
