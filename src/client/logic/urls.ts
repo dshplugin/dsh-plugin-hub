@@ -40,6 +40,7 @@ export function pluginSiteUrl(repo: string): string {
 function reasonTitleOf(kind: FailureKind): string {
   switch (kind) {
     case 'npmTooOld': return 'npm too old to install'
+    case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmIgnoredBuild': return 'build scripts blocked by pnpm allowlist'
     case 'pluginPrepare': return 'plugin distribution incomplete'
     case 'network': return 'network failure on the user side'

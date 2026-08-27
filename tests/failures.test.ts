@@ -108,6 +108,19 @@ test('npmTooLowVersion extracts the version from the marker, null otherwise', ()
   assert.equal(npmTooLowVersion('no marker here'), null)
 })
 
+test('classifyFailure: dsh command missing on the machine is an environment issue (issue #12), not a plugin issue', () => {
+  // Windows cmd: 'dsh' 不是内部或外部命令
+  assert.equal(classifyFailure("'dsh' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\n\u6216\u6279\u5904\u7406\u6587\u4ef6\u3002"), 'dshMissing')
+  // Windows cmd (English)
+  assert.equal(classifyFailure("'dsh' is not recognized as an internal or external command,"), 'dshMissing')
+  // POSIX shell
+  assert.equal(classifyFailure('sh: dsh: command not found'), 'dshMissing')
+  // node spawn ENOENT
+  assert.equal(classifyFailure('spawn dsh ENOENT'), 'dshMissing')
+  // 即使被外层 "Command failed" 包裹也必须归类为环境问题，不能被吞成插件问题
+  assert.equal(classifyFailure("Command failed: dsh plugin add github:owner/repo\n'dsh' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'dshMissing')
+})
+
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')

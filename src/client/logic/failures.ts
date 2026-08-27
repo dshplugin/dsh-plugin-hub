@@ -151,15 +151,18 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
- * 失败归类，五态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+ * 失败归类，六态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
  * 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
- * 一律引导提 Issue；唯一的两个例外是本机环境问题（npm 版本过低 / 网络不通）：
+ * 一律引导提 Issue；唯一的例外是本机环境问题（npm 版本过低 / 找不到 dsh 命令 / 网络不通）：
  * - npmTooOld：失败输出含 npm arborist 的 `edgesOut` 崩溃特征（build-ideal-tree.js 解 peer 依赖时
  *   内部抛错，npm 11.6.0 前必现的已知缺陷，npm/cli#8261、#9787），或服务端已核实本机版本低于
  *   阈值并打了 `[npm-too-low]` 标记 —— 是本机 npm 版本过低/自身缺陷，不是插件问题 → 引导升级 npm
+ * - dshMissing：安装器 spawn 的 `dsh` 命令找不到（Windows cmd「不是内部或外部命令」/ POSIX
+ *   「command not found」/ spawn ENOENT）—— 是本机 DSH 未正确安装或不在 PATH，不是插件问题
+ *   → 提示检查 PATH/重装 DSH，不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
  *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
@@ -176,6 +179,11 @@ export function classifyFailure(message: string): FailureKind {
   // 不是插件问题 —— 必须最先判，否则该报错会被外层 ERR_PNPM_PREPARE_PACKAGE 吞成
   // 「插件打包分发问题」，误导用户去提 Issue
   if (/\[npm-too-low\]|edgesOut/i.test(message)) return 'npmTooOld'
+  // 找不到 dsh 命令（Windows cmd「不是内部或外部命令」/ POSIX「command not found」/
+  // node spawn ENOENT）：是本机 DSH 未正确安装或不在 PATH，不是插件问题 —— 必须先判，
+  // 否则会被外层 "Command failed" 吞成「插件打包问题」，误导用户去提 Issue
+  // （dsh-plugin-hub#12：Win 下 'dsh' 不在 PATH，cmd 报「不是内部或外部命令」被误归插件侧失败）
+  if (/不是内部或外部命令|is not recognized as an internal or external command|command not found|spawn dsh ENOENT/i.test(message)) return 'dshMissing'
   // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
   // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
   // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本
