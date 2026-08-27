@@ -125,6 +125,49 @@ export function probeUrl(url: string, proxy: string, timeoutMs: number): Promise
 }
 
 /**
+ * git 通道真实克隆握手探测：spawn git ls-remote（https 传输，与 pnpm 克隆前的
+ * ref 握手一致），注入代理 env，GIT_TERMINAL_PROMPT=0 防凭据提示挂起。
+ *
+ * 为什么要真实 git 而非 curl 打网页：网页「能打开」和 git「能克隆」是两码事 ——
+ * 防火墙/代理常按端口与协议区分，HTTP 页可达不代表 git 传输可达。这里测的就是
+ * 克隆握手本身，回答「github:owner/repo 装不装得动」。
+ * 供系统诊断 GitHub 通道使用；探测目标用 dshplugin/hello-dsh 小仓库（秒级完成，
+ * 不打 17MB 的 dsh-plugin-hub 主页）。
+ */
+export function gitLsRemote(url: string, proxy: string, timeoutMs: number): Promise<ProbeResult> {
+  return new Promise((resolve) => {
+    const started = Date.now()
+    const env: NodeJS.ProcessEnv = { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+    if (proxy !== '') {
+      env.HTTP_PROXY = proxy
+      env.HTTPS_PROXY = proxy
+      env.http_proxy = proxy
+      env.https_proxy = proxy
+    }
+    const child = spawn('git', ['ls-remote', '--exit-code', url, 'HEAD'], { env })
+    let out = ''
+    child.stdout.on('data', (c: Buffer) => { out += c.toString() })
+    // git 的报错不透传给终端：结果以退出码 + HEAD ref 是否返回为准
+    child.stderr.on('data', () => {})
+    let done = false
+    const finish = (r: ProbeResult) => {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      resolve(r)
+    }
+    child.on('error', () => finish(probeFail()))
+    child.on('close', (code) => {
+      const ok = code === 0 && out.trim() !== ''
+      // status 复用为 git 退出码（0 = 克隆握手成功）；客户端 git 行不把它显示成 HTTP 码
+      finish({ ok, ms: Date.now() - started, status: code })
+    })
+    // 超时兜底：与 curlProbe 同口径，防止 git 挂起
+    const timer = setTimeout(() => { child.kill(); finish(probeFail()) }, timeoutMs + 1000)
+  })
+}
+
+/**
  * curl 子进程抓取响应体（与 probeUrl 同一套代理 env 注入）。
  * 供服务端 /catalog 代理路由使用：目录/统计数据经此拉到服务端再转给浏览器，
  * 使「目录数据请求走设置里的代理」与 npm / git 安装通道口径一致。

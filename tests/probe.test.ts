@@ -11,7 +11,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { probeUrl, systemProxy } from '../src/server/services/probe.ts'
+import { gitLsRemote, probeUrl, systemProxy } from '../src/server/services/probe.ts'
 
 const ONLINE = process.env.DSH_HUB_TEST_OFFLINE !== '1'
 
@@ -30,6 +30,17 @@ test('probeUrl: 无代理直连已知站点（本地断网时跳过）', { skip:
   const r = await probeUrl('https://registry.npmjs.org/dsh-plugin', '', 6000)
   assert.equal(r.ok, true)
   assert.equal(r.status, 200)
+})
+
+test('gitLsRemote: 对不存在的代理走真实 git 握手，应归为不可达', async () => {
+  const r = await gitLsRemote('https://github.com/dshplugin/hello-dsh', 'http://127.0.0.1:1', 1500)
+  assert.equal(r.ok, false)
+})
+
+test('gitLsRemote: 直连测试仓库返回真实克隆握手（本地断网时跳过）', { skip: !ONLINE }, async () => {
+  const r = await gitLsRemote('https://github.com/dshplugin/hello-dsh', '', 8000)
+  assert.equal(r.ok, true)
+  assert.equal(r.status, 0)
 })
 
 test('systemProxy: 读到的代理必须是 http://host:port 形态（读不到时返回 null 也可接受）', () => {

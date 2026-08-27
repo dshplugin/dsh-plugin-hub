@@ -13,7 +13,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir, release } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { spawn } from 'node:child_process'
-import { fetchViaCurl, probeUrl, systemProxy } from '../services/probe.ts'
+import { fetchViaCurl, gitLsRemote, probeUrl, systemProxy } from '../services/probe.ts'
 import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, globalNpmPackagesOf, hasQueuedTarget, installTargetOf, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install/install.ts'
 import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/profile/installed-versions.ts'
 import { resolveNpmPackage } from '../services/install/npm-resolve.ts'
@@ -494,9 +494,11 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         // 连通性自检直接打安装通道真实访问的轻量资源：npm 源拉包元数据、git 通道探
         // 仓库主页、目录站探 badge 小文件，避免拉取目录全量 JSON。
         // npm 行 display：配置了镜像就显示镜像地址；未配置置空 —— 客户端显示「未配置（跟随本机 npm 配置）」。
-        const allChecks: Array<{ key: string; url: string; display: string; cmd: string; proxy?: string }> = [
+        const allChecks: Array<{ key: string; url: string; display: string; cmd: string; proxy?: string; git?: boolean }> = [
           { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? registry : '', cmd: `npm view dsh-plugin version --registry ${registry}` },
-          { key: 'github', url: 'https://github.com/dshplugin/dsh-plugin-hub', display: 'github.com', cmd: 'git ls-remote https://github.com/dshplugin/dsh-plugin-hub' },
+          // GitHub 行用真实 git 克隆握手（git ls-remote）打 dshplugin/hello-dsh 小仓库：
+          // 「网页能打开」和「git 能克隆」是两码事，握手成功才算通道通；小仓库秒级完成，不打 17MB 的 dsh-plugin-hub。
+          { key: 'github', url: 'https://github.com/dshplugin/hello-dsh', display: 'github.com/dshplugin/hello-dsh', cmd: 'git ls-remote https://github.com/dshplugin/hello-dsh', git: true },
           { key: 'catalog', url: 'https://api.dsh-plugin.org/stats.json', display: 'api.dsh-plugin.org', cmd: 'curl -s https://api.dsh-plugin.org/stats.json' },
         ]
         // 配置了 HTTP 代理：追加一行代理诊断 —— 用该代理打 github.com（安装通道真实访问的地址），
@@ -523,9 +525,13 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         const results: Array<{ key: string; ok: boolean }> = []
         for (const c of checks) {
           send({ type: 'probe', key: c.key, cmd: c.cmd, display: c.display })
-          const r = await probe(c.url, c.proxy)
+          // git 行走真实克隆握手（gitLsRemote），其余走 curl 探测，两路都带超时兜底
+          const r = c.git
+            ? await gitLsRemote(c.url, c.proxy ?? effectiveProxy, 6000)
+            : await probe(c.url, c.proxy)
           results.push({ key: c.key, ok: r.ok })
-          send({ type: r.ok ? 'ok' : 'fail', key: c.key, display: c.display, ms: r.ms, status: r.status })
+          // git 行的 status 是退出码，客户端 git 行只显示 OK / 不可达，不显示成 HTTP 码
+          send({ type: r.ok ? 'ok' : 'fail', key: c.key, display: c.display, ms: r.ms, status: c.git ? null : r.status })
         }
         send({ type: 'end', at: Date.now() })
         response.end()
@@ -547,11 +553,11 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       path: '/dsh-plugin-hub/proxy-check',
       handler: async (request, response) => {
         if (!requireTrustedPost(request, response)) return
-        // 代理连通性校验：用待测代理打一个权威可达目标（默认 github.com），
+        // 代理连通性校验：用待测代理打 dshplugin/hello-dsh 真实仓库页（权威可达目标），
         // 供设置页输入代理时实时反馈「这个地址通不通」。不通过也允许保存 ——
         // 用户可能是先填地址后开代理，因此这里只报告探测结果、不拦截保存。
         let proxy = ''
-        let target = 'https://github.com'
+        let target = 'https://github.com/dshplugin/hello-dsh'
         try {
           const body = await readJsonBody(request)
           if (body !== null && typeof body === 'object') {

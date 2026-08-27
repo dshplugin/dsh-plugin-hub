@@ -42,7 +42,7 @@ interface RowState {
 const INITIAL_ROWS: RowState[] = [
   // npm 行 display 初始置空：设置里未配置镜像时显示「未配置（跟随本机）」，探测结果回来再用服务端 display 覆盖
   { key: 'npm', display: '', nameKey: 'diagNpm', status: 'idle', ms: null, statusCode: null },
-  { key: 'github', display: 'github.com', nameKey: 'diagGithub', status: 'idle', ms: null, statusCode: null },
+  { key: 'github', display: 'github.com/dshplugin/hello-dsh', nameKey: 'diagGithub', status: 'idle', ms: null, statusCode: null },
   { key: 'catalog', display: 'api.dsh-plugin.org', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
 ]
 
