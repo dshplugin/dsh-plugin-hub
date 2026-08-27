@@ -10,7 +10,7 @@
  * uninstall, cancel) plus the modal task lookups used by the dialogs.
  */
 import { useEffect, useRef, useState } from 'react'
-import type { HubPlugin, Translate } from '../types.ts'
+import type { HubPlugin, LocaleId, Translate } from '../types.ts'
 import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import type { InstalledItem } from '../logic/installed.ts'
 
@@ -64,6 +64,8 @@ export interface PendingRestart {
 
 export interface TaskQueueOptions {
   t: Translate
+  /** 界面语言（zh/en）：随安装请求带给服务端，网络预检等错误消息按用户语言提示 */
+  langKey?: LocaleId
   refreshInstalled: () => void
   /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录；
    *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）。
@@ -89,7 +91,7 @@ export interface TaskQueueOptions {
 
 export function useTaskQueue(opts: TaskQueueOptions) {
   const {
-    t, refreshInstalled, onInstallDone, onUninstallDone, onError,
+    t, langKey, refreshInstalled, onInstallDone, onUninstallDone, onError,
     installPlugin, installCustomTarget, installGlobalTarget, uninstallPlugin, uninstallName, installedName, resolvePending,
   } = opts
   const [queue, setQueue] = useState<QueueTask[]>([])
@@ -442,6 +444,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           display: input.repo,
           source: input.source,
           mode: input.update ? 'update' : undefined,
+          // 界面语言带给服务端：网络预检等错误消息按用户当前语言返回（中文界面给中文，英文界面给英文）
+          ...(langKey ? { lang: langKey } : {}),
           ...(input.globalNpm && input.globalNpm.length > 0 ? { globalNpm: input.globalNpm } : {}),
         }),
         signal: controller.signal,

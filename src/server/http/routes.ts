@@ -605,6 +605,10 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             ? (body as { source: string }).source
             : ''
           const settings = loadSettings(profile)
+          // 界面语言（客户端随请求携带）：错误消息按用户当前语言提示（中文界面给中文，英文界面给英文）
+          const lang = typeof body === 'object' && body !== null && (body as { lang?: unknown }).lang === 'en'
+            ? 'en'
+            : 'zh'
           // 全局 npm 安装（官方 README 的 `npm install -g <pkgs>`，如 dsh-tui 的安装命令）：
           // 直接从命令框输入格式执行全局安装，不进任何 profile、无需宿主重启。
           // 包列表优先取 body.globalNpm（客户端命令框解析后显式携带）；兜底再从 rawRepo 解析，
@@ -715,16 +719,20 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
               ? settings.proxy
               : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
             const isGitChannel = repoTarget !== null && target === repoTarget
-            const channel = isGitChannel ? 'github.com' : 'the npm registry'
             const probeTarget = isGitChannel
               ? 'https://github.com/'
               : `${(settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org')}/`
             const net = await probeUrl(probeTarget, effectiveProxy, 6000)
             if (!net.ok) {
-              sendJson(response, 400, {
-                error: `[network] install aborted: cannot reach ${channel} (${probeTarget}) before install — your network connection appears to be down or blocked (DNS / proxy / firewall). Check your connection or proxy settings, run the connectivity diagnostic, then retry.`,
-                attempts,
-              })
+              // 错误消息按客户端界面语言提示：中文界面给中文、英文界面给英文，
+              // 不再写死英文（用户一眼看懂是网络问题，而不是插件问题）
+              const channelName = isGitChannel
+                ? (lang === 'zh' ? 'GitHub' : 'github.com')
+                : (lang === 'zh' ? 'npm 源' : 'the npm registry')
+              const error = lang === 'zh'
+                ? `[network] 安装已中止：安装前无法连接到 ${channelName}（${probeTarget}）—— 您的网络似乎不通或被拦截（断网 / DNS 解析失败 / 防火墙 / 代理配置问题）。这不是插件本身的问题，请检查网络连接或代理设置，运行「系统诊断」检测各通道连通性后重试。`
+                : `[network] install aborted: cannot reach ${channelName} (${probeTarget}) before install — your network connection appears to be down or blocked (DNS / proxy / firewall). This is not a problem with the plugin itself. Check your connection or proxy settings, run the connectivity diagnostic, then retry.`
+              sendJson(response, 400, { error, attempts })
               return
             }
           }

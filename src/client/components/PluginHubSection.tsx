@@ -106,6 +106,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
 
   const queue = useTaskQueue({
     t,
+    // 界面语言带给服务端：网络预检等错误消息按用户语言提示（中文界面给中文，英文界面给英文）
+    langKey,
     refreshInstalled: catalog.refreshInstalled,
     onInstallDone: (viaModal, repo, needsRestart, update) => {
       setInstallNeedsRestart(needsRestart)
