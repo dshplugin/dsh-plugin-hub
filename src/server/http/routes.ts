@@ -703,6 +703,31 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             sendJson(response, 409, { error: `already queued: ${target}` })
             return
           }
+          // 安装前网络连通性预检：npm 通道探 registry、git 通道探 github.com 连通性。
+          // 探测目标固定为通道的稳定入口（registry 根 / github.com 主页），不探具体包或仓库
+          // 页 —— 404 表示「目标不存在」而非网络不通，不该被当成网络故障拦截。
+          // 仅新安装预检（更新是已信任目标的覆盖重装，跳过）；不通直接 400 拦下并打
+          // [network] 标记，客户端据此提示「你的网络不通」，而不是把网络失败当成
+          // 插件侧问题引导去作者仓库提 Issue（issue #10：git fetch 超时被误报为插件问题）。
+          // 代理口径与诊断一致：设置里的代理 → 系统代理 → 环境变量 → 直连。
+          if (already === null) {
+            const effectiveProxy = settings.proxy !== ''
+              ? settings.proxy
+              : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
+            const isGitChannel = repoTarget !== null && target === repoTarget
+            const channel = isGitChannel ? 'github.com' : 'the npm registry'
+            const probeTarget = isGitChannel
+              ? 'https://github.com/'
+              : `${(settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org')}/`
+            const net = await probeUrl(probeTarget, effectiveProxy, 6000)
+            if (!net.ok) {
+              sendJson(response, 400, {
+                error: `[network] install aborted: cannot reach ${channel} (${probeTarget}) before install — your network connection appears to be down or blocked (DNS / proxy / firewall). Check your connection or proxy settings, run the connectivity diagnostic, then retry.`,
+                attempts,
+              })
+              return
+            }
+          }
           // 安装前预检：仅新安装走预检（github 源分发改入口文件缺失时直接拦截）。
           // 更新是已信任目标的覆盖重装，跳过预检避免重复下载 tarball。
           // npm 包信任 registry 直接放行；github 源拦截时标记 [packaging] 前缀，

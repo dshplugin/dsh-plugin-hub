@@ -58,6 +58,27 @@ test('classifyFailure: prepare script actually failing is a plugin issue, even w
   assert.equal(classifyFailure(msg), 'pluginPrepare')
 })
 
+test('classifyFailure: git fetch timeout (issue #10) is a network issue, not a plugin issue', () => {
+  const msg = [
+    'ERR_PNPM_GIT_FETCH_FAILED Git fetch failed: "git fetch https://github.com/adoresever/graph-memory HEAD ..."',
+    'fatal: unable to access \'https://github.com/adoresever/graph-memory/\': Failed to connect to github.com port 443: Timed out',
+    '[exit 1]',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'network')
+})
+
+test('classifyFailure: [network] marker from the server pre-check is a network issue', () => {
+  const msg = '[network] install aborted: cannot reach github.com (https://github.com/) before install — your network connection appears to be down or blocked (DNS / proxy / firewall).'
+  assert.equal(classifyFailure(msg), 'network')
+})
+
+test('classifyFailure: DNS / connection-reset / TLS failures are network issues, even wrapped by Command failed', () => {
+  assert.equal(classifyFailure('Command failed: git fetch https://github.com/x/y\nfatal: unable to access: Could not resolve host: github.com'), 'network')
+  assert.equal(classifyFailure('pnpm error code ECONNRESET\npnpm error network socket hang up'), 'network')
+  assert.equal(classifyFailure('getaddrinfo ENOTFOUND registry.npmjs.org'), 'network')
+  assert.equal(classifyFailure('SSL certificate problem: unable to get local issuer certificate'), 'network')
+})
+
 test('npmTooLowVersion extracts the version from the marker, null otherwise', () => {
   assert.equal(npmTooLowVersion('[npm-too-low] npm@11.3.0 — npm arborist crashed'), '11.3.0')
   assert.equal(npmTooLowVersion('no marker here'), null)

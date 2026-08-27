@@ -385,7 +385,11 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
           failureKind === 'npmTooOld'
             ? h('div', { className: styles.failPrepareHint },
               t(npmVersion ? 'failNpmTooLowV' : 'failNpmTooLow', npmVersion ? { v: npmVersion } : undefined))
-            : failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
+            : failureKind === 'network'
+              // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
+              // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failNetworkHint'))
+              : failureKind === 'pluginPrepare' || failureKind === 'pnpmIgnoredBuild'
               ? h('div', null, [
                 // [packaging]（预检/装后校验拦截：git 分发缺产物）与
                 // prepare 构建脚本实际执行失败 / 原生依赖构建被 pnpm 拦截：都是插件打包分发问题 —— 先说明原因，按钮在下方提交

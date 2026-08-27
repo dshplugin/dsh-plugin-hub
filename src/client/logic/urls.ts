@@ -61,11 +61,13 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
   const kind = classifyFailure(message)
   const reason = /\[packaging\]/i.test(message)
     ? 'plugin distribution is incomplete — the entry file declared in package.json is missing from the published package (github tarball or npm package); please commit build output or publish a complete package'
-      : kind === 'pluginPrepare'
-        ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
-        : kind === 'pnpmIgnoredBuild'
-          ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
-          : 'plugin-side install failure'
+      : kind === 'network'
+        ? 'network connectivity issue on the user side (DNS, proxy, firewall, or a blocked connection)'
+        : kind === 'pluginPrepare'
+          ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
+          : kind === 'pnpmIgnoredBuild'
+            ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
+            : 'plugin-side install failure'
   const code = coreErrorCode(message)
   // 按给定核心摘要预算构建完整预填 URL（含 URL 编码）；预算可调，供超长时逐档缩小
   const build = (coreChars: number): string => {

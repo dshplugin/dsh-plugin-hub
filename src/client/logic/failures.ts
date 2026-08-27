@@ -151,15 +151,18 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'repo'
+export type FailureKind = 'npmTooOld' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
- * 失败归类，四态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+ * 失败归类，五态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
  * 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
- * 一律引导提 Issue；唯一例外是本机 npm 自身版本过低导致的内部崩溃（见 npmTooOld）：
+ * 一律引导提 Issue；唯一的两个例外是本机环境问题（npm 版本过低 / 网络不通）：
  * - npmTooOld：失败输出含 npm arborist 的 `edgesOut` 崩溃特征（build-ideal-tree.js 解 peer 依赖时
  *   内部抛错，npm 11.6.0 前必现的已知缺陷，npm/cli#8261、#9787），或服务端已核实本机版本低于
  *   阈值并打了 `[npm-too-low]` 标记 —— 是本机 npm 版本过低/自身缺陷，不是插件问题 → 引导升级 npm
+ * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
+ *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
+ *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
  * - pnpmIgnoredBuild：插件依赖里的原生模块构建脚本被 pnpm 默认拦截（如 node-pty，
  *   `ERR_PNPM_IGNORED_BUILDS`）。只影响带原生模块的插件，其他插件不受影响 —— 差异在
  *   插件的依赖选择，属插件依赖/打包问题 → 引导去仓库提 Issue（建议改用预编译版本）
@@ -172,6 +175,12 @@ export function classifyFailure(message: string): FailureKind {
   // 不是插件问题 —— 必须最先判，否则该报错会被外层 ERR_PNPM_PREPARE_PACKAGE 吞成
   // 「插件打包分发问题」，误导用户去提 Issue
   if (/\[npm-too-low\]|edgesOut/i.test(message)) return 'npmTooOld'
+  // 网络问题（服务端 [network] 标记，或安装日志里的连接失败特征：git fetch 失败、
+  // 连接超时/拒绝/重置、DNS 解析失败、TLS/SSL 握手失败）—— 是本机网络/代理问题，
+  // 不是插件问题。必须在 prepare/Command failed 判定之前：git fetch 失败常被
+  // 外层包成 "Command failed: git fetch ..."，先按网络特征归类才不会误判成插件问题。
+  // 404 类「目标不存在」不含这些特征，仍归 repo（那是仓库/包的问题）。
+  if (/\[network\]|ERR_PNPM_GIT_FETCH_FAILED|ETIMEDOUT|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|EPIPE|EHOSTUNREACH|ENETUNREACH|getaddrinfo|Could not connect|Could not resolve host|Network unreachable|Failed to connect|socket hang up|CERT_HAS_EXPIRED|SSL certificate problem|\bTLS\b|\bSSL\b/i.test(message)) return 'network'
   // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
