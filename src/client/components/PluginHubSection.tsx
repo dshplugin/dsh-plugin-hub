@@ -51,10 +51,21 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   /** 外部跳转设置分组的一次性信号（错误弹窗「去系统诊断」→ 设置 → 系统诊断）：
    *  传给 SettingsView 消费后即清空，避免下次进设置被强制带跳 */
   const [settingsSection, setSettingsSection] = useState<SettingsSection | null>(null)
-  /** 网络不通提示的「去系统诊断」直达：关弹窗 → 切到设置页 → 切到系统诊断分组（自动跑连通性检测） */
+  /** 网络不通提示的「去系统诊断」直达：关掉所有弹窗（错误/通知/安装确认进度等，
+   *  否则 InstallModal 失败后仍停驻原地盖住设置页）→ 切到设置页 → 切到系统诊断分组（自动跑连通性检测） */
   const openDiagnostics = () => {
     setErrorMsg(null)
     setShowNotifications(false)
+    setConfirmPlugin(null)
+    setConfirmCustomTarget(null)
+    setConfirmGlobalNpm(null)
+    setUninstallPlugin(null)
+    setUninstallItem(null)
+    setDetailItem(null)
+    setShowHubUpdate(false)
+    setShowAbout(false)
+    setIgnoreTarget(null)
+    setShowRestartConfirm(false)
     setView('settings')
     setSettingsSection('diagnostics')
   }
