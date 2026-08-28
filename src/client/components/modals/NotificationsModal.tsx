@@ -276,6 +276,12 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 本机缺 pnpm，不是插件问题 —— 给安装指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmMissingHint'))
                     }
+                    if (kind === 'pnpmStore') {
+                      // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录旧依赖是
+                      // 另一大版本 pnpm 装的，当前 pnpm 不认，任何插件装进该 profile 都会失败 ——
+                      // 给清理重建指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failPnpmStoreHint'))
+                    }
                     if (kind === 'network') {
                       // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
                       // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

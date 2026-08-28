@@ -42,6 +42,7 @@ function reasonTitleOf(kind: FailureKind): string {
     case 'npmTooOld': return 'npm too old to install'
     case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmMissing': return 'pnpm command not found on the user machine'
+    case 'pnpmStore': return 'pnpm store version mismatch on the user machine'
     case 'pnpmIgnoredBuild': return 'build scripts blocked by pnpm allowlist'
     case 'pluginPrepare': return 'plugin distribution incomplete'
     case 'network': return 'network failure on the user side'
@@ -110,9 +111,16 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
           `- DSH: ${env.dshVersion ? `v${env.dshVersion}` : 'unknown'}`,
           `- Plugin Hub: v${PLUGIN_VERSION}`,
           `- Node: ${env.nodeVersion}`,
+          // 工具链版本：pnpm/npm/git —— 排查 ERR_PNPM_UNEXPECTED_STORE（store 大版本不匹配）
+          // 这类环境问题，作者一眼就能对号入座；探测不到如实写 unknown
+          `- pnpm: ${env.pnpmVersion ? `v${env.pnpmVersion}` : 'unknown'}`,
+          `- npm: ${env.npmVersion ? `v${env.npmVersion}` : 'unknown'}`,
+          `- git: ${env.gitVersion ? `v${env.gitVersion}` : 'unknown'}`,
           `- OS: ${env.platform} ${env.arch} (${env.release})`,
           `- Profile: \`${env.profile}\``,
           `- DSH Home: \`${env.dshHome}\``,
+          // 完整安装日志所在（正文受 URL 长度限制只能带摘要，完整日志在 hub.log，可复制/附加给作者）
+          `- Full log: \`~/.dsh/profiles/${env.profile}/hub.log\` (paste or attach for the full output)`,
         ]
         : []),
       // 该插件在插件中心的收录位置（详情页链接）

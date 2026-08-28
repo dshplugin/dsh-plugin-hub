@@ -12,7 +12,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { homedir, release } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { fetchViaCurl, gitLsRemote, probeUrl, systemProxy } from '../services/probe.ts'
 import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, globalNpmPackagesOf, hasQueuedTarget, installTargetOf, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install/install.ts'
 import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/profile/installed-versions.ts'
@@ -171,11 +171,28 @@ function hostDshVersion(): string | null {
   return null
 }
 
+/** 探测命令行工具的版本号（pnpm --version / npm --version / git --version）：
+ *  未安装 / 不在 PATH / 超时一律返回 null —— issue 环境快照如实写 unknown，绝不挂起。
+ *  （同步探测仅用于启动期/请求期的低频率 /env 快照，安装通道不经过这里。） */
+function toolVersion(cmd: string, args: string[]): string | null {
+  try {
+    const r = spawnSync(cmd, args, { timeout: 1500, encoding: 'utf8' })
+    if (r.error || r.status !== 0) return null
+    const v = (r.stdout ?? '').trim().split(/\r?\n/)[0]
+    return v || null
+  } catch {
+    return null
+  }
+}
+
 /** 宿主环境快照：提交 bug 时随 issue 附上，便于作者复现（前端 /env 端点返回）。 */
 function hostEnv(profile: string): Record<string, string | null> {
   return {
     dshVersion: hostDshVersion(),
     nodeVersion: process.version,
+    pnpmVersion: toolVersion('pnpm', ['--version']),
+    npmVersion: toolVersion('npm', ['--version']),
+    gitVersion: toolVersion('git', ['--version']),
     platform: process.platform,
     arch: process.arch,
     release: release(),

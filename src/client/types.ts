@@ -87,6 +87,12 @@ export interface ToastState {
 export interface EnvInfo {
   dshVersion: string | null
   nodeVersion: string
+  /** 本机 pnpm 版本（pnpm --version 首行；缺失返回 null）—— 排查 ERR_PNPM_UNEXPECTED_STORE 等 pnpm 环境问题 */
+  pnpmVersion: string | null
+  /** 本机 npm 版本（npm --version 首行；缺失返回 null） */
+  npmVersion: string | null
+  /** 本机 git 版本（git --version 首行；缺失返回 null） */
+  gitVersion: string | null
   platform: string
   arch: string
   release: string

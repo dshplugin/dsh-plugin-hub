@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStore' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -167,6 +167,10 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmIgno
  *   「pnpm: command not found」/ spawn ENOENT）—— 本机缺 pnpm（dsh 用 pnpm 管理 profile 插件），
  *   不是插件问题（dsh-plugin-hub#13：Linux 下 `dsh: pnpm not found on PATH` 被误归插件侧失败）
  *   → 提示安装/开启 pnpm，不引导提 Issue
+ * - pnpmStore：pnpm 存在但报 store 位置不匹配（`ERR_PNPM_UNEXPECTED_STORE` / `Unexpected store
+ *   location`）—— profile 目录的 node_modules 是用不同大版本的 pnpm 生成的，当前 pnpm 不认，
+ *   任何插件装进该 profile 都会失败；不是插件问题（dsh-plugin-hub#14：macOS 下
+ *   `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）→ 提示清理 profile 依赖目录重建，不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
  *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
@@ -196,6 +200,12 @@ export function classifyFailure(message: string): FailureKind {
   // 否则会被外层 "Command failed" 吞成「插件打包问题」，误导用户去提 Issue
   // （dsh-plugin-hub#12：Win 下 'dsh' 不在 PATH，cmd 报「不是内部或外部命令」被误归插件侧失败）
   if (/\[dsh-missing\]|不是内部或外部命令|is not recognized as an internal or external command|command not found|spawn dsh ENOENT/i.test(message)) return 'dshMissing'
+  // pnpm 大版本不一致（ERR_PNPM_UNEXPECTED_STORE / Unexpected store location）：profile 目录里
+  // 旧依赖是另一个大版本 pnpm 生成的，当前 pnpm 出于安全不认旧 store —— 本机环境问题，
+  // 任何插件装进该 profile 都会同样失败，不是插件问题（dsh-plugin-hub#14：macOS 下
+  // `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）；提示清理依赖目录用当前 pnpm 重建，
+  // 不引导提 Issue。必须在 pnpmMissing 之后 —— pnpm 在（能跑起来报错），不是「找不到命令」。
+  if (/ERR_PNPM_UNEXPECTED_STORE|Unexpected store location/i.test(message)) return 'pnpmStore'
   // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
   // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
   // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本

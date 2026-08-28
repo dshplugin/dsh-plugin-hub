@@ -141,6 +141,13 @@ test('classifyFailure: pnpm command missing is an environment issue (issue #13),
   assert.equal(classifyFailure('Command failed: dsh plugin add github:owner/repo\nsh: pnpm: command not found'), 'pnpmMissing')
 })
 
+test('classifyFailure: pnpm store version mismatch is an environment issue (issue #14), not a plugin issue', () => {
+  assert.equal(classifyFailure('[ERR_PNPM_UNEXPECTED_STORE] Unexpected store location\n(This error may happen if the node_modules was installed with a different major version of pnpm)\ndsh: pnpm failed in profile directory /Users/xxx/.dsh/profiles/web'), 'pnpmStore')
+  assert.equal(classifyFailure('dsh: pnpm failed in profile directory /Users/xxx/.dsh/profiles/web\n[ERR_PNPM_UNEXPECTED_STORE] Unexpected store location'), 'pnpmStore')
+  // 裸 Unexpected store location（无 ERR_ 前缀）也要能归到 pnpmStore
+  assert.equal(classifyFailure('Unexpected store location: expected /Users/xxx/.pnpm-store, got /Users/xxx/.pnpm-store/v10'), 'pnpmStore')
+})
+
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')
