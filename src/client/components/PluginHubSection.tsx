@@ -12,7 +12,7 @@ import { createElement as h, useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import styles from '../styles/Header.module.css'
 import modalStyles from '../styles/Modal.module.css'
-import type { EnvInfo, HubPlugin, SectionProps, ToastState } from '../types.ts'
+import type { EnvInfo, HubPlugin, InstallChannel, SectionProps, ToastState } from '../types.ts'
 import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import { PLUGIN_VERSION } from '../logic/constants.ts'
 import { ensurePluginCss } from '../logic/ensure-plugin-css.ts'
@@ -81,6 +81,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   /** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名 / GitHub 地址，DSH 命令已剥成裸目标）——
    *  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
   const [confirmCustomTarget, setConfirmCustomTarget] = useState<string | null>(null)
+  /** 自定义安装入口渠道（三张卡片之一）：随确认弹窗记录，提交时上报服务端，
+   *  报错/日志据此精准溯源「从哪个入口发起」（npm 全局安装固定为 'npm'） */
+  const [confirmCustomChannel, setConfirmCustomChannel] = useState<InstallChannel | null>(null)
   /** 全局 npm 安装确认弹窗（官方 `npm install -g <pkgs>`）：记录原始命令 + 解析出的包列表，
    *  走与应用商店同一套确认/进度/结果弹窗（plugin 传 null，InstallModal 走 globalNpm 模式） */
   const [confirmGlobalNpm, setConfirmGlobalNpm] = useState<{ raw: string; pkgs: string[] } | null>(null)
@@ -212,6 +215,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       if (e.key === 'Escape') {
         setConfirmPlugin(null)
         setConfirmCustomTarget(null)
+        setConfirmCustomChannel(null)
         setConfirmGlobalNpm(null)
         setUninstallPlugin(null)
         setUninstallItem(null)
@@ -471,11 +475,14 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
                 // 不进插件列表，不做「已安装→更新」判定 —— npm install -g 对已装包是原位覆盖更新，天然幂等）
                 if (opts?.globalNpm && opts.globalNpm.length > 0) {
                   setConfirmCustomTarget(null)
+                  setConfirmCustomChannel(null)
                   setConfirmIsUpdate(false)
                   setConfirmGlobalNpm({ raw, pkgs: opts.globalNpm })
                   return
                 }
                 setConfirmGlobalNpm(null)
+                // 记录入口渠道：报错/日志据此精准提示「从哪张卡片发起的安装」（NPM 包 / GitHub 源码 / DSH 命令）
+                setConfirmCustomChannel(opts.installChannel)
                 setConfirmIsUpdate(customTargetInstalled(target))
                 setConfirmCustomTarget(target)
               },
@@ -635,12 +642,17 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onClose: () => {
         setInstallDone(false)
         setConfirmCustomTarget(null)
+        setConfirmCustomChannel(null)
       },
       onCopy: () => {
         doCopy(`pnpm add ${confirmCustomTarget}`)
         setToast({ id: Date.now(), kind: 'copied' })
       },
-      onInstall: () => void queue.installCustom(confirmCustomTarget, confirmIsUpdate ? { update: true } : undefined),
+      onInstall: () => void queue.installCustom(confirmCustomTarget, {
+        update: confirmIsUpdate,
+        // 入口渠道（NPM 包 / GitHub 源码 / DSH 命令卡片）：上报服务端，报错/日志据此溯源
+        channel: confirmCustomChannel ?? 'npm',
+      }),
       onRestart: () => setShowRestartConfirm(true),
     }),
     // 全局 npm 安装确认弹窗（官方 `npm install -g <pkgs>`）：与应用商店同一套确认/进度/结果流程。
@@ -661,12 +673,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onClose: () => {
         setInstallDone(false)
         setConfirmGlobalNpm(null)
+        setConfirmCustomChannel(null)
       },
       onCopy: () => {
         doCopy(`npm install -g ${confirmGlobalNpm.pkgs.join(' ')}`)
         setToast({ id: Date.now(), kind: 'copied' })
       },
-      onInstall: () => void queue.installGlobalNpm(confirmGlobalNpm.pkgs),
+      onInstall: () => void queue.installGlobalNpm(confirmGlobalNpm.pkgs, { channel: 'npm' }),
       onRestart: () => setShowRestartConfirm(true),
     }),
     // 卸载确认弹窗：确认/进度/结果视图逻辑收敛在 modals.tsx。

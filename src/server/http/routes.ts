@@ -646,6 +646,12 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           const source = typeof body === 'object' && body !== null && typeof (body as { source?: unknown }).source === 'string'
             ? (body as { source: string }).source
             : ''
+          // 自定义安装入口渠道（客户端三张卡片：NPM 包 / GitHub 源码 / DSH 命令）：
+          // 客户端显式上报，服务端日志/报错据此精准溯源「从哪个入口发起」；目录插件安装不传。
+          const installChannel = (() => {
+            const raw = body !== null && typeof body === 'object' ? (body as { installChannel?: unknown }).installChannel : undefined
+            return raw === 'git' || raw === 'dsh' || raw === 'npm' ? raw : undefined
+          })()
           const settings = loadSettings(profile)
           // 界面语言（客户端随请求携带）：错误消息按用户当前语言提示（中文界面给中文，英文界面给英文）
           const lang = typeof body === 'object' && body !== null && (body as { lang?: unknown }).lang === 'en'
@@ -684,6 +690,8 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
               globalNpm,
               timeoutMs: COMMAND_TIMEOUT_MS,
               env: mutationEnv(settings),
+              // 全局 npm 安装由 NPM 包卡片/官方命令发起：日志体现入口渠道
+              installChannel: installChannel ?? 'npm',
             })
             sendJson(response, 200, { ok: true, task: task.id })
             return
@@ -816,6 +824,8 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             env: mutationEnv(settings),
             // 覆盖更新：npm 通道命令显式 @latest（pnpm add 无版本对已存在依赖是幂等的，不加版本不会真更新）
             updateNpm: mode === 'update',
+            // 自定义安装入口渠道（NPM 包 / GitHub 源码 / DSH 命令卡片）：日志/报错据此溯源
+            installChannel,
           })
           sendJson(response, 200, { ok: true, task: task.id })
         } catch (error) {

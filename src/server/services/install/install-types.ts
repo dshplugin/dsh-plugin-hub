@@ -28,6 +28,9 @@ export interface InstallTask {
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时任务执行全局 npm 安装，不进任何 profile */
   globalNpm?: string[]
   action: 'add' | 'remove' | 'update'
+  /** 自定义安装入口渠道（客户端三张卡片：NPM 包 / GitHub 源码 / DSH 命令）：
+   *  任务输出行与系统日志据此溯源「从哪个入口发起」；目录插件安装无此字段。 */
+  installChannel?: 'npm' | 'git' | 'dsh'
   /** 队列语义：pending 排队中 / running 执行中 / done / failed / cancelled（用户取消） */
   status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled'
   timedOut: boolean
@@ -51,7 +54,7 @@ export interface Invocation {
 /** 排队中的变更任务及其启动参数。 */
 export interface QueueItem {
   task: InstallTask
-  options: { action: 'add' | 'remove' | 'update'; profile: string; target: string; timeoutMs?: number; env?: NodeJS.ProcessEnv; globalNpm?: string[] }
+  options: { action: 'add' | 'remove' | 'update'; profile: string; target: string; timeoutMs?: number; env?: NodeJS.ProcessEnv; globalNpm?: string[]; installChannel?: 'npm' | 'git' | 'dsh' }
 }
 
 /**

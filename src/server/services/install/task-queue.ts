@@ -44,6 +44,8 @@ export interface ActiveTaskInfo {
   lines: string[]
   /** 尝试过的安装方式（npm 反查 + 实际执行命令）：失败时前端 issue 预填需要 */
   attempts: string[]
+  /** 自定义安装入口渠道（NPM 包 / GitHub 源码 / DSH 命令卡片）：前端刷新恢复后仍能精准溯源 */
+  installChannel?: 'npm' | 'git' | 'dsh'
 }
 
 /** All non-terminal tasks in queue order (running first, then pending). Lets the client resume a queue after a page reload. */
@@ -55,12 +57,12 @@ export function activeTask(): ActiveTaskInfo[] {
   for (const item of queue) {
     const task = item.task
     if (task.status === 'pending') {
-      found.push({ id: task.id, target: show(task), action: task.action, status: 'pending', progress: task.progress, lines: task.lines.slice(0, MAX_TASK_LINES), attempts: task.attempts })
+      found.push({ id: task.id, target: show(task), action: task.action, status: 'pending', progress: task.progress, lines: task.lines.slice(0, MAX_TASK_LINES), attempts: task.attempts, installChannel: task.installChannel })
     }
   }
   tasks.forEach((task) => {
     if (task.status === 'running') {
-      found.unshift({ id: task.id, target: show(task), action: task.action, status: 'running', progress: task.progress, lines: task.lines.slice(0, MAX_TASK_LINES), attempts: task.attempts })
+      found.unshift({ id: task.id, target: show(task), action: task.action, status: 'running', progress: task.progress, lines: task.lines.slice(0, MAX_TASK_LINES), attempts: task.attempts, installChannel: task.installChannel })
     }
   })
   return found
@@ -185,6 +187,15 @@ function mutationVerb(action: 'add' | 'remove' | 'update'): string {
   return action === 'remove' ? '开始卸载' : action === 'update' ? '开始更新' : '开始安装'
 }
 
+/** 系统日志入口渠道后缀：自定义安装（带渠道）在日志里体现「从哪张卡片发起」，
+ *  目录插件安装（无渠道）返回空串。日志中文语境，渠道名用中文口语。 */
+function channelLabel(channel: 'npm' | 'git' | 'dsh' | undefined): string {
+  if (channel === 'git') return '（GitHub 源码入口）'
+  if (channel === 'dsh') return '（DSH 命令入口）'
+  if (channel === 'npm') return '（NPM 包入口）'
+  return ''
+}
+
 /**
  * Enqueue a plugin mutation and return its task. Tasks run strictly serially:
  * the queue worker starts the next one only after the previous finishes.
@@ -206,8 +217,11 @@ export function startPluginMutation(options: {
   attempts?: string[]
   /** 更新已安装的 npm 包（mode=update）：命令显式带 @latest，让 pnpm 真正解析最新版本 */
   updateNpm?: boolean
+  /** 自定义安装入口渠道（客户端三张卡片：NPM 包 / GitHub 源码 / DSH 命令）：
+   *  任务输出行与系统日志据此溯源「从哪个入口发起」；目录插件安装不传 */
+  installChannel?: 'npm' | 'git' | 'dsh'
 }): InstallTask {
-  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, globalNpm: options.globalNpm, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false }
+  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, globalNpm: options.globalNpm, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false, installChannel: options.installChannel }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
   tasks.set(task.id, task)
   if (tasks.size > MAX_TASKS) {
@@ -220,14 +234,18 @@ export function startPluginMutation(options: {
     })
   }
   queue.push({ task, options: { ...options } })
-  // 系统日志：记录任务入队（安装/卸载/更新开始）
+  // 任务输出首行标记入口渠道（ASCII 标记，乱码免疫）：进度面板/失败明细里能溯源「从哪张卡片发起」
+  if (options.installChannel !== undefined) {
+    pushLine(task, `[install-channel] ${options.installChannel}`)
+  }
+  // 系统日志：记录任务入队（安装/卸载/更新开始），自定义安装带入口渠道后缀
   const category = mutationCategory(options.action)
   appendLog(options.profile, {
     at: Date.now(),
     level: 'info',
     category,
     event: `${category}.start`,
-    message: `${mutationVerb(options.action)} ${options.displayTarget ?? options.target}`,
+    message: `${mutationVerb(options.action)} ${options.displayTarget ?? options.target}${channelLabel(options.installChannel)}`,
   })
   pumpQueue()
   return task
@@ -252,7 +270,7 @@ function pumpQueue(): void {
         level: 'success',
         category,
         event: `${category}.done`,
-        message: `${verb('成功')} ${show}${task.needsRestart ? '（待重启生效）' : ''}`,
+        message: `${verb('成功')} ${show}${channelLabel(options.installChannel)}${task.needsRestart ? '（待重启生效）' : ''}`,
       })
     } else if (task.status === 'failed') {
       appendLog(options.profile, {
@@ -260,7 +278,7 @@ function pumpQueue(): void {
         level: 'error',
         category,
         event: `${category}.fail`,
-        message: `${verb('失败')} ${show}`,
+        message: `${verb('失败')} ${show}${channelLabel(options.installChannel)}`,
       })
     } else if (task.status === 'cancelled') {
       appendLog(options.profile, {
@@ -268,7 +286,7 @@ function pumpQueue(): void {
         level: 'warn',
         category,
         event: 'task.cancel',
-        message: `已取消 ${show}`,
+        message: `已取消 ${show}${channelLabel(options.installChannel)}`,
       })
     }
     // 已终态的任务移出队列：既防 queue 数组无限增长（内存泄漏），也让下一轮 pump 干净

@@ -20,7 +20,7 @@ import { createElement as h, useState } from 'react'
 import type { FormEvent, MouseEvent } from 'react'
 import styles from '../../styles/CustomInstallView.module.css'
 import modal from '../../styles/Modal.module.css'
-import type { Translate } from '../../types.ts'
+import type { InstallChannel, Translate } from '../../types.ts'
 import { CloseIcon, HelpIcon } from '../ui/icons.tsx'
 
 /* —— 自定义安装输入预检 ——
@@ -113,8 +113,10 @@ type HelpTarget = keyof typeof HELP_CARDS
 export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, enableDsh, onOpenSettings, profile }: {
   t: Translate
   /** 命令行安装：输入 npm 包名 / npm、pnpm 安装命令 / GitHub 地址 / dsh plugin 命令即装
-   *  （custom 源，受安全设置开关控制）；opts.globalNpm 表示官方 npm 全局安装命令（npm install -g），附带解析出的包列表 */
-  onInstallCustom: (raw: string, opts?: { globalNpm?: string[] }) => void
+   *  （custom 源，受安全设置开关控制）。installChannel 必填 = 入口渠道（三张卡片之一）：
+   *  服务端日志/报错提示据此溯源「从哪个入口发起」；opts.globalNpm 表示官方 npm 全局安装
+   *  命令（npm install -g），附带解析出的包列表（仍属 NPM 包入口）。 */
+  onInstallCustom: (raw: string, opts: { installChannel: InstallChannel; globalNpm?: string[] }) => void
   /** 安全信任三通道开关：关掉后对应输入卡片禁用（不提交），并引导去设置打开 */
   enableNpm: boolean
   enableGit: boolean
@@ -155,9 +157,9 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
     const parsed = parseNpmInput(raw)
     if (parsed === null) { setNpmError(t('npmInstallInvalid')); return }
     if (parsed.kind === 'global') {
-      onInstallCustom(raw, { globalNpm: parsed.pkgs })
+      onInstallCustom(raw, { installChannel: 'npm', globalNpm: parsed.pkgs })
     } else {
-      onInstallCustom(parsed.target)
+      onInstallCustom(parsed.target, { installChannel: 'npm' })
     }
     setNpmQuery('')
     setNpmError('')
@@ -166,7 +168,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
     const target = gitQuery.trim()
     if (!target) return
     if (!isGitHubInput(target)) { setGitError(t('gitInstallInvalid')); return }
-    onInstallCustom(target)
+    onInstallCustom(target, { installChannel: 'git' })
     setGitQuery('')
     setGitError('')
   }
@@ -177,7 +179,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
     if (parsed === null) { setCmdError(t('dshCmdInvalid')); return }
     // add / update 统一走安装流程：目标已安装时弹窗自动转「更新」覆盖重装（服务端 mode=update 放行），
     // 未安装时即为普通安装 —— 粘贴 `dsh plugin --profile web update dsh-plugin` 这类命令即可更新到最新
-    onInstallCustom(parsed.target)
+    onInstallCustom(parsed.target, { installChannel: 'dsh' })
     setCmdQuery('')
     setCmdError('')
   }

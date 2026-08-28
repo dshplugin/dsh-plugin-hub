@@ -9,6 +9,10 @@
 
 export type LocaleId = 'zh' | 'en'
 
+/** 自定义安装入口渠道：三张卡片（NPM 包 / GitHub 源码 / DSH 命令）。
+ * 客户端提交时显式上报，服务端落日志/报错提示据此溯源「从哪个入口发起」。 */
+export type InstallChannel = 'npm' | 'git' | 'dsh'
+
 /** Translation function signature shared by the host binder and the in-component dictionary. */
 export type Translate = (key: string, params?: Record<string, string | number>) => string
 

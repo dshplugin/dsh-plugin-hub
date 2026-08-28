@@ -10,7 +10,7 @@
  * uninstall, cancel) plus the modal task lookups used by the dialogs.
  */
 import { useEffect, useRef, useState } from 'react'
-import type { HubPlugin, LocaleId, Translate } from '../types.ts'
+import type { HubPlugin, InstallChannel, LocaleId, Translate } from '../types.ts'
 import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import type { InstalledItem } from '../logic/installed.ts'
 
@@ -28,6 +28,9 @@ export interface QueueTask {
   desc?: string
   /** 所属插件仓库（owner/repo）：失败时错误弹窗据此提供「去仓库反馈」入口；卸载为 null */
   repo: string | null
+  /** 自定义安装入口渠道（NPM 包 / GitHub 源码 / DSH 命令三张卡片）：失败时错误/通知精准
+   *  溯源「从哪个入口发起」；目录插件安装无此字段（非自定义入口）。 */
+  channel?: InstallChannel
   /** 实际动作（add/update/remove）：成功通知据此区分「安装成功」与「更新成功」。
    *  服务端 /active 带回真实动作；本地乐观入队按 update 标记推断。 */
   action?: 'add' | 'update' | 'remove'
@@ -88,6 +91,15 @@ export interface TaskQueueOptions {
   /** 待重启项展示信息补齐：按 owner/repo 从插件目录解析简介/版本；找不到返回 null。 */
   resolvePending: (repo: string) => { desc?: string; version?: string } | null
 }
+
+/** 入口渠道的 i18n key：NPM 包 / GitHub 源码 / DSH 命令。 */
+const channelKeyOf = (channel: InstallChannel): string =>
+  channel === 'git' ? 'installChannelGit' : channel === 'dsh' ? 'installChannelDsh' : 'installChannelNpm'
+
+/** 失败消息的入口溯源前缀：自定义安装（带渠道）在错误正文顶部精准指出从哪张卡片发起；
+ *  目录插件安装（无渠道）返回 null，错误正文保持原样。 */
+const entryLineOf = (t: Translate, channel: InstallChannel | undefined): string | null =>
+  channel ? t('installEntryLine', { c: t(channelKeyOf(channel)) }) : null
 
 export function useTaskQueue(opts: TaskQueueOptions) {
   const {
@@ -205,10 +217,12 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       }
     } else {
       // 失败：完整展示全部输出行（最新在前，逆序为日志阅读顺序），不裁剪
-      const detail = lines.length > 0
+      const rawDetail = lines.length > 0
         ? [...lines].reverse().join('\n')
         : q.kind === 'uninstall' ? t('uninstallFail') : t('installFail')
-      onError(detail, q.repo, q.kind, q.command, q.attempts, q.action === 'update')
+      // 自定义安装（带入口渠道）：错误正文顶部精准提示「从哪张卡片发起」，目录安装保持原样
+      const entry = entryLineOf(t, q.channel)
+      onError(entry ? `${entry}\n${rawDetail}` : rawDetail, q.repo, q.kind, q.command, q.attempts, q.action === 'update')
     }
     maybeStopPoll()
   }
@@ -283,7 +297,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         const res = await fetch('/dsh-plugin-hub/active', { cache: 'no-store' })
         if (!res.ok) throw new Error(`active ${res.status}`)
         const data = await res.json() as {
-          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown; needsRestart?: unknown }[]
+          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown; needsRestart?: unknown; installChannel?: unknown }[]
           pendingRestarts?: unknown
         }
         const active = (data.tasks ?? []).filter((a) => typeof a.id === 'number')
@@ -313,6 +327,10 @@ export function useTaskQueue(opts: TaskQueueOptions) {
                 lines: Array.isArray(a.lines) ? (a.lines as string[]) : (prevTask?.lines ?? []),
                 attempts: Array.isArray(a.attempts) ? (a.attempts as string[]) : (prevTask?.attempts ?? []),
                 needsRestart: typeof a.needsRestart === 'boolean' ? a.needsRestart : (prevTask?.needsRestart ?? true),
+                // 入口渠道：本地乐观入队已带；服务端 /active 也带回（刷新恢复用），服务端优先
+                channel: (a.installChannel === 'npm' || a.installChannel === 'git' || a.installChannel === 'dsh')
+                  ? a.installChannel
+                  : prevTask?.channel,
               })
             }
             // 保留乐观条目：服务端尚未登记（preflight 中），无真实 id，不能因 active 缺它就被合并吞掉
@@ -353,7 +371,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         const res = await fetch('/dsh-plugin-hub/active', { cache: 'no-store' })
         if (!res.ok) return
         const data = await res.json() as {
-          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown; needsRestart?: unknown }[]
+          tasks?: { id?: unknown; action?: unknown; target?: unknown; status?: unknown; progress?: unknown; lines?: unknown; attempts?: unknown; needsRestart?: unknown; displayTarget?: unknown; installChannel?: unknown }[]
           pendingRestarts?: unknown
         }
         if (cancelled) return
@@ -379,6 +397,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
               lines: Array.isArray(a.lines) ? (a.lines as string[]) : [],
               attempts: Array.isArray((a as { attempts?: unknown }).attempts) ? ((a as { attempts: string[] }).attempts) : [],
               needsRestart: typeof (a as { needsRestart?: unknown }).needsRestart === 'boolean' ? (a as { needsRestart: boolean }).needsRestart : true,
+              // 服务端登记的入口渠道：自定义安装刷新后也能精准溯源（目录安装无此字段）
+              channel: (a.installChannel === 'npm' || a.installChannel === 'git' || a.installChannel === 'dsh') ? a.installChannel : undefined,
             }
           })
         if (items.length > 0 || pendingRef.current.length > 0) {
@@ -410,6 +430,9 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     update?: boolean
     /** 全局 npm 安装包列表（`npm install -g <pkgs>`）：非空时服务端执行全局安装，不进任何 profile */
     globalNpm?: string[]
+    /** 自定义安装入口渠道（NPM 包 / GitHub 源码 / DSH 命令卡片）：随请求上报服务端落日志，
+     *  失败弹窗/通知据此精准溯源「从哪个入口发起」；目录安装不传。 */
+    channel?: InstallChannel
   }) => {
     // 防重复入队：同一目标已在排队/执行中则忽略
     if (queueRef.current.some((q) => q.kind === 'install' && q.target === input.repo)) return
@@ -428,6 +451,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       version: input.version, updatedAt: input.updatedAt,
       status: 'running', progress: 0, lines: [], optimistic: true,
       command: input.command,
+      channel: input.channel,
       action: input.update ? 'update' : 'add',
       // 服务端登记后 /active 会带回真实尝试记录（npm 反查 + 执行命令），先占位空列表
       attempts: [], needsRestart: true,
@@ -446,6 +470,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           mode: input.update ? 'update' : undefined,
           // 界面语言带给服务端：网络预检等错误消息按用户当前语言返回（中文界面给中文，英文界面给英文）
           ...(langKey ? { lang: langKey } : {}),
+          // 自定义安装入口渠道（三张卡片之一）：服务端日志/报错提示据此溯源
+          ...(input.channel ? { installChannel: input.channel } : {}),
           ...(input.globalNpm && input.globalNpm.length > 0 ? { globalNpm: input.globalNpm } : {}),
         }),
         signal: controller.signal,
@@ -455,8 +481,11 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         // 请求层失败（重复安装 409 / 参数错误 / 安全开关 403 等）：移除乐观条目 + 完整错误弹窗
         applyQueue((prev) => prev.filter((x) => x.id !== tempId))
         // 同步 400（如预检拦截）服务端会附上已尝试的安装方式，issue 预填一并展示；
-        // 用 || 而非 ?? ：error 为空字符串时回退 HTTP 状态，避免复制出来是空白
-        onError(data.error || `HTTP ${res.status}`, input.repo, 'install', input.command, data.attempts)
+        // 用 || 而非 ?? ：error 为空字符串时回退 HTTP 状态，避免复制出来是空白。
+        // 自定义安装（带入口渠道）：错误正文顶部精准提示「从哪张卡片发起」
+        const entry = entryLineOf(t, input.channel)
+        const msg = data.error || `HTTP ${res.status}`
+        onError(entry ? `${entry}\n${msg}` : msg, input.repo, 'install', input.command, data.attempts)
         return
       }
       const taskId = data.task
@@ -476,7 +505,10 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       const reason = aborted
         ? t('requestTimeout')
         : err instanceof Error && err.message ? err.message : String(err ?? '')
-      onError(reason ? `${t('installFail')} — ${reason}` : t('installFail'), input.repo, 'install', input.command)
+      // 自定义安装（带入口渠道）：错误正文顶部精准提示「从哪张卡片发起」
+      const entry = entryLineOf(t, input.channel)
+      const msg = reason ? `${t('installFail')} — ${reason}` : t('installFail')
+      onError(entry ? `${entry}\n${msg}` : msg, input.repo, 'install', input.command)
     } finally {
       window.clearTimeout(timeout)
       submittingRef.current.delete(input.repo)
@@ -505,9 +537,11 @@ export function useTaskQueue(opts: TaskQueueOptions) {
 
   /** 命令行安装：用户手输 npm 包名或 GitHub 地址，走 custom 源（受安全开关控制）。
    *  update=true 时对已安装目标放行覆盖重装（与目录插件「更新」同一语义）。
+   *  channel=入口渠道（NPM 包 / GitHub 源码 / DSH 命令卡片）：上报服务端落日志，
+   *  失败弹窗/通知据此精准溯源。
    *  队列展示/防重一律用归一化身份（owner/repo 或 npm 包名）：与服务端 /active 合并、
    *  弹窗目标匹配同口径，npm 包名透传不受影响。 */
-  const installCustom = async (raw: string, opts?: { update?: boolean }) => {
+  const installCustom = async (raw: string, opts?: { update?: boolean; channel?: InstallChannel }) => {
     const target = raw.trim()
     if (!target) return
     const repo = repoFromInstallTarget(target)
@@ -517,12 +551,13 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       command: `pnpm add ${target}`,
       source: 'custom',
       update: opts?.update,
+      channel: opts?.channel,
     })
   }
 
   /** 全局 npm 安装（官方 README 的 `npm install -g <pkgs>`）：不进任何 profile、无需宿主重启。
-   *  队列展示/防重用包列表空格拼接的身份（与服务端 target 同口径）。 */
-  const installGlobalNpm = async (pkgs: string[], opts?: { update?: boolean }) => {
+   *  队列展示/防重用包列表空格拼接的身份（与服务端 target 同口径）；入口渠道固定为 npm（NPM 包卡片）。 */
+  const installGlobalNpm = async (pkgs: string[], opts?: { update?: boolean; channel?: InstallChannel }) => {
     const list = (pkgs ?? []).map((p) => p.trim()).filter((p) => p !== '')
     if (list.length === 0) return
     const identity = list.join(' ')
@@ -533,6 +568,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       source: 'custom',
       globalNpm: list,
       update: opts?.update,
+      channel: opts?.channel ?? 'npm',
     })
   }
 
