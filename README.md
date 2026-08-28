@@ -29,7 +29,7 @@
 DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方插件开发规范构建的开源插件，安装进「设置 → 插件中心」后，无需离开应用即可浏览、搜索并一键安装社区插件。本项目为独立社区项目，与 DeepSeek Harness 官方无隶属关系。
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-market-zh.png" alt="DSH Plugin Hub 插件中心界面" width="840">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-market-zh.png" alt="DSH Plugin Hub 插件中心界面" width="840">
 </p>
 
 ## 插件中心特性
@@ -76,8 +76,8 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 **已安装插件列表 · 自定义安装**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-installed-zh.png" alt="已安装插件列表" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-custom-install-zh.png" alt="自定义安装" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-installed-zh.png" alt="已安装插件列表" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-custom-install-zh.png" alt="自定义安装" width="400">
 </p>
 
 集中管理当前环境已装的全部插件，支持搜索、来源筛选与排序，行尾提供更新、卸载与「在 Finder 中显示」 · 手动安装目录外的任意插件，支持 NPM 包、GitHub 源码与 DSH 命令行三种通道
@@ -85,8 +85,8 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 **设置 · 系统日志**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-settings-zh.png" alt="设置" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-system-logs-zh.png" alt="系统日志" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-settings-zh.png" alt="设置" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-system-logs-zh.png" alt="系统日志" width="400">
 </p>
 
 集中配置更新检查、NPM 镜像源、代理通道、安全信任与日志存放位置 · 记录安装、卸载、设置变更与诊断轨迹，按分类与级别筛选，内置日志查看器
@@ -94,8 +94,8 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 **确认安装 · 确认卸载**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-install-confirm-zh.png" alt="确认安装" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-uninstall-confirm-zh.png" alt="确认卸载" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-install-confirm-zh.png" alt="确认安装" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-uninstall-confirm-zh.png" alt="确认卸载" width="400">
 </p>
 
 安装前展示插件名称、来源仓库与执行命令，确认后才开始安装 · 卸载前展示待移除的插件，确认后才从环境移除，避免误删
@@ -103,8 +103,8 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 **确认更新 · 通知中心**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-update-confirm-zh.png" alt="确认更新" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-8/dsh-plugin-hub-notifications-zh.png" alt="通知中心" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-update-confirm-zh.png" alt="确认更新" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-9/dsh-plugin-hub-notifications-zh.png" alt="通知中心" width="400">
 </p>
 
 检测到新版本时弹出，确认后原位覆盖安装到最新版 · 集中管理安装、卸载、更新的历史记录、实时进度与待重启提醒
