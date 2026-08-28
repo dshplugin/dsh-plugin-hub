@@ -149,8 +149,12 @@ export function readInstalled(profile: string): Record<string, string> {
   }
 }
 
-/** 宿主 dsh CLI 版本：从入口（process.argv[1]）向上找最近的 dsh/harness 相关 package.json；找不到返回 null。 */
+/** 宿主 dsh CLI 版本：优先直接跑 `dsh --version`（与 pnpm/npm/git 同款同步探测，1500ms 超时兜底，
+ *  绝不挂起）—— 原先从 process.argv[1] 向上找 package.json 猜版本在部分宿主加载方式下取不到，
+ *  导致 issue 环境快照 DSH: unknown；拿不到再退回入口 package.json 查找（dsh 不在 PATH 时兜底）。 */
 function hostDshVersion(): string | null {
+  const viaCli = toolVersion('dsh', ['--version'])
+  if (viaCli) return viaCli
   const entry = process.argv[1]
   if (entry === undefined) return null
   let dir = dirname(resolve(entry))
