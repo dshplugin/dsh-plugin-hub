@@ -125,6 +125,22 @@ test('classifyFailure: dsh command missing on the machine is an environment issu
   assert.equal(classifyFailure("Command failed: dsh plugin add github:owner/repo\n'dsh' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'dshMissing')
 })
 
+test('classifyFailure: pnpm command missing is an environment issue (issue #13), not a plugin issue', () => {
+  // dsh 存在但缺 pnpm（dsh 用它管理 profile 插件）：issue #13 的真实报错（Linux）
+  assert.equal(classifyFailure('dsh: pnpm not found on PATH — install pnpm to manage profile plugins'), 'pnpmMissing')
+  // POSIX shell
+  assert.equal(classifyFailure('sh: pnpm: command not found'), 'pnpmMissing')
+  // node spawn ENOENT
+  assert.equal(classifyFailure('spawn pnpm ENOENT'), 'pnpmMissing')
+  // Windows cmd 中英文
+  assert.equal(classifyFailure("'pnpm' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'pnpmMissing')
+  assert.equal(classifyFailure("'pnpm' is not recognized as an internal or external command"), 'pnpmMissing')
+  // 服务端 [pnpm-missing] 标记（乱码免疫）
+  assert.equal(classifyFailure('[pnpm-missing] the pnpm CLI was not found on this machine'), 'pnpmMissing')
+  // 优先级：pnpm 缺失不能被 dshMissing（裸 command not found）或插件侧（Command failed）吞掉
+  assert.equal(classifyFailure('Command failed: dsh plugin add github:owner/repo\nsh: pnpm: command not found'), 'pnpmMissing')
+})
+
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')

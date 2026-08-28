@@ -151,18 +151,22 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
- * 失败归类，六态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
+ * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
  * 对用户而言结果都一样 —— 当前安装通道（npm 或 git）装不上，就是插件分发/依赖的问题，
- * 一律引导提 Issue；唯一的例外是本机环境问题（npm 版本过低 / 找不到 dsh 命令 / 网络不通）：
+ * 一律引导提 Issue；唯一的例外是本机环境问题（npm 版本过低 / 找不到 dsh / 找不到 pnpm / 网络不通）：
  * - npmTooOld：失败输出含 npm arborist 的 `edgesOut` 崩溃特征（build-ideal-tree.js 解 peer 依赖时
  *   内部抛错，npm 11.6.0 前必现的已知缺陷，npm/cli#8261、#9787），或服务端已核实本机版本低于
  *   阈值并打了 `[npm-too-low]` 标记 —— 是本机 npm 版本过低/自身缺陷，不是插件问题 → 引导升级 npm
  * - dshMissing：安装器 spawn 的 `dsh` 命令找不到（Windows cmd「不是内部或外部命令」/ POSIX
  *   「command not found」/ spawn ENOENT）—— 是本机 DSH 未正确安装或不在 PATH，不是插件问题
  *   → 提示检查 PATH/重装 DSH，不引导提 Issue
+ * - pnpmMissing：dsh 存在但调用的 `pnpm` 找不到（dsh 报 `pnpm not found on PATH`/POSIX
+ *   「pnpm: command not found」/ spawn ENOENT）—— 本机缺 pnpm（dsh 用 pnpm 管理 profile 插件），
+ *   不是插件问题（dsh-plugin-hub#13：Linux 下 `dsh: pnpm not found on PATH` 被误归插件侧失败）
+ *   → 提示安装/开启 pnpm，不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
  *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
@@ -179,6 +183,12 @@ export function classifyFailure(message: string): FailureKind {
   // 不是插件问题 —— 必须最先判，否则该报错会被外层 ERR_PNPM_PREPARE_PACKAGE 吞成
   // 「插件打包分发问题」，误导用户去提 Issue
   if (/\[npm-too-low\]|edgesOut/i.test(message)) return 'npmTooOld'
+  // 找不到 pnpm 命令（dsh 报 `pnpm not found on PATH` —— dsh 用它管理 profile 插件 /
+  // POSIX「pnpm: command not found」/ spawn pnpm ENOENT / Windows cmd 中英文报错）：
+  // 本机缺 pnpm，不是插件问题。必须在 dshMissing 之前 —— dshMissing 正则含裸「command not
+  // found」，会把 `pnpm: command not found` 吞成「dsh 缺失」，误引导用户去装 DSH
+  // （dsh-plugin-hub#13：Linux 下 `dsh: pnpm not found on PATH` 被误归插件侧失败）
+  if (/\[pnpm-missing\]|pnpm not found|pnpm: command not found|spawn pnpm ENOENT|'pnpm' 不是内部或外部命令|"pnpm" 不是内部或外部命令|pnpm['"]?\s*is not recognized/i.test(message)) return 'pnpmMissing'
   // 找不到 dsh 命令（服务端 [dsh-missing] 标记 —— 乱码免疫：Windows cmd 中文版输出 GBK，
   // 经 UTF-8 解码成乱码无法匹配原文，故服务端在 spawn 前用 which/where 探测并打 ASCII 标记；
   // 其余形态：Windows cmd「不是内部或外部命令」/ POSIX「command not found」/

@@ -271,6 +271,11 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 本机 DeepSeek Harness 未正确安装或 dsh 不在 PATH，不是插件问题 —— 直接给环境修复指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failDshMissingHint'))
                     }
+                    if (kind === 'pnpmMissing') {
+                      // 找到了 dsh 但缺 pnpm（dsh 用它管理 profile 插件；dsh 报 pnpm not found on PATH）：
+                      // 本机缺 pnpm，不是插件问题 —— 给安装指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failPnpmMissingHint'))
+                    }
                     if (kind === 'network') {
                       // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
                       // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

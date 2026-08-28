@@ -312,6 +312,7 @@ export const zh = {
   // 「去系统诊断」直达按钮：网络不通提示下方的品牌实底按钮，跳到设置 → 系统诊断跑连通性检测
   failNetworkRunDiag: '去系统诊断检测网络',
   failDshMissingHint: '系统找不到 dsh 命令（dsh 未加入系统 PATH），无法调用安装器执行安装。请确认 DeepSeek Harness 已正确安装、dsh 已加入 PATH（或重新安装），然后重试。这不是插件本身的问题。',
+  failPnpmMissingHint: '安装器找到了 dsh，但系统里没有 pnpm 命令（dsh 用它来管理 profile 插件）。请先安装 pnpm（如 npm install -g pnpm），确认 pnpm 已加入 PATH 后重试。这不是插件本身的问题。',
   reportIssue: '去插件仓库提交 Issue',
   detail: '打开详情',
   noResult: '没有找到匹配的插件',
@@ -660,6 +661,7 @@ export const en = {
   // Diagnostics shortcut button under the network-down hint: jumps to Settings → System Diagnostics
   failNetworkRunDiag: 'Run a network diagnostic',
   failDshMissingHint: 'The dsh command could not be found (it is not on the system PATH), so the installer could not run. Please make sure DeepSeek Harness is installed correctly and dsh is on your PATH (or reinstall it), then retry. This is not a problem with the plugin itself.',
+  failPnpmMissingHint: 'The installer found dsh, but pnpm is missing on this machine (dsh uses it to manage profile plugins). Please install pnpm first (e.g. npm install -g pnpm), make sure it is on your PATH, then retry. This is not a problem with the plugin itself.',
   reportIssue: 'Report an Issue to the plugin repo',
   detail: 'Open details',
   noResult: 'No plugins match your search',
