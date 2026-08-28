@@ -43,6 +43,7 @@ function reasonTitleOf(kind: FailureKind): string {
     case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmMissing': return 'pnpm command not found on the user machine'
     case 'pnpmStore': return 'pnpm store version mismatch on the user machine'
+    case 'pnpmPolicy': return 'pnpm supply-chain policy blocked the install on the user machine'
     case 'pnpmIgnoredBuild': return 'build scripts blocked by pnpm allowlist'
     case 'pluginPrepare': return 'plugin distribution incomplete'
     case 'network': return 'network failure on the user side'
@@ -74,7 +75,9 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
           ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
           : kind === 'pnpmIgnoredBuild'
             ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
-            : 'plugin-side install failure'
+            : kind === 'pnpmPolicy'
+              ? 'the pnpm supply-chain policy on the user machine blocked the install (minimum release age for freshly published packages / untrusted origin)'
+              : 'plugin-side install failure'
   const code = coreErrorCode(message)
   // 按给定核心摘要预算构建完整预填 URL（含 URL 编码）；预算可调，供超长时逐档缩小
   const build = (coreChars: number): string => {

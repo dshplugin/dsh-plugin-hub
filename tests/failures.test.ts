@@ -148,6 +148,17 @@ test('classifyFailure: pnpm store version mismatch is an environment issue (issu
   assert.equal(classifyFailure('Unexpected store location: expected /Users/xxx/.pnpm-store, got /Users/xxx/.pnpm-store/v10'), 'pnpmStore')
 })
 
+test('classifyFailure: pnpm supply-chain policy blocks are environment issues (issues #15/#16), not plugin issues', () => {
+  // #15：minimumReleaseAge —— 锁文件里包的发布时间太近被 pnpm 11 拒收（用户装刚发布的官方插件）
+  assert.equal(classifyFailure('[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION] 2 lockfile entries failed verification\nSome packages are not released long enough to be installed\n(use minimumReleaseAge setting to adjust)'), 'pnpmPolicy')
+  assert.equal(classifyFailure('Minimum release age of @scope/pkg is 1 day, but the package was published 2 hours ago'), 'pnpmPolicy')
+  // #16：untrusted origin —— 依赖来源未受本机 pnpm 信任
+  assert.equal(classifyFailure('untrusted origin\ndsh: pnpm failed in profile directory /Users/xxx/.dsh/profiles/web'), 'pnpmPolicy')
+  assert.equal(classifyFailure('ERR_PNPM_UNTRUSTED_ORIGIN untrusted origin for @scope/pkg'), 'pnpmPolicy')
+  // 这两类都必须优先于「构建脚本被白名单拦截 / Command failed / 兜底 repo」
+  assert.equal(classifyFailure('ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION ... Command failed: pnpm add'), 'pnpmPolicy')
+})
+
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')

@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStore' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStore' | 'pnpmPolicy' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -171,6 +171,11 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStor
  *   location`）—— profile 目录的 node_modules 是用不同大版本的 pnpm 生成的，当前 pnpm 不认，
  *   任何插件装进该 profile 都会失败；不是插件问题（dsh-plugin-hub#14：macOS 下
  *   `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）→ 提示清理 profile 依赖目录重建，不引导提 Issue
+ * - pnpmPolicy：pnpm 11 的供应链安全策略拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` /
+ *   `Minimum release age` —— 锁文件里包的发布时间太近被拒；`untrusted origin` —— 依赖来源未被
+ *   本机 pnpm 信任）。拦的是「发布太新的包」与「未被信任的来源」，装任何新插件都会撞墙，不是
+ *   插件问题（dsh-plugin-hub#15/#16：用户装官方 dsh-plugin 也被这两类策略拦下并误归插件侧失败）
+ *   → 提示在 pnpm 配置里豁免该策略（如 `minimumReleaseAge: 0`）或等发布冷却后重试，不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
  *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
@@ -206,6 +211,11 @@ export function classifyFailure(message: string): FailureKind {
   // `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）；提示清理依赖目录用当前 pnpm 重建，
   // 不引导提 Issue。必须在 pnpmMissing 之后 —— pnpm 在（能跑起来报错），不是「找不到命令」。
   if (/ERR_PNPM_UNEXPECTED_STORE|Unexpected store location/i.test(message)) return 'pnpmStore'
+  // pnpm 供应链安全策略拦截（pnpm 11：minimumReleaseAge 拒收「发布太新」的包 /
+  // untrusted origin 来源不受信任）：pnpm 在、也连得上，纯粹是本机策略不放行 ——
+  // 装任何「新发布/非信任来源」的插件都会同样失败，不是插件问题（dsh-plugin-hub#15/#16）。
+  // 必须在 pnpmIgnoredBuild 之前 —— 该策略优先于「构建脚本被白名单拦截」，且两者都不引导提 Issue。
+  if (/ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|Minimum release age|untrusted origin/i.test(message)) return 'pnpmPolicy'
   // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
   // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
   // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本

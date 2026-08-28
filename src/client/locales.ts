@@ -314,6 +314,7 @@ export const zh = {
   failDshMissingHint: '系统找不到 dsh 命令（dsh 未加入系统 PATH），无法调用安装器执行安装。请确认 DeepSeek Harness 已正确安装、dsh 已加入 PATH（或重新安装），然后重试。这不是插件本身的问题。',
   failPnpmMissingHint: '安装器找到了 dsh，但系统里没有 pnpm 命令（dsh 用它来管理 profile 插件）。请先安装 pnpm（如 npm install -g pnpm），确认 pnpm 已加入 PATH 后重试。这不是插件本身的问题。',
   failPnpmStoreHint: '安装器调用 pnpm 时报「store 位置不匹配」（ERR_PNPM_UNEXPECTED_STORE）：你的 profile 目录里旧插件依赖是用另一个大版本的 pnpm 生成的，当前 pnpm 出于安全不认旧目录，导致任何插件装进该 profile 都会失败。请删除该 profile 目录下的 node_modules 与 pnpm-lock.yaml（可先到「系统日志」或 ~/.dsh/profiles/<profile>/hub.log 查看完整报错），再重新安装。这不是插件本身的问题。',
+  failPnpmPolicyHint: '安装器调用 pnpm 时被其供应链安全策略拦截（ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION / Minimum release age：锁文件里包的发布时间太近被拒；或 untrusted origin：依赖来源未受本机 pnpm 信任）。这是 pnpm 11 的默认安全策略，装任何「刚发布/新来源」的插件都会撞墙，不是插件本身的问题。请在 pnpm 配置（pnpm-workspace.yaml 或 .npmrc）里加入 minimumReleaseAge: 0 豁免，或等发布冷却一段时间后重试。',
   // 自定义安装三卡片入口的渠道名（报错/日志溯源：本次安装从哪个入口发起）
   installChannelNpm: 'NPM 包',
   installChannelGit: 'GitHub 源码',
@@ -670,6 +671,7 @@ export const en = {
   failDshMissingHint: 'The dsh command could not be found (it is not on the system PATH), so the installer could not run. Please make sure DeepSeek Harness is installed correctly and dsh is on your PATH (or reinstall it), then retry. This is not a problem with the plugin itself.',
   failPnpmMissingHint: 'The installer found dsh, but pnpm is missing on this machine (dsh uses it to manage profile plugins). Please install pnpm first (e.g. npm install -g pnpm), make sure it is on your PATH, then retry. This is not a problem with the plugin itself.',
   failPnpmStoreHint: 'pnpm reported an unexpected store location (ERR_PNPM_UNEXPECTED_STORE): the profile directory was previously set up with a different major version of pnpm, and the current pnpm refuses to reuse it — no plugin can be installed into that profile. Delete node_modules and pnpm-lock.yaml under the profile directory (see System Logs or ~/.dsh/profiles/<profile>/hub.log for the full output), then reinstall. This is not a problem with the plugin itself.',
+  failPnpmPolicyHint: 'The installer was blocked by pnpm supply-chain security policy (ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION / Minimum release age: a package in the lockfile was published too recently; or untrusted origin: a dependency source is not trusted by pnpm). This is pnpm 11 default security policy — installing any freshly published or new-origin plugin hits the same wall, so this is not a problem with the plugin itself. Add minimumReleaseAge: 0 to your pnpm config (pnpm-workspace.yaml or .npmrc) to opt out, or retry once the release has cooled down.',
   // Custom install entry channel names (the three cards) — used in error/log traceability
   installChannelNpm: 'NPM package',
   installChannelGit: 'GitHub source',

@@ -400,6 +400,10 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // 另一大版本 pnpm 装的，当前 pnpm 不认，任何插件装进该 profile 都会失败 ——
               // 给清理重建指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmStoreHint'))
+              : failureKind === 'pnpmPolicy'
+              // pnpm 11 供应链安全策略拦截（minimumReleaseAge 拒收发布太新的包 / untrusted origin）：
+              // 本机 pnpm 策略不放行，装任何「刚发布/新来源」插件都撞墙 —— 给豁免指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failPnpmPolicyHint'))
               : failureKind === 'network'
               // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
               // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，
