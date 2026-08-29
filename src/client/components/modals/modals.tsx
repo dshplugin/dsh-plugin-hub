@@ -391,10 +391,18 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // 找不到 dsh 命令（Win「不是内部或外部命令」/ POSIX「command not found」/ spawn ENOENT）：
               // 本机 DeepSeek Harness 未正确安装或 dsh 不在 PATH，不是插件问题 —— 直接给环境修复指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failDshMissingHint'))
+              : failureKind === 'gitMissing'
+              // 找不到 git 命令（Win「'git' is not recognized」/ POSIX「git: command not found」/ spawn ENOENT）：
+              // 本机 Git 未安装或不在 PATH，不是插件问题 —— 直接给环境修复指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failGitMissingHint'))
               : failureKind === 'pnpmMissing'
               // 找到了 dsh 但缺 pnpm（dsh 用它管理 profile 插件；dsh 报 pnpm not found on PATH）：
               // 本机缺 pnpm，不是插件问题 —— 给安装指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmMissingHint'))
+              : failureKind === 'npmMissing'
+              // 全局 npm 安装通道 spawn 的 npm 找不到（Win「'npm' is not recognized」/ POSIX
+              // 「npm: command not found」/ spawn ENOENT）：本机 npm 未安装或不在 PATH —— 给安装指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failNpmMissingHint'))
               : failureKind === 'pnpmStore'
               // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录旧依赖是
               // 另一大版本 pnpm 装的，当前 pnpm 不认，任何插件装进该 profile 都会失败 ——

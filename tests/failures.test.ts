@@ -125,6 +125,42 @@ test('classifyFailure: dsh command missing on the machine is an environment issu
   assert.equal(classifyFailure("Command failed: dsh plugin add github:owner/repo\n'dsh' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'dshMissing')
 })
 
+test('classifyFailure: missing git executable is an environment issue (issue #21), not a plugin issue', () => {
+  // Windows cmd (Chinese)
+  assert.equal(classifyFailure("'git' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'gitMissing')
+  // Windows cmd (English)
+  assert.equal(classifyFailure("'git' is not recognized as an internal or external command,"), 'gitMissing')
+  // POSIX shell
+  assert.equal(classifyFailure('sh: git: command not found'), 'gitMissing')
+  // node spawn ENOENT
+  assert.equal(classifyFailure('spawn git ENOENT'), 'gitMissing')
+  // 服务端 [git-missing] 标记（乱码免疫）
+  assert.equal(classifyFailure('[git-missing] the git CLI was not found on this machine'), 'gitMissing')
+  // 作者场景：pnpm 把缺 git 报成 ERR_PNPM_GIT_RESOLVE_FAILED（git ls-remote failed），
+  // 且外层无包裹也必须归类为环境问题，不能被吞成 dshMissing（dshMissing 正则含裸 is not recognized）
+  assert.equal(
+    classifyFailure("[ERR_PNPM_GIT_RESOLVE_FAILED] Failed to resolve git dependency\ngit ls-remote failed: 'git' is not recognized as an internal or external command"),
+    'gitMissing',
+  )
+  // 优先级：git 缺失必须先于 dshMissing 判出（裸 is not recognized 模式不能吞掉 'git'）
+  assert.equal(classifyFailure("Command failed: git ls-remote\n'git' is not recognized as an internal or external command"), 'gitMissing')
+})
+
+test('classifyFailure: missing npm executable is an environment issue, not a plugin issue', () => {
+  // Windows cmd (Chinese)
+  assert.equal(classifyFailure("'npm' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'npmMissing')
+  // Windows cmd (English)
+  assert.equal(classifyFailure("'npm' is not recognized as an internal or external command,"), 'npmMissing')
+  // POSIX shell
+  assert.equal(classifyFailure('sh: npm: command not found'), 'npmMissing')
+  // node spawn ENOENT
+  assert.equal(classifyFailure('spawn npm ENOENT'), 'npmMissing')
+  // 服务端 [npm-missing] 标记（乱码免疫）
+  assert.equal(classifyFailure('[npm-missing] the npm CLI was not found on this machine'), 'npmMissing')
+  // 优先级：npm 缺失必须先于 dshMissing 判出（裸 is not recognized 模式不能吞掉 'npm'）
+  assert.equal(classifyFailure("Command failed: npm install -g foo\n'npm' is not recognized as an internal or external command"), 'npmMissing')
+})
+
 test('classifyFailure: pnpm command missing is an environment issue (issue #13), not a plugin issue', () => {
   // dsh 存在但缺 pnpm（dsh 用它管理 profile 插件）：issue #13 的真实报错（Linux）
   assert.equal(classifyFailure('dsh: pnpm not found on PATH — install pnpm to manage profile plugins'), 'pnpmMissing')

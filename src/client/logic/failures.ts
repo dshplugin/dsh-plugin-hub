@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStore' | 'pnpmPolicy' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmPolicy' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -163,10 +163,21 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStor
  * - dshMissing：安装器 spawn 的 `dsh` 命令找不到（Windows cmd「不是内部或外部命令」/ POSIX
  *   「command not found」/ spawn ENOENT）—— 是本机 DSH 未正确安装或不在 PATH，不是插件问题
  *   → 提示检查 PATH/重装 DSH，不引导提 Issue
+ * - gitMissing：安装器调用 `git` 时找不到可执行文件（Windows cmd「'git' is not recognized」/
+ *   POSIX「git: command not found」/ spawn ENOENT）—— 是本机 Git 未安装或不在 PATH，不是插件
+ *   问题。pnpm 会把缺失 git 报成 `ERR_PNPM_GIT_RESOLVE_FAILED`（git ls-remote failed），若只看
+ *   错误码会误归插件侧失败；且 dshMissing 的通用「not recognized」模式会先把它吞成 dsh 缺失，
+ *   所以必须在 dshMissing 之前判断（dsh-plugin-hub#21：Win 下装 git 源插件，
+ *   `'git' is not recognized` 被误归仓库问题引导去提 Issue）→ 提示安装 Git / 加入 PATH，不引导提 Issue
  * - pnpmMissing：dsh 存在但调用的 `pnpm` 找不到（dsh 报 `pnpm not found on PATH`/POSIX
  *   「pnpm: command not found」/ spawn ENOENT）—— 本机缺 pnpm（dsh 用 pnpm 管理 profile 插件），
  *   不是插件问题（dsh-plugin-hub#13：Linux 下 `dsh: pnpm not found on PATH` 被误归插件侧失败）
  *   → 提示安装/开启 pnpm，不引导提 Issue
+ * - npmMissing：全局 npm 安装通道（`npm install -g ...`）spawn 的 `npm` 命令找不到
+ *   （Windows cmd「'npm' is not recognized」/ POSIX「npm: command not found」/ spawn ENOENT）——
+ *   本机 npm 未安装或不在 PATH，不是插件问题。dshMissing 的通用「not recognized」模式会把
+ *   `'npm' is not recognized` 吞成 dsh 缺失，所以必须在 dshMissing 之前判断
+ *   → 提示安装 npm（Node.js 自带）/加入 PATH，不引导提 Issue
  * - pnpmStore：pnpm 存在但报 store 位置不匹配（`ERR_PNPM_UNEXPECTED_STORE` / `Unexpected store
  *   location`）—— profile 目录的 node_modules 是用不同大版本的 pnpm 生成的，当前 pnpm 不认，
  *   任何插件装进该 profile 都会失败；不是插件问题（dsh-plugin-hub#14：macOS 下
@@ -199,6 +210,18 @@ export function classifyFailure(message: string): FailureKind {
   // found」，会把 `pnpm: command not found` 吞成「dsh 缺失」，误引导用户去装 DSH
   // （dsh-plugin-hub#13：Linux 下 `dsh: pnpm not found on PATH` 被误归插件侧失败）
   if (/\[pnpm-missing\]|pnpm not found|pnpm: command not found|spawn pnpm ENOENT|'pnpm' 不是内部或外部命令|"pnpm" 不是内部或外部命令|pnpm['"]?\s*is not recognized/i.test(message)) return 'pnpmMissing'
+  // 找不到 git 命令（服务端 [git-missing] 标记 / Windows cmd 中英文「'git' is not recognized」/
+  // POSIX「git: command not found」/ spawn git ENOENT）：本机 Git 未安装或不在 PATH，不是插件问题。
+  // 必须在 dshMissing 之前 —— dshMissing 正则含裸「is not recognized / command not found」，
+  // 会把 git 缺失（'git' is not recognized as an internal or external command）吞成「dsh 缺失」，
+  // 误导用户去装 DSH；且 pnpm 报 `ERR_PNPM_GIT_RESOLVE_FAILED`（git ls-remote failed）时
+  // 若只看错误码会落到插件侧失败、引导去提 Issue（dsh-plugin-hub#21）
+  if (/\[git-missing\]|spawn git ENOENT|'git' 不是内部或外部命令|"git" 不是内部或外部命令|git['"]?\s*is not recognized|git: command not found/i.test(message)) return 'gitMissing'
+  // 找不到 npm 命令（全局 npm 安装通道 `npm install -g` spawn 的 npm 缺失 / Windows cmd 中英文
+  // 「'npm' is not recognized」/ POSIX「npm: command not found」/ spawn npm ENOENT）：本机 npm 未安装
+  // 或不在 PATH，不是插件问题。必须在 dshMissing 之前 —— dshMissing 正则含裸「is not recognized /
+  // command not found」，会把 npm 缺失（'npm' is not recognized）吞成「dsh 缺失」，误导用户去装 DSH
+  if (/\[npm-missing\]|spawn npm ENOENT|'npm' 不是内部或外部命令|"npm" 不是内部或外部命令|npm['"]?\s*is not recognized|npm: command not found/i.test(message)) return 'npmMissing'
   // 找不到 dsh 命令（服务端 [dsh-missing] 标记 —— 乱码免疫：Windows cmd 中文版输出 GBK，
   // 经 UTF-8 解码成乱码无法匹配原文，故服务端在 spawn 前用 which/where 探测并打 ASCII 标记；
   // 其余形态：Windows cmd「不是内部或外部命令」/ POSIX「command not found」/

@@ -271,10 +271,20 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 本机 DeepSeek Harness 未正确安装或 dsh 不在 PATH，不是插件问题 —— 直接给环境修复指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failDshMissingHint'))
                     }
+                    if (kind === 'gitMissing') {
+                      // 找不到 git 命令（Win「'git' is not recognized」/ POSIX「git: command not found」/ spawn ENOENT）：
+                      // 本机 Git 未安装或不在 PATH，不是插件问题 —— 直接给环境修复指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failGitMissingHint'))
+                    }
                     if (kind === 'pnpmMissing') {
                       // 找到了 dsh 但缺 pnpm（dsh 用它管理 profile 插件；dsh 报 pnpm not found on PATH）：
                       // 本机缺 pnpm，不是插件问题 —— 给安装指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmMissingHint'))
+                    }
+                    if (kind === 'npmMissing') {
+                      // 全局 npm 安装通道 spawn 的 npm 找不到：本机 npm 未安装或不在 PATH ——
+                      // 给安装指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failNpmMissingHint'))
                     }
                     if (kind === 'pnpmStore') {
                       // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录旧依赖是
