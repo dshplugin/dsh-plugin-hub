@@ -175,7 +175,8 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'pnpmMissing' | 'pnpmStor
  *   `Minimum release age` —— 锁文件里包的发布时间太近被拒；`untrusted origin` —— 依赖来源未被
  *   本机 pnpm 信任）。拦的是「发布太新的包」与「未被信任的来源」，装任何新插件都会撞墙，不是
  *   插件问题（dsh-plugin-hub#15/#16：用户装官方 dsh-plugin 也被这两类策略拦下并误归插件侧失败）
- *   → 提示在 pnpm 配置里豁免该策略（如 `minimumReleaseAge: 0`）或等发布冷却后重试，不引导提 Issue
+ *   → 提示按子场景给解法（release age 过近 → `minimumReleaseAge: 0` 豁免或等冷却；untrusted
+ *   origin → 删除 profile 的 node_modules + pnpm-lock.yaml 清掉不受信任来源后重装），不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
  *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue

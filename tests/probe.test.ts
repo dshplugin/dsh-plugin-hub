@@ -6,14 +6,15 @@
  * 连通性探测（probeUrl / systemProxy）的单元测试。
  *
  * probeUrl 走真实网络（spawn curl，走代理或直连），与 npm-resolve 一样标注
- * skip 策略：本地无网络时跳过，CI 可显式关闭。systemProxy 依赖本机系统代理
+ * skip 策略：默认跳过（本机直连 GitHub/npm 常不通，会等满超时才失败、看着像卡死），
+ * 显式设 DSH_HUB_TEST_ONLINE=1 才跑真实网络测试。systemProxy 依赖本机系统代理
  * 设置，只在确实读取到代理时断言格式。
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { gitLsRemote, probeUrl, systemProxy } from '../src/server/services/probe.ts'
 
-const ONLINE = process.env.DSH_HUB_TEST_OFFLINE !== '1'
+const ONLINE = process.env.DSH_HUB_TEST_ONLINE === '1'
 
 test('probeUrl: 非法 URL 直接不可达，不抛错', async () => {
   const r = await probeUrl('not a url', '', 1000)
