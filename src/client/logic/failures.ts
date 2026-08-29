@@ -183,10 +183,10 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  *   任何插件装进该 profile 都会失败；不是插件问题（dsh-plugin-hub#14：macOS 下
  *   `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）→ 提示清理 profile 依赖目录重建，不引导提 Issue
  * - pnpmPolicy：pnpm 11 的供应链安全策略拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` /
- *   `Minimum release age` —— 锁文件里包的发布时间太近被拒；`untrusted origin` —— 依赖来源未被
- *   本机 pnpm 信任）。拦的是「发布太新的包」与「未被信任的来源」，装任何新插件都会撞墙，不是
+ *   `Minimum release age` —— 锁文件里包的发布时间还不满 24 小时被拒；`untrusted origin` —— 依赖来源未被
+ *   本机 pnpm 信任）。拦的是「刚发布的新包」与「未被信任的来源」，装任何新插件都会撞墙，不是
  *   插件问题（dsh-plugin-hub#15/#16：用户装官方 dsh-plugin 也被这两类策略拦下并误归插件侧失败）
- *   → 提示按子场景给解法（release age 过近 → `minimumReleaseAge: 0` 豁免或等冷却；untrusted
+ *   → 提示按子场景给解法（发布未满 24 小时 → `minimumReleaseAge: 0` 豁免或等满 24 小时；untrusted
  *   origin → 删除 profile 的 node_modules + pnpm-lock.yaml 清掉不受信任来源后重装），不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
@@ -235,7 +235,7 @@ export function classifyFailure(message: string): FailureKind {
   // `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）；提示清理依赖目录用当前 pnpm 重建，
   // 不引导提 Issue。必须在 pnpmMissing 之后 —— pnpm 在（能跑起来报错），不是「找不到命令」。
   if (/ERR_PNPM_UNEXPECTED_STORE|Unexpected store location/i.test(message)) return 'pnpmStore'
-  // pnpm 供应链安全策略拦截（pnpm 11：minimumReleaseAge 拒收「发布太新」的包 /
+  // pnpm 供应链安全策略拦截（pnpm 11：minimumReleaseAge 拒收「刚发布」的包 /
   // untrusted origin 来源不受信任）：pnpm 在、也连得上，纯粹是本机策略不放行 ——
   // 装任何「新发布/非信任来源」的插件都会同样失败，不是插件问题（dsh-plugin-hub#15/#16）。
   // 必须在 pnpmIgnoredBuild 之前 —— 该策略优先于「构建脚本被白名单拦截」，且两者都不引导提 Issue。
