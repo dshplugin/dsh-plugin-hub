@@ -179,7 +179,7 @@ export function SortArrowIcon({ up }: { up: boolean }) {
   }))
 }
 
-/** 插件中心图标：店面货架（stroke 继承 currentColor），一级导航「插件中心」tab 用。 */
+/** 插件市场图标：店面货架（stroke 继承 currentColor），一级导航「插件市场」tab 用。 */
 export function MarketIcon() {
   return h('svg', {
     viewBox: '0 0 24 24',

@@ -1,6 +1,6 @@
 # DSH Plugin Hub 文档
 
-DSH Plugin Hub 是 DeepSeek Harness 的插件中心（cordis 插件）。本目录集中存放
+DSH Plugin Hub 是 DeepSeek Harness 的插件市场（cordis 插件）。本目录集中存放
 开发相关的规范、架构与操作指南。
 
 ## 目录结构
@@ -64,6 +64,6 @@ DeepSeek Harness 是开源仓库（MIT）。强烈建议把官方源码克隆到
 > 无需再走官网 CDN）；`assets/` 仅保留 logo 与历史素材。
 
 - `logo.svg`：项目标识。
-- `screenshot-hub-main.png`：插件中心主界面截图（历史素材；README 主图现引用 `dsh-plugin-hub-home-en.png`（英文）/ `dsh-plugin-hub-home-zh.png`（中文））。
+- `screenshot-hub-main.png`：插件市场主界面截图（历史素材；README 主图现引用 `dsh-plugin-hub-home-en.png`（英文）/ `dsh-plugin-hub-home-zh.png`（中文））。
 - `screenshot-install-uninstall.png`：可视化安装/卸载过程截图（历史素材；README 功能一览现引用 `dsh-plugin-hub-install-en/zh-v1.2.1.png`、`dsh-plugin-hub-uninstall-en/zh-v1.2.1.png`、`dsh-plugin-hub-update-en/zh-v1.2.1.png`）。
 - `screenshot-notifications.png`：可视化消息通知截图（历史素材；README 现引用 `dsh-plugin-hub-notifications-en.png`（英文）/ `dsh-plugin-hub-notifications-zh.png`（中文））。

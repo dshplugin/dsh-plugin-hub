@@ -1,6 +1,6 @@
 # 架构
 
-DSH Plugin Hub 是 DeepSeek Harness（Cordis 体系）的一个插件，提供插件中心功能。
+DSH Plugin Hub 是 DeepSeek Harness（Cordis 体系）的一个插件，提供插件市场功能。
 它分两部分运行：
 
 | 部分    | 源码               | 构建   | 产物      |

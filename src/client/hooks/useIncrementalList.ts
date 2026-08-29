@@ -5,7 +5,7 @@
  *
  * Incremental list: renders only the first batch of a (potentially huge)
  * result set and appends the next batch whenever the end sentinel scrolls
- * into view, so the plugin center never mounts thousands of cards at once.
+ * into view, so the plugin market never mounts thousands of cards at once.
  * The items reference is the list identity — category / search / sort
  * changes produce a new array, which resets the window to the first batch.
  */

@@ -8,10 +8,10 @@
  */
 import type { LocaleId } from '../types.ts'
 
-/** 插件中心官网地址。 */
+/** 插件市场官网地址。 */
 export const SITE_URL = 'https://dsh-plugin.org/'
 
-/** 插件中心源码仓库：头部右上角 GitHub 图标的跳转地址 */
+/** 插件市场源码仓库：头部右上角 GitHub 图标的跳转地址 */
 export const GITHUB_URL = 'https://github.com/dshplugin/dsh-plugin-hub'
 
 /** Hub 自身在目录数据里的仓库标识：头部版本号旁的「可更新」徽标按它定位自己。 */

@@ -87,8 +87,8 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       ...(code ? [`- Key error: \`${code}\``] : []),
       '',
       // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的安装命令（含 --profile）与执行结果，链接由常量动态拼接
-      `## [DSH Plugin 插件中心](${SITE_URL}) · 安装 Plugin 失败错误信息`,
-      `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件中心的安装程序自动生成，随本次安装失败一并提交。`,
+      `## [DSH Plugin 插件市场](${SITE_URL}) · 安装 Plugin 失败错误信息`,
+      `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件市场的安装程序自动生成，随本次安装失败一并提交。`,
       `- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add git+https://github.com/${repo}.git`}\``,
       `- 执行结果：安装失败，未能安装该插件。`,
       // 尝试过的安装方式（npm 反查 + 实际执行命令，按先后顺序）：作者据此反推正确的
@@ -126,7 +126,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
           `- Full log: \`~/.dsh/profiles/${env.profile}/hub.log\` (paste or attach for the full output)`,
         ]
         : []),
-      // 该插件在插件中心的收录位置（详情页链接）
+      // 该插件在插件市场的收录位置（详情页链接）
       `- Catalog: [${pluginSiteUrl(repo)}](${pluginSiteUrl(repo)})`,
       '',
       '## Error (core)',

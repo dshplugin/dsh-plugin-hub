@@ -4,9 +4,9 @@
   <img src="docs/assets/logo.svg" alt="DSH Plugin Hub" width="96" height="96" />
 </p>
 
-# DSH Plugin 插件中心 - DeepSeek Harness Plugin (DSH) 下载与安装 · 插件大全
+# DSH Plugin 插件市场 - DeepSeek Harness Plugin (DSH) 下载与安装 · 插件大全
 
-**DeepSeek Harness Plugin（DSH）插件中心与插件大全，收录 8000+ 插件、人工精选 4500+、每日更新，免费浏览、搜索并按分类发现、下载与安装 DSH 插件，人工验证、来源可溯。**
+**DeepSeek Harness Plugin（DSH）插件市场与插件大全，收录 8000+ 插件、人工精选 4500+、每日更新，免费浏览、搜索并按分类发现、下载与安装 DSH 插件，人工验证、来源可溯。**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -26,13 +26,13 @@
 
 ## 什么是 DSH Plugin Hub
 
-DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方插件开发规范构建的开源插件，安装进「设置 → 插件中心」后，无需离开应用即可浏览、搜索并一键安装社区插件。本项目为独立社区项目，与 DeepSeek Harness 官方无隶属关系。
+DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方插件开发规范构建的开源插件，安装进「设置 → 插件市场」后，无需离开应用即可浏览、搜索并一键安装社区插件。本项目为独立社区项目，与 DeepSeek Harness 官方无隶属关系。
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-market-zh.png" alt="DSH Plugin Hub 插件中心界面" width="840">
+  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-market-zh.png" alt="DSH Plugin Hub 插件市场界面" width="840">
 </p>
 
-## 插件中心特性
+## 插件市场特性
 
 **一键操作 · 全部可视化**
 
@@ -111,7 +111,7 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 ## 官网一览
 
-插件中心的数据由 [dsh-plugin.org](https://dsh-plugin.org) 整理发布，两侧实时同步；在官网还可以查看插件详情、评分与 GitHub 源码链接。
+插件市场的数据由 [dsh-plugin.org](https://dsh-plugin.org) 整理发布，两侧实时同步；在官网还可以查看插件详情、评分与 GitHub 源码链接。
 
 **官网首页 · 分类展示**
 
@@ -120,15 +120,15 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
   <img src="docs/screenshots/dsh-plugin-hub-site-categories.png" alt="DSH Plugin 分类展示" width="400">
 </p>
 
-数据与插件中心同源，人工精选验证、每日更新 · 按分类浏览全部收录插件，支持搜索直达
+数据与插件市场同源，人工精选验证、每日更新 · 按分类浏览全部收录插件，支持搜索直达
 
 ## 为什么选择 DSH Plugin Hub
 
-DSH Plugin 插件中心收录 **8,197** 个 DeepSeek Harness Plugin（DSH）插件，其中 **4,585** 已人工精选验证，每日更新，免费按分类浏览、搜索、下载与安装，来源可溯。
+DSH Plugin 插件市场收录 **8,197** 个 DeepSeek Harness Plugin（DSH）插件，其中 **4,585** 已人工精选验证，每日更新，免费按分类浏览、搜索、下载与安装，来源可溯。
 
 ### 及时更新
 
-新发布的 DSH plugin 会尽快收录进插件中心，已有插件的描述、分类与兼容状态也会定期刷新。专业团队持续跟进 DeepSeek Harness 生态动态，让你始终看到最新信息。
+新发布的 DSH plugin 会尽快收录进插件市场，已有插件的描述、分类与兼容状态也会定期刷新。专业团队持续跟进 DeepSeek Harness 生态动态，让你始终看到最新信息。
 
 ### 人工审核
 
@@ -154,11 +154,11 @@ dsh plugin --profile web add dsh-plugin
 dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
 ```
 
-> **提示**：插件已内置浏览器端 bundle，从 GitHub 安装无需任何构建与授权；装完重启 `dsh web`，在「设置 → 插件中心」即可使用。
+> **提示**：插件已内置浏览器端 bundle，从 GitHub 安装无需任何构建与授权；装完重启 `dsh web`，在「设置 → 插件市场」即可使用。
 
 ## 更新 DSH Plugin Hub
 
-插件中心检测到新版本时会提示一键更新；如果旧版本存在更新缺陷导致拉取不到最新版，请直接用命令行升级：
+插件市场检测到新版本时会提示一键更新；如果旧版本存在更新缺陷导致拉取不到最新版，请直接用命令行升级：
 
 **方式一：直接更新到最新（推荐）**
 
@@ -187,7 +187,7 @@ dsh plugin --profile web add dsh-plugin
 
 ## 快速开始：在 DeepSeek Harness 中使用
 
-安装完成后重启 `dsh web`，打开 **设置 → 插件中心**，即可浏览并安装插件。插件市场与 [dsh-plugin.org](https://dsh-plugin.org) 官网数据同源、实时同步。
+安装完成后重启 `dsh web`，打开 **设置 → 插件市场**，即可浏览并安装插件。插件市场与 [dsh-plugin.org](https://dsh-plugin.org) 官网数据同源、实时同步。
 
 ## 提交你的 DSH plugin
 
@@ -201,7 +201,7 @@ dsh plugin --profile web add dsh-plugin
 
 ## 相关项目
 
-- [dsh-plugin.org](https://dsh-plugin.org) — 插件中心官网，数据同源
+- [dsh-plugin.org](https://dsh-plugin.org) — 插件市场官网，数据同源
 - [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness) — DeepSeek Harness 本体
 
 ## 许可

@@ -46,7 +46,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   /** 设置状态：服务端 hub-settings.json 持久化，本地乐观更新即时生效 */
   const { settings: hubSettings, ready: settingsReady, update: updateSettings, reset: resetSettings } = useSettings()
 
-  /** 一级导航：插件中心 / 已安装 / 自定义安装 / 设置 */
+  /** 一级导航：插件市场 / 已安装 / 自定义安装 / 设置 */
   const [view, setView] = useState<SectionView>('market')
   /** 外部跳转设置分组的一次性信号（错误弹窗「去系统诊断」→ 设置 → 系统诊断）：
    *  传给 SettingsView 消费后即清空，避免下次进设置被强制带跳 */

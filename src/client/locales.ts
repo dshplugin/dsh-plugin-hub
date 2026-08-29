@@ -6,13 +6,13 @@
  * zh/en dictionaries for the DSH Plugin Hub settings section.
  */
 export const zh = {
-  nav: '插件中心',
+  nav: '插件市场',
   title: 'DSH Plugin Hub',
   // 收录/精选数量由组件从官网 /api/stats.json 实时拉取填充（{total}/{verified}），不写死
-  tagline: 'DSH Plugin 插件中心：面向 DeepSeek Harness 插件收录平台，人工审验、来源可溯，免费安装',
+  tagline: 'DSH Plugin 插件市场：面向 DeepSeek Harness 插件收录平台，人工审验、来源可溯，免费安装',
   adBadge: '推荐',
   // 紫色广告横幅：突出数量（显眼）+ 更新节奏，与 tagline 职责分开、不重复
-  ad: 'DSH Plugin 插件中心：收录 {total} 款插件，{verified} 款人工精选验证，每日更新',
+  ad: 'DSH Plugin 插件市场：收录 {total} 款插件，{verified} 款人工精选验证，每日更新',
   search: '搜索插件名称、描述、标签…',
   all: '全部',
   sortStars: 'Star',
@@ -26,8 +26,8 @@ export const zh = {
   loading: '正在加载插件数据…',
   failed: '插件数据加载失败',
   // 目录拉不出来时的精准提示：按「是否配置了代理」区分，引导排查网络 / 代理
-  failedDescNoProxy: '你的网络似乎不通，无法获取插件目录数据。请检查网络连接后重试；或点击右上角按钮在浏览器中打开插件中心。',
-  failedDescProxy: '你的网络似乎不通，或设置里的 HTTP 代理地址不可达，无法获取插件目录数据。请检查代理设置与网络连接后重试；或点击右上角按钮在浏览器中打开插件中心。',
+  failedDescNoProxy: '你的网络似乎不通，无法获取插件目录数据。请检查网络连接后重试；或点击右上角按钮在浏览器中打开插件市场。',
+  failedDescProxy: '你的网络似乎不通，或设置里的 HTTP 代理地址不可达，无法获取插件目录数据。请检查代理设置与网络连接后重试；或点击右上角按钮在浏览器中打开插件市场。',
   retry: '重试',
   install: '安装',
   // AI 识别可能需要命令行辅助的插件（webInstallable=false）：仍可尝试一键安装，失败时复制命令去 dsh 终端
@@ -35,8 +35,8 @@ export const zh = {
   failedCopyHint: '安装失败。请复制上方安装命令到 dsh 终端手动执行（原生依赖构建脚本可能需要人工放行，如 pnpm approve-builds）',
   toastCopied: '安装命令已复制，去 dsh 终端粘贴即可安装',
   installed: '已安装',
-  // 一级导航：插件中心 / 已安装 / 自定义安装 / 设置
-  viewMarket: '插件中心',
+  // 一级导航：插件市场 / 已安装 / 自定义安装 / 设置
+  viewMarket: '插件市场',
   viewInstalled: '已安装',
   viewCustom: '自定义安装',
   viewSettings: '设置',
@@ -76,8 +76,8 @@ export const zh = {
   customLabel: '自定义安装',
   installedSearch: '搜索已安装的插件…',
   installedFilterCatalog: '目录插件',
-  hubInstall: '插件中心',
-  hubInstallHint: '来自插件中心收录的目录插件',
+  hubInstall: '插件市场',
+  hubInstallHint: '来自插件市场收录的目录插件',
   manualInstall: '手动安装',
   manualInstallHint: '非目录收录，通过命令行手动安装',
   filterByLabel: '来源',
@@ -109,7 +109,7 @@ export const zh = {
   settingsUpdate: '更新设置',
   settingsUpdateDesc: '更新检查方式与安装走到的网络通道',
   settingsCheckOnStart: '启动时检查更新',
-  settingsCheckOnStartDesc: '打开插件中心时检查已安装插件是否有新版，发现更新会提示',
+  settingsCheckOnStartDesc: '打开插件市场时检查已安装插件是否有新版，发现更新会提示',
   settingsProxy: 'HTTP 代理',
   settingsProxyDesc: 'npm / git / 目录数据请求统一走该代理；留空直连',
   // 代理连通性实时探测：输入停笔后提示检测结果（不通仍可保存，先填地址后开代理也合法）

@@ -111,7 +111,7 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, onOpenDetail, 
           ? h('span', { className: styles.updateBadge, title: t('updateAvailableHint') }, t('updateAvailable'))
           : null,
       ),
-      // 来源标签列（行尾、操作按钮前，右对齐固定）：目录插件 →「插件中心」（品牌色），
+      // 来源标签列（行尾、操作按钮前，右对齐固定）：目录插件 →「插件市场」（品牌色），
       // 命令行安装 →「手动安装」（琥珀色）；两词 4 字等宽，所有条目标签同列对齐
       h('span', {
         className: isCustom
