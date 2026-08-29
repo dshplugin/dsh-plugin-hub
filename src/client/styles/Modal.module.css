@@ -23,7 +23,7 @@
 /* 弹窗基座：安装/卸载确认、错误、失败记录共用；错误类弹窗（.errorModal）单独加宽 */
 .modal,
 .errorModal {
-  width: 420px;
+  width: 540px;
   max-width: calc(100vw - 32px);
   /* 高度自适应屏幕（桌面/手机视口）：内容超长时窗体内滚动，头部与按钮不消失 */
   max-height: calc(100dvh - 64px);
@@ -41,21 +41,21 @@
 
 /* 错误/失败记录弹窗：宽一些，错误详情长行少折行、阅读更顺；两边留白也更稳 */
 .errorModal {
-  width: 640px;
+  width: 720px;
   max-width: calc(100vw - 48px);
 }
 
 /* 日志存放位置弹窗：加宽 —— 路径随用户主目录/用户名变化（长短不一），
    输入框内要完整显示长路径，窄了显示不下 */
 .modalWide {
-  width: 560px;
+  width: 640px;
   max-width: calc(100vw - 48px);
 }
 
 /* 自定义安装「帮助」弹窗：比错误弹窗更宽 —— 命令格式 + 中文说明要排在一行，
    窄了容易折行，宽窗让每条格式整行展示 */
 .helpModal {
-  width: 720px;
+  width: 760px;
   max-width: calc(100vw - 48px);
 }
 
@@ -63,7 +63,7 @@
    加上筛选栏与底部操作栏后需要横向空间，窄了长行容易折行。
    高度固定（540px，小视口才让位给窗口上限）：内容多寡不再让弹窗忽高忽低 */
 .logModal {
-  width: 780px;
+  width: 820px;
   height: min(540px, calc(100vh - 64px));
   max-width: calc(100vw - 48px);
 }
@@ -1285,7 +1285,7 @@
 /* 关注弹窗：比普通弹窗略宽，给 Markdown 介绍 + 反馈群二维码留出阅读空间；
    max-width 覆盖普通弹窗的 calc(100vw - 32px)，窄屏时仍不贴边 */
 .aboutModal {
-  width: 460px;
+  width: 560px;
   max-width: calc(100vw - 48px);
 }
 
@@ -1418,7 +1418,7 @@
 
 /* 更新说明弹窗：比普通弹窗略宽，给变更记录留出阅读空间 */
 .hubUpdateModal {
-  width: 520px;
+  width: 620px;
   max-width: calc(100vw - 48px);
 }
 
@@ -1536,7 +1536,7 @@
 
 /* 详情弹窗：比普通弹窗略宽，给信息网格/路径留出横向空间 */
 .detailModal {
-  width: 480px;
+  width: 580px;
   max-width: calc(100vw - 48px);
 }
 

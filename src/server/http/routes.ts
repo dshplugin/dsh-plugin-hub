@@ -519,8 +519,8 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           { key: 'npm', url: `${registry}/dsh-plugin`, display: settings.npmRegistry !== '' ? registry : '', cmd: `npm view dsh-plugin version --registry ${registry}` },
           // GitHub 行用真实 git 克隆握手（git ls-remote）打 dshplugin/hello-dsh 小仓库：
           // 「网页能打开」和「git 能克隆」是两码事，握手成功才算通道通；小仓库秒级完成，不打 17MB 的 dsh-plugin-hub。
-          { key: 'github', url: 'https://github.com/dshplugin/hello-dsh', display: 'github.com/dshplugin/hello-dsh', cmd: 'git ls-remote https://github.com/dshplugin/hello-dsh', git: true },
-          { key: 'catalog', url: 'https://api.dsh-plugin.org/stats.json', display: 'api.dsh-plugin.org', cmd: 'curl -s https://api.dsh-plugin.org/stats.json' },
+          { key: 'github', url: 'https://github.com/dshplugin/hello-dsh', display: 'github.com', cmd: 'git ls-remote https://github.com/dshplugin/hello-dsh', git: true },
+          { key: 'catalog', url: 'https://api.dsh-plugin.org/stats.json', display: '', cmd: 'curl -s https://api.dsh-plugin.org/stats.json' },
         ]
         // 配置了 HTTP 代理：追加一行代理诊断 —— 用该代理打 github.com（安装通道真实访问的地址），
         // 验证「代理能不能把请求带出去」。与安装同口径：curl 子进程注入该代理 env。

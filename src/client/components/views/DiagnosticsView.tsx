@@ -42,8 +42,8 @@ interface RowState {
 const INITIAL_ROWS: RowState[] = [
   // npm 行 display 初始置空：设置里未配置镜像时显示「未配置（跟随本机）」，探测结果回来再用服务端 display 覆盖
   { key: 'npm', display: '', nameKey: 'diagNpm', status: 'idle', ms: null, statusCode: null },
-  { key: 'github', display: 'github.com/dshplugin/hello-dsh', nameKey: 'diagGithub', status: 'idle', ms: null, statusCode: null },
-  { key: 'catalog', display: 'api.dsh-plugin.org', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
+  { key: 'github', display: 'github.com', nameKey: 'diagGithub', status: 'idle', ms: null, statusCode: null },
+  { key: 'catalog', display: '', nameKey: 'diagCatalog', status: 'idle', ms: null, statusCode: null },
 ]
 
 export function DiagnosticsView({ t, env, proxy, onCopy }: {
@@ -172,8 +172,10 @@ export function DiagnosticsView({ t, env, proxy, onCopy }: {
         title: t('diagRecheck'),
       },
         h('span', { className: styles.name }, t(r.nameKey)),
-        // npm 行未配置镜像：display 为空 → 显示「未配置（跟随本机）」，不误导成官方源
-        h('span', { className: styles.display }, r.display !== '' ? r.display : t('diagNpmUnset')),
+        // npm 行未配置镜像：display 为空 → 显示「未配置（跟随本机）」，不误导成官方源；
+        // 目录站点行不暴露域名/API 地址，固定显示「插件市场」这一友好称呼
+        h('span', { className: styles.display },
+          r.key === 'catalog' ? t('diagCatalogTarget') : (r.display !== '' ? r.display : t('diagNpmUnset'))),
         h('span', { className: styles.meta }, r.status === 'ok' && r.ms !== null ? `${r.ms} ms` : ''),
         badge,
       )
