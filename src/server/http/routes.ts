@@ -822,6 +822,22 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
               })
               return
             }
+            // 包名冲突拦截（仅 git 通道）：git 目标包内声明的 name 若与 profile 已装依赖同名，
+            // pnpm 会以该 name 做依赖键撞车，抛出的 CLI 报错晦涩难懂（issue #25：sandbase-harness
+            // 声明 managed-agents，但该包名在 registry 上被另一仓库占用，npm 反查搜不到 → git 直装
+            // 撞已装同名依赖）。到这里已装依赖要么来源不同仓库、要么 spec 是版本号解析不出仓库身份，
+            // 都无法归并为同一插件 —— 在入队前转成明确的 409，指导用户先卸载或改装其 npm 包。
+            if (preflight.name !== null && repoTarget !== null && target === repoTarget) {
+              const declared = preflight.name
+              if (installed[declared] !== undefined) {
+                attempts.push(`package name conflict: \`${gitRepo}\` declares npm name \`${declared}\`, which is already present in the profile and cannot be matched to this repo (that npm name is likely registered by another repository)`)
+                const error = lang === 'zh'
+                  ? `already installed: ${declared} —— ${gitRepo} 声明的 npm 包名「${declared}」已存在于当前 profile，且无法匹配到本仓库（该包名在 npm 上可能被其他仓库占用）。请先移除现有的 ${declared}（dsh plugin remove ${declared}），再重新安装；或改装该包名对应的官方 npm 包。`
+                  : `already installed: ${declared} — ${gitRepo} declares the npm package name "${declared}", which is already present in the profile and cannot be matched to this repo (that npm name is likely registered by another repository). Remove the existing ${declared} dependency (dsh plugin remove ${declared}) first, then retry; or install the official npm package under that name.`
+                sendJson(response, 409, { error, attempts })
+                return
+              }
+            }
           }
           // 入队前复检（与上方检查同语义，但必须在同步块内）：preflight 的 await 期间并发请求
           // 可能已通过上方检查、任务却尚未入队——此处检查与 startPluginMutation 之间无 await，

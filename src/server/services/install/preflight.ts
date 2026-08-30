@@ -25,15 +25,19 @@ const execFileAsync = promisify(execFile)
  *  否则 `/install` 请求永远不返回、任务不入队、前端进度卡 0%。超时后放行（交给装后校验）。 */
 const PREFLIGHT_TIMEOUT_MS = 15_000
 
-/** 预检结果：ok=false 表示分发改入口文件缺失，missing 为该文件在包内的相对路径。 */
+/** 预检结果：ok=false 表示分发改入口文件缺失，missing 为该文件在包内的相对路径；
+ *  name 为 git 分发包 package.json 声明的包名（非 git 目标/无法确定时为 null），
+ *  供安装路由做「包名冲突」检测 —— 同名包名已被其他来源占用时，pnpm 装前必然撞车，
+ *  需要把晦涩的 CLI 报错转成明确的拦截。 */
 export interface PreflightResult {
   ok: boolean
   missing: string | null
+  name: string | null
 }
 
 export async function preflightTarget(target: string): Promise<PreflightResult> {
   const source = githubRepoOf(target)
-  if (source === null) return { ok: true, missing: null }
+  if (source === null) return { ok: true, missing: null, name: null }
   const [owner, repo] = source.split('/')
   let commit = ''
   try {
@@ -43,15 +47,15 @@ export async function preflightTarget(target: string): Promise<PreflightResult> 
     })
     commit = stdout.split(/\s+/)[0] ?? ''
   } catch {
-    return { ok: true, missing: null }
+    return { ok: true, missing: null, name: null }
   }
-  if (!commit) return { ok: true, missing: null }
+  if (!commit) return { ok: true, missing: null, name: null }
   const dir = mkdtempSync(join(tmpdir(), 'dsh-preflight-'))
   try {
     const tar = join(dir, 'pkg.tar.gz')
     await download(`https://codeload.github.com/${owner}/${repo}/tar.gz/${commit}`, tar)
     const meta = await readTarJson(tar, 'package/package.json')
-    if (meta === null) return { ok: true, missing: null }
+    if (meta === null) return { ok: true, missing: null, name: null }
     const dot = (meta.exports as Record<string, unknown> | undefined)?.['.']
     const resolved = typeof dot === 'string'
       ? dot
@@ -60,9 +64,9 @@ export async function preflightTarget(target: string): Promise<PreflightResult> 
         : undefined
     const entry = typeof resolved === 'string' ? resolved : typeof meta.main === 'string' ? meta.main : 'index.js'
     const inTar = await hasTarEntry(tar, `package/${entry}`)
-    return { ok: inTar, missing: inTar ? null : entry }
+    return { ok: inTar, missing: inTar ? null : entry, name: typeof meta.name === 'string' ? meta.name : null }
   } catch {
-    return { ok: true, missing: null }
+    return { ok: true, missing: null, name: null }
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
