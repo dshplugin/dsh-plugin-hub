@@ -6,7 +6,7 @@
 
 # DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
 
-**8,000+ DeepSeek Harness (DSH) plugins indexed, 4,500+ hand-verified, in one community hub, updated daily. Browse, search, download and install by category — free, human-verified, traceable.**
+**7,600+ DeepSeek Harness (DSH) plugins indexed, 4,400+ hand-verified, in one community hub, updated daily. Browse, search, download and install by category — free, human-verified, traceable.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -29,7 +29,7 @@
 DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-market-en.png" alt="DSH Plugin Hub plugin market UI" width="840">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-market-en.png" alt="DSH Plugin Hub plugin market UI" width="840">
 </p>
 
 ## Plugin Hub Features
@@ -48,7 +48,7 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 **Rich catalog · human-curated**
 
-- Indexes **8,197** community plugins, **4,585** of which are hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
+- Indexes **7,621** community plugins, **4,497** of which are hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
 - Covers UI & experience, sessions & messages, memory & context, tooling and more — browse by category or search straight to it
 - Every plugin shows its verification status (verified), star / fork ratings, version and last-update time — fully sourced
 
@@ -76,8 +76,8 @@ Questions, feature ideas or just want to talk plugins? Scan the QR code to join 
 **Installed plugins · Custom install**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-installed-en.png" alt="Installed plugins" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-installed-en.png" alt="Installed plugins" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-custom-install-en.png" alt="Custom install" width="400">
 </p>
 
 Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row · Installs any plugin outside the catalog via three channels: npm package, GitHub source and DSH command
@@ -85,8 +85,8 @@ Manages every installed plugin with search, source filters and sorting, plus upd
 **Settings · System logs**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-settings-en.png" alt="Settings" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-system-logs-en.png" alt="System logs" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-settings-en.png" alt="Settings" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-system-logs-en.png" alt="System logs" width="400">
 </p>
 
 Centralizes update checks, npm mirror, proxy channel, trust toggles and log location · Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer
@@ -94,8 +94,8 @@ Centralizes update checks, npm mirror, proxy channel, trust toggles and log loca
 **Confirm install · Confirm uninstall**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-install-confirm-en.png" alt="Confirm install" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-uninstall-confirm-en.png" alt="Confirm uninstall" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-install-confirm-en.png" alt="Confirm install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-uninstall-confirm-en.png" alt="Confirm uninstall" width="400">
 </p>
 
 Shows the plugin, its source repo and the command before anything runs; the install starts only after confirmation · Shows what will be removed and its source; nothing is removed until the user confirms
@@ -103,8 +103,8 @@ Shows the plugin, its source repo and the command before anything runs; the inst
 **Confirm update · Notifications**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-update-confirm-en.png" alt="Confirm update" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/1-3-11/dsh-plugin-hub-notifications-en.png" alt="Notifications" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-update-confirm-en.png" alt="Confirm update" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/1-4-0/dsh-plugin-hub-notifications-en.png" alt="Notifications" width="400">
 </p>
 
 Pops up when a newer version is found; confirming overwrite-installs in place to the latest release · Gathers install / remove / update history, live task progress and pending-restart reminders in one place
@@ -124,7 +124,7 @@ Same data source as the hub — human-verified, updated daily · Browse every in
 
 ## Why DSH Plugin Hub
 
-The DSH Plugin Hub indexes **8,197** DeepSeek Harness plugins (DSH), **4,585** of which are hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
+The DSH Plugin Hub indexes **7,621** DeepSeek Harness plugins (DSH), **4,497** of which are hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
 
 ### Always Fresh
 
