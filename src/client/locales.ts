@@ -213,8 +213,7 @@ export const zh = {
   settingsResetRun: '恢复默认',
   settingsResetConfirm: '确认恢复',
   settingsResetConfirmDetail: '确定要恢复默认设置吗？更新策略、镜像源、代理与安全限制将全部回到出厂默认值。',
-  // 启动更新策略提示
-  updatesFound: '发现 {n} 个插件可更新，已加入通知中心',
+  // 更新通知（通知中心条目标题）
   updateNoticeTitle: '发现新版本',
   updateNoticeGo: '去更新',
   ignoreUpdateRun: '忽略本次更新',
@@ -575,8 +574,7 @@ export const en = {
   settingsResetRun: 'Restore Defaults',
   settingsResetConfirm: 'Restore Defaults',
   settingsResetConfirmDetail: 'Reset all settings to factory defaults? Update policy, npm mirror, proxy and security restrictions will be cleared.',
-  // Startup update policy hints
-  updatesFound: '{n} plugin(s) have updates — check the notification center',
+  // Update notice (notification center item title)
   updateNoticeTitle: 'Update available',
   updateNoticeGo: 'Update',
   ignoreUpdateRun: 'Ignore this update',

@@ -464,8 +464,7 @@ export function Toast({ toast, t }: { toast: ToastState; t: Translate }) {
         : toast.kind === 'fail' ? t('installFail')
           : toast.kind === 'removed' ? t('uninstallDone')
             : toast.kind === 'revealFail' ? t('openFolderFail')
-              : toast.kind === 'updates' ? t('updatesFound', { n: toast.n ?? 0 })
-                  : t('uninstallFail')
+              : t('uninstallFail')
   const fail = toast.kind === 'fail' || toast.kind === 'removeFail' || toast.kind === 'revealFail'
   return h('div', {
     key: toast.id,

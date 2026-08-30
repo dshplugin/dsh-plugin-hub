@@ -22,6 +22,9 @@ export interface LocaleService {
   bind(namespace: string): (key: string, params?: Record<string, string | number>) => string
   getSnapshot(): { active: LocaleId }
   subscribe(fn: () => void): () => void
+  /** 切换宿主（系统）语言偏好：Hub 语言跟随宿主，右上角语言按钮直接写入宿主偏好，
+   *  宿主左侧菜单/设置弹窗与 Hub 面板一起切换，不再与宿主语言脱节 */
+  setLocale(id: string): void
 }
 
 /** The subset of the slots service this plugin touches. */
@@ -74,13 +77,11 @@ export interface TaskState {
   lines: string[]
 }
 
-export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail' | 'updates'
+export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail'
 
 export interface ToastState {
   id: number
   kind: ToastKind
-  /** 「发现更新」类提示的插件数量（按 kind 语义使用） */
-  n?: number
 }
 
 /** 宿主机器环境快照（后端 /dsh-plugin-hub/env）：提交 bug 时拼进 issue 正文，便于作者复现。 */

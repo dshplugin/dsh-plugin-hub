@@ -195,7 +195,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   }
 
   // 启动更新策略：目录数据与设置都就绪后触发一次 —— 开启「启动时检查更新」→ 发现可更新插件
-  // 即写入通知中心（每条一条，点击可去更新），toast 同步提示已入通知。
+  // 即写入通知中心（每条一条，点击可去更新），不弹窗打扰，由通知中心红点提示。
   // 绝不自动安装：是否更新完全由用户决定。
   // ref 守卫保证只跑一次，后续目录刷新/设置变化不会重复打扰。
   const startupCheckedRef = useRef(false)
@@ -204,8 +204,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     if (!settingsReady || catalog.plugins === null || catalog.failed) return
     startupCheckedRef.current = true
     if (!hubSettings.checkUpdatesOnStart) return
-    const added = syncUpdateNotices()
-    if (added > 0) setToast({ id: Date.now(), kind: 'updates', n: added })
+    syncUpdateNotices()
   }, [settingsReady, hubSettings, catalog.plugins, catalog.failed, catalog.installedItems, queue])
 
   // 信任/卸载/更新说明弹窗打开时按 Esc 关闭；任务进入后台队列后可随时关闭（任务继续）
