@@ -11,7 +11,7 @@
 import { createElement as h, useEffect, useRef } from 'react'
 import styles from '../../styles/List.module.css'
 import type { HubPlugin, LocaleId, Translate } from '../../types.ts'
-import { SITE_URL } from '../../logic/constants.ts'
+import { siteUrl } from '../../logic/urls.ts'
 import { useIncrementalList } from '../../hooks/useIncrementalList.ts'
 import { PluginCard } from './PluginCard.tsx'
 
@@ -82,7 +82,7 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
     plugins !== null && !failed && h('div', { className: styles.footer },
       h('a', {
         className: styles.footLink,
-        href: `${SITE_URL}${langPath}`,
+        href: siteUrl(langPath),
         target: '_blank',
         rel: 'noopener noreferrer',
       }, t('browseAll', { n: total })),

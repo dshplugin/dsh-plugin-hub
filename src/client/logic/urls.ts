@@ -17,13 +17,19 @@ export function langPathOf(lang: LocaleId): string {
   return lang === 'zh' ? 'zh/' : ''
 }
 
+/** 官网链接统一携带 `?ref=hub` 来源参数：统计有多少访问是从插件商城跳转而来。
+ *  所有「从商城跳官网」的链接（详情页/首页）都应经由此函数拼接，避免来源参数散落各处。 */
+export function siteUrl(path: string): string {
+  return `${SITE_URL}${path}?ref=hub`
+}
+
 /**
  * 官网详情页两级路径：/plugins/{ownerSlug}/{slug}；
  * 缺 ownerSlug 时从 repo 推导（卡片详情按钮与弹窗来源行共用）。
  */
 export function pluginDetailUrl(plugin: HubPlugin, langPath: string): string {
   const repo = plugin.source?.repo ?? ''
-  return `${SITE_URL}${langPath}plugins/${plugin.ownerSlug ?? repo.split('/')[0]?.toLowerCase() ?? ''}/${plugin.slug}`
+  return siteUrl(`${langPath}plugins/${plugin.ownerSlug ?? repo.split('/')[0]?.toLowerCase() ?? ''}/${plugin.slug}`)
 }
 
 /**
@@ -31,7 +37,7 @@ export function pluginDetailUrl(plugin: HubPlugin, langPath: string): string {
  * 与 issue 正文的 Catalog 链接同一形式（单级 /plugins/{repo}）。
  */
 export function pluginSiteUrl(repo: string): string {
-  return `${SITE_URL}plugins/${repo}`
+  return siteUrl(`plugins/${repo}`)
 }
 
 /** 按失败类型给出简洁的错误原因标题（对外用英文）：

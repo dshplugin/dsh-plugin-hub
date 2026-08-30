@@ -9,7 +9,8 @@
 import { createElement as h, Fragment } from 'react'
 import styles from '../../styles/Header.module.css'
 import type { Translate } from '../../types.ts'
-import { GITHUB_URL, PLUGIN_VERSION, SITE_URL } from '../../logic/constants.ts'
+import { GITHUB_URL, PLUGIN_VERSION } from '../../logic/constants.ts'
+import { siteUrl } from '../../logic/urls.ts'
 import { GitHubIcon, LogoIcon } from '../ui/icons.tsx'
 
 export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggleLang, hubUpdate, onVersionClick, onAboutClick }: {
@@ -31,7 +32,7 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggle
       h('div', { className: styles.headerTitleRow },
         h('a', {
           className: styles.brandTitle,
-          href: `${SITE_URL}${langPath}`,
+          href: siteUrl(langPath),
           target: '_blank',
           rel: 'noopener noreferrer',
           title: t('openHint'),
@@ -86,7 +87,7 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggle
       // 第二行：副标题仍是官网链接，点击跳 dsh-plugin.org
       h('a', {
         className: styles.taglineLink,
-        href: `${SITE_URL}${langPath}`,
+        href: siteUrl(langPath),
         target: '_blank',
         rel: 'noopener noreferrer',
         title: t('openHint'),
@@ -96,7 +97,7 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggle
     ),
     h('a', {
       className: styles.adBanner,
-      href: `${SITE_URL}${langPath}`,
+      href: siteUrl(langPath),
       target: '_blank',
       rel: 'noopener noreferrer',
     },
