@@ -184,6 +184,15 @@ test('classifyFailure: pnpm store version mismatch is an environment issue (issu
   assert.equal(classifyFailure('Unexpected store location: expected /Users/xxx/.pnpm-store, got /Users/xxx/.pnpm-store/v10'), 'pnpmStore')
 })
 
+test('classifyFailure: virtual store location mismatch is an environment issue (issue #30), not a plugin issue', () => {
+  // profile 目录被复制/移动、virtual-store-dir 配置变化 → ERR_PNPM_UNEXPECTED_VIRTUAL_STORE
+  assert.equal(classifyFailure('[ERR_PNPM_UNEXPECTED_VIRTUAL_STORE] Unexpected virtual store location\ndsh: pnpm failed in profile directory C:\\Users\\zijin\\.dsh-desktop\\profiles\\web'), 'pnpmStore')
+  // 裸 Unexpected virtual store location（无 ERR_ 前缀）也要能归到 pnpmStore
+  assert.equal(classifyFailure('Unexpected virtual store location: the modules directory is linked to a different virtual store'), 'pnpmStore')
+  // 验证该错误码不落入「插件侧失败」兜底
+  assert.equal(classifyFailure('[ERR_PNPM_UNEXPECTED_VIRTUAL_STORE] Unexpected virtual store location'), 'pnpmStore')
+})
+
 test('classifyFailure: pnpm supply-chain policy blocks are environment issues (issues #15/#16), not plugin issues', () => {
   // #15：minimumReleaseAge —— 锁文件里包的发布时间太近被 pnpm 11 拒收（用户装刚发布的官方插件）
   assert.equal(classifyFailure('[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION] 2 lockfile entries failed verification\nSome packages are not released long enough to be installed\n(use minimumReleaseAge setting to adjust)'), 'pnpmPolicy')
@@ -236,6 +245,23 @@ test('summarizeError keeps only the diagnostic lines, deduplicated', () => {
   assert.ok(out.includes('pnpm failed in profile'))
   assert.ok(out.includes('allowBuilds'))
   assert.equal(out.split('ERR_PNPM_PREPARE_PACKAGE').length, 2) // deduped
+})
+
+test('summarizeError drops harmless peer-dependency WARNs so the real error surfaces (issue #28)', () => {
+  const msg = [
+    'WARN Issues with peer dependencies found',
+    '└─ ✕ missing peer @deepseek-ai/cordis',
+    '  ✕ missing peer dsh-settings',
+    '  ✕ missing peer react',
+    'Peer dependencies that should be installed:',
+    '  @deepseek-ai/cordis  react',
+    '[ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED] The git-hosted package "anime-find@0.1.12" needs to execute build scripts but is not in the "allowBuilds" allowlist.',
+    '[exit 1]',
+  ].join('\n')
+  const out = summarizeError(msg)
+  assert.ok(out.includes('ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED'), 'the real git prepare error must survive')
+  assert.ok(!out.includes('missing peer'), 'missing-peer WARN must be dropped')
+  assert.ok(!out.includes('Issues with peer dependencies'), 'peer WARN header must be dropped')
 })
 
 test('summarizeError keeps descriptive failure lines like a missing submodule', () => {

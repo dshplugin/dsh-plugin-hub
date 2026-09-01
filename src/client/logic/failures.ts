@@ -178,10 +178,12 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  *   本机 npm 未安装或不在 PATH，不是插件问题。dshMissing 的通用「not recognized」模式会把
  *   `'npm' is not recognized` 吞成 dsh 缺失，所以必须在 dshMissing 之前判断
  *   → 提示安装 npm（Node.js 自带）/加入 PATH，不引导提 Issue
- * - pnpmStore：pnpm 存在但报 store 位置不匹配（`ERR_PNPM_UNEXPECTED_STORE` / `Unexpected store
- *   location`）—— profile 目录的 node_modules 是用不同大版本的 pnpm 生成的，当前 pnpm 不认，
- *   任何插件装进该 profile 都会失败；不是插件问题（dsh-plugin-hub#14：macOS 下
- *   `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）→ 提示清理 profile 依赖目录重建，不引导提 Issue
+ * - pnpmStore：pnpm 存在但报 store / virtual store 位置不匹配（`ERR_PNPM_UNEXPECTED_STORE` /
+ *   `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` / `Unexpected store location`）—— profile 目录的 node_modules
+ *   是用不同大版本的 pnpm 生成的（或 profile 目录被复制/移动、virtual-store-dir 配置变化），
+ *   当前 pnpm 不认，任何插件装进该 profile 都会失败；不是插件问题（dsh-plugin-hub#14：macOS 下
+ *   `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败；dsh-plugin-hub#30：`ERR_PNPM_UNEXPECTED_VIRTUAL_STORE`
+ *   漏判被误归插件侧失败）→ 提示清理 profile 依赖目录重建，不引导提 Issue
  * - pnpmPolicy：pnpm 11 的供应链安全策略拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` /
  *   `Minimum release age` —— 锁文件里包的发布时间还不满 24 小时被拒；`untrusted origin` —— 依赖来源未被
  *   本机 pnpm 信任）。拦的是「刚发布的新包」与「未被信任的来源」，装任何新插件都会撞墙，不是
@@ -229,12 +231,15 @@ export function classifyFailure(message: string): FailureKind {
   // 否则会被外层 "Command failed" 吞成「插件打包问题」，误导用户去提 Issue
   // （dsh-plugin-hub#12：Win 下 'dsh' 不在 PATH，cmd 报「不是内部或外部命令」被误归插件侧失败）
   if (/\[dsh-missing\]|不是内部或外部命令|is not recognized as an internal or external command|command not found|spawn dsh ENOENT/i.test(message)) return 'dshMissing'
-  // pnpm 大版本不一致（ERR_PNPM_UNEXPECTED_STORE / Unexpected store location）：profile 目录里
-  // 旧依赖是另一个大版本 pnpm 生成的，当前 pnpm 出于安全不认旧 store —— 本机环境问题，
-  // 任何插件装进该 profile 都会同样失败，不是插件问题（dsh-plugin-hub#14：macOS 下
-  // `ERR_PNPM_UNEXPECTED_STORE` 被误归插件侧失败）；提示清理依赖目录用当前 pnpm 重建，
-  // 不引导提 Issue。必须在 pnpmMissing 之后 —— pnpm 在（能跑起来报错），不是「找不到命令」。
-  if (/ERR_PNPM_UNEXPECTED_STORE|Unexpected store location/i.test(message)) return 'pnpmStore'
+  // pnpm 大版本/虚拟 store 位置不一致（ERR_PNPM_UNEXPECTED_STORE / ERR_PNPM_UNEXPECTED_VIRTUAL_STORE /
+  // Unexpected store location）：profile 目录里旧依赖是另一个大版本 pnpm 生成的（或 profile 目录
+  // 被复制/移动、virtual-store-dir 配置变化导致 virtual store 位置不匹配），当前 pnpm 出于安全
+  // 不认旧 store —— 本机环境问题，任何插件装进该 profile 都会同样失败，不是插件问题
+  // （dsh-plugin-hub#14：macOS 下 ERR_PNPM_UNEXPECTED_STORE 被误归插件侧失败；
+  //  dsh-plugin-hub#30：ERR_PNPM_UNEXPECTED_VIRTUAL_STORE 漏判被误归插件侧失败）；
+  // 提示清理依赖目录用当前 pnpm 重建，不引导提 Issue。必须在 pnpmMissing 之后 ——
+  // pnpm 在（能跑起来报错），不是「找不到命令」。
+  if (/ERR_PNPM_UNEXPECTED_(VIRTUAL_)?STORE|Unexpected (virtual )?store location/i.test(message)) return 'pnpmStore'
   // pnpm 供应链安全策略拦截（pnpm 11：minimumReleaseAge 拒收「刚发布」的包 /
   // untrusted origin 来源不受信任）：pnpm 在、也连得上，纯粹是本机策略不放行 ——
   // 装任何「新发布/非信任来源」的插件都会同样失败，不是插件问题（dsh-plugin-hub#15/#16）。
@@ -271,6 +276,14 @@ export function npmTooLowVersion(message: string): string | null {
 
 /** 核心行特征：错误代码 / 生命周期脚本失败 / prepare 失败 / 描述性报错（子模块缺失、找不到等）/ 退出与宿主提示信息。 */
 const CORE_LINE_RE = /ERR_[A-Z_]+|ELIFECYCLE|Command failed|prepare-guard|Failed to prepare|exit code|\bprepare\b|pnpm failed in profile|git-hosted plugins build|submodule|not found|cannot find|no such|unable to|fatal|missing|error/i
+/** pnpm 的 peer 依赖告警行（`missing peer …` / `Issues with peer dependencies found` /
+ *  `Peer dependencies that should be installed`）：宿主提供的 peer（@deepseek-ai/*、react、
+ *  dsh-client-* 等，DSH profile 用 autoInstallPeers:false 不自动装）缺失是无害噪音，与插件本身
+ *  无关 —— 抓核心错误时必须跳过，否则会被 CORE_LINE_RE 的 `missing` 分支误抓、淹没真正的
+ *  错误码（如 git 源的 ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED），让 issue 正文只剩一堆 peer WARN
+ *  （dsh-plugin-hub#28：anime-find 的 auto-issue 核心错误全是 missing-peer WARN 树，真正的
+ *  prepare 错误被盖住）。 */
+const PEER_WARN_RE = /missing peer|issues with peer dependencies|peer dependencies that should be installed/i
 /** 提交 issue 时正文里错误摘要的上限字符数。GitHub 请求行上限 8192 字节，
  * 固定模板与 URL 编码开销约 1~2K，核心错误（以 ASCII 日志为主）可安全带到 ~5K；
  * 仍超长时 pluginIssueUrl 会逐档缩小核心预算，最终 URL 不会超限。 */
@@ -289,7 +302,7 @@ export function summarizeError(message: string, maxChars: number = MAX_CORE_CHAR
   const core: string[] = []
   for (const raw of message.split(/\r?\n/)) {
     const line = raw.trim()
-    if (!line || !CORE_LINE_RE.test(line)) continue
+    if (!line || PEER_WARN_RE.test(line) || !CORE_LINE_RE.test(line)) continue
     const short = line.length > MAX_LINE_CHARS ? `${line.slice(0, MAX_LINE_CHARS)}…` : line
     if (!seen.has(short)) {
       seen.add(short)
