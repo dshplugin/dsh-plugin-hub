@@ -18,7 +18,7 @@ import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { NotificationRecord } from '../../logic/failures.ts'
-import { classifyFailure, npmTooLowVersion, unreachableTargetOf } from '../../logic/failures.ts'
+import { classifyFailure, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
 import type { PendingRestart, QueueTask } from '../../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
 import { CloseIcon } from '../ui/icons.tsx'
@@ -304,6 +304,9 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       return h('div', null, [
                         // 「无法访问 …」醒目行：精准告诉用户具体哪个地址连不上（消息里取不到地址就跳过这行）
                         (() => { const target = unreachableTargetOf(r.message); return target ? h('div', { className: styles.failNetworkTarget }, t('failNetworkTarget', { url: target })) : null })(),
+                        // registry 被指向内网/自定义源（tarball 从非官方源下载失败）：直接给出换源指引，
+                        // 否则用户外网是通的会困惑「为什么连不上」（dsh-plugin-hub#32）
+                        (() => { const host = registryHostOf(r.message); return host ? h('div', { className: styles.failPrepareHint }, t('failNetworkRegistryHint', { host })) : null })(),
                         h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
                         onRunDiagnostics ? h('button', {
                           className: styles.failDiagBtn,

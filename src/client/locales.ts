@@ -308,6 +308,7 @@ export const zh = {
   // 安装前连通性预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：本机网络或代理问题，不是插件问题，不引导提 Issue
   failNetworkHint: '安装前检测到网络不通：无法连接到安装源（可能是断网、DNS 解析失败、被防火墙拦截，或代理配置有问题）。这不是插件本身的问题 —— 请检查网络连接，或到「设置」里确认 HTTP 代理配置，再到「系统诊断」运行一次连通性检测，然后重试。',
   // 网络失败弹窗里的「无法访问 …」醒目行：直接告诉用户具体哪个地址连不上（{url} 为提取的不可达地址）
+  failNetworkRegistryHint: '你的 npm/pnpm 源（registry）被配置为 {host}，插件包需从该源下载但失败了。这通常是内网/自定义源没有同步该包（或需要内网认证）—— 请把 npm/pnpm 的 registry 指回官方源 https://registry.npmjs.org（或确认此源可访问该包）后重试。',
   failNetworkTarget: '无法访问 {url} —— 你的网络连接不通',
   // 「去系统诊断」直达按钮：网络不通提示下方的品牌实底按钮，跳到设置 → 系统诊断跑连通性检测
   failNetworkRunDiag: '去系统诊断检测网络',
@@ -667,6 +668,7 @@ export const en = {
   // Pre-install connectivity probe / connection failure in the install log ([network] / git fetch timeout / DNS / TLS): a local network or proxy issue, not a plugin issue — no issue link
   failNetworkHint: 'The network could not be reached before install: the install source is unreachable (offline, DNS failure, firewall block, or a misconfigured proxy). This is not a problem with the plugin itself — please check your connection, confirm the HTTP proxy in Settings, run a connectivity check under System Diagnostics, then retry.',
   // Prominent "cannot reach …" line in the network-failure dialog: shows the exact unreachable address ({url})
+  failNetworkRegistryHint: 'Your npm/pnpm registry is set to {host}, and the package tarball could not be downloaded from it. This usually means a private/internal mirror that has not synced the package (or requires intranet auth) — point the registry back to https://registry.npmjs.org (or make sure this source can serve the package), then retry.',
   failNetworkTarget: 'Cannot reach {url} — your network connection is down',
   // Diagnostics shortcut button under the network-down hint: jumps to Settings → System Diagnostics
   failNetworkRunDiag: 'Run a network diagnostic',

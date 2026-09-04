@@ -11,7 +11,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyFailure, coreErrorCode, npmTooLowVersion, summarizeError, unreachableTargetOf } from '../src/client/logic/failures.ts'
+import { classifyFailure, coreErrorCode, npmTooLowVersion, summarizeError, unreachableTargetOf, registryHostOf } from '../src/client/logic/failures.ts'
 
 const dshTailHint = 'dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in /Users/x/.dsh/profiles/web/pnpm-workspace.yaml, then re-run'
 
@@ -223,6 +223,49 @@ test('unreachableTargetOf extracts the exact unreachable address for the dialog'
     'https://github.com/adoresever/graph-memory/')
   // 提取不到 URL → null（调用方据此跳过地址行）
   assert.equal(unreachableTargetOf('pnpm error code ECONNRESET'), null)
+})
+
+test('classifyFailure: registry tarball download failure is a network/registry issue (issue #32), not a plugin issue', () => {
+  // #32 真实报错：pnpm 被配成公司内网 Artifactory 源，tarball 拉取失败 → fetch failed
+  const msg = [
+    '[WARN] GET https://cmc.centralrepo.rnd.huawei.com/artifactory/api/npm/npm-public/dsh-plugin/-/dsh-plugin-1.4.2.tgz error (0). Will retry in 10 seconds. 2 retries left.',
+    '[WARN] GET https://cmc.centralrepo.rnd.huawei.com/artifactory/api/npm/npm-public/dsh-plugin/-/dsh-plugin-1.4.2.tgz error (0). Will retry in 1 minute. 1 retries left.',
+    '[ERROR] fetch failed',
+    'TypeError: fetch failed',
+    'dsh: pnpm failed in profile directory C:\\Users\\x00257188\\.dsh\\profiles\\web',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'network')
+  // 只有 TypeError: fetch failed（pnpm 各版本输出形态不同）也要能归到 network
+  assert.equal(classifyFailure('TypeError: fetch failed\ndsh: pnpm failed in profile directory /Users/x/.dsh/profiles/web'), 'network')
+  // 不能被 repo 兜底吞掉：旧逻辑会把 #32 误报成「插件侧安装失败」引导去提 Issue
+  assert.notEqual(classifyFailure(msg), 'repo')
+})
+
+test('classifyFailure: generic "network error while fetching" without the tarball markers stays repo', () => {
+  // 不加面过宽的词：只有描述性文本时仍按插件问题兜底（防止误伤真实插件侧报错）
+  assert.equal(classifyFailure('network error while fetching'), 'repo')
+})
+
+test('registryHostOf reports a private/internal registry host, null for official or public mirrors', () => {
+  // 内网/自定义源（#32：华为内网 Artifactory）→ 返回主机名，前端据此给出换源指引
+  assert.equal(
+    registryHostOf('GET https://cmc.centralrepo.rnd.huawei.com/artifactory/api/npm/npm-public/dsh-plugin/-/dsh-plugin-1.4.2.tgz error (0)'),
+    'cmc.centralrepo.rnd.huawei.com')
+  // 带端口的私有源 → 返回去掉端口的主机名
+  assert.equal(
+    registryHostOf('GET http://registry.local:4873/dsh-plugin/-/dsh-plugin-1.4.2.tgz error (0)'),
+    'registry.local')
+  // 官方源 → null（属正常配置，按通用网络问题提示即可）
+  assert.equal(
+    registryHostOf('GET https://registry.npmjs.org/dsh-plugin/-/dsh-plugin-1.4.2.tgz error (0)'),
+    null)
+  // 公开镜像 → null
+  assert.equal(
+    registryHostOf('GET https://registry.npmmirror.com/dsh-plugin/-/dsh-plugin-1.4.2.tgz error (0)'),
+    null)
+  // 非 tarball 下载 URL（git 仓库 / metadata）→ null
+  assert.equal(registryHostOf('Could not connect to github.com:443: Timed out'), null)
+  assert.equal(registryHostOf(''), null)
 })
 
 test('coreErrorCode extracts the first error code', () => {

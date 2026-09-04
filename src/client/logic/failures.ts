@@ -190,9 +190,12 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  *   插件问题（dsh-plugin-hub#15/#16：用户装官方 dsh-plugin 也被这两类策略拦下并误归插件侧失败）
  *   → 提示按子场景给解法（发布未满 24 小时 → `minimumReleaseAge: 0` 豁免或等满 24 小时；untrusted
  *   origin → 删除 profile 的 node_modules + pnpm-lock.yaml 清掉不受信任来源后重装），不引导提 Issue
- * - network：安装前连通性预检拦截（服务端 `[network]` 标记）或底层连接失败
- *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝）——
- *   是本机网络不通/被墙/代理有问题，不是插件问题 → 提示检查网络，不引导提 Issue
+ * - network：安装前连通性预检拦截（服务端 `[network]` 标记）、底层连接失败
+ *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝），或
+ *   registry tarball 拉取失败（`fetch failed` / `GET …/-/…tgz error (n)` —— 常见于本机
+ *   npm/pnpm 的 registry 被指向内网/自定义源，该源取不到包）—— 是本机网络不通/被墙/
+ *   代理有问题/源配置异常，不是插件问题 → 提示检查网络，registry 指向自定义源时给出换源指引，
+ *   不引导提 Issue
  * - pnpmIgnoredBuild：插件自身或依赖的构建脚本被 pnpm 安全白名单（allowBuilds）默认拦截
  *   （`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` / `ERR_PNPM_IGNORED_BUILDS`）。只影响带安装期
  *   构建的插件，其他插件不受影响 —— 差异在插件的依赖/打包方式，属插件依赖/打包问题
@@ -253,11 +256,15 @@ export function classifyFailure(message: string): FailureKind {
   // 「你的网络不通」（graph-memory issues #82-#84：PREPARE_NOT_ALLOWED + 尾随超时）。
   if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:|ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED/i.test(message)) return 'pnpmIgnoredBuild'
   // 网络问题（服务端 [network] 标记，或安装日志里的连接失败特征：git fetch 失败、
-  // 连接超时/拒绝/重置、DNS 解析失败、TLS/SSL 握手失败）—— 是本机网络/代理问题，
-  // 不是插件问题。必须在 prepare/Command failed 判定之前：git fetch 失败常被
+  // 连接超时/拒绝/重置、DNS 解析失败、TLS/SSL 握手失败，或 registry tarball 拉取失败
+  // —— `fetch failed` / `GET https://…/-/…tgz error (n)` 是 pnpm 下载包文件时的网络层失败，
+  // 常见于本机 npm/pnpm registry 被指向内网/自定义源而取不到包）—— 是本机网络/代理/源
+  // 配置问题，不是插件问题。必须在 prepare/Command failed 判定之前：git fetch 失败常被
   // 外层包成 "Command failed: git fetch ..."，先按网络特征归类才不会误判成插件问题。
   // 404 类「目标不存在」不含这些特征，仍归 repo（那是仓库/包的问题）。
-  if (/\[network\]|ERR_PNPM_GIT_FETCH_FAILED|ETIMEDOUT|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|EPIPE|EHOSTUNREACH|ENETUNREACH|getaddrinfo|Could not connect|Could not resolve host|Network unreachable|Failed to connect|socket hang up|CERT_HAS_EXPIRED|SSL certificate problem|\bTLS\b|\bSSL\b/i.test(message)) return 'network'
+  // 注意：fetch failed 只在 pnpm 拉取阶段出现；prepare/构建已跑起来（tarball 到手）的
+  // 插件问题不带此特征，不会误伤（graph-memory #82-#84 的 allowBuilds 拦截在上一分支先判）。
+  if (/\[network\]|ERR_PNPM_GIT_FETCH_FAILED|ETIMEDOUT|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|EPIPE|EHOSTUNREACH|ENETUNREACH|getaddrinfo|Could not connect|Could not resolve host|Network unreachable|Failed to connect|socket hang up|CERT_HAS_EXPIRED|SSL certificate problem|\bTLS\b|\bSSL\b|fetch failed|\bGET https?:\/\/\S+\.tgz\s+error \(\d+\)/i.test(message)) return 'network'
   // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
@@ -342,4 +349,29 @@ export function unreachableTargetOf(message: string): string | null {
   // 其余网络失败（git fetch / npm 连接失败）：取第一个 URL，去掉行尾标点
   const url = message.match(/https?:\/\/[^\s'"`<>（）()]+/)
   return url ? url[0].replace(/[.,;:）)\]]+$/, '') : null
+}
+
+/** npm registry 的官方/常见公开镜像主机名：tarball 从这里下载属正常配置，
+ * 失败按「网络不通」提示即可，不需要额外的换源指引。 */
+const PUBLIC_REGISTRY_HOSTS = new Set([
+  'registry.npmjs.org',
+  'registry.yarnpkg.com',
+  'registry.npmmirror.com',
+  'mirrors.cloud.tencent.com',
+  'mirrors.huaweicloud.com',
+])
+
+/**
+ * 网络类失败消息里，判断是否「npm/pnpm 的 registry 被指向了内网/自定义源导致拉包失败」。
+ * pnpm 下载包文件的 URL 形如 `<registry>/<pkg>/-/<pkg>-<ver>.tgz`（路径含 `/-/`）；
+ * 若该 tarball 的主机不属于官方/常见公开镜像，说明本机 registry 被配成了私有/内网源
+ * （如公司 Artifactory）—— 常因源未同步该包、需内网认证或网络策略拦截而失败（dsh-plugin-hub#32）。
+ * 返回该主机名供前端给出「检查 registry 配置」的精准提示；官方/公开源或提取不到返回 null，
+ * 调用方按通用网络问题提示即可。
+ */
+export function registryHostOf(message: string): string | null {
+  const m = message.match(/https?:\/\/([^/\s]+)\/[^\s'"`<>]*\/-\/[^\s'"`<>]+/)
+  if (!m) return null
+  const host = m[1].replace(/:\d+$/, '')
+  return PUBLIC_REGISTRY_HOSTS.has(host) ? null : host
 }
