@@ -6,7 +6,7 @@
 
 # DSH Plugin 插件市场 - DeepSeek Harness Plugin (DSH) 下载与安装 · 插件大全
 
-**DeepSeek Harness Plugin（DSH）插件市场与插件大全，收录 9,000+ 插件、人工精选 8,000+、每日更新，免费浏览、搜索并按分类发现、下载与安装 DSH 插件，人工验证、来源可溯。**
+**DeepSeek Harness Plugin（DSH）插件市场与插件大全，收录 9,000+ 插件、人工精选 9,000+、每日更新，免费浏览、搜索并按分类发现、下载与安装 DSH 插件，人工验证、来源可溯。**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
