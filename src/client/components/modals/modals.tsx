@@ -417,6 +417,14 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // pnpm 11 供应链安全策略拦截（minimumReleaseAge 拒收发布太新的包 / untrusted origin）：
               // 本机 pnpm 策略不放行，装任何「刚发布/新来源」插件都撞墙 —— 给豁免指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmPolicyHint'))
+              : failureKind === 'pnpmUnusedPatch'
+              // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm 发现
+              // 补丁没被用上就中止整次安装，任何插件都装不进来 —— 给删除条目的指引，不引导提 Issue（#48）
+              ? h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
+              : failureKind === 'fileLocked'
+              // profile 里的文件被其他进程占用（Windows os error 32）：pnpm 无法替换被占用的文件，
+              // 通常是宿主或杀毒软件持有句柄 —— 给退出宿主的指引，不引导提 Issue（#47）
+              ? h('div', { className: styles.failPrepareHint }, t('failFileLockedHint'))
               : failureKind === 'network'
               // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
               // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

@@ -217,6 +217,41 @@ test('classifyFailure: pnpm workspace-root check is an environment issue (issue 
   assert.equal(classifyFailure('ERR_PNPM_ADDING_TO_ROOT'), 'pnpmWorkspace')
 })
 
+test('classifyFailure: a stale pnpm patch entry on the machine is an environment issue (issue #48), not a plugin issue', () => {
+  // #48：profile 里留着指向旧版本 dsh-plugin 的 patch 声明，本次安装解析到的版本已不是它，
+  // pnpm 发现补丁没被用上即中止整次安装 —— 任何插件都装不进来
+  const msg = [
+    '[ERR_PNPM_UNUSED_PATCH] The following patches were not used: dsh-plugin@1.4.2',
+    'dsh: pnpm failed in profile directory /home/zhongsy/.dsh/profiles/web',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'pnpmUnusedPatch')
+  // 不能被 repo 兜底吞掉：旧逻辑会把 #48 误报成「插件侧安装失败」引导去提 Issue
+  assert.notEqual(classifyFailure(msg), 'repo')
+  // 只带说明句（无错误码）也要能归到 pnpmUnusedPatch，且优先于「Command failed」的插件侧判定
+  assert.equal(classifyFailure('The following patches were not used: dsh-plugin@1.4.2\nCommand failed: pnpm add'), 'pnpmUnusedPatch')
+})
+
+test('classifyFailure: a locked file inside the profile is an environment issue (issue #47), not a plugin issue', () => {
+  // #47：Windows 下 profile 里的文件被其他进程占用，pnpm 无法替换。中文原文经解码后可能残缺，
+  // 靠 ASCII 特征 os error 32 命中（乱码免疫），不能要求匹配中文原句
+  const msg = [
+    'Error:',
+    '\u4ef6\uff0c\u8fdb\u7a0b\u65e0\u6cd5\u8bbf\u95ee\u3002 (os error 32)',
+    'dsh: pnpm failed in profile directory C:\\Users\\ZeKun\\.dsh\\profiles\\web',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'fileLocked')
+  assert.notEqual(classifyFailure(msg), 'repo')
+  // 其他形态的占用报错（EBUSY / 英文原句）同样归到 fileLocked
+  assert.equal(classifyFailure('EBUSY: resource busy or locked, rename ...'), 'fileLocked')
+  assert.equal(classifyFailure('Error: the process cannot access the file because it is being used by another process'), 'fileLocked')
+})
+
+test('classifyFailure: the browser "Failed to fetch" on the host request is an environment issue (issue #45), not a plugin issue', () => {
+  const msg = '安装失败 — Failed to fetch'
+  assert.equal(classifyFailure(msg), 'network')
+  assert.notEqual(classifyFailure(msg), 'repo')
+})
+
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')

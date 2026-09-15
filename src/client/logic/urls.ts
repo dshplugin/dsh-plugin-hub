@@ -51,6 +51,8 @@ function reasonTitleOf(kind: FailureKind): string {
     case 'pnpmStore': return 'pnpm store version mismatch on the user machine'
     case 'pnpmWorkspace': return 'pnpm workspace-root check blocked the install on the user machine'
     case 'pnpmPolicy': return 'pnpm supply-chain policy blocked the install on the user machine'
+    case 'pnpmUnusedPatch': return 'stale pnpm patch entry on the user machine'
+    case 'fileLocked': return 'file locked by another process on the user machine'
     case 'pnpmIgnoredBuild': return 'build scripts blocked by pnpm allowlist'
     case 'pluginPrepare': return 'plugin distribution incomplete'
     case 'network': return 'network failure on the user side'
@@ -83,8 +85,12 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
           : kind === 'pnpmIgnoredBuild'
             ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
             : kind === 'pnpmPolicy'
-              ? 'the pnpm supply-chain policy on the user machine blocked the install (minimum release age for freshly published packages / untrusted origin)'
-              : 'plugin-side install failure'
+                ? 'the pnpm supply-chain policy on the user machine blocked the install (minimum release age for freshly published packages / untrusted origin)'
+                : kind === 'pnpmUnusedPatch'
+                  ? 'the profile keeps a pnpm patch entry for an older dsh-plugin version, so pnpm aborted the install (local config issue)'
+                  : kind === 'fileLocked'
+                    ? 'a file in the profile is locked by another process on the user machine (local environment issue)'
+                    : 'plugin-side install failure'
   const code = coreErrorCode(message)
   // 按给定核心摘要预算构建完整预填 URL（含 URL 编码）；预算可调，供超长时逐档缩小
   const build = (coreChars: number): string => {

@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -195,12 +195,21 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  *   插件问题（dsh-plugin-hub#15/#16：用户装官方 dsh-plugin 也被这两类策略拦下并误归插件侧失败）
  *   → 提示按子场景给解法（发布未满 24 小时 → `minimumReleaseAge: 0` 豁免或等满 24 小时；untrusted
  *   origin → 删除 profile 的 node_modules + pnpm-lock.yaml 清掉不受信任来源后重装），不引导提 Issue
+ * - pnpmUnusedPatch：profile 里留着指向旧版本 dsh-plugin 的 patch 声明，本次安装解析到的版本
+ *   已经不是它（`ERR_PNPM_UNUSED_PATCH` / `The following patches were not used: dsh-plugin@1.4.2`）
+ *   —— pnpm 发现补丁没被用上即中止整次安装，任何插件都装不进来，不是插件问题
+ *   （dsh-plugin-hub#48：用户升级 dsh-plugin 后旧 patch 条目失配）→ 提示删掉该条目后重试，不引导提 Issue
+ * - fileLocked：pnpm 无法替换 profile 里被其他进程占用的文件（Windows `os error 32`
+ *   「另一个程序正在使用此文件」/ `EBUSY` / `resource busy or locked`）—— 通常是宿主进程或杀毒软件
+ *   实时扫描持有句柄，不是插件问题（dsh-plugin-hub#47）→ 提示完全退出宿主后重试，不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）、底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝），或
  *   registry tarball 拉取失败（`fetch failed` / `GET …/-/…tgz error (n)` —— 常见于本机
- *   npm/pnpm 的 registry 被指向内网/自定义源，该源取不到包）—— 是本机网络不通/被墙/
- *   代理有问题/源配置异常，不是插件问题 → 提示检查网络，registry 指向自定义源时给出换源指引，
- *   不引导提 Issue
+ *   npm/pnpm 的 registry 被指向内网/自定义源，该源取不到包），或界面请求压根没送达宿主服务
+ *   （浏览器 fetch 的 `Failed to fetch` —— 宿主未就绪/正在重启，或本地代理拦了回环地址；
+ *   dsh-plugin-hub#45：该消息此前落进 repo 兜底，被误报成「插件侧安装失败」）—— 是本机网络
+ *   不通/被墙/代理有问题/源配置异常，不是插件问题 → 提示检查网络，registry 指向自定义源时
+ *   给出换源指引，不引导提 Issue
  * - pnpmIgnoredBuild：插件自身或依赖的构建脚本被 pnpm 安全白名单（allowBuilds）默认拦截
  *   （`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` / `ERR_PNPM_IGNORED_BUILDS`）。只影响带安装期
  *   构建的插件，其他插件不受影响 —— 差异在插件的依赖/打包方式，属插件依赖/打包问题
@@ -258,6 +267,17 @@ export function classifyFailure(message: string): FailureKind {
   // 装任何「新发布/非信任来源」的插件都会同样失败，不是插件问题（dsh-plugin-hub#15/#16）。
   // 必须在 pnpmIgnoredBuild 之前 —— 该策略优先于「构建脚本被白名单拦截」，且两者都不引导提 Issue。
   if (/ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|Minimum release age|untrusted origin/i.test(message)) return 'pnpmPolicy'
+  // profile 里留着指向旧版本 dsh-plugin 的 patch 声明（ERR_PNPM_UNUSED_PATCH /
+  // `The following patches were not used: dsh-plugin@1.4.2`）：本机 pnpm 配置与本次解析到的版本
+  // 对不上，pnpm 出于安全直接中止整次安装 —— 任何插件都装不进来，不是插件问题
+  // （dsh-plugin-hub#48：用户升级 dsh-plugin 后旧 patch 条目失配）→ 提示删条目后重试，不引导提 Issue。
+  // 必须在兜底之前，否则被归成「插件侧失败」引导去提 Issue。
+  if (/ERR_PNPM_UNUSED_PATCH|patches were not used/i.test(message)) return 'pnpmUnusedPatch'
+  // profile 里的文件被其他进程占用，pnpm 无法替换（Windows `os error 32`
+  // 「另一个程序正在使用此文件，进程无法访问」/ EBUSY / resource busy or locked）——
+  // 通常是宿主进程或杀毒软件实时扫描持有句柄；`os error 32` 用 ASCII 特征，中文原文乱码也能命中
+  // （dsh-plugin-hub#47）→ 提示完全退出宿主后重试，不引导提 Issue
+  if (/os error 32|EBUSY|resource busy or locked|being used by another process/i.test(message)) return 'fileLocked'
   // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
   // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
   // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本
@@ -274,7 +294,10 @@ export function classifyFailure(message: string): FailureKind {
   // 404 类「目标不存在」不含这些特征，仍归 repo（那是仓库/包的问题）。
   // 注意：fetch failed 只在 pnpm 拉取阶段出现；prepare/构建已跑起来（tarball 到手）的
   // 插件问题不带此特征，不会误伤（graph-memory #82-#84 的 allowBuilds 拦截在上一分支先判）。
-  if (/\[network\]|ERR_PNPM_GIT_FETCH_FAILED|ETIMEDOUT|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|EPIPE|EHOSTUNREACH|ENETUNREACH|getaddrinfo|Could not connect|Could not resolve host|Network unreachable|Failed to connect|socket hang up|CERT_HAS_EXPIRED|SSL certificate problem|\bTLS\b|\bSSL\b|fetch failed|\bGET https?:\/\/\S+\.tgz\s+error \(\d+\)/i.test(message)) return 'network'
+  // `Failed to fetch` 是浏览器 fetch 的 TypeError（词序与 Node 的 fetch failed 相反）：界面
+  // 请求根本没送达宿主服务（宿主未就绪/正在重启、本地代理拦了回环地址）—— 同样不是插件问题
+  // （dsh-plugin-hub#45：此前不被识别，落进 repo 兜底并自动提了「插件侧安装失败」）。
+  if (/\[network\]|ERR_PNPM_GIT_FETCH_FAILED|ETIMEDOUT|ECONNREFUSED|ECONNRESET|ENOTFOUND|EAI_AGAIN|EPIPE|EHOSTUNREACH|ENETUNREACH|getaddrinfo|Could not connect|Could not resolve host|Network unreachable|Failed to connect|socket hang up|CERT_HAS_EXPIRED|SSL certificate problem|\bTLS\b|\bSSL\b|fetch failed|failed to fetch|\bGET https?:\/\/\S+\.tgz\s+error \(\d+\)/i.test(message)) return 'network'
   // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'

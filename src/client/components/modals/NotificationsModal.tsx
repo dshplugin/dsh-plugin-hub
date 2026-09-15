@@ -303,6 +303,16 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 本机 pnpm 策略不放行，装任何「刚发布/新来源」插件都撞墙 —— 给豁免指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmPolicyHint'))
                     }
+                    if (kind === 'pnpmUnusedPatch') {
+                      // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm
+                      // 发现补丁没被用上就中止安装，任何插件都装不进来 —— 不引导提 Issue（#48）
+                      return h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
+                    }
+                    if (kind === 'fileLocked') {
+                      // profile 里的文件被其他进程占用（Windows os error 32）：通常是宿主或杀毒软件
+                      // 持有句柄 —— 给出完全退出宿主的指引，不引导提 Issue（#47）
+                      return h('div', { className: styles.failPrepareHint }, t('failFileLockedHint'))
+                    }
                     if (kind === 'network') {
                       // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
                       // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，
