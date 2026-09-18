@@ -425,6 +425,10 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // profile 里的文件被其他进程占用（Windows os error 32）：pnpm 无法替换被占用的文件，
               // 通常是宿主或杀毒软件持有句柄 —— 给退出宿主的指引，不引导提 Issue（#47）
               ? h('div', { className: styles.failPrepareHint }, t('failFileLockedHint'))
+              : failureKind === 'accessDenied'
+              // profile 里的文件被系统拒绝写入（Windows os error 5「拒绝访问」/ EPERM / EACCES）：
+              // 占用、只读属性、目录 ACL 或杀软拦截 —— 同样给退出宿主/检查权限的指引，不引导提 Issue（#50）
+              ? h('div', { className: styles.failPrepareHint }, t('failAccessDeniedHint'))
               : failureKind === 'network'
               // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
               // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

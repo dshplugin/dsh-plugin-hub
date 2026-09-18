@@ -246,6 +246,27 @@ test('classifyFailure: a locked file inside the profile is an environment issue 
   assert.equal(classifyFailure('Error: the process cannot access the file because it is being used by another process'), 'fileLocked')
 })
 
+test('classifyFailure: a write access denial inside the profile is an environment issue (issue #50), not a plugin issue', () => {
+  // #50：Windows 下 pnpm 在 swap 阶段替换 profile 里的文件被系统拒绝（os error 5 = ERROR_ACCESS_DENIED，
+  // 中文为「拒绝访问」）。中文原文经 GBK→UTF-8 解码会残缺，靠 ASCII 特征 os error 5 命中（乱码免疫）
+  const msg = [
+    'Error:',
+    '\u00d7 adding a new package',
+    'swap: \u62d2\u7edd\u8bbf\u95ee\u3002 (os error 5)',
+    'dsh: pnpm failed in profile directory C:\\Users\\Administrator\\AppData\\Roaming\\Deepseek-Harness-Desktop\\dsh-home\\profiles\\web',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'accessDenied')
+  assert.notEqual(classifyFailure(msg), 'repo')
+  // 语义与 os error 32（文件被占用）不同，不能被 fileLocked 分支抢走
+  assert.notEqual(classifyFailure(msg), 'fileLocked')
+  // Node 层的权限码与 Windows 英文原句同样归到 accessDenied
+  assert.equal(classifyFailure('EPERM: operation not permitted, rename ...'), 'accessDenied')
+  assert.equal(classifyFailure('EACCES: permission denied, unlink ...'), 'accessDenied')
+  assert.equal(classifyFailure('Error: Access is denied. (os error 5)'), 'accessDenied')
+  // 不能被后续分支抢走：普通安装失败仍归插件侧（避免新分支过宽）
+  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
+})
+
 test('classifyFailure: the browser "Failed to fetch" on the host request is an environment issue (issue #45), not a plugin issue', () => {
   const msg = '安装失败 — Failed to fetch'
   assert.equal(classifyFailure(msg), 'network')

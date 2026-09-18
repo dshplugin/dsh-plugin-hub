@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'accessDenied' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -202,6 +202,14 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  * - fileLocked：pnpm 无法替换 profile 里被其他进程占用的文件（Windows `os error 32`
  *   「另一个程序正在使用此文件」/ `EBUSY` / `resource busy or locked`）—— 通常是宿主进程或杀毒软件
  *   实时扫描持有句柄，不是插件问题（dsh-plugin-hub#47）→ 提示完全退出宿主后重试，不引导提 Issue
+ * - accessDenied：pnpm 在 profile 里替换文件时被系统拒绝写入（Windows `os error 5`
+ *   「拒绝访问」= ERROR_ACCESS_DENIED / Node 的 `EPERM` `EACCES` / `Access is denied`）——
+ *   同属本机文件系统层面的写入受阻：文件/目录被其他进程占用、只读属性、目录 ACL 受限，
+ *   或杀毒软件实时防护拦截写入（`os error 5` 与 `os error 32` 语义不同：前者是「拒绝访问」，
+ *   后者是「文件正被占用」，但用户侧处置一致）。任何插件装进该目录都会同样失败，不是插件问题
+ *   （dsh-plugin-hub#50：Win 下 `swap: 拒绝访问。 (os error 5)` 漏判，被误报成插件侧安装失败并
+ *   自动提了 issue）→ 提示退出宿主/关杀软后重试，仍失败则检查只读属性并以管理员身份运行，
+ *   不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）、底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝），或
  *   registry tarball 拉取失败（`fetch failed` / `GET …/-/…tgz error (n)` —— 常见于本机
@@ -278,6 +286,12 @@ export function classifyFailure(message: string): FailureKind {
   // 通常是宿主进程或杀毒软件实时扫描持有句柄；`os error 32` 用 ASCII 特征，中文原文乱码也能命中
   // （dsh-plugin-hub#47）→ 提示完全退出宿主后重试，不引导提 Issue
   if (/os error 32|EBUSY|resource busy or locked|being used by another process/i.test(message)) return 'fileLocked'
+  // profile 里的文件/目录被系统拒绝写入（Windows `os error 5`「拒绝访问」= ERROR_ACCESS_DENIED /
+  // Node 的 EPERM、EACCES / 英文 `Access is denied`）：占用、只读属性、目录 ACL 或杀软拦截，
+  // 同属本机文件系统问题，任何插件都装不上，不是插件问题。`os error 5` 只认 ASCII 特征 ——
+  // 中文原文经 GBK→UTF-8 解码会残缺，不能依赖「拒绝访问」四个字
+  // （dsh-plugin-hub#50：swap 阶段 `os error 5` 漏判，落 repo 兜底被误报成插件侧失败）
+  if (/os error 5\b|ERROR_ACCESS_DENIED|\bEPERM\b|\bEACCES\b|access is denied/i.test(message)) return 'accessDenied'
   // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
   // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
   // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本

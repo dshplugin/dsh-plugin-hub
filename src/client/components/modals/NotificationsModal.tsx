@@ -313,6 +313,11 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 持有句柄 —— 给出完全退出宿主的指引，不引导提 Issue（#47）
                       return h('div', { className: styles.failPrepareHint }, t('failFileLockedHint'))
                     }
+                    if (kind === 'accessDenied') {
+                      // profile 里的文件被系统拒绝写入（Windows os error 5「拒绝访问」/ EPERM / EACCES）：
+                      // 占用、只读属性、目录 ACL 或杀软拦截 —— 给退出宿主 + 检查权限的指引，不引导提 Issue（#50）
+                      return h('div', { className: styles.failPrepareHint }, t('failAccessDeniedHint'))
+                    }
                     if (kind === 'network') {
                       // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
                       // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

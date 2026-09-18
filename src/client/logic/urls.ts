@@ -53,6 +53,7 @@ function reasonTitleOf(kind: FailureKind): string {
     case 'pnpmPolicy': return 'pnpm supply-chain policy blocked the install on the user machine'
     case 'pnpmUnusedPatch': return 'stale pnpm patch entry on the user machine'
     case 'fileLocked': return 'file locked by another process on the user machine'
+    case 'accessDenied': return 'file write access denied on the user machine'
     case 'pnpmIgnoredBuild': return 'build scripts blocked by pnpm allowlist'
     case 'pluginPrepare': return 'plugin distribution incomplete'
     case 'network': return 'network failure on the user side'
@@ -90,7 +91,9 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
                   ? 'the profile keeps a pnpm patch entry for an older dsh-plugin version, so pnpm aborted the install (local config issue)'
                   : kind === 'fileLocked'
                     ? 'a file in the profile is locked by another process on the user machine (local environment issue)'
-                    : 'plugin-side install failure'
+                    : kind === 'accessDenied'
+                      ? 'the system denied write access to a file in the profile on the user machine (local environment issue)'
+                      : 'plugin-side install failure'
   const code = coreErrorCode(message)
   // 按给定核心摘要预算构建完整预填 URL（含 URL 编码）；预算可调，供超长时逐档缩小
   const build = (coreChars: number): string => {
