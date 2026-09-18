@@ -107,12 +107,13 @@ function catalogCacheFile(profile: string, key: string): string {
   return join(profileDirectory(profile), 'cache', `catalog-${key}.json`)
 }
 
-/** 读缓存：文件存在、JSON 合法、未过期 → 返回原始响应字符串；否则 null（视为 miss）。 */
-function readCatalogCache(file: string): string | null {
+/** 读缓存：文件存在、JSON 合法、未超过 maxAgeMs → 返回原始响应字符串；否则 null（视为 miss）。
+ *  maxAgeMs 传 Infinity 即「任意年龄的缓存」，供实时拉取失败时兜底使用。 */
+function readCatalogCache(file: string, maxAgeMs: number): string | null {
   try {
     const entry = JSON.parse(readFileSync(file, 'utf8')) as CatalogCacheEntry
     if (entry && typeof entry.at === 'number' && typeof entry.body === 'string'
-      && Date.now() - entry.at < CATALOG_CACHE_TTL_MS) {
+      && Date.now() - entry.at < maxAgeMs) {
       return entry.body
     }
   } catch {
@@ -567,8 +568,16 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             ? await gitLsRemote(c.url, c.proxy ?? effectiveProxy, 6000)
             : await probe(c.url, c.proxy)
           results.push({ key: c.key, ok: r.ok })
-          // git 行的 status 是退出码，客户端 git 行只显示 OK / 不可达，不显示成 HTTP 码
-          send({ type: r.ok ? 'ok' : 'fail', key: c.key, display: c.display, ms: r.ms, status: c.git ? null : r.status })
+          // git 行的 status 是退出码，客户端 git 行只显示 OK / 不可达，不显示成 HTTP 码。
+          // reason 透出失败细分原因（如 Windows 证书吊销受阻），客户端据此给对症提示而非笼统「不可达」。
+          send({
+            type: r.ok ? 'ok' : 'fail',
+            key: c.key,
+            display: c.display,
+            ms: r.ms,
+            status: c.git ? null : r.status,
+            reason: r.ok ? null : (r.reason ?? null),
+          })
         }
         send({ type: 'end', at: Date.now() })
         response.end()
@@ -609,9 +618,10 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           sendJson(response, 200, { ok: false, ms: null, status: null, target, reason: 'empty' })
           return
         }
-        // 探测走该代理本身（不是 effectiveProxy）：验证的就是用户填的这个地址
+        // 探测走该代理本身（不是 effectiveProxy）：验证的就是用户填的这个地址。
+        // reason 带上失败细分原因（如证书吊销受阻），设置页才能提示「不是代理地址的问题」。
         const r = await probeUrl(target, proxy, 6000)
-        sendJson(response, 200, { ok: r.ok, ms: r.ms, status: r.status, target })
+        sendJson(response, 200, { ok: r.ok, ms: r.ms, status: r.status, target, reason: r.reason ?? null })
       },
     }),
     webServer.register({
@@ -635,7 +645,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           : `https://api.dsh-plugin.org/plugins.${lang}.json`
         // 1 小时本地缓存：命中直接返回（跨重启生效，插件市场秒开），未命中才走 curl 拉远程
         const cacheFile = catalogCacheFile(profile, isStats ? 'stats' : `plugins-${lang}`)
-        const cached = readCatalogCache(cacheFile)
+        const cached = readCatalogCache(cacheFile, CATALOG_CACHE_TTL_MS)
         if (cached !== null) {
           try {
             sendJson(response, 200, JSON.parse(cached))
@@ -646,6 +656,17 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
         }
         const r = await fetchViaCurl(target, proxy, 20000)
         if (!r.ok || r.body === '') {
+          // 实时拉取失败：退回任意年龄的本地缓存（上次成功数据），
+          // 避免证书吊销受阻 / 网络抖动时整个插件市场打不开 —— 数据可能过期，但好过空白。
+          const stale = readCatalogCache(cacheFile, Number.POSITIVE_INFINITY)
+          if (stale !== null) {
+            try {
+              sendJson(response, 200, JSON.parse(stale))
+              return
+            } catch {
+              // 兜底缓存也损坏：落到下面的 502
+            }
+          }
           sendJson(response, 502, { error: 'catalog fetch failed' })
           return
         }

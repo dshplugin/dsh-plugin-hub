@@ -94,6 +94,8 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
   // —— HTTP 代理连通性：输入停笔后防抖实时探测（服务端 /proxy-check 用该代理打 github.com）。
   // 结果只作提示、绝不阻断保存 —— 用户可能是先填地址后开代理，保存后再去开代理完全合法。
   const [proxyProbe, setProxyProbe] = useState<'idle' | 'checking' | 'ok' | 'fail'>('idle')
+  // 失败细分原因（如 'tlsRevocation'）：证书吊销受阻时提示「不是代理地址不通」，避免误导排查方向
+  const [proxyProbeReason, setProxyProbeReason] = useState<string | null>(null)
   const proxyProbeTimer = useRef<number | null>(null)
   const proxyProbeSeq = useRef(0)
   // 卸载时清掉未触发的防抖计时器，避免卸载后 setState
@@ -103,25 +105,31 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
   }, [])
   // 设置被外部重置（恢复默认/清空代理）时同步清掉探测状态，避免残留过期的「不通」提示
   useEffect(() => {
-    if (settings.proxy === '') setProxyProbe('idle')
+    if (settings.proxy === '') { setProxyProbe('idle'); setProxyProbeReason(null) }
   }, [settings.proxy])
 
   const probeProxyNow = (value: string) => {
     const v = value.trim()
-    if (v === '') { setProxyProbe('idle'); return }
+    if (v === '') { setProxyProbe('idle'); setProxyProbeReason(null); return }
     const seq = ++proxyProbeSeq.current
     setProxyProbe('checking')
+    setProxyProbeReason(null)
     void fetch('/dsh-plugin-hub/proxy-check', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ proxy: v }),
       cache: 'no-store',
     }).then((res) => res.json())
-      .then((data: { ok?: boolean }) => {
+      .then((data: { ok?: boolean; reason?: string | null }) => {
         if (seq !== proxyProbeSeq.current) return
         setProxyProbe(data.ok ? 'ok' : 'fail')
+        setProxyProbeReason(typeof data.reason === 'string' ? data.reason : null)
       })
-      .catch(() => { if (seq === proxyProbeSeq.current) setProxyProbe('fail') })
+      .catch(() => {
+        if (seq !== proxyProbeSeq.current) return
+        setProxyProbe('fail')
+        setProxyProbeReason(null)
+      })
   }
 
   const onProxyChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +199,8 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
           : proxyProbe === 'ok'
             ? h('div', { className: `${styles.proxyHint} ${styles.proxyHintOk}` }, t('proxyCheckOk'))
             : proxyProbe === 'fail'
-              ? h('div', { className: `${styles.proxyHint} ${styles.proxyHintFail}` }, t('proxyCheckFail'))
+              ? h('div', { className: `${styles.proxyHint} ${styles.proxyHintFail}` },
+                proxyProbeReason === 'tlsRevocation' ? t('proxyCheckRevocation') : t('proxyCheckFail'))
               : null,
       ),
     }),

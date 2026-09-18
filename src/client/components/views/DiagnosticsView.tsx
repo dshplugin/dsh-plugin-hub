@@ -37,6 +37,8 @@ interface RowState {
   status: 'idle' | 'running' | 'ok' | 'fail'
   ms: number | null
   statusCode: number | null
+  /** 失败细分原因：'tlsRevocation' = 证书吊销检查受阻（本机 TLS 环境问题，不是网络不通） */
+  reason?: string | null
 }
 
 const INITIAL_ROWS: RowState[] = [
@@ -74,7 +76,7 @@ export function DiagnosticsView({ t, env, proxy, onCopy }: {
     runningRef.current?.abort()
     const controller = new AbortController()
     runningRef.current = controller
-    patchRows(key, { status: 'running', ms: null, statusCode: null })
+    patchRows(key, { status: 'running', ms: null, statusCode: null, reason: null })
 
     void (async () => {
       try {
@@ -98,7 +100,7 @@ export function DiagnosticsView({ t, env, proxy, onCopy }: {
             const raw = buf.slice(0, nl).trim()
             buf = buf.slice(nl + 1)
             if (raw !== '') {
-              const ev = JSON.parse(raw) as { type?: string; key?: string; ms?: number | null; status?: number | null; display?: string }
+              const ev = JSON.parse(raw) as { type?: string; key?: string; ms?: number | null; status?: number | null; display?: string; reason?: string | null }
               if (ev.type === 'ok' || ev.type === 'fail') {
                 patchRows(ev.key as ProbeKey, {
                   status: ev.type === 'ok' ? 'ok' : 'fail',
@@ -106,6 +108,8 @@ export function DiagnosticsView({ t, env, proxy, onCopy }: {
                   statusCode: typeof ev.status === 'number' ? ev.status : null,
                   // 服务端带出实际使用的源地址（配置镜像 → 镜像地址；未配置 → 空串）
                   display: typeof ev.display === 'string' ? ev.display : '',
+                  // 失败细分原因：证书吊销受阻时给对症提示，而非笼统「不可达」
+                  reason: typeof ev.reason === 'string' ? ev.reason : null,
                 })
               }
             }
@@ -155,13 +159,16 @@ export function DiagnosticsView({ t, env, proxy, onCopy }: {
       }, t('diagRunAll')),
     ),
     rows.map((r) => {
+      // 证书吊销检查受阻：badge 与悬浮提示都换成对症文案，避免用户朝「网络不通」方向排查
+      const revokeBlocked = r.status === 'fail' && r.reason === 'tlsRevocation'
       const badge = r.status === 'running'
         ? h('span', { className: `${styles.badge} ${styles.badgeRunning}` }, t('diagChecking'))
         : r.status === 'ok'
           ? h('span', { className: `${styles.badge} ${styles.badgeOk}` },
             r.statusCode !== null ? `HTTP ${r.statusCode} ${t('diagOk')}` : t('diagOk'))
           : r.status === 'fail'
-            ? h('span', { className: `${styles.badge} ${styles.badgeFail}` }, t('settingsDiagFail'))
+            ? h('span', { className: `${styles.badge} ${styles.badgeFail}` },
+              revokeBlocked ? t('diagFailRevocation') : t('settingsDiagFail'))
             : h('span', { className: `${styles.badge} ${styles.badgeIdle}` }, t('diagIdle'))
       return h('button', {
         key: r.key,
@@ -169,7 +176,7 @@ export function DiagnosticsView({ t, env, proxy, onCopy }: {
         className: styles.row,
         disabled: r.status === 'running',
         onClick: () => run(r.key),
-        title: t('diagRecheck'),
+        title: revokeBlocked ? t('diagFailRevocationHint') : t('diagRecheck'),
       },
         h('span', { className: styles.name }, t(r.nameKey)),
         // npm 行未配置镜像：display 为空 → 显示「未配置（跟随本机）」，不误导成官方源；

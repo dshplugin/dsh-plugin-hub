@@ -116,6 +116,8 @@ export const zh = {
   proxyCheckChecking: '正在测试该代理地址…',
   proxyCheckOk: '测试可达，安装与目录请求将统一走该代理',
   proxyCheckFail: '此地址测试不通，仍可保存；请确认代理已开启、地址与端口无误',
+  // 失败细分原因：Windows Schannel 必须取到证书吊销信息，取不到即中断握手 —— 不是代理地址不通
+  proxyCheckRevocation: '证书吊销检查受阻（Windows Schannel 取不到 CRL/OCSP），握手被中断；属本机 TLS 环境问题，非代理地址不通',
   settingsMirror: 'npm 镜像源',
   settingsMirrorDesc: '默认跟随本机 npm 配置；官方源慢可换国内镜像',
   mirrorNone: '未配置（跟随本机 npm 配置）',
@@ -203,6 +205,9 @@ export const zh = {
   diagSummaryRunning: '正在检测通道…',
   diagSummaryOk: '全部通道正常',
   diagSummaryFail: '存在不可达通道，点击对应行可重测',
+  // 失败细分原因：Windows Schannel 必须取到证书吊销信息才能握手，取不到即中断（易被误当成网络不通）
+  diagFailRevocation: '证书校验受阻',
+  diagFailRevocationHint: '系统 curl 取不到证书吊销信息（Windows Schannel 必需 CRL/OCSP），TLS 握手被中断 —— 这不是网络不通，npm/git 可能照常可用。升级 curl 到 7.70+ 可自动按「尽力而为」处理，或换一个能访问吊销服务的网络。',
   settingsEnvSnapshot: '系统版本',
   settingsEnvSnapshotDesc: '复制宿主版本与系统信息，提交 Issue 时粘贴到正文便于复现',
   settingsEnvCopy: '复制',
@@ -483,6 +488,8 @@ export const en = {
   proxyCheckChecking: 'Testing this proxy address…',
   proxyCheckOk: 'Reachable — installs and catalog requests will route through it',
   proxyCheckFail: 'Unreachable, but you can still save it; make sure the proxy is running and the address and port are correct',
+  // Failure reason: Windows Schannel aborts the handshake when revocation info (CRL/OCSP) is unreachable — not a bad proxy address
+  proxyCheckRevocation: 'Certificate revocation check blocked (Windows Schannel could not fetch CRL/OCSP), so the handshake was aborted — a local TLS issue, not a bad proxy address',
   settingsMirror: 'npm mirror',
   settingsMirrorDesc: 'Unset by default — follows local npm config; pick a domestic mirror if slow',
   mirrorNone: 'Unset (follow local npm config)',
@@ -570,6 +577,9 @@ export const en = {
   diagSummaryRunning: 'Checking channels…',
   diagSummaryOk: 'All channels reachable',
   diagSummaryFail: 'Unreachable channel(s) — click a row to re-check',
+  // Failure reason: Windows Schannel aborts the handshake when revocation info (CRL/OCSP) is unreachable (easily mistaken for a network outage)
+  diagFailRevocation: 'Cert check blocked',
+  diagFailRevocationHint: 'The system curl cannot fetch certificate revocation info (CRL/OCSP, required by Windows Schannel), so the TLS handshake is aborted — this is not a network outage, and npm/git may still work. curl 7.70+ downgrades the check to best-effort, or switch to a network that can reach the revocation service.',
   settingsEnvSnapshot: 'System version',
   settingsEnvSnapshotDesc: 'Copy host version and system info for pasting into issue reports',
   settingsEnvCopy: 'Copy',
