@@ -318,6 +318,11 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 占用、只读属性、目录 ACL 或杀软拦截 —— 给退出宿主 + 检查权限的指引，不引导提 Issue（#50）
                       return h('div', { className: styles.failPrepareHint }, t('failAccessDeniedHint'))
                     }
+                    if (kind === 'fsUnavailable') {
+                      // 本机磁盘写不进去（ENOSPC / EROFS / EMFILE 及 Windows os error 112、19）：
+                      // 空间不足、盘只读、句柄耗尽，任何插件都装不进来 —— 按子场景给指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failFsUnavailableHint'))
+                    }
                     if (kind === 'network') {
                       // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
                       // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'accessDenied' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -210,6 +210,12 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  *   （dsh-plugin-hub#50：Win 下 `swap: 拒绝访问。 (os error 5)` 漏判，被误报成插件侧安装失败并
  *   自动提了 issue）→ 提示退出宿主/关杀软后重试，仍失败则检查只读属性并以管理员身份运行，
  *   不引导提 Issue
+ * - fsUnavailable：本机文件系统层面根本写不进去 —— 磁盘/分区空间耗尽（`ENOSPC` /
+ *   `no space left on device`，Windows 为 `os error 112`）、目标分卷或挂载点为只读
+ *   （`EROFS` / `read-only file system`，Windows 写保护为 `os error 19`）、进程可用的文件句柄
+ *   被耗尽（`EMFILE` / `ENFILE` / `too many open files`）。这三类都在 pnpm 落盘阶段发生，
+ *   与具体装哪个插件无关：空间不足、盘只读、句柄不够时，任何插件都装不进来，不是插件问题
+ *   → 提示按报错代码对号入座（清空间 / 换可写目录 / 重启宿主释放句柄），不引导提 Issue
  * - network：安装前连通性预检拦截（服务端 `[network]` 标记）、底层连接失败
  *   （ERR_PNPM_GIT_FETCH_FAILED / ETIMEDOUT / DNS 解析 / TLS 握手 / 代理拒绝），或
  *   registry tarball 拉取失败（`fetch failed` / `GET …/-/…tgz error (n)` —— 常见于本机
@@ -292,6 +298,13 @@ export function classifyFailure(message: string): FailureKind {
   // 中文原文经 GBK→UTF-8 解码会残缺，不能依赖「拒绝访问」四个字
   // （dsh-plugin-hub#50：swap 阶段 `os error 5` 漏判，落 repo 兜底被误报成插件侧失败）
   if (/os error 5\b|ERROR_ACCESS_DENIED|\bEPERM\b|\bEACCES\b|access is denied/i.test(message)) return 'accessDenied'
+  // 本机文件系统层面根本写不进去：空间耗尽（ENOSPC / no space left on device / Windows os error 112）、
+  // 目标盘或挂载点只读（EROFS / read-only file system / Windows 写保护 os error 19）、
+  // 文件句柄耗尽（EMFILE / ENFILE / too many open files）。都在 pnpm 落盘阶段发生，
+  // 空间不足、盘只读或句柄不够时任何插件都装不进来，不是插件问题 ——
+  // 必须在 network / prepare 之前判：磁盘满时 pnpm 会在日志尾部混着重试与超时特征，
+  // 先判网络会把「本机磁盘写不进去」误报成「你的网络不通」
+  if (/os error 112\b|os error 19\b|ERROR_DISK_FULL|ERROR_WRITE_PROTECT|\bENOSPC\b|\bEROFS\b|\bEMFILE\b|\bENFILE\b|no space left on device|read-only file system|too many open files/i.test(message)) return 'fsUnavailable'
   // 构建脚本被 pnpm 白名单（allowBuilds）拦截：插件的 prepare 脚本或依赖里的原生模块构建
   // 被默认拒绝（ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED / ERR_PNPM_IGNORED_BUILDS）。
   // 这类错误出现即说明 pnpm 已成功 fetch 到 tarball（网络是通的），主因是插件构建脚本

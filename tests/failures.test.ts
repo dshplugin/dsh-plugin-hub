@@ -267,6 +267,23 @@ test('classifyFailure: a write access denial inside the profile is an environmen
   assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
 })
 
+test('classifyFailure: a file system that cannot accept writes is an environment issue, not a plugin issue', () => {
+  // 在 pnpm 落盘阶段报错：磁盘写不进去时任何插件都装不上，不能落 repo 兜底引导用户去插件仓库提 Issue
+  assert.equal(classifyFailure('Error: ENOSPC: no space left on device, write'), 'fsUnavailable')
+  assert.equal(classifyFailure('npm ERR! code ENOSPC\nnpm ERR! syscall write'), 'fsUnavailable')
+  assert.equal(classifyFailure('Error: EROFS: read-only file system, mkdir ...'), 'fsUnavailable')
+  assert.equal(classifyFailure('Error: EMFILE: too many open files, open ...'), 'fsUnavailable')
+  assert.equal(classifyFailure('Error: ENFILE: file table overflow'), 'fsUnavailable')
+  // Windows 形态：只认 ASCII 错误码（中文原文经 GBK→UTF-8 解码会残缺）
+  assert.equal(classifyFailure('write: There is not enough space on the disk. (os error 112)'), 'fsUnavailable')
+  assert.equal(classifyFailure('mkdir: The media is write protected. (os error 19)'), 'fsUnavailable')
+  assert.notEqual(classifyFailure('Error: ENOSPC: no space left on device, write'), 'repo')
+  // 磁盘满时 pnpm 日志尾部常混着超时/重试特征，不能被 network 抢走
+  assert.notEqual(classifyFailure('Error: ENOSPC: no space left on device\nETIMEDOUT'), 'network')
+  // 不能被后续分支抢走：普通安装失败仍归插件侧（避免新分支过宽）
+  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
+})
+
 test('classifyFailure: the browser "Failed to fetch" on the host request is an environment issue (issue #45), not a plugin issue', () => {
   const msg = '安装失败 — Failed to fetch'
   assert.equal(classifyFailure(msg), 'network')
