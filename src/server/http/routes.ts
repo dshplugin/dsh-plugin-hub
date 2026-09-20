@@ -729,7 +729,11 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           'mkdir -p "$HOME/.dsh/logs"',
           `nohup dsh web --port ${port} >>"$HOME/.dsh/logs/dsh-web-${port}.log" 2>&1 &`,
         ].join('\n')
-        spawn('/bin/sh', ['-c', script], { detached: true, stdio: 'ignore' }).unref()
+        const restarter = spawn('/bin/sh', ['-c', script], { detached: true, stdio: 'ignore' })
+        // 响应已同步返回；/bin/sh 缺失（如 Windows）时若不挂 error 监听，
+        // 异步 ENOENT 会成为未处理 error 事件，直接以 uncaughtException 崩掉宿主。
+        restarter.once('error', () => {})
+        restarter.unref()
         sendJson(response, 200, { ok: true, port })
       },
     }),
