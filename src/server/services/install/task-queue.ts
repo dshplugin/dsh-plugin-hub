@@ -259,7 +259,19 @@ function pumpQueue(): void {
   if (!item) return
   const { task, options } = item
   task.status = 'running'
-  void runPluginMutation({ ...options, task }).finally(() => {
+  void runPluginMutation({ ...options, task })
+    .catch((error) => {
+      // runPluginMutation 的恢复路径（如 allowBuilds 写回 pnpm-workspace.yaml）
+      // 可能抛出；落到 failed 终态并留痕，否则该 Promise 链成为未处理 rejection
+      //（Node >= 15 默认直接终止进程），而队列自身却在 finally 里继续 pump。
+      if (task.status !== 'cancelled') {
+        task.status = 'failed'
+        task.exitCode = null
+        task.progress = 0
+        pushLine(task, `[internal] ${error instanceof Error ? error.message : String(error)}`)
+      }
+    })
+    .finally(() => {
     runningChildren.delete(task.id)
     // 系统日志：任务终态（成功/失败/取消），按动作归类安装/卸载/更新日志
     const show = task.displayTarget ?? task.target
