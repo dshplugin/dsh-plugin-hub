@@ -13,7 +13,7 @@
  */
 import { get } from 'node:https'
 
-/** 反查缓存：repo 小写 → npm 包名（null 表示已确认无对应 npm 包）。 */
+/** 反查缓存：repo 小写 → npm 包名（null 表示已确认无对应 npm 包；网络异常不缓存）。 */
 const cache = new Map<string, string | null>()
 
 /** 单次 registry 查询超时（ms）：慢网络下失败返回 null，不阻塞安装流程。 */
@@ -22,7 +22,9 @@ const REQUEST_TIMEOUT_MS = 8000
 /**
  * 反查 repo（`owner/repo`）对应的官方 npm 包名；未命中、网络异常或超时返回 null。
  * 返回 null 不代表仓库一定没有 npm 包，只代表本次未能确认 —— 调用方应保留
- * 原有错误路径，反查只是额外的一次尝试。
+ * 原有错误路径，反查只是额外的一次尝试。只有「已确认」的结果（包名，或 200
+ * 响应下确认无匹配）会进缓存；网络异常/超时/解析失败不缓存，同一会话内下次
+ * 安装仍会重试反查，避免一次瞬时故障把整个会话锁死在 git 通道。
  * registry 参数：npm 镜像源地址，空串 = 官方源；与安装通道吃同一 registry，
  * 保证「配置了镜像」时反查和安装走同一个源（镜像节点同步完整时结果一致）。
  * 慢网络下失败不阻塞安装。
@@ -31,12 +33,15 @@ export function resolveNpmPackage(repo: string, registry = ''): Promise<string |
   const key = repo.toLowerCase()
   if (cache.has(key)) return Promise.resolve(cache.get(key) ?? null)
   const name = searchRepo(repo, registry)
-  name.then((found) => cache.set(key, found)).catch(() => cache.set(key, null))
-  return name
+  void name.then((found) => {
+    if (found !== undefined) cache.set(key, found)
+  })
+  return name.then((found) => found ?? null)
 }
 
-/** 用 npm search 接口按 repository 地址反查，并做铁证校验（包元数据必须指向该仓库）。 */
-function searchRepo(repo: string, registry: string): Promise<string | null> {
+/** 用 npm search 接口按 repository 地址反查，并做铁证校验（包元数据必须指向该仓库）。
+ * 返回：包名 = 命中；null = 200 响应下确认无匹配；undefined = 本次未能确认（网络/超时/解析失败）。 */
+function searchRepo(repo: string, registry: string): Promise<string | null | undefined> {
   const [owner, name] = repo.split('/')
   if (owner === undefined || name === undefined || name === '') return Promise.resolve(null)
   const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
@@ -45,7 +50,7 @@ function searchRepo(repo: string, registry: string): Promise<string | null> {
     const req = get(url, { timeout: REQUEST_TIMEOUT_MS }, (res) => {
       if (res.statusCode !== 200) {
         res.resume()
-        resolve(null)
+        resolve(undefined)
         return
       }
       let body = ''
@@ -65,11 +70,11 @@ function searchRepo(repo: string, registry: string): Promise<string | null> {
           }
           resolve(null)
         } catch {
-          resolve(null)
+          resolve(undefined)
         }
       })
     })
     req.on('timeout', () => req.destroy())
-    req.on('error', () => resolve(null))
+    req.on('error', () => resolve(undefined))
   })
 }
