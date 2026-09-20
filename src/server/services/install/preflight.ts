@@ -18,6 +18,7 @@ import { join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
 import { githubRepoOf } from '../profile/profile.ts'
+import { resolvePackageEntry } from './package-entry.ts'
 
 const execFileAsync = promisify(execFile)
 
@@ -56,13 +57,7 @@ export async function preflightTarget(target: string): Promise<PreflightResult> 
     await download(`https://codeload.github.com/${owner}/${repo}/tar.gz/${commit}`, tar)
     const meta = await readTarJson(tar, 'package/package.json')
     if (meta === null) return { ok: true, missing: null, name: null }
-    const dot = (meta.exports as Record<string, unknown> | undefined)?.['.']
-    const resolved = typeof dot === 'string'
-      ? dot
-      : dot !== null && typeof dot === 'object'
-        ? (dot as Record<string, unknown>).default
-        : undefined
-    const entry = typeof resolved === 'string' ? resolved : typeof meta.main === 'string' ? meta.main : 'index.js'
+    const entry = resolvePackageEntry(meta)
     const inTar = await hasTarEntry(tar, `package/${entry}`)
     return { ok: inTar, missing: inTar ? null : entry, name: typeof meta.name === 'string' ? meta.name : null }
   } catch {

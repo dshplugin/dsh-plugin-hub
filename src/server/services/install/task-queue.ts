@@ -8,6 +8,7 @@
  * 输出流式收集到任务上；卸载成功时尝试从运行中 loader 即时停用（见 loader.ts）。
  */
 import { spawn, spawnSync } from 'node:child_process'
+import { resolvePackageEntry } from './package-entry.ts'
 import { readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import type { InstallResult, InstallTask, Invocation, QueueItem } from './install-types.ts'
@@ -547,12 +548,7 @@ export function verifyInstalledEntry(profile: string, target: string): { name: s
       main?: unknown
       exports?: unknown
     }
-    const dot = (meta.exports as Record<string, unknown> | undefined)?.['.']
-    const resolved = typeof dot === 'string' ? dot
-      : dot !== null && typeof dot === 'object'
-        ? (dot as Record<string, unknown>).default
-        : undefined
-    entry = typeof resolved === 'string' ? resolved : typeof meta.main === 'string' ? meta.main : 'index.js'
+    entry = resolvePackageEntry(meta)
   } catch {
     return { name, missing: null }
   }
