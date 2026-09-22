@@ -34,7 +34,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Launch of DSH Plugin Hub: a community plugin marketplace for DeepSeek
   Harness, built to the official plugin spec.
-- Browse and search 9,000+ community plugins, sourced from live data.
+- Browse and search 10000+ community plugins, sourced from live data.
 - Copy-to-clipboard install command with a source-trust confirmation step.
 
 [Unreleased]: https://github.com/dshplugin/dsh-plugin-hub/compare/v0.1.1...HEAD
