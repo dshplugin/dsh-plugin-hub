@@ -8,14 +8,39 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { PACKAGE_RE, REPO_RE } from '../install/install-types.ts'
 
 /** Resolve the active profile from the booted CLI args, falling back to `web`. */
 export function readProfileArg(fallback = 'web'): string {
-  const index = process.argv.indexOf('--profile')
-  const candidate = index >= 0 ? process.argv[index + 1] : undefined
-  return candidate !== undefined && !candidate.startsWith('-') ? candidate : fallback
+  return profileFromArgv(process.argv, fallback)
+}
+
+/**
+ * 从启动参数解析当前 profile，两种宿主形态都认：
+ *  - 官方 CLI：`--profile <name>`（也兼容 `--profile=<name>` 等号形式）；
+ *  - Electron 桌面宿主：不传 `--profile`，而是把 profile 目录作为位置参数传入
+ *    （`… <dshRoot> <home>\profiles\desktop …`）。
+ * 桌面端只认 `--profile` 会永远落回 fallback，把路由/日志/安装全挂到错误的 profile 上
+ * （日志写进 profiles/web/hub.log、市场必然「插件数据加载失败」，dsh-plugin-hub#65）。
+ * 位置参数按「父目录名为 profiles」精确识别 profile 目录，避免误取其它位置参数。
+ */
+export function profileFromArgv(argv: readonly string[], fallback = 'web'): string {
+  const index = argv.indexOf('--profile')
+  const candidate = index >= 0 ? argv[index + 1] : undefined
+  if (candidate !== undefined && !candidate.startsWith('-')) return candidate
+  const equals = argv.find((arg) => arg.startsWith('--profile='))
+  if (equals !== undefined) {
+    const name = equals.slice('--profile='.length)
+    if (name !== '') return name
+  }
+  for (const arg of argv.slice(2)) {
+    if (arg === '' || arg.startsWith('-')) continue
+    if (basename(dirname(arg)) !== 'profiles') continue
+    const name = basename(arg)
+    if (name !== '') return name
+  }
+  return fallback
 }
 
 /** Resolve a profile directory (`DSH_HOME` or `~/.dsh`). */

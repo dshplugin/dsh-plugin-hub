@@ -90,6 +90,20 @@ function macSystemProxy(): string | null {
   }
 }
 
+/**
+ * 从 `reg query … /v ProxyServer` 的输出里解析出 `http://host:port`；解析不出返回 null。
+ * 注册表里的值常见三种写法：`http://127.0.0.1:10793`（带 scheme）、`127.0.0.1:10793`、
+ * `http=host:port;https=host:port`（按协议分别配置）。
+ * 字符类必须同时排除 `/` 与 `=`：只排除 `=` 时，带 scheme 的值会让「主机名」吞掉 `//`，
+ * 拼出 `http:////127.0.0.1:10793` 这种立刻失败的非法地址 —— 代理本来是通的，却把诊断、
+ * 目录拉取、npm/git 预检全判成「不可达」（dsh-plugin-hub#66）。
+ */
+export function parseWinProxyServer(stdout: string): string | null {
+  const m = /([^:\s=/]+):(\d+)/.exec(stdout)
+  if (m === null) return null
+  return `http://${m[1]}:${m[2]}`
+}
+
 /** Windows 系统代理：WinINET Internet 设置注册表；未开启返回 null。 */
 function winSystemProxy(): string | null {
   try {
@@ -97,9 +111,7 @@ function winSystemProxy(): string | null {
     const enable = spawnSync('reg', ['query', key, '/v', 'ProxyEnable'], { encoding: 'utf8', timeout: 1500 })
     const server = spawnSync('reg', ['query', key, '/v', 'ProxyServer'], { encoding: 'utf8', timeout: 1500 })
     if (!/0x1/i.test(enable.stdout ?? '')) return null
-    const m = /([^:\s=]+):(\d+)/.exec(server.stdout ?? '')
-    if (m === null) return null
-    return `http://${m[1]}:${m[2]}`
+    return parseWinProxyServer(server.stdout ?? '')
   } catch {
     return null
   }

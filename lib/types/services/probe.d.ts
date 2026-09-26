@@ -28,6 +28,15 @@ export declare function curlRevokeFlagUnsupported(code: number | null, stderr: s
 /** stderr 是否指向 Schannel 取不到证书吊销信息（据此归因为环境 TLS 问题，而非网络不通）。 */
 export declare function tlsRevocationBlocked(stderr: string): boolean;
 /**
+ * 从 `reg query … /v ProxyServer` 的输出里解析出 `http://host:port`；解析不出返回 null。
+ * 注册表里的值常见三种写法：`http://127.0.0.1:10793`（带 scheme）、`127.0.0.1:10793`、
+ * `http=host:port;https=host:port`（按协议分别配置）。
+ * 字符类必须同时排除 `/` 与 `=`：只排除 `=` 时，带 scheme 的值会让「主机名」吞掉 `//`，
+ * 拼出 `http:////127.0.0.1:10793` 这种立刻失败的非法地址 —— 代理本来是通的，却把诊断、
+ * 目录拉取、npm/git 预检全判成「不可达」（dsh-plugin-hub#66）。
+ */
+export declare function parseWinProxyServer(stdout: string): string | null;
+/**
  * 操作系统级代理（macOS 系统网络设置 / Windows Internet 设置）。
  * Node 内置 http(s) 不读系统代理，浏览器挂的代理 Node 看不见 —— 这里读出来
  * 作为默认代理，保证「浏览器能开、安装/诊断就能通」。

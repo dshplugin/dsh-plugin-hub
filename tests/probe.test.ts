@@ -3,7 +3,7 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 连通性探测（probeUrl / systemProxy / curl TLS 参数）的单元测试。
+ * 连通性探测（probeUrl / systemProxy / Windows 代理解析 / curl TLS 参数）的单元测试。
  *
  * probeUrl 走真实网络（spawn curl，走代理或直连），与 npm-resolve 一样标注
  * skip 策略：默认跳过（本机直连 GitHub/npm 常不通，会等满超时才失败、看着像卡死），
@@ -13,7 +13,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { curlRevokeFlagUnsupported, curlTlsArgs, gitLsRemote, probeUrl, systemProxy, tlsRevocationBlocked } from '../src/server/services/probe.ts'
+import { curlRevokeFlagUnsupported, curlTlsArgs, gitLsRemote, parseWinProxyServer, probeUrl, systemProxy, tlsRevocationBlocked } from '../src/server/services/probe.ts'
 
 const ONLINE = process.env.DSH_HUB_TEST_ONLINE === '1'
 
@@ -62,6 +62,20 @@ test('tlsRevocationBlocked: 认得出 Schannel 取不到吊销信息的握手失
   assert.equal(tlsRevocationBlocked('curl: (7) Failed to connect to github.com port 443'), false)
   assert.equal(tlsRevocationBlocked('curl: (60) SSL certificate problem: unable to get local issuer certificate'), false)
   assert.equal(tlsRevocationBlocked(''), false)
+})
+
+test('parseWinProxyServer: 注册表值带 scheme 时不再把 // 吞进主机名（#66）', () => {
+  // reg query 的真实输出形态：首行是键名，值行以若干空格 + 值名 + REG_SZ + 值分隔
+  const regOut = (value: string) =>
+    `HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\r\n    ProxyServer    REG_SZ    ${value}\r\n\r\n`
+  // 此前解析成 http:////127.0.0.1:10793（非法地址，curl 立刻失败）→ 诊断/目录/npm 预检全判不可达
+  assert.equal(parseWinProxyServer(regOut('http://127.0.0.1:10793')), 'http://127.0.0.1:10793')
+  // 无 scheme 写法与按协议分别配置（http=host:port;https=host:port）都要认
+  assert.equal(parseWinProxyServer(regOut('127.0.0.1:10793')), 'http://127.0.0.1:10793')
+  assert.equal(parseWinProxyServer(regOut('http=10.0.0.5:8080;https=10.0.0.5:8443')), 'http://10.0.0.5:8080')
+  // 取不到 host:port（空输出 / 未设置）：返回 null，调用方按「无系统代理」处理
+  assert.equal(parseWinProxyServer(''), null)
+  assert.equal(parseWinProxyServer(regOut('')), null)
 })
 
 test('probeUrl: 非法 URL 直接不可达，不抛错', async () => {

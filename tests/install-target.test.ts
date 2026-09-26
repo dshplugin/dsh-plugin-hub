@@ -7,7 +7,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf } from '../src/server/services/profile/profile.ts'
+import { githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf, profileFromArgv } from '../src/server/services/profile/profile.ts'
 
 test('githubTarget: emits an explicit HTTPS Git URL', () => {
   assert.equal(githubTarget('GanyuanRan/Aegis'), 'git+https://github.com/GanyuanRan/Aegis.git')
@@ -63,4 +63,25 @@ test('globalNpmPackagesOf: extracts package lists from official `npm install -g`
   // 包名非法（含参数/路径等非包名内容）→ null（防注入任意参数）
   assert.equal(globalNpmPackagesOf('npm install -g lodash --save-dev'), null)
   assert.equal(globalNpmPackagesOf('npm install -g'), null)
+})
+
+test('profileFromArgv: CLI 的 --profile 优先，Electron 桌面宿主按位置参数里的 profile 目录识别（#65）', () => {
+  const node = '/usr/local/bin/node'
+  const entry = '/app/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/index.js'
+  // Electron 桌面宿主：不传 --profile，把 profile 目录作为位置参数传入 ——
+  // 认不出就会永远落回 fallback，把路由/日志/安装全挂到 web profile
+  assert.equal(
+    profileFromArgv([node, entry, '--expose-internals', '/app/dsh', '/home/u/.dsh/profiles/desktop', '/app/runtime/primary-runtime'], 'web'),
+    'desktop',
+  )
+  // 官方 CLI：--profile <name>（含 --profile=<name> 等号形式）
+  assert.equal(profileFromArgv([node, entry, 'plugin', '--profile', 'web', 'add', 'lodash'], 'web'), 'web')
+  assert.equal(profileFromArgv([node, entry, '--profile=desktop'], 'web'), 'desktop')
+  // 两者都有：--profile 标志优先（位置参数只是启动路径，不作数）
+  assert.equal(profileFromArgv([node, entry, '--profile', 'desktop', '/home/u/.dsh/profiles/web'], 'web'), 'desktop')
+  // 其它位置参数（dshRoot / runtime 路径）父目录不是 profiles，不得误取
+  assert.equal(profileFromArgv([node, entry, '--expose-internals', '/app/dsh', '/app/runtime/primary-runtime'], 'web'), 'web')
+  // 都没有：保持原 fallback 行为
+  assert.equal(profileFromArgv([node, entry, '--port', '3080'], 'web'), 'web')
+  assert.equal(profileFromArgv([node, entry], 'my-profile'), 'my-profile')
 })
