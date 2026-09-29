@@ -5,10 +5,8 @@
  *
  * Unit tests for the origin check guarding every POST mutation
  * (src/server/http/routes.ts). This predicate is the whole CSRF defence:
- * the desktop host page runs under the app's own scheme (origin
- * `dsh-app://app`) and always failed the old `url.host === host` test, so
- * the entire install path answered 403 untrusted origin on the Electron
- * build (dsh-plugin-hub#70).
+ * it must accept the desktop host page, whose origin is the app's own
+ * scheme (`dsh-app://app`) rather than a localhost URL (dsh-plugin-hub#70).
  *
  * Run with the Node built-in test runner: `npm test` (Node >= 22.6 with
  * type stripping). No extra test dependencies required.
@@ -25,7 +23,7 @@ function req(headers: { origin?: string; host?: string }): IncomingMessage {
 
 test('isSameOrigin: the desktop host page (dsh-app://) is accepted (issue #70)', () => {
   // 桌面端页面 origin 形如 `dsh-app://app`：自定义协议下 host 为第一个路径段（'app'），
-  // 与 Host 头（localhost:3081）必然不等 —— 修复前这里恒返回 false，安装全链路 403
+  // 与 Host 头（localhost:3081）必然不等，只能按协议放行
   assert.equal(isSameOrigin(req({ origin: 'dsh-app://app', host: 'localhost:3081' })), true)
   // 放行按协议判定，与具体 host 段无关
   assert.equal(isSameOrigin(req({ origin: 'dsh-app://anything', host: 'localhost:3081' })), true)

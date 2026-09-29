@@ -206,9 +206,8 @@ test('classifyFailure: pnpm supply-chain policy blocks are environment issues (i
 
 test('classifyFailure: the local hub service\'s bare `untrusted origin` 403 is originRejected, not pnpmPolicy (issue #70)', () => {
   // 服务端 requireTrustedPost 的 403 正文恰好是裸 `untrusted origin`（整行以它结尾）：
-  // 请求在进入安装流程前就被拦下，与 pnpm 无关。修复前被 pnpmPolicy 吞掉，弹出
-  // 「删 node_modules + pnpm-lock.yaml」这类无效且具破坏性的解法
-  // （dsh-plugin-hub#70：桌面端页面 origin 为 `dsh-app://app`，所有安装 POST 都被误归 pnpmPolicy）
+  // 请求在进入安装流程前就被拦下，与 pnpm 无关 —— 不能与 pnpmPolicy 同归一类，后者的
+  // 解法（删 profile 的 node_modules + pnpm-lock.yaml）对本类无效（dsh-plugin-hub#70）
   assert.equal(classifyFailure('untrusted origin'), 'originRejected')
   // useTaskQueue 把服务端 error 字段拼在 install 命令行之后，同样以它结尾
   assert.equal(classifyFailure('[install] dsh-plugin\nuntrusted origin'), 'originRejected')
