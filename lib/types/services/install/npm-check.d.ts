@@ -1,6 +1,6 @@
 /** npm arborist 内部崩溃特征：`Cannot read properties of null (reading 'edgesOut')`。 */
 export declare const NPM_CRASH_EDGES_OUT_RE: RegExp;
-/** 该缺陷在 npm 11.6.0 起不再复现；低于此版本遇到 edgesOut 崩溃即判「本机 npm 版本过低」。 */
+/** 低于该版本（该缺陷在 npm 11.6.0 修复）遇到 edgesOut 崩溃即判「本机 npm 版本过低」。 */
 export declare const NPM_MIN_VERSION: number[];
 /** 读本机 npm 版本（major.minor.patch）；npm 不在 PATH 或执行失败/超时时返回 null（不妄下结论）。 */
 export declare function npmVersionOf(env: NodeJS.ProcessEnv | undefined): [number, number, number] | null;
