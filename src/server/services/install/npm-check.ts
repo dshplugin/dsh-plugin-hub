@@ -5,10 +5,9 @@
  *
  * 本机 npm 环境检测：判断一次安装失败是否源于「本机 npm 版本过低」。
  *
- * 背景：pnpm 在 git 源插件的 prepare 阶段会调 npm 装依赖，npm arborist 在解 peer 依赖时
- * 有已知内部崩溃 —— `Cannot read properties of null (reading 'edgesOut')`（build-ideal-tree.js
- * 的 #loadPeerSet），官方标记 Cannot Reproduce（npm/cli#8261、#9787），npm 11.6.0 起不再复现。
- * 该报错会被 pnpm 包进 ERR_PNPM_PREPARE_PACKAGE 输出，若按插件打包问题引导提 Issue 就误导了用户。
+ * 背景：pnpm 在 git 源插件的 prepare 阶段会调 npm 装依赖，npm arborist 在解 peer 依赖时有
+ * 已知内部崩溃 —— `Cannot read properties of null (reading 'edgesOut')`。这是 npm 自身缺陷，
+ * 该报错会被 pnpm 包进 ERR_PNPM_PREPARE_PACKAGE 输出，不能按插件打包问题引导用户提 Issue。
  *
  * 这里的 `npmTooLowMarker` 是纯函数（输出文本 + 环境 → 标记行或 null），不触碰任务/队列，
  * 由调用方（task-queue.ts）负责把标记追加到任务输出；spawn 读 npm 版本是唯一副作用，独立可测。
@@ -17,7 +16,7 @@ import { spawnSync } from 'node:child_process'
 
 /** npm arborist 内部崩溃特征：`Cannot read properties of null (reading 'edgesOut')`。 */
 export const NPM_CRASH_EDGES_OUT_RE = /Cannot read properties of null \(reading 'edgesOut'\)|edgesOut/i
-/** 该缺陷在 npm 11.6.0 起不再复现；低于此版本遇到 edgesOut 崩溃即判「本机 npm 版本过低」。 */
+/** 低于该版本（该缺陷在 npm 11.6.0 修复）遇到 edgesOut 崩溃即判「本机 npm 版本过低」。 */
 export const NPM_MIN_VERSION = [11, 6, 0]
 
 /** 读本机 npm 版本（major.minor.patch）；npm 不在 PATH 或执行失败/超时时返回 null（不妄下结论）。 */

@@ -42,7 +42,7 @@ export function pluginSiteUrl(repo: string): string {
 
 /** 按失败类型给出简洁的错误原因标题（对外用英文）：
  *  标题直接点明问题出在哪一侧（构建白名单/分发物/本机 npm/网络/插件侧），
- *  作者与用户扫一眼列表就能分流 —— 不再用含糊的 Install/Remove 动作词。 */
+ *  让作者与用户扫一眼列表就能分流，而不是笼统的 Install/Remove 动作词。 */
 function reasonTitleOf(kind: FailureKind): string {
   switch (kind) {
     case 'npmTooOld': return 'npm too old to install'

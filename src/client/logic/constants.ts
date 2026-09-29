@@ -20,7 +20,7 @@ export const HUB_REPO = 'dshplugin/dsh-plugin-hub'
 /**
  * Hub 自我更新版本控制（接口中心 Pages：api.dsh-plugin.org，静态 JSON 发布）。
  * 发新版 = 在 api-center 的 releases/ 写发版记录 + 重新部署，hub.json 随之更新，
- * 所有已装用户的「可更新」徽标即可见，不再依赖主站目录数据管道。
+ * 所有已装用户的「可更新」徽标即可见，不经过主站目录数据管道。
  * 响应：{ version: string | null, publishedAt: string | null, notes: string | {zh,en} | null }
  */
 export const HUB_UPDATE_URL = 'https://api.dsh-plugin.org/hub.json'

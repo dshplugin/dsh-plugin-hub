@@ -456,7 +456,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               // 命令行安装：与应用商店同一套确认/进度/结果弹窗 —— 输入 npm 包名 / GitHub 地址 /
               // dsh plugin 命令即装（custom 源，受安全设置三开关控制）。点安装先弹确认窗，
               // 确认后走队列安装（实时进度 + 成功结果视图）；目标已安装 → 弹窗转「更新」覆盖重装，
-              // 不再撞「already installed」报错（第一次安装没有反馈才导致用户重复点击）。
+              // 不会撞「already installed」报错。
               // 安全信任开关关掉对应通道 → 卡片禁用并提示去设置打开（onOpenSettings 跳到设置页）。
               enableNpm: hubSettings.enableNpmInstall,
               enableGit: hubSettings.enableGitInstall,

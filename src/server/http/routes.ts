@@ -24,7 +24,7 @@ import { appendLog, clearLog, readLog, logFilePath, defaultLogFilePath, customLo
 
 /**
  * 跨平台宿主重启脚本（以 `node -e` 运行，独立于宿主进程）。
- * 取代原先的 `/bin/sh -c`：Windows 无 /bin/sh，且 lsof/nohup 仅 POSIX 存在。
+ * 不用 `/bin/sh -c`：Windows 无 /bin/sh，且 lsof/nohup 仅 POSIX 存在。
  * 由 `spawn(process.execPath, ['-e', SCRIPT, port], { detached, stdio:'ignore' })` 孵化，
  * 宿主进程被 kill 后仍能完成「停旧 → 等端口释放 → 拉起新 dsh web」。
  */
@@ -167,8 +167,7 @@ function installedRepoOf(profile: string, name: string): string | null {
 }
 
 /** 宿主 dsh CLI 版本：优先直接跑 `dsh --version`（与 pnpm/npm/git 同款同步探测，1500ms 超时兜底，
- *  绝不挂起）—— 原先从 process.argv[1] 向上找 package.json 猜版本在部分宿主加载方式下取不到，
- *  导致 issue 环境快照 DSH: unknown；拿不到再退回入口 package.json 查找（dsh 不在 PATH 时兜底）。 */
+ *  绝不挂起）；拿不到再退回从入口 `process.argv[1]` 向上找 package.json（dsh 不在 PATH 时兜底）。 */
 function hostDshVersion(): string | null {
   const viaCli = toolVersion('dsh', ['--version'])
   if (viaCli) return viaCli
@@ -223,7 +222,7 @@ function hostEnv(profile: string): Record<string, string | null> {
 }
 
 /** 安装/卸载 CLI 的子进程环境：透传宿主环境，并按设置注入 HTTP(S) 代理。
- *  npm registry 不再注入 —— 安装完全沿用用户本机 npm 配置（~/.npmrc / 全局配置）。
+ *  不注入 npm registry —— 安装完全沿用用户本机 npm 配置（~/.npmrc / 全局配置）。
  *  代理优先级：设置里的代理 → 系统代理（macOS scutil / Windows 注册表）→ 宿主 env 原有值。
  *  使安装通道与诊断使用相同的代理来源。 */
 function mutationEnv(settings: HubSettings): NodeJS.ProcessEnv {
@@ -265,11 +264,10 @@ export function isSameOrigin(request: IncomingMessage): boolean {
   try {
     const url = new URL(origin)
     // 桌面端（Electron 宿主）的页面跑在宿主自定义协议下，origin 形如 `dsh-app://app`。
-    // 客户端一律用相对路径请求，页面内的请求本身是同源的，但宿主把 `/dsh-plugin-hub/*`
-    // 转发给本地 http server 时 Origin 头原样保留，与 Host（如 localhost:3081）必然不等 ——
-    // 桌面端的安装/卸载/设置等全部 POST 都会被判成 untrusted origin，整个安装链路不可用
-    // （dsh-plugin-hub#70）。该协议只有宿主自身能产生，外部网页无法把自己的 Origin 伪造成
-    // `dsh-app://…`，放行不扩大 CSRF 面。
+    // 客户端一律用相对路径请求，宿主把 `/dsh-plugin-hub/*` 转发给本地 http server 时
+    // Origin 头原样保留，与 Host（如 localhost:3081）不等，因此必须显式放行该协议，
+    // 否则桌面端全部 POST 都会被判成 untrusted origin。该协议只有宿主自身能产生，
+    // 外部网页无法把 Origin 伪造成 `dsh-app://…`，放行不扩大 CSRF 面。
     if (url.protocol === 'dsh-app:') return true
     const host = request.headers.host
     if (host === undefined) return false
@@ -643,7 +641,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       path: '/dsh-plugin-hub/catalog',
       handler: async (request, response) => {
         if (!requireMethod(request, response, 'GET')) return
-        // 目录/统计数据服务端代理：浏览器不再直连 dsh-plugin.org，改经此路由
+        // 目录/统计数据服务端代理：浏览器不直连 dsh-plugin.org，统一经此路由
         // 转发（curl 子进程注入代理 env），与 npm / git 安装通道走同一代理口径，
         // 「npm / git / 目录数据请求统一走该代理」的设置文案因此真实生效。
         const url = new URL(request.url ?? '/', 'http://localhost')
@@ -697,7 +695,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       path: '/dsh-plugin-hub/install',
       handler: async (request, response) => {
         if (!requireTrustedPost(request, response)) return
-        // 任务自动入队：即使已有插件操作在跑也接受请求（FIFO 串行执行），不再 409 拒绝
+        // 任务自动入队：即使已有插件操作在跑也接受请求（FIFO 串行执行），不做 409 拒绝
         try {
           const body = await readJsonBody(request)
           // mode: 'update' = 已安装目标的覆盖更新（放行 add，pnpm 对已存在依赖原位覆盖重装）。
@@ -835,7 +833,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           // 页 —— 404 表示「目标不存在」而非网络不通，不该被当成网络故障拦截。
           // 仅新安装预检（更新是已信任目标的覆盖重装，跳过）；不通直接 400 拦下并打
           // [network] 标记，客户端据此提示「你的网络不通」，而不是把网络失败当成
-          // 插件侧问题引导去作者仓库提 Issue（issue #10：git fetch 超时被误报为插件问题）。
+          // 插件侧问题引导去作者仓库提 Issue。
           // 代理口径与诊断一致：设置里的代理 → 系统代理 → 环境变量 → 直连。
           if (already === null) {
             const effectiveProxy = settings.proxy !== ''
@@ -848,7 +846,7 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             const net = await probeUrl(probeTarget, effectiveProxy, 6000)
             if (!net.ok) {
               // 错误消息按客户端界面语言提示：中文界面给中文、英文界面给英文，
-              // 不再写死英文（用户一眼看懂是网络问题，而不是插件问题）
+              // 让用户一眼看懂是网络问题而非插件问题
               const channelName = isGitChannel
                 ? (lang === 'zh' ? 'GitHub' : 'github.com')
                 : (lang === 'zh' ? 'npm 源' : 'the npm registry')
@@ -875,9 +873,9 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
               return
             }
             // 包名冲突检测（仅 git 通道）：git 目标包内声明的 name 若与 profile 已装依赖同名，
-            // pnpm 会以该 name 做依赖键撞车，抛出的 CLI 报错晦涩难懂（issue #25：sandbase-harness
-            // 声明 managed-agents，但该包名在 registry 上被另一仓库占用，npm 反查搜不到 → git 直装
-            // 撞已装同名依赖）。到这里已装依赖要么来源不同仓库、要么 spec 是版本号解析不出仓库身份。
+            // pnpm 会以该 name 做依赖键撞车，抛出的 CLI 报错晦涩难懂 —— 且该包名在 registry 上
+            // 可能被别的仓库占用，npm 反查搜不到，git 直装就会撞上已装的同名依赖。
+            // 到这里已装依赖要么来源不同仓库、要么 spec 是版本号解析不出仓库身份。
             // 读 node_modules 里已装包的真实 repository 区分两种情况：
             //  - 指向同一仓库 → 是「同仓库残留」（spec 丢了仓库身份），就地转 update 覆盖重装（幂等）；
             //  - 指向别的仓库 / 读不到 → 跨仓库包名冲突，入队前转成明确 409，指导用户先卸载或改装。

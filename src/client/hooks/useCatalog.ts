@@ -100,7 +100,7 @@ export function useCatalog(lang: LocaleId) {
     setHubPlugin(null)
     setStats(null)
     setFailed(false)
-    // 目录数据直拉：hub 自身版本由独立 Worker 版本控制中心管理，不再依赖主站版本号接口。
+    // 此处只拉目录与统计；hub 自身版本由独立 Worker 版本控制中心提供（见 fetchHubUpdate）。
     const load = () => Promise.all([fetchCatalog(lang, controller.signal), fetchStats(controller.signal)])
     load()
       .then(([list, stats]) => {
@@ -160,7 +160,7 @@ export function useCatalog(lang: LocaleId) {
   useEffect(() => { refreshInstalled() }, [])
 
   // Hub 自身版本检查走独立 Worker（版本控制中心）：发新版后写一次 Worker KV，
-  // 所有已装用户立即看到「可更新」+ Markdown 变更记录，不再依赖主站目录数据管道。
+  // 所有已装用户立即看到「可更新」+ Markdown 变更记录，不经过主站目录数据管道。
   // 失败静默降级为 null（徽标不出现，不影响目录本身加载）。
   useEffect(() => {
     let cancelled = false

@@ -225,8 +225,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       className: styles.failCopy,
                       onClick: () => onCopy(r.message),
                     }, t('failCopy')),
-                    // 成功通知：时间戳并入本行右侧，与图标/文字垂直居中 ——
-                    // 不再单独占底部一行，卡片只有一行内容，图标文字整体居中不顶头
+                    // 成功通知：时间戳在行右侧，与图标/文字垂直居中，卡片保持单行内容
                     r.ok
                       ? h('span', {
                         className: styles.noticeTime,
@@ -288,12 +287,12 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     }
                     if (kind === 'pnpmWorkspace') {
                       // pnpm 拒绝把依赖装到 workspace 根目录（ERR_PNPM_ADDING_TO_ROOT）：宿主在 profile
-                      // 目录调 pnpm add 未声明在根操作，任何插件都会失败，不是插件问题 ——
-                      // 给 .npmrc 豁免指引，不引导提 Issue（dsh-plugin-hub#40）
+                      // 目录调 pnpm add 未声明在根操作，任何插件都会失败 ——
+                      // 给 .npmrc 豁免指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmWorkspaceHint'))
                     }
                     if (kind === 'pnpmStore') {
-                      // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录旧依赖是
+                      // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录的依赖是
                       // 另一大版本 pnpm 装的，当前 pnpm 不认，任何插件装进该 profile 都会失败 ——
                       // 给清理重建指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmStoreHint'))
@@ -305,17 +304,17 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     }
                     if (kind === 'pnpmUnusedPatch') {
                       // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm
-                      // 发现补丁没被用上就中止安装，任何插件都装不进来 —— 不引导提 Issue（#48）
+                      // 发现补丁没被用上就中止安装，任何插件都装不进来 —— 不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
                     }
                     if (kind === 'fileLocked') {
                       // profile 里的文件被其他进程占用（Windows os error 32）：通常是宿主或杀毒软件
-                      // 持有句柄 —— 给出完全退出宿主的指引，不引导提 Issue（#47）
+                      // 持有句柄 —— 给出完全退出宿主的指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failFileLockedHint'))
                     }
                     if (kind === 'accessDenied') {
                       // profile 里的文件被系统拒绝写入（Windows os error 5「拒绝访问」/ EPERM / EACCES）：
-                      // 占用、只读属性、目录 ACL 或杀软拦截 —— 给退出宿主 + 检查权限的指引，不引导提 Issue（#50）
+                      // 占用、只读属性、目录 ACL 或杀软拦截 —— 给退出宿主 + 检查权限的指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failAccessDeniedHint'))
                     }
                     if (kind === 'fsUnavailable') {
@@ -325,7 +324,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     }
                     if (kind === 'originRejected') {
                       // 请求来源没通过本地 hub 服务的校验（服务端 403 untrusted origin）：请求根本没进
-                      // 安装流程，与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue（dsh-plugin-hub#70）
+                      // 安装流程，与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failOriginRejectedHint'))
                     }
                     if (kind === 'network') {
@@ -336,7 +335,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                         // 「无法访问 …」醒目行：精准告诉用户具体哪个地址连不上（消息里取不到地址就跳过这行）
                         (() => { const target = unreachableTargetOf(r.message); return target ? h('div', { className: styles.failNetworkTarget }, t('failNetworkTarget', { url: target })) : null })(),
                         // registry 被指向内网/自定义源（tarball 从非官方源下载失败）：直接给出换源指引，
-                        // 否则用户外网是通的会困惑「为什么连不上」（dsh-plugin-hub#32）
+                        // 否则用户外网是通的会困惑「为什么连不上」
                         (() => { const host = registryHostOf(r.message); return host ? h('div', { className: styles.failPrepareHint }, t('failNetworkRegistryHint', { host })) : null })(),
                         h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
                         onRunDiagnostics ? h('button', {

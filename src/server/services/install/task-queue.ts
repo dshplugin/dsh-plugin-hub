@@ -485,7 +485,7 @@ function spawnMutation(options: {
 
   return (async () => {
     let result = await spawnOnce(args)
-    // npm 11 的 arborist peer-set bug（`Cannot read properties of null (reading 'children')`，npm/cli#9911）：
+    // npm 11 的 arborist peer-set bug（`Cannot read properties of null (reading 'children')`）：
     // 某些包的 peerDependencies 用「双段 prerelease 范围」（如 dsh-tui@0.9.0 的 `^0.1.0-rc.6 || ^0.1.1-rc.1`，
     // 26 个必需 peer 全是这种形状）会让 `npm install -g` 在解析阶段直接崩溃 —— 退出码 1、什么都没装，
     // 与是不是从我们界面发起无关（终端里同样复现）。首次失败后自动带 `--legacy-peer-deps` 重试一次：

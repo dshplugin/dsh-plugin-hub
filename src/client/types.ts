@@ -23,7 +23,7 @@ export interface LocaleService {
   getSnapshot(): { active: LocaleId }
   subscribe(fn: () => void): () => void
   /** 切换宿主（系统）语言偏好：Hub 语言跟随宿主，右上角语言按钮直接写入宿主偏好，
-   *  宿主左侧菜单/设置弹窗与 Hub 面板一起切换，不再与宿主语言脱节 */
+   *  宿主左侧菜单/设置弹窗与 Hub 面板一起切换，与宿主语言保持一致 */
   setLocale(id: string): void
 }
 

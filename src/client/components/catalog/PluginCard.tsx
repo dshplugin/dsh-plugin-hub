@@ -50,8 +50,8 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
           ? h('span', { className: styles.verified }, t('verified'))
           : null,
       ),
-      // 描述始终显示：站点英文数据缺翻译时 description 回退成中文也照常展示，
-      // 描述是了解插件的第一入口，比隐藏更实用（不再为求语言一致而砍内容）。
+      // 描述始终显示：站点英文数据缺翻译时 description 回退成中文也照常展示 ——
+      // 描述是了解插件的第一入口，语言不一致也不该省略。
       p.description ? h('p', { className: styles.desc }, p.description) : null,
       (p.topics?.length ?? 0) > 0
         ? h('div', { className: styles.topics },

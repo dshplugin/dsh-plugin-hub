@@ -406,10 +406,10 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               : failureKind === 'pnpmWorkspace'
               // pnpm 拒绝把依赖装到 workspace 根目录（ERR_PNPM_ADDING_TO_ROOT）：宿主在 profile 目录
               // 调 pnpm add 时未声明在根操作，任何插件都会失败，不是插件问题 ——
-              // 给 .npmrc 豁免指引，不引导提 Issue（dsh-plugin-hub#40）
+              // 给 .npmrc 豁免指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmWorkspaceHint'))
               : failureKind === 'pnpmStore'
-              // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录旧依赖是
+              // pnpm 存在但 store 大版本不匹配（ERR_PNPM_UNEXPECTED_STORE）：profile 目录的依赖是
               // 另一大版本 pnpm 装的，当前 pnpm 不认，任何插件装进该 profile 都会失败 ——
               // 给清理重建指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmStoreHint'))
@@ -419,15 +419,15 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmPolicyHint'))
               : failureKind === 'pnpmUnusedPatch'
               // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm 发现
-              // 补丁没被用上就中止整次安装，任何插件都装不进来 —— 给删除条目的指引，不引导提 Issue（#48）
+              // 补丁没被用上就中止整次安装，任何插件都装不进来 —— 给删除条目的指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
               : failureKind === 'fileLocked'
               // profile 里的文件被其他进程占用（Windows os error 32）：pnpm 无法替换被占用的文件，
-              // 通常是宿主或杀毒软件持有句柄 —— 给退出宿主的指引，不引导提 Issue（#47）
+              // 通常是宿主或杀毒软件持有句柄 —— 给退出宿主的指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failFileLockedHint'))
               : failureKind === 'accessDenied'
               // profile 里的文件被系统拒绝写入（Windows os error 5「拒绝访问」/ EPERM / EACCES）：
-              // 占用、只读属性、目录 ACL 或杀软拦截 —— 同样给退出宿主/检查权限的指引，不引导提 Issue（#50）
+              // 占用、只读属性、目录 ACL 或杀软拦截 —— 同样给退出宿主/检查权限的指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failAccessDeniedHint'))
               : failureKind === 'fsUnavailable'
               // 本机磁盘写不进去（ENOSPC / EROFS / EMFILE 及 Windows os error 112、19）：
@@ -435,7 +435,7 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               ? h('div', { className: styles.failPrepareHint }, t('failFsUnavailableHint'))
               : failureKind === 'originRejected'
               // 请求来源没通过本地 hub 服务的校验（服务端 403 untrusted origin）：请求根本没进
-              // 安装流程，与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue（dsh-plugin-hub#70）
+              // 安装流程，与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failOriginRejectedHint'))
               : failureKind === 'network'
               // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
@@ -445,7 +445,7 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
                 // 「无法访问 …」醒目行：精准告诉用户具体哪个地址连不上（消息里取不到地址就跳过这行）
                 (() => { const target = unreachableTargetOf(message); return target ? h('div', { className: styles.failNetworkTarget }, t('failNetworkTarget', { url: target })) : null })(),
                 // registry 被指向内网/自定义源（tarball 从非官方源下载失败）：直接给出换源指引，
-                // 否则用户外网是通的会困惑「为什么连不上」（dsh-plugin-hub#32）
+                // 否则用户外网是通的会困惑「为什么连不上」
                 (() => { const host = registryHostOf(message); return host ? h('div', { className: styles.failPrepareHint }, t('failNetworkRegistryHint', { host })) : null })(),
                 h('div', { className: styles.failPrepareHint }, t('failNetworkHint')),
                 onRunDiagnostics ? h('button', {

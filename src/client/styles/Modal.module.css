@@ -1026,9 +1026,9 @@
   background: var(--hub-danger-tint);
 }
 
-/* 成功通知卡片（时间戳已并入头部行）：删除按钮不再用 auto margin 顶到最右，
+/* 成功通知卡片（时间戳并入头部行）：删除按钮不占 auto margin，
    由时间戳的 margin-left:auto 把「时间 + 删除」整体推到行尾 —— 图标文字与
-   时间垂直居中，卡片只有一行内容，整体居中不顶头 */
+   时间垂直居中，卡片只有一行内容 */
 .noticeRowOk .noticeRemove {
   margin-left: 0;
 }

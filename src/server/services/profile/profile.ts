@@ -22,7 +22,7 @@ export function readProfileArg(fallback = 'web'): string {
  *  - Electron 桌面宿主：不传 `--profile`，而是把 profile 目录作为位置参数传入
  *    （`… <dshRoot> <home>\profiles\desktop …`）。
  * 桌面端只认 `--profile` 会永远落回 fallback，把路由/日志/安装全挂到错误的 profile 上
- * （日志写进 profiles/web/hub.log、市场必然「插件数据加载失败」，dsh-plugin-hub#65）。
+ * （日志写进 profiles/web/hub.log、市场必然「插件数据加载失败」）。
  * 位置参数按「父目录名为 profiles」精确识别 profile 目录，避免误取其它位置参数。
  */
 export function profileFromArgv(argv: readonly string[], fallback = 'web'): string {

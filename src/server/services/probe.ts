@@ -38,7 +38,7 @@ const probeFail = (): ProbeResult => ({ ok: false, ms: null, status: null })
  * 代理受限或吊销服务不可达时整个握手直接失败（CRYPT_E_NO_REVOCATION_CHECK），
  * 表现为 `curl: (35) schannel: next InitializeSecurityContext failed` —— 而 Node/npm/
  * 浏览器各有自己的 TLS 实现，照常可用，用户只会看到「插件市场打不开」。
- * --ssl-revoke-best-effort（curl ≥ 7.70）把吊销检查降级为尽力而为，握手不再被它拦死；
+ * --ssl-revoke-best-effort（curl ≥ 7.70）把吊销检查降级为尽力而为，避免它拦死握手；
  * 其它平台后端（SecureTransport / OpenSSL）没有这个强制行为，不加参数。
  * 运行时读 process.platform（而非模块级常量），便于测试覆盖两条分支。
  */
@@ -96,7 +96,7 @@ function macSystemProxy(): string | null {
  * `http=host:port;https=host:port`（按协议分别配置）。
  * 字符类必须同时排除 `/` 与 `=`：只排除 `=` 时，带 scheme 的值会让「主机名」吞掉 `//`，
  * 拼出 `http:////127.0.0.1:10793` 这种立刻失败的非法地址 —— 代理本来是通的，却把诊断、
- * 目录拉取、npm/git 预检全判成「不可达」（dsh-plugin-hub#66）。
+ * 目录拉取、npm/git 预检全判成「不可达」。
  */
 export function parseWinProxyServer(stdout: string): string | null {
   const m = /([^:\s=/]+):(\d+)/.exec(stdout)

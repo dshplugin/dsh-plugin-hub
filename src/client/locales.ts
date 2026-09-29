@@ -318,7 +318,7 @@ export const zh = {
   // 「去系统诊断」直达按钮：网络不通提示下方的品牌实底按钮，跳到设置 → 系统诊断跑连通性检测
   failNetworkRunDiag: '去系统诊断检测网络',
   // 请求来源没通过本地 hub 服务校验（服务端 403 untrusted origin）：请求根本没进安装流程，
-  // 与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue（dsh-plugin-hub#70）
+  // 与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue
   failOriginRejectedHint: '这次安装请求没有通过插件市场的来源校验，被本地服务直接拒绝，所以安装根本没有开始 —— 与插件本身无关。通常是因为市场页面不是从本机地址打开的（比如用了局域网 IP），或宿主页面的来源未被识别。请从本机的插件市场地址（localhost）重新打开页面后重试；桌面端用户重启一次宿主即可。',
   failDshMissingHint: '系统找不到 dsh 命令（dsh 未加入系统 PATH），无法调用安装器执行安装。请确认 DeepSeek Harness 已正确安装、dsh 已加入 PATH（或重新安装），然后重试。这不是插件本身的问题。',
   failGitMissingHint: '系统找不到 git 命令（Git 未安装或未加入系统 PATH），无法从 GitHub 源安装插件。请先安装 Git（如 git-scm.com/downloads）或把 git 加入 PATH，重启 DSH 后重试。这不是插件本身的问题。',
@@ -692,7 +692,7 @@ export const en = {
   failNetworkRunDiag: 'Run a network diagnostic',
   // The request origin did not pass the local hub service check (403 untrusted origin): the request
   // never reached the install flow — nothing to do with the plugin, so point at the local address
-  // and do not offer an issue link (dsh-plugin-hub#70)
+  // and do not offer an issue link
   failOriginRejectedHint: 'This install request did not pass the marketplace origin check and was rejected by the local service, so the install never started — this is not about the plugin itself. It usually means the marketplace page was not opened from a local address (for example a LAN IP), or the host page origin was not recognized. Reopen the marketplace from localhost and retry; on the desktop app, restart the host once.',
   failDshMissingHint: 'The dsh command could not be found (it is not on the system PATH), so the installer could not run. Please make sure DeepSeek Harness is installed correctly and dsh is on your PATH (or reinstall it), then retry. This is not a problem with the plugin itself.',
   failGitMissingHint: 'The git command could not be found (Git is not installed or not on the system PATH), so GitHub-source plugins cannot be installed. Please install Git (e.g. from git-scm.com/downloads) or add git to your PATH, restart DSH, then retry. This is not a problem with the plugin itself.',
