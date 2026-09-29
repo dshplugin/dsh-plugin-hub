@@ -49,6 +49,8 @@ export interface Invocation {
   prefixArgs: string[]
   cwd: string
   useShell: boolean
+  /** 必须叠加到子进程环境上的变量（打包桌面端要带 ELECTRON_RUN_AS_NODE） */
+  env?: NodeJS.ProcessEnv
 }
 
 /** 排队中的变更任务及其启动参数。 */

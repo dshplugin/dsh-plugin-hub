@@ -51,6 +51,9 @@ export function curlRevokeFlagUnsupported(code: number | null, stderr: string): 
   return code === 2 && /ssl-revoke-best-effort/i.test(stderr) && /unknown|unrecognized/i.test(stderr)
 }
 
+/** 彻底关闭证书吊销检查的兜底参数（curl ≥ 7.19），比降级参数覆盖更老的 Windows curl。 */
+const NO_REVOKE_ARG = '--ssl-no-revoke'
+
 /** stderr 是否指向 Schannel 取不到证书吊销信息（据此归因为环境 TLS 问题，而非网络不通）。 */
 export function tlsRevocationBlocked(stderr: string): boolean {
   return /CRYPT_E_NO_REVOCATION_CHECK|CRYPT_E_REVOCATION_OFFLINE|0x80092012/i.test(stderr)
@@ -159,12 +162,23 @@ function runCurl(args: string[], env: NodeJS.ProcessEnv, timeoutMs: number): Pro
 }
 
 /** 带 TLS 兜底的 curl 调用：先按平台参数跑（Windows 带吊销检查降级），
- *  若本机 curl 不认这个参数（curl < 7.70）则去掉参数重跑一次，保证老版本不因此直接失败。 */
+ *  若本机 curl 不认这个参数（curl < 7.70）则去掉参数重跑一次，保证老版本不因此直接失败；
+ *  降级后仍被吊销检查拦死（CRYPT_E_NO_REVOCATION_CHECK）时，再用 --ssl-no-revoke
+ *  彻底关掉吊销检查跑一次 —— 该参数 curl ≥ 7.19 即存在，覆盖面比降级参数更广，
+ *  否则「能上网但取不到 CRL」的 Windows 机器会把所有通道误报成不可达（见 issue #71）。
+ *  吊销检查只影响本次探测自身的信任判断，不改变系统 TLS 配置。 */
 async function curlWithTlsFallback(args: string[], env: NodeJS.ProcessEnv, timeoutMs: number): Promise<CurlRun> {
   const tlsArgs = curlTlsArgs()
-  const first = await runCurl([...tlsArgs, ...args], env, timeoutMs)
-  if (tlsArgs.length === 0 || !curlRevokeFlagUnsupported(first.code, first.stderr)) return first
-  return runCurl(args, env, timeoutMs)
+  let run = await runCurl([...tlsArgs, ...args], env, timeoutMs)
+  if (tlsArgs.length > 0 && curlRevokeFlagUnsupported(run.code, run.stderr)) {
+    run = await runCurl(args, env, timeoutMs)
+  }
+  if (tlsArgs.length > 0 && tlsRevocationBlocked(run.stderr)) {
+    const retry = await runCurl([NO_REVOKE_ARG, ...args], env, timeoutMs)
+    // 只在兜底本身跑起来（非「不认识该参数」）时采用其结果，否则保留原始失败线索
+    if (retry.code !== null && !curlRevokeFlagUnsupported(retry.code, retry.stderr)) run = retry
+  }
+  return run
 }
 
 /**

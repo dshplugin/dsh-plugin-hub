@@ -13,6 +13,9 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { delimiter, join } from 'node:path'
 import { curlRevokeFlagUnsupported, curlTlsArgs, gitLsRemote, parseWinProxyServer, probeUrl, systemProxy, tlsRevocationBlocked } from '../src/server/services/probe.ts'
 
 const ONLINE = process.env.DSH_HUB_TEST_ONLINE === '1'
@@ -114,4 +117,51 @@ test('systemProxy: 读到的代理必须是 http://host:port 形态（读不到�
     assert.match(p, /^http:\/\/.+/)
     assert.ok(Number(p.slice(p.lastIndexOf(':') + 1)) > 0)
   }
+})
+
+/**
+ * 假的 curl：模拟 Windows Schannel「取不到吊销信息」——带降级参数仍失败，
+ * 只有显式 --ssl-no-revoke 才通。用来验证二级兜底真的会重跑一次。
+ */
+const FAKE_CURL = `#!/bin/sh
+for a in "$@"; do
+  if [ "$a" = "--ssl-no-revoke" ]; then echo 200; exit 0; fi
+done
+for a in "$@"; do
+  if [ "$a" = "--ssl-revoke-best-effort" ]; then
+    echo "curl: (35) schannel: next InitializeSecurityContext failed: CRYPT_E_NO_REVOCATION_CHECK (0x80092012)" >&2
+    exit 35
+  fi
+done
+echo "curl: (35) schannel: next InitializeSecurityContext failed: CRYPT_E_NO_REVOCATION_CHECK (0x80092012)" >&2
+exit 35
+`
+
+/** 把假的 curl 放到 PATH 最前面跑一段断言，结束后恢复 PATH（Windows 分支需要）。 */
+async function withFakeCurl(fn: () => Promise<void>): Promise<void> {
+  const dir = mkdtempSync(join(tmpdir(), 'dsh-fake-curl-'))
+  const bin = join(dir, 'curl')
+  writeFileSync(bin, FAKE_CURL, { mode: 0o755 })
+  const originalPath = process.env.PATH
+  const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
+  Object.defineProperty(process, 'platform', { value: 'win32', configurable: true })
+  process.env.PATH = `${dir}${delimiter}${originalPath ?? ''}`
+  try {
+    await fn()
+  } finally {
+    if (originalPath === undefined) delete process.env.PATH
+    else process.env.PATH = originalPath
+    if (originalPlatform !== undefined) Object.defineProperty(process, 'platform', originalPlatform)
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
+test('curlProbe: 降级后仍被吊销检查拦死时，再用 --ssl-no-revoke 兜底一次（issue #71）', async () => {
+  await withFakeCurl(async () => {
+    const r = await probeUrl('https://github.com/', '', 5000)
+    // 首次（--ssl-revoke-best-effort）失败 → 二级兜底重跑后取到 200，判为可达而非 [network]
+    assert.equal(r.ok, true)
+    assert.equal(r.status, 200)
+    assert.equal(r.reason, null)
+  })
 })

@@ -840,10 +840,25 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
               ? settings.proxy
               : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
             const isGitChannel = repoTarget !== null && target === repoTarget
-            const probeTarget = isGitChannel
-              ? 'https://github.com/'
-              : `${(settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org')}/`
-            const net = await probeUrl(probeTarget, effectiveProxy, 6000)
+            const npmProbeTarget = `${(settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org')}/`
+            // git 通道的探针换成克隆握手本身：git ls-remote 走的就是 pnpm 克隆前的同一套
+            // https 传输。curl 打 github.com 主页会被按协议/端口区分的防火墙与 TLS 复检
+            // 拦截（能 git 克隆、打不开网页），把可装的仓库误判成 [network] 而中止
+            // （见 issue #71）。握手失败时再用 curl 复核一次主页连通性：只有两者都不通
+            // 才判「网络不通」；仅握手失败（仓库不存在、私有仓库、需要凭据）放行，
+            // 交给后续预检与真实安装给出准确原因。
+            const gitProbeTarget = repoTarget === null ? null : repoTarget.replace(/^git\+/, '')
+            let net: Awaited<ReturnType<typeof probeUrl>>
+            if (gitProbeTarget !== null) {
+              net = await gitLsRemote(gitProbeTarget, effectiveProxy, 6000)
+              if (!net.ok) {
+                const reachable = await probeUrl('https://github.com/', effectiveProxy, 6000)
+                if (reachable.ok) net = reachable
+              }
+            } else {
+              net = await probeUrl(npmProbeTarget, effectiveProxy, 6000)
+            }
+            const probeTarget = gitProbeTarget ?? npmProbeTarget
             if (!net.ok) {
               // 错误消息按客户端界面语言提示：中文界面给中文、英文界面给英文，
               // 让用户一眼看懂是网络问题而非插件问题

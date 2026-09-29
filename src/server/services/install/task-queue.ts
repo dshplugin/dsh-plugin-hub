@@ -9,7 +9,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process'
 import { resolvePackageEntry } from './package-entry.ts'
-import { readFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import type { InstallResult, InstallTask, Invocation, QueueItem } from './install-types.ts'
 import { CAPTURE_LIMIT_BYTES, MAX_TASKS, MAX_TASK_LINES } from './install-types.ts'
@@ -129,18 +129,53 @@ function pushLine(task: InstallTask, line: string): void {
   }
 }
 
-function cliInvocation(): Invocation {
+function cliInvocation(profile: string): Invocation {
   const entry = process.argv[1]
-  if (entry !== undefined && /[\\/](?:bin\.(?:js|ts)|dsh)$/.test(entry)) {
-    const absoluteEntry = resolve(entry)
-    return {
-      file: process.execPath,
-      prefixArgs: [...process.execArgv, absoluteEntry],
-      cwd: dirname(absoluteEntry),
-      useShell: false,
+  if (entry !== undefined) {
+    // 打包桌面端（Electron）：宿主入口在 app.asar 内，机器上根本没有 `dsh` 可执行文件
+    //（Windows 那条 dsh.cmd shim 只存在于宿主进程自己的 PATH 里），直接回退 PATH 必然
+    // 报 [dsh-missing]（见 issue #71）。这里改用应用自己的 CLI 引导脚本调起同一份打包
+    // CLI：Electron 可执行文件 + --expose-internals + desktop-cli.js，与内置终端、
+    // 官方插件页安装完全同一条路径 —— desktop profile 由应用独占管理的授权也在其中。
+    const bootstrap = desktopCliBootstrap(entry)
+    if (bootstrap !== null) {
+      return {
+        file: process.execPath,
+        prefixArgs: ['--expose-internals', bootstrap],
+        // 工作目录用 profile 目录（真实存在的目录）：asar 内的路径不能作为 spawn 的 cwd
+        cwd: profileDirectory(profile),
+        useShell: false,
+        // Electron 可执行文件只有带这个变量才按 Node 运行引导脚本
+        env: { ELECTRON_RUN_AS_NODE: '1' },
+      }
+    }
+    if (/[\\/](?:bin\.(?:js|ts)|dsh)$/.test(entry)) {
+      const absoluteEntry = resolve(entry)
+      return {
+        file: process.execPath,
+        prefixArgs: [...process.execArgv, absoluteEntry],
+        cwd: dirname(absoluteEntry),
+        useShell: false,
+      }
     }
   }
   return { file: 'dsh', prefixArgs: [], cwd: process.cwd(), useShell: process.platform === 'win32' }
+}
+
+/**
+ * 打包桌面端宿主的 CLI 引导脚本路径（`<asar 根>/lib/desktop-cli.js`，即应用内
+ * pnpm 服务的 dshBootstrapPath）。宿主入口落在 app.asar 内时按 asar 根反推候选路径，
+ * 命中存在的那个才采用；布局不认识（官方改版）时返回 null，调用方回退原逻辑。
+ * 导出供单测覆盖路径推导。
+ */
+export function desktopCliBootstrap(entry: string): string | null {
+  const marker = /[\\/]app\.asar(?=[\\/]|$)/i.exec(entry)
+  if (marker === null) return null
+  const root = entry.slice(0, marker.index + marker[0].length)
+  for (const candidate of [join(root, 'lib', 'desktop-cli.js'), join(root, 'dsh', 'lib', 'desktop-cli.js')]) {
+    if (existsSync(candidate)) return candidate
+  }
+  return null
 }
 
 /**
@@ -335,7 +370,7 @@ function spawnMutation(options: {
   const isGlobalNpm = (globalNpm ?? []).length > 0
   const invocation = isGlobalNpm
     ? { file: 'npm', prefixArgs: [], cwd: process.cwd(), useShell: process.platform === 'win32' }
-    : cliInvocation()
+    : cliInvocation(profile)
   // 更新已安装的 npm 包：显式指定 @latest。pnpm add <pkg>（无版本）对已存在依赖
   // （尤其精确 spec 如 "1.3.0"）是幂等的 —— 输出 "Already up to date" 且不改 package.json，
   // 导致「更新成功」但实际仍停留在旧版本；git 地址与全局安装不受此影响。
@@ -383,7 +418,9 @@ function spawnMutation(options: {
       }
       child = spawn(invocation.file, attemptArgs, {
         cwd: invocation.cwd,
-        env,
+        // invocation.env 是「必须叠加」的变量（打包桌面端的 ELECTRON_RUN_AS_NODE）：
+        // 没有它时保持 env 原样透传，有它时必须基于完整环境叠加，否则子进程会丢掉 PATH。
+        env: invocation.env === undefined ? env : { ...(env ?? process.env), ...invocation.env },
         shell: invocation.useShell,
         // detached 使子进程成为独立进程组组长：取消时能整组清理（见 stopChild），
         // 且宿主进程崩溃后安装任务不会被连带误杀
