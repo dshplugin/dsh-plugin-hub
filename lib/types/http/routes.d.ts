@@ -11,6 +11,9 @@ export interface WebServerService {
 }
 /** Read non-official dependencies installed into one profile. */
 export declare function readInstalled(profile: string): Record<string, string>;
+/** POST mutations are only accepted from the local web server origin or the desktop host page.
+ *  Exported for tests (tests/routes.test.ts) — the origin check is the whole CSRF defence. */
+export declare function isSameOrigin(request: IncomingMessage): boolean;
 /**
  * Register the Plugin Hub API on the host web server and return a disposer.
  * @param webServer - DSH web server service.
