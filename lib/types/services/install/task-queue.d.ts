@@ -34,6 +34,13 @@ export declare function hasQueuedTarget(target: string): boolean;
  */
 export declare function cancelTask(id: number): boolean;
 /**
+ * 打包桌面端宿主的 CLI 引导脚本路径（`<asar 根>/lib/desktop-cli.js`，即应用内
+ * pnpm 服务的 dshBootstrapPath）。宿主入口落在 app.asar 内时按 asar 根反推候选路径，
+ * 命中存在的那个才采用；布局不认识（官方改版）时返回 null，调用方回退原逻辑。
+ * 导出供单测覆盖路径推导。
+ */
+export declare function desktopCliBootstrap(entry: string): string | null;
+/**
  * Enqueue a plugin mutation and return its task. Tasks run strictly serially:
  * the queue worker starts the next one only after the previous finishes.
  * Progress is visible through `getTask(id)` / `activeTask()` until done.
