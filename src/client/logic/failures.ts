@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类，七态。无论底层机制如何（pnpm 白名单拦截 / 构建脚本被忽略 / prepare 失败），
@@ -189,6 +189,11 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  *   pnpm-workspace.yaml 即被 pnpm 视为 workspace 根，缺 `-w`/`--workspace-root` 就整条命令
  *   被拒，任何插件都装不上，不是插件问题（dsh-plugin-hub#40）→ 提示在 profile 的 .npmrc 里
  *   加 `ignore-workspace-root-check=true` 或升级宿主，不引导提 Issue
+ * - originRejected：请求的来源没通过本地 hub 服务的校验（服务端 403，正文是裸的
+ *   `untrusted origin`）—— 请求在进入安装流程前就被拒了，与 pnpm 无关。常见于用非
+ *   localhost 的地址（如局域网 IP）打开市场页面，或宿主页面 origin 未被识别；
+ *   任何插件在这种情况下都会同样失败，不是插件问题 → 提示从本机地址打开市场后重试，
+ *   不引导提 Issue
  * - pnpmPolicy：pnpm 11 的供应链安全策略拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` /
  *   `Minimum release age` —— 锁文件里包的发布时间还不满 24 小时被拒；`untrusted origin` —— 依赖来源未被
  *   本机 pnpm 信任）。拦的是「刚发布的新包」与「未被信任的来源」，装任何新插件都会撞墙，不是
@@ -276,6 +281,14 @@ export function classifyFailure(message: string): FailureKind {
   // pnpm 直接整条命令拒绝 —— 本机 profile/宿主调用方式问题，任何插件都装不上，不是插件问题
   // （dsh-plugin-hub#40：Win 下装 hub 本体，ADDING_TO_ROOT 被误归插件侧失败）
   if (/ERR_PNPM_ADDING_TO_ROOT|add the dependency to the workspace root/i.test(message)) return 'pnpmWorkspace'
+  // 本地 hub 服务的来源校验拒绝了请求（服务端 403，正文恰好是 `untrusted origin`）：
+  // 请求在 requireTrustedPost 就被拦下，压根没进入安装流程，与 pnpm 无关。
+  // 必须放在 pnpmPolicy 之前 —— 后者正则含同名裸文本，会把这条吞成「pnpm 供应链策略」，
+  // 并建议用户删掉 profile 的 node_modules + pnpm-lock.yaml（无效且具破坏性）。
+  // 用「整行以它结尾」来区隔 pnpm 的真实报错：pnpm 的形态后面一定跟着 dsh 的上下文
+  // （如 `untrusted origin\ndsh: pnpm failed in profile directory …`），不会被本规则命中
+  // （dsh-plugin-hub#70：桌面端 origin 为 `dsh-app://app`，所有安装 POST 都被误归 pnpmPolicy）
+  if (/(^|\n)untrusted origin\s*$/.test(message)) return 'originRejected'
   // pnpm 供应链安全策略拦截（pnpm 11：minimumReleaseAge 拒收「刚发布」的包 /
   // untrusted origin 来源不受信任）：pnpm 在、也连得上，纯粹是本机策略不放行 ——
   // 装任何「新发布/非信任来源」的插件都会同样失败，不是插件问题（dsh-plugin-hub#15/#16）。

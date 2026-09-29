@@ -433,6 +433,10 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // 本机磁盘写不进去（ENOSPC / EROFS / EMFILE 及 Windows os error 112、19）：
               // 空间不足、盘只读、句柄耗尽，任何插件都装不进来 —— 按子场景给指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failFsUnavailableHint'))
+              : failureKind === 'originRejected'
+              // 请求来源没通过本地 hub 服务的校验（服务端 403 untrusted origin）：请求根本没进
+              // 安装流程，与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue（dsh-plugin-hub#70）
+              ? h('div', { className: styles.failPrepareHint }, t('failOriginRejectedHint'))
               : failureKind === 'network'
               // 安装前预检 / 安装日志里的连接失败（[network] / git fetch 超时 / DNS / TLS）：
               // 是本机网络不通或代理有问题，不是插件问题 —— 提示检查网络 + 直达「系统诊断」，

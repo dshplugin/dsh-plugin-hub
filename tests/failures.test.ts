@@ -204,6 +204,20 @@ test('classifyFailure: pnpm supply-chain policy blocks are environment issues (i
   assert.equal(classifyFailure('ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION ... Command failed: pnpm add'), 'pnpmPolicy')
 })
 
+test('classifyFailure: the local hub service\'s bare `untrusted origin` 403 is originRejected, not pnpmPolicy (issue #70)', () => {
+  // 服务端 requireTrustedPost 的 403 正文恰好是裸 `untrusted origin`（整行以它结尾）：
+  // 请求在进入安装流程前就被拦下，与 pnpm 无关。修复前被 pnpmPolicy 吞掉，弹出
+  // 「删 node_modules + pnpm-lock.yaml」这类无效且具破坏性的解法
+  // （dsh-plugin-hub#70：桌面端页面 origin 为 `dsh-app://app`，所有安装 POST 都被误归 pnpmPolicy）
+  assert.equal(classifyFailure('untrusted origin'), 'originRejected')
+  // useTaskQueue 把服务端 error 字段拼在 install 命令行之后，同样以它结尾
+  assert.equal(classifyFailure('[install] dsh-plugin\nuntrusted origin'), 'originRejected')
+  // 尾随空白不影响判定
+  assert.equal(classifyFailure('untrusted origin\n'), 'originRejected')
+  // 反过来：pnpm 的真实报错尾部还有 dsh 的上下文，不能被抢走（见上一条 #16 用例，仍是 pnpmPolicy）
+  assert.notEqual(classifyFailure('untrusted origin\ndsh: pnpm failed in profile directory /Users/xxx/.dsh/profiles/web'), 'originRejected')
+})
+
 test('classifyFailure: pnpm workspace-root check is an environment issue (issue #40), not a plugin issue', () => {
   // #40：宿主在 profile 目录（pnpm 视为 workspace 根）执行 pnpm add 时未声明在根操作 →
   // pnpm 直接拒绝，任何插件都装不上
