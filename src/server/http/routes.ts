@@ -256,23 +256,47 @@ function sendJson(response: ServerResponse, status: number, value: unknown): voi
   response.end(JSON.stringify(value))
 }
 
+/** 本机回环主机名：`localhost` / `127.0.0.1` / `[::1]` 指向同一台机器的同一个端口，
+ *  字符串不同但同源，必须按同一来源比较（dsh-plugin-hub#72）。 */
+const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+/** 把 `host[:port]` 形式的 authority 归一化成 `loopback:端口` —— 三个回环别名
+ *  映射成同一个身份，端口缺省按 http 的 80 补齐；非回环主机名、以及解析不出来的值
+ *  都返回 null。 */
+function loopbackAuthority(authority: string): string | null {
+  try {
+    const parsed = new URL(`http://${authority}`)
+    if (!LOOPBACK_HOSTNAMES.has(parsed.hostname.toLowerCase())) return null
+    return `loopback:${parsed.port === '' ? '80' : parsed.port}`
+  } catch {
+    return null
+  }
+}
+
 /** POST mutations are only accepted from the local web server origin or the desktop host page.
  *  Exported for tests (tests/routes.test.ts) — the origin check is the whole CSRF defence. */
 export function isSameOrigin(request: IncomingMessage): boolean {
+  // 服务只绑定本机回环地址：Host 不是回环（局域网 IP、被改写的域名）一律拒绝，
+  // 顺带挡掉 DNS rebinding（Host 是攻击者域名，即便解析到 127.0.0.1）。
+  const host = request.headers.host
+  const hostKey = host === undefined ? null : loopbackAuthority(host)
+  if (hostKey === null) return false
   const origin = request.headers.origin
-  if (origin === undefined) return false
+  // 桌面端宿主把 `/dsh-plugin-hub/*` 转发给本地 http server 时可能不带 Origin 头，
+  // 此时所有 POST 都会被判成 untrusted origin（dsh-plugin-hub#72）。浏览器对 POST 请求
+  // 必定携带 Origin（含同源 POST 与跨站表单），能省略该头的只有本机原生客户端，
+  // 而它们本来就能伪造任意 Origin，因此放行不扩大 CSRF 面。
+  if (origin === undefined || origin === '') return true
   try {
     const url = new URL(origin)
-    // 桌面端（Electron 宿主）的页面跑在宿主自定义协议下，origin 形如 `dsh-app://app`。
-    // 客户端一律用相对路径请求，宿主把 `/dsh-plugin-hub/*` 转发给本地 http server 时
-    // Origin 头原样保留，与 Host（如 localhost:3081）不等，因此必须显式放行该协议，
-    // 否则桌面端全部 POST 都会被判成 untrusted origin。该协议只有宿主自身能产生，
-    // 外部网页无法把 Origin 伪造成 `dsh-app://…`，放行不扩大 CSRF 面。
+    // 桌面端（Electron 宿主）的页面跑在宿主自定义协议下，origin 形如 `dsh-app://app`，
+    // 与 Host（如 localhost:3081）必然不等，因此必须显式放行该协议，否则桌面端全部 POST
+    // 都会被判成 untrusted origin。该协议只有宿主自身能产生，外部网页无法把 Origin
+    // 伪造成 `dsh-app://…`，放行不扩大 CSRF 面。
     if (url.protocol === 'dsh-app:') return true
-    const host = request.headers.host
-    if (host === undefined) return false
-    const localHostnames = new Set(['localhost', '127.0.0.1', '[::1]'])
-    return url.host === host && localHostnames.has(url.hostname)
+    // 按归一化后的「主机名:端口」比较：`localhost` / `127.0.0.1` / `[::1]` 不再互相拒绝，
+    // 端口仍然必须一致（另一个本机进程不能被当成同一来源）。
+    return loopbackAuthority(url.host) === hostKey
   } catch {
     return false
   }

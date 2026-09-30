@@ -35,17 +35,40 @@ test('isSameOrigin: local web server origins stay accepted', () => {
   assert.equal(isSameOrigin(req({ origin: 'http://[::1]:3081', host: '[::1]:3081' })), true)
 })
 
+test('isSameOrigin: loopback aliases of the same port are one origin (issue #72)', () => {
+  // 页面入口 host 与请求 Host 头只要都是回环、端口相同就是同一来源：
+  // `localhost` / `127.0.0.1` / `[::1]` 指向同一台机器的同一端口，逐字比较会
+  // 把「市场能看能搜、一装就 403」这种组合放进来
+  assert.equal(isSameOrigin(req({ origin: 'http://localhost:3081', host: '127.0.0.1:3081' })), true)
+  assert.equal(isSameOrigin(req({ origin: 'http://127.0.0.1:3081', host: 'localhost:3081' })), true)
+  assert.equal(isSameOrigin(req({ origin: 'http://[::1]:3081', host: '127.0.0.1:3081' })), true)
+  assert.equal(isSameOrigin(req({ origin: 'http://LOCALHOST:3081', host: 'localhost:3081' })), true)
+})
+
 test('isSameOrigin: foreign and mismatched origins are rejected', () => {
   // 外部网页把自己的 Origin 设成 https://evil.example：host 不等 → 拒
   assert.equal(isSameOrigin(req({ origin: 'https://evil.example', host: 'localhost:3081' })), false)
   // 同为 localhost 但端口不同（另一个本机进程）也不放行
   assert.equal(isSameOrigin(req({ origin: 'http://localhost:9999', host: 'localhost:3081' })), false)
+  // 带/不带端口是两个来源（http://localhost 等价于 80 端口）
+  assert.equal(isSameOrigin(req({ origin: 'http://localhost', host: 'localhost:3081' })), false)
   // 非本机主机名：即便 Host 头被改成一致，hostname 不在本地白名单 → 拒
   assert.equal(isSameOrigin(req({ origin: 'http://evil.example:3081', host: 'evil.example:3081' })), false)
+  // 局域网 IP 不是回环 → 拒（Host 侧同样拒）
+  assert.equal(isSameOrigin(req({ origin: 'http://192.168.1.5:3081', host: '192.168.1.5:3081' })), false)
 })
 
-test('isSameOrigin: missing and malformed headers are rejected', () => {
-  assert.equal(isSameOrigin(req({ host: 'localhost:3081' })), false)
+test('isSameOrigin: a missing Origin header is accepted only on a loopback Host (issue #72)', () => {
+  // 桌面宿主转发 `/dsh-plugin-hub/*` 时可能剥掉 Origin 头：浏览器对 POST 请求必定携带
+  // Origin，能省略该头的只有本机原生客户端（它们本来就能伪造任意 Origin）→ 放行
+  assert.equal(isSameOrigin(req({ host: '127.0.0.1:3081' })), true)
+  assert.equal(isSameOrigin(req({ host: 'localhost:3081', origin: '' })), true)
+  // Host 不是回环时，无 Origin 仍然拒绝：局域网访问、DNS rebinding 域名都进不来
+  assert.equal(isSameOrigin(req({ host: '192.168.1.5:3081' })), false)
+  assert.equal(isSameOrigin(req({ host: 'evil.example:3081' })), false)
+})
+
+test('isSameOrigin: malformed headers are rejected', () => {
   assert.equal(isSameOrigin(req({ origin: 'http://localhost:3081' })), false)
   assert.equal(isSameOrigin(req({ origin: 'null', host: 'localhost:3081' })), false)
   assert.equal(isSameOrigin(req({ origin: 'not a url', host: 'localhost:3081' })), false)
