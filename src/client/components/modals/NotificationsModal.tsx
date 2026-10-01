@@ -310,8 +310,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     if (kind === 'pnpmMissingDep') {
                       // profile 里留着指向 registry 上不存在（404）的包的依赖：pnpm 连得上 registry，
                       // 是被明确告知包不存在 —— 该 profile 的任何安装都会先卡在这条依赖上，与本次要装的
-                      // 插件无关（#73 的 issue 就是这么被误挂到正在安装的插件上的）→ 点名缺失的包 +
-                      // 删除条目指引，不引导提 Issue
+                      // 插件无关 → 点名缺失的包 + 删除条目指引，不引导提 Issue
                       const pkg = missingRegistryPackageOf(r.message)
                       return h('div', null, [
                         pkg ? h('div', { className: styles.failNetworkTarget }, t('failPnpmMissingDepTarget', { pkg })) : null,

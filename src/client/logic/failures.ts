@@ -315,17 +315,16 @@ export function classifyFailure(message: string): FailureKind {
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
   // 依赖在 registry 上不存在（`ERR_PNPM_FETCH_404` / `Not Found - 404`）：pnpm 连得上 registry，
-  // 是被明确告知「这个包不存在」—— 不是插件问题。profile 里留着一条指向未发布包的依赖条目时，
-  // 该 profile 的**任何**安装都会先卡在这条依赖上（宿主尾部只有 `dsh: plugin command failed`）。
-  // 必须在 pluginPrepare 之前：否则该尾部会被下面的 `Command failed` 判定吞成
-  // 「插件分发不完整」，把 Issue 误挂到正在安装的插件上，而不是 404 的那个依赖（#73）
+  // 是被明确告知「这个包不存在」—— 属于 profile 的本地依赖问题，不是插件问题。profile 里留着
+  // 一条指向未发布包的依赖条目时，该 profile 的**任何**安装都会先卡在这条依赖上。
+  // 必须在 pluginPrepare 之前判定：此时宿主尾部只有通用的 `dsh: plugin command failed`，
+  // 落到下面会被当成构建失败。
   // （两个形态：pnpm 的 `[ERR_PNPM_FETCH_404] GET <url>: Not Found - 404` 与 npm 的
   //   `npm error 404 Not Found - GET <url> - Not found`）
   if (/ERR_PNPM_FETCH_404|404 Not Found|Not Found - 404/i.test(message)) return 'pnpmMissingDep'
-  // 再判 prepare 实际执行失败：只有构建脚本真的跑挂了才是插件问题
-  // （`Command failed` 区分大小写：宿主尾部提示是小写的 `dsh: plugin command failed`，
-  //   那只是「这条命令失败了」的通用说明 —— 带 /i 会让任何带该尾部的未知失败都被判成
-  //   「插件分发不完整」，把 Issue 误挂到正在安装的插件上，见 #73）
+  // 再判 prepare 实际执行失败：只有构建脚本真的跑挂了才是插件问题。
+  // `Command failed` 区分大小写 —— 只匹配 pnpm 包装出的报错，不匹配宿主那句小写的
+  // `dsh: plugin command failed`（那只是「这条命令失败了」的通用说明）。
   if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|prepare-guard/i.test(message) || /Command failed/.test(message)) return 'pluginPrepare'
   // 其余失败（含 git prepare 被 pnpm 白名单拦截）：当前通道装不上 = 插件分发/依赖的问题，一律提 Issue
   return 'repo'
@@ -386,16 +385,15 @@ export function summarizeError(message: string, maxChars: number = MAX_CORE_CHAR
 }
 
 /** 提取首个错误代码（如 ERR_PNPM_PREPARE_PACKAGE），无则 null。
- *  代码里可能含数字（ERR_PNPM_FETCH_404 / ERR_PNPM_EBADPLATFORM_...），字符类必须带上 0-9，
- *  否则会被截成 `ERR_PNPM_FETCH_`（#73 的 issue 正文就是这么被截断的）。 */
+ *  代码里可能含数字（ERR_PNPM_FETCH_404 / ERR_PNPM_EBADPLATFORM_...），字符类需带上 0-9，
+ *  否则会被截断成 `ERR_PNPM_FETCH_`。 */
 export function coreErrorCode(message: string): string | null {
   const m = message.match(/\[?ERR_[A-Z0-9_]+\]?/)
   return m ? m[0].replace(/^\[|\]$/g, '') : null
 }
 
 /** 提取「registry 上不存在的包名」：从 404 行（`ERR_PNPM_FETCH_404 GET <registry>/<pkg>: Not Found - 404`）
- *  里取请求路径中的包名（含 scope，如 `@scope/name`）；非 404 或提取不到返回 null。
- *  调用方据此在提示里点名具体是哪个依赖缺失 —— 光说「有个包 404 了」用户无从下手。 */
+ *  里取请求路径中的包名（含 scope，如 `@scope/name`）；非 404 或提取不到返回 null。 */
 export function missingRegistryPackageOf(message: string): string | null {
   for (const line of message.split(/\r?\n/)) {
     if (!/ERR_PNPM_FETCH_404|404/.test(line)) continue
