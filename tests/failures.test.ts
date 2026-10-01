@@ -11,7 +11,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { classifyFailure, coreErrorCode, npmTooLowVersion, summarizeError, unreachableTargetOf, registryHostOf } from '../src/client/logic/failures.ts'
+import { classifyFailure, coreErrorCode, missingRegistryPackageOf, npmTooLowVersion, summarizeError, unreachableTargetOf, registryHostOf } from '../src/client/logic/failures.ts'
 
 const dshTailHint = 'dsh: git-hosted plugins build on install via their prepare script, which pnpm blocks until allowed — add the exact key pnpm printed above under allowBuilds in /Users/x/.dsh/profiles/web/pnpm-workspace.yaml, then re-run'
 
@@ -303,6 +303,47 @@ test('classifyFailure: the browser "Failed to fetch" on the host request is an e
   assert.notEqual(classifyFailure(msg), 'repo')
 })
 
+test('classifyFailure: a dependency missing from the registry is an environment issue (issue #73), not a plugin issue', () => {
+  // #73：报告人在装 dsh-plugin-hub 本身，真正 404 的却是 profile 里既存的依赖 dsh-our-free-model
+  // （在 npm 上不存在）—— pnpm 解析依赖时先卡在它上面，日志尾部只有宿主那句通用的
+  // `dsh: plugin command failed`，旧逻辑据此把整个失败报成「正在安装的插件分发不完整」
+  const msg = [
+    '[ERR_PNPM_FETCH_404] GET https://registry.npmjs.org/dsh-our-free-model: Not Found - 404',
+    'This error happened while installing a direct dependency of C:\\Users\\xiangyu\\.dsh\\profiles\\desktop',
+    'dsh: plugin command failed; diagnostics: C:\\Users\\xiangyu\\.dsh\\profiles\\desktop\\.plugin-manager\\logs\\operation-qmm9Rk\\pnpm.log',
+  ].join('\n')
+  assert.equal(classifyFailure(msg), 'pnpmMissingDep')
+  // 不能把 Issue 误挂到正在安装的插件上（旧逻辑的两个错报）
+  assert.notEqual(classifyFailure(msg), 'pluginPrepare')
+  assert.notEqual(classifyFailure(msg), 'repo')
+  // 404 是「包不存在」，不是网络不通
+  assert.notEqual(classifyFailure(msg), 'network')
+  // npm 通道的同类报错（`npm error 404 Not Found - GET …`）同样归到这里
+  assert.equal(classifyFailure('npm error 404 Not Found - GET https://registry.npmjs.org/foo - Not found'), 'pnpmMissingDep')
+})
+
+test('classifyFailure: the host tail alone (lowercase `command failed`) is not a prepare failure', () => {
+  // 宿主尾部提示是小写的 `dsh: plugin command failed`，只是「这条命令失败了」的通用说明 ——
+  // 旧正则带 /i 把它当成构建脚本失败，任何未知失败都被判成 pluginPrepare（#73 错报的直接原因）
+  assert.equal(classifyFailure('something unexpected\ndsh: plugin command failed; diagnostics: /tmp/pnpm.log'), 'repo')
+  // pnpm 真正包出来的 `Command failed: …`（大写 C）仍按 prepare 失败处理
+  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
+})
+
+test('missingRegistryPackageOf extracts the 404 package name (scoped too), null otherwise', () => {
+  assert.equal(
+    missingRegistryPackageOf('[ERR_PNPM_FETCH_404] GET https://registry.npmjs.org/dsh-our-free-model: Not Found - 404'),
+    'dsh-our-free-model')
+  assert.equal(
+    missingRegistryPackageOf('ERR_PNPM_FETCH_404  GET https://registry.npmjs.org/@scope/pkg: Not Found - 404'),
+    '@scope/pkg')
+  // 私有/自定义 registry 同样取路径里的包名（带端口的 host 也能剥掉）
+  assert.equal(missingRegistryPackageOf('[ERROR] GET http://registry.local:4873/foo: Not Found - 404'), 'foo')
+  // 非 404 / 取不到 URL → null（调用方据此跳过「哪个包缺失」那行）
+  assert.equal(missingRegistryPackageOf('[ERR_PNPM_PREPARE_PACKAGE] Failed to prepare git-hosted package'), null)
+  assert.equal(missingRegistryPackageOf(''), null)
+})
+
 test('classifyFailure: generic install failure falls back to repo', () => {
   assert.equal(classifyFailure('network error while fetching'), 'repo')
   assert.equal(classifyFailure(''), 'repo')
@@ -369,6 +410,11 @@ test('registryHostOf reports a private/internal registry host, null for official
 
 test('coreErrorCode extracts the first error code', () => {
   assert.equal(coreErrorCode('foo [ERR_PNPM_PREPARE_PACKAGE] bar'), 'ERR_PNPM_PREPARE_PACKAGE')
+  // 带数字的错误码不能被截断：旧正则的字符类缺 0-9，会把 ERR_PNPM_FETCH_404 写成
+  // `ERR_PNPM_FETCH_`（#73 的 issue 正文里就是这么被截断的）
+  assert.equal(
+    coreErrorCode('[ERR_PNPM_FETCH_404] GET https://registry.npmjs.org/foo: Not Found - 404'),
+    'ERR_PNPM_FETCH_404')
   assert.equal(coreErrorCode('no code here'), null)
 })
 

@@ -53,6 +53,7 @@ function reasonTitleOf(kind: FailureKind): string {
     case 'originRejected': return 'request origin rejected by the local service on the user machine'
     case 'pnpmPolicy': return 'pnpm supply-chain policy blocked the install on the user machine'
     case 'pnpmUnusedPatch': return 'stale pnpm patch entry on the user machine'
+    case 'pnpmMissingDep': return 'dependency not found on the npm registry on the user machine'
     case 'fileLocked': return 'file locked by another process on the user machine'
     case 'accessDenied': return 'file write access denied on the user machine'
     case 'fsUnavailable': return 'local file system unavailable on the user machine'

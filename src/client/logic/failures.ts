@@ -151,7 +151,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
+export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
 /**
  * 失败归类：把安装输出归到具体成因，供弹窗文案、是否引导提 Issue 与 issue 预填原因使用。
@@ -191,6 +191,9 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  * - pnpmUnusedPatch：profile 里留着指向旧版本 dsh-plugin 的 patch 声明，本次安装解析到的版本
  *   已经不是它（`ERR_PNPM_UNUSED_PATCH` / `The following patches were not used: dsh-plugin@1.4.2`）
  *   —— pnpm 发现补丁没被用上即中止整次安装 → 提示删掉该条目后重试
+ * - pnpmMissingDep：profile 里留着一条指向 registry 上不存在的包的依赖，pnpm 解析时收到 404
+ *   （`ERR_PNPM_FETCH_404` / `Not Found - 404`）—— 该 profile 的任何安装都会先卡在这条依赖上
+ *   → 提示按包名删掉该条目后重试（404 的包通常不是正在安装的插件，故不引导提 Issue）
  * - fileLocked：pnpm 无法替换 profile 里被其他进程占用的文件（Windows `os error 32`
  *   「另一个程序正在使用此文件」/ `EBUSY` / `resource busy or locked`）—— 通常是宿主进程或
  *   杀毒软件实时扫描持有句柄 → 提示完全退出宿主后重试
@@ -311,8 +314,19 @@ export function classifyFailure(message: string): FailureKind {
   // 装后校验拦截（服务端 verifyInstalledEntry 标记）：入口文件缺失 = git 分发缺构建产物，
   // 与 pluginPrepare 同类（插件打包/分发问题），引导去仓库提 Issue
   if (/\[packaging\]|entry file missing/i.test(message)) return 'pluginPrepare'
+  // 依赖在 registry 上不存在（`ERR_PNPM_FETCH_404` / `Not Found - 404`）：pnpm 连得上 registry，
+  // 是被明确告知「这个包不存在」—— 不是插件问题。profile 里留着一条指向未发布包的依赖条目时，
+  // 该 profile 的**任何**安装都会先卡在这条依赖上（宿主尾部只有 `dsh: plugin command failed`）。
+  // 必须在 pluginPrepare 之前：否则该尾部会被下面的 `Command failed` 判定吞成
+  // 「插件分发不完整」，把 Issue 误挂到正在安装的插件上，而不是 404 的那个依赖（#73）
+  // （两个形态：pnpm 的 `[ERR_PNPM_FETCH_404] GET <url>: Not Found - 404` 与 npm 的
+  //   `npm error 404 Not Found - GET <url> - Not found`）
+  if (/ERR_PNPM_FETCH_404|404 Not Found|Not Found - 404/i.test(message)) return 'pnpmMissingDep'
   // 再判 prepare 实际执行失败：只有构建脚本真的跑挂了才是插件问题
-  if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|Command failed|prepare-guard/i.test(message)) return 'pluginPrepare'
+  // （`Command failed` 区分大小写：宿主尾部提示是小写的 `dsh: plugin command failed`，
+  //   那只是「这条命令失败了」的通用说明 —— 带 /i 会让任何带该尾部的未知失败都被判成
+  //   「插件分发不完整」，把 Issue 误挂到正在安装的插件上，见 #73）
+  if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|prepare-guard/i.test(message) || /Command failed/.test(message)) return 'pluginPrepare'
   // 其余失败（含 git prepare 被 pnpm 白名单拦截）：当前通道装不上 = 插件分发/依赖的问题，一律提 Issue
   return 'repo'
 }
@@ -371,10 +385,24 @@ export function summarizeError(message: string, maxChars: number = MAX_CORE_CHAR
   return out.length > maxChars ? `${out.slice(0, maxChars)}\n… (truncated)` : out
 }
 
-/** 提取首个错误代码（如 ERR_PNPM_PREPARE_PACKAGE），无则 null。 */
+/** 提取首个错误代码（如 ERR_PNPM_PREPARE_PACKAGE），无则 null。
+ *  代码里可能含数字（ERR_PNPM_FETCH_404 / ERR_PNPM_EBADPLATFORM_...），字符类必须带上 0-9，
+ *  否则会被截成 `ERR_PNPM_FETCH_`（#73 的 issue 正文就是这么被截断的）。 */
 export function coreErrorCode(message: string): string | null {
-  const m = message.match(/\[?ERR_[A-Z_]+\]?/)
+  const m = message.match(/\[?ERR_[A-Z0-9_]+\]?/)
   return m ? m[0].replace(/^\[|\]$/g, '') : null
+}
+
+/** 提取「registry 上不存在的包名」：从 404 行（`ERR_PNPM_FETCH_404 GET <registry>/<pkg>: Not Found - 404`）
+ *  里取请求路径中的包名（含 scope，如 `@scope/name`）；非 404 或提取不到返回 null。
+ *  调用方据此在提示里点名具体是哪个依赖缺失 —— 光说「有个包 404 了」用户无从下手。 */
+export function missingRegistryPackageOf(message: string): string | null {
+  for (const line of message.split(/\r?\n/)) {
+    if (!/ERR_PNPM_FETCH_404|404/.test(line)) continue
+    const m = line.match(/GET\s+https?:\/\/[^\s/]+\/((?:@[^/\s:]+\/)?[^/\s:]+)/)
+    if (m) return m[1]
+  }
+  return null
 }
 
 /**

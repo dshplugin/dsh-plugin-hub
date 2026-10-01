@@ -18,7 +18,7 @@ import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { NotificationRecord } from '../../logic/failures.ts'
-import { classifyFailure, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
+import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
 import type { PendingRestart, QueueTask } from '../../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
 import { CloseIcon } from '../ui/icons.tsx'
@@ -306,6 +306,17 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm
                       // 发现补丁没被用上就中止安装，任何插件都装不进来 —— 不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
+                    }
+                    if (kind === 'pnpmMissingDep') {
+                      // profile 里留着指向 registry 上不存在（404）的包的依赖：pnpm 连得上 registry，
+                      // 是被明确告知包不存在 —— 该 profile 的任何安装都会先卡在这条依赖上，与本次要装的
+                      // 插件无关（#73 的 issue 就是这么被误挂到正在安装的插件上的）→ 点名缺失的包 +
+                      // 删除条目指引，不引导提 Issue
+                      const pkg = missingRegistryPackageOf(r.message)
+                      return h('div', null, [
+                        pkg ? h('div', { className: styles.failNetworkTarget }, t('failPnpmMissingDepTarget', { pkg })) : null,
+                        h('div', { className: styles.failPrepareHint }, t('failPnpmMissingDepHint')),
+                      ])
                     }
                     if (kind === 'fileLocked') {
                       // profile 里的文件被其他进程占用（Windows os error 32）：通常是宿主或杀毒软件

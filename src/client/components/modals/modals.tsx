@@ -16,7 +16,7 @@ import { CloseIcon, ConfirmIcon, CopyIcon, LinkIcon } from '../ui/icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
 import { installCommandOf } from '../../logic/install-command.ts'
 import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
-import { classifyFailure, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
+import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述；
  *  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
@@ -421,6 +421,18 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm 发现
               // 补丁没被用上就中止整次安装，任何插件都装不进来 —— 给删除条目的指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
+              : failureKind === 'pnpmMissingDep'
+              // profile 里留着指向 registry 上不存在（404）的包的依赖：pnpm 连得上 registry，
+              // 是被明确告知包不存在 —— 该 profile 的任何安装都会先卡在这条依赖上，与本次要装的
+              // 插件无关（#73 的 issue 就是这么被误挂到正在安装的插件上的）→ 点名缺失的包 +
+              // 删除条目指引，不引导提 Issue
+              ? h('div', null, [
+                (() => {
+                  const pkg = missingRegistryPackageOf(message)
+                  return pkg ? h('div', { className: styles.failNetworkTarget }, t('failPnpmMissingDepTarget', { pkg })) : null
+                })(),
+                h('div', { className: styles.failPrepareHint }, t('failPnpmMissingDepHint')),
+              ])
               : failureKind === 'fileLocked'
               // profile 里的文件被其他进程占用（Windows os error 32）：pnpm 无法替换被占用的文件，
               // 通常是宿主或杀毒软件持有句柄 —— 给退出宿主的指引，不引导提 Issue
