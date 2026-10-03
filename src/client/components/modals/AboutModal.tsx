@@ -8,13 +8,26 @@
  * 客户端按接口返回渲染，不内置固定文案。
  * 图片（反馈群二维码）经 renderMarkdown 的 ![](url) 语法嵌入，居中、最大高度受控。
  */
-import { createElement as h } from 'react'
+import { createElement as h, useMemo } from 'react'
 import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { HubAboutInfo } from '../../types.ts'
 import type { LocaleId, Translate } from '../../types.ts'
 import { renderMarkdown } from '../../logic/renderMarkdown.ts'
 import { CloseIcon } from '../ui/icons.tsx'
+
+/**
+ * 反馈群二维码 URL 恒定（每次换码都是同名覆盖，文件名不变），浏览器 / CDN 会按
+ * URL 缓存旧图。这里在渲染前给二维码 URL 实时拼一个新的时间戳，强制每次打开
+ * 「关注我们」都回源拉取最新图片，无需重新构建 / 部署接口中心。
+ * 匹配规则与 renderMarkdown 的二维码识别保持一致（dsh-plugin-user-group-qr 前缀）。
+ */
+function bustQrCache(md: string, ts: number): string {
+  return md.replace(
+    /(!\[[^\]]*\]\()([^)\s]*dsh-plugin-user-group-qr[^)\s]*)/g,
+    (_m, pre, url) => `${pre}${String(url).split('?')[0]}?v=${ts}`,
+  )
+}
 
 export function AboutModal({ info, lang, t, onClose }: {
   info: HubAboutInfo | null
@@ -33,7 +46,10 @@ export function AboutModal({ info, lang, t, onClose }: {
           : (info.content.zh ?? info.content.en ?? '')
         : ''
     : ''
-  const contentHtml = contentRaw.trim() ? renderMarkdown(contentRaw) : null
+  // 每次打开弹窗（组件重新挂载）生成一个时间戳，用于二维码破缓存；
+  // 同一次打开内保持稳定，避免父组件重渲染导致图片被反复重载。
+  const qrTs = useMemo(() => Date.now(), [])
+  const contentHtml = contentRaw.trim() ? renderMarkdown(bustQrCache(contentRaw, qrTs)) : null
   // 更新时间：ISO 字符串转本地可读格式；非法值静默隐藏
   let updated: string | null = null
   if (info?.updatedAt) {
