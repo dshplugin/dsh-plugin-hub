@@ -3,7 +3,7 @@ export function githubReleaseTarget(value: string): { target: string; repo: stri
   const input = value.trim()
   // Catalog commands are display data, never shell code. Accept only one
   // official DSH target, with no trailing flags or additional commands.
-  const command = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+(?:add|update)\s+(.+)$/i.exec(input)
+  const command = /^dsh[ \t]+plugin[ \t]+--profile(?:[ \t]+|=)[A-Za-z0-9_-]+[ \t]+(?:add|update)[ \t]+(.+)$/i.exec(input)
   const raw = command?.[1] ?? input
   const target = raw.startsWith('"') && raw.endsWith('"') ? raw.slice(1, -1) : raw
   const match = /^https:\/\/github\.com\/([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+)\/releases\/download\/([A-Za-z0-9._+-]+)\/([A-Za-z0-9._+-]+\.tgz)$/.exec(target)

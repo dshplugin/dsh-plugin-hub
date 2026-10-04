@@ -29,7 +29,11 @@ export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'g
  *  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。 */
 export function installCommandOf(p: HubPlugin, withProfile = false): string {
   const { target, via } = installTargetOf(p)
-  if (via === 'release') return `dsh plugin${withProfile ? ' --profile web' : ''} add ${target}`
+  if (via === 'release') {
+    const command = p.install?.githubCommand?.trim()
+    return command && /^dsh[ \t]+plugin[ \t]/i.test(command)
+      ? command : `dsh plugin --profile web add ${target}`
+  }
   if (via === 'npm') {
     const cmd = p.install?.command
     if (cmd) return cmd

@@ -21,6 +21,7 @@ test('catalog authoritative release command selects the prebuilt package, not re
   const plugin = normalize({ s: 'widget', r: repo, igc: command })
   assert.deepEqual(installTargetOf(plugin), { target: artifact, via: 'release' })
   assert.equal(installCommandOf(plugin, true), command)
+  assert.equal(installCommandOf(plugin), command)
   assert.deepEqual(githubReleaseTarget(`dsh plugin --profile=web add "${artifact}"`), { target: artifact, repo })
   assert.deepEqual(installTargetOf(normalize({ s: 'widget', r: { repo, npmPackage: 'widget' }, igc: command })),
     { target: 'widget', via: 'npm' })
@@ -37,7 +38,7 @@ test('release grammar rejects shell code, other hosts, credentials, moving URLs 
     artifact.replace('github.com', 'user@github.com'), `${artifact}?download=1`, `${artifact}#fragment`,
     artifact.replace('/download/widget-v1.2.3/', '/latest/download/'), artifact.replace('.tgz', '.zip'),
     artifact.replace('/widget-v1.2.3/', '/../'), `${command} --ignore-scripts`, `${command}; echo injected`,
-    `${command} && echo injected`, `"${artifact}" extra`, artifact.replace('widget-v1.2.3', 'tag%2Fpart'),
+    `${command} && echo injected`, command.replace("web", "web;echo"), command.replace(" plugin ", "\nplugin "), `"${artifact}" extra`, artifact.replace('widget-v1.2.3', 'tag%2Fpart'),
   ]) assert.equal(githubReleaseTarget(value), null, value)
 })
 
