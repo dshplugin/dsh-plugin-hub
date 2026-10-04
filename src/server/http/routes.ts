@@ -15,6 +15,7 @@ import { dirname, join, resolve } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { fetchViaCurl, gitLsRemote, probeUrl, systemProxy } from '../services/probe.ts'
 import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, globalNpmPackagesOf, hasQueuedTarget, installTargetOf, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install/install.ts'
+import { githubReleaseTarget } from '../services/install/release-target.ts'
 import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/profile/installed-versions.ts'
 import { resolveNpmPackage } from '../services/install/npm-resolve.ts'
 import { preflightTarget } from '../services/install/preflight.ts'
@@ -791,12 +792,14 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             sendJson(response, 200, { ok: true, task: task.id })
             return
           }
-          // 目标语法两态：GitHub 地址（owner/repo、github:、https/ssh 链接等任意写法）→ 显式
-          // HTTPS Git 源（走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装。
+          // 目标语法三态：固定 GitHub release .tgz（保留其包根目录，不转成仓库 HEAD）；
+          // GitHub 地址（owner/repo、github:、https/ssh 链接等任意写法）→ 显式 HTTPS Git 源
+          // （走装前预检）；npm 包名（@scope/name 或 name）→ 信任 registry 直接安装。
           // githubRepoOf 先把各种 GitHub 地址归一成 owner/repo，让「输入地址即装」兼容粘贴完整链接。
           const gitRepo = githubRepoOf(rawRepo)
-          const repoTarget = gitRepo !== null ? githubTarget(gitRepo) : null
-          let target: string | null = repoTarget ?? (validPackageName(rawRepo) ? rawRepo : null)
+          const release = githubReleaseTarget(rawRepo)
+          const repoTarget = gitRepo !== null && release === null ? githubTarget(gitRepo) : null
+          let target: string | null = release?.target ?? repoTarget ?? (validPackageName(rawRepo) ? rawRepo : null)
           if (target === null) {
             sendJson(response, 400, { error: 'unsupported install target' })
             return
@@ -825,9 +828,9 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
           }
           // 命令行安装（目录外）按通道门禁：GitHub 源码通道受「启用 GitHub 源码安装」控制，
           // npm 通道受「启用 NPM 安装」控制 —— 目录插件安装走目录白名单，不受开关影响。
-          // 通道判定看反查后的最终 target：仍是 git 目标 = 走 GitHub 源码，否则走 npm。
+          // 通道判定看反查后的最终 target：release 包与 git 目标同属 GitHub 通道，否则走 npm。
           if (source !== 'catalog') {
-            const isGitChannel = repoTarget !== null && target === repoTarget
+            const isGitChannel = release !== null || (repoTarget !== null && target === repoTarget)
             if (isGitChannel && !settings.enableGitInstall) {
               sendJson(response, 403, { error: 'git installs are disabled by the security settings' })
               return
@@ -863,8 +866,12 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             const effectiveProxy = settings.proxy !== ''
               ? settings.proxy
               : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
-            const isGitChannel = repoTarget !== null && target === repoTarget
-            const npmProbeTarget = `${(settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org')}/`
+            const isGitChannel = release !== null || (repoTarget !== null && target === repoTarget)
+            // release 包是 https://github.com/ 直链下载（非 git 克隆），探针按 HTTP 打 github.com 主页；
+            // npm 通道探 registry 根。两者都是通道的稳定入口，不探具体包/仓库（404 会被误判成网络故障）。
+            const httpProbeTarget = release !== null
+              ? 'https://github.com/'
+              : `${(settings.npmRegistry.replace(/\/+$/, '') || 'https://registry.npmjs.org')}/`
             // git 通道的探针换成克隆握手本身：git ls-remote 走的就是 pnpm 克隆前的同一套
             // https 传输。curl 打 github.com 主页会被按协议/端口区分的防火墙与 TLS 复检
             // 拦截（能 git 克隆、打不开网页），把可装的仓库误判成 [network] 而中止
@@ -880,9 +887,9 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
                 if (reachable.ok) net = reachable
               }
             } else {
-              net = await probeUrl(npmProbeTarget, effectiveProxy, 6000)
+              net = await probeUrl(httpProbeTarget, effectiveProxy, 6000)
             }
-            const probeTarget = gitProbeTarget ?? npmProbeTarget
+            const probeTarget = gitProbeTarget ?? httpProbeTarget
             if (!net.ok) {
               // 错误消息按客户端界面语言提示：中文界面给中文、英文界面给英文，
               // 让用户一眼看懂是网络问题而非插件问题
