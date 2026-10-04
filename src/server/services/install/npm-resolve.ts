@@ -18,6 +18,8 @@ const cache = new Map<string, string | null>()
 
 /** 单次 registry 查询超时（ms）：慢网络下失败返回 null，不阻塞安装流程。 */
 const REQUEST_TIMEOUT_MS = 8000
+/** npm search 是相关性搜索而非 repository 精确索引；拉满单页结果后再本地做严格 repo 过滤。 */
+const SEARCH_RESULT_LIMIT = 250
 
 /**
  * 反查 repo（`owner/repo`）对应的官方 npm 包名；未命中、网络异常或超时返回 null。
@@ -39,13 +41,49 @@ export function resolveNpmPackage(repo: string, registry = ''): Promise<string |
   return name.then((found) => found ?? null)
 }
 
+type NpmSearchPackage = {
+  name?: unknown
+  keywords?: unknown
+  links?: { repository?: unknown }
+  repository?: { url?: unknown }
+}
+
+type NpmSearchObject = { package?: NpmSearchPackage }
+type NpmSearchResponse = { objects?: NpmSearchObject[] }
+
+/**
+ * Pick the installable npm package for one GitHub repository. npm search is a
+ * relevance-ranked text search, not an exact repository index, so first filter
+ * by repository URL. If a monorepo publishes both a CLI/helper package and a
+ * DSH plugin, prefer the package that explicitly advertises the `dsh-plugin`
+ * keyword instead of whichever result npm happened to rank first.
+ */
+export function selectNpmPackageForRepo(objects: NpmSearchObject[], repo: string): string | null {
+  const needle = `github.com/${repo}`.toLowerCase()
+  const matches: Array<{ name: string; isDshPlugin: boolean }> = []
+
+  for (const obj of objects) {
+    const pkg = obj.package
+    if (typeof pkg?.name !== 'string' || pkg.name === '') continue
+    const repoUrl = String(pkg.repository?.url ?? pkg.links?.repository ?? '')
+    if (!repoUrl.toLowerCase().includes(needle)) continue
+    const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : []
+    matches.push({
+      name: pkg.name,
+      isDshPlugin: keywords.some((keyword) => typeof keyword === 'string' && keyword.toLowerCase() === 'dsh-plugin'),
+    })
+  }
+
+  return matches.find((candidate) => candidate.isDshPlugin)?.name ?? matches[0]?.name ?? null
+}
+
 /** 用 npm search 接口按 repository 地址反查，并做铁证校验（包元数据必须指向该仓库）。
  * 返回：包名 = 命中；null = 200 响应下确认无匹配；undefined = 本次未能确认（网络/超时/解析失败）。 */
 function searchRepo(repo: string, registry: string): Promise<string | null | undefined> {
   const [owner, name] = repo.split('/')
   if (owner === undefined || name === undefined || name === '') return Promise.resolve(null)
   const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
-  const url = `${base}/-/v1/search?text=${encodeURIComponent(`repository:${owner}/${name}`)}&size=10`
+  const url = `${base}/-/v1/search?text=${encodeURIComponent(`repository:${owner}/${name}`)}&size=${SEARCH_RESULT_LIMIT}`
   return new Promise((resolve) => {
     const req = get(url, { timeout: REQUEST_TIMEOUT_MS }, (res) => {
       if (res.statusCode !== 200) {
@@ -57,18 +95,8 @@ function searchRepo(repo: string, registry: string): Promise<string | null | und
       res.on('data', (chunk: Buffer) => { body += chunk.toString() })
       res.on('end', () => {
         try {
-          const data = JSON.parse(body) as { objects?: Array<{ package?: { name?: unknown; links?: { repository?: unknown }; repository?: { url?: unknown } } }> }
-          const needle = `github.com/${owner}/${name}`.toLowerCase()
-          for (const obj of data.objects ?? []) {
-            const pkg = obj.package
-            if (typeof pkg?.name !== 'string' || pkg.name === '') continue
-            const repoUrl = String(pkg.repository?.url ?? pkg.links?.repository ?? '')
-            if (repoUrl.toLowerCase().includes(needle)) {
-              resolve(pkg.name)
-              return
-            }
-          }
-          resolve(null)
+          const data = JSON.parse(body) as NpmSearchResponse
+          resolve(selectNpmPackageForRepo(data.objects ?? [], `${owner}/${name}`))
         } catch {
           resolve(undefined)
         }

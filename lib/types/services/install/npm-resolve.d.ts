@@ -9,3 +9,25 @@
  * 慢网络下失败不阻塞安装。
  */
 export declare function resolveNpmPackage(repo: string, registry?: string): Promise<string | null>;
+type NpmSearchPackage = {
+    name?: unknown;
+    keywords?: unknown;
+    links?: {
+        repository?: unknown;
+    };
+    repository?: {
+        url?: unknown;
+    };
+};
+type NpmSearchObject = {
+    package?: NpmSearchPackage;
+};
+/**
+ * Pick the installable npm package for one GitHub repository. npm search is a
+ * relevance-ranked text search, not an exact repository index, so first filter
+ * by repository URL. If a monorepo publishes both a CLI/helper package and a
+ * DSH plugin, prefer the package that explicitly advertises the `dsh-plugin`
+ * keyword instead of whichever result npm happened to rank first.
+ */
+export declare function selectNpmPackageForRepo(objects: NpmSearchObject[], repo: string): string | null;
+export {};
