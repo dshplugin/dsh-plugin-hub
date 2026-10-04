@@ -19,6 +19,7 @@ import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
 import { githubRepoOf } from '../profile/profile.ts'
 import { resolvePackageEntry } from './package-entry.ts'
+import { githubReleaseTarget } from './release-target.ts'
 
 const execFileAsync = promisify(execFile)
 
@@ -37,6 +38,10 @@ export interface PreflightResult {
 }
 
 export async function preflightTarget(target: string): Promise<PreflightResult> {
+  // Release packages have their own package root. Checking monorepo HEAD
+  // would reject a complete artifact using an unrelated source distribution.
+  // The real installer and existing verifyInstalledEntry validate the package.
+  if (githubReleaseTarget(target) !== null) return { ok: true, missing: null, name: null }
   const source = githubRepoOf(target)
   if (source === null) return { ok: true, missing: null, name: null }
   const [owner, repo] = source.split('/')

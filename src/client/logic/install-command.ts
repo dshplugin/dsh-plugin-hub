@@ -4,20 +4,23 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * Install target/command helpers: decide the install channel (npm package
- * vs explicit-HTTPS GitHub), build the display command and normalize a raw
+ * vs prebuilt release vs explicit-HTTPS GitHub), build the display command and normalize a raw
  * install spec back to its owner/repo identity.
  */
 import type { HubPlugin } from '../types.ts'
+import { githubReleaseTarget } from '../../server/services/install/release-target.ts'
 
 /**
  * 安装通道决策（用户无感知）：目录探测到 npm 包名 → 用 npm 包名安装
- * （走 npm registry tarball，更快、与 GitHub 网络无关）；无 npm 包名 → git 直装。
- * 返回值 target 即传给后端 /install 的安装目标（npm 包名 或 owner/repo）。
+ * （走 npm registry tarball，更快、与 GitHub 网络无关）；其次使用同仓库的权威 release 包命令，最后 git 直装。
+ * 返回值 target 即传给后端 /install 的安装目标（npm 包名、release URL 或 owner/repo）。
  */
-export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'github' } {
+export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'github' | 'release' } {
   const pkg = (p.source?.npmPackage ?? '').trim()
   const repo = (p.source?.repo ?? '').trim()
   if (pkg && repo) return { target: pkg, via: 'npm' }
+  const release = githubReleaseTarget(p.install?.githubCommand ?? '')
+  if (release?.repo.toLowerCase() === repo.toLowerCase()) return { target: release.target, via: 'release' }
   return { target: repo, via: 'github' }
 }
 
@@ -26,6 +29,7 @@ export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'g
  *  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。 */
 export function installCommandOf(p: HubPlugin, withProfile = false): string {
   const { target, via } = installTargetOf(p)
+  if (via === 'release') return `dsh plugin${withProfile ? ' --profile web' : ''} add ${target}`
   if (via === 'npm') {
     const cmd = p.install?.command
     if (cmd) return cmd
@@ -41,6 +45,8 @@ export function installCommandOf(p: HubPlugin, withProfile = false): string {
 /** Normalize a task/install target to its owner/repo display identity. */
 export function repoFromInstallTarget(value: string): string {
   const input = value.trim()
+  const release = githubReleaseTarget(input)
+  if (release !== null) return release.repo
   if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(input)) return input
   const patterns = [
     /^github:([^/]+)\/([^/]+)$/i,

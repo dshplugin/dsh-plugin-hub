@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import { PACKAGE_RE, REPO_RE } from '../install/install-types.ts'
+import { githubReleaseTarget } from '../install/release-target.ts'
 
 /** Resolve the active profile from the booted CLI args, falling back to `web`. */
 export function readProfileArg(fallback = 'web'): string {
@@ -90,6 +91,8 @@ export function globalNpmPackagesOf(value: string): string[] | null {
 export function githubRepoOf(value: string): string | null {
   if (typeof value !== 'string') return null
   const input = value.trim()
+  const release = githubReleaseTarget(input)
+  if (release !== null) return release.repo
   if (REPO_RE.test(input)) return input
   const patterns = [
     /^github:([^/]+)\/([^/]+)$/i,
