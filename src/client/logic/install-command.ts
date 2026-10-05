@@ -51,6 +51,8 @@ export function installCommandOf(p: HubPlugin, withProfile = false): string {
 /** Normalize a task/install target to its owner/repo display identity. */
 export function repoFromInstallTarget(value: string): string {
   const input = value.trim()
+  const release = githubReleaseTarget(input)
+  if (release !== null) return release.repo
   if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(input)) return input
   const patterns = [
     /^github:([^/]+)\/([^/]+)$/i,

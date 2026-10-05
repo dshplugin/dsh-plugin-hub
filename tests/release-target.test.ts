@@ -13,7 +13,9 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { githubReleaseTarget } from '../src/server/services/install/release-target.ts'
 import { githubRepoOf } from '../src/server/services/profile/profile.ts'
-import { installCommandOf, installTargetOf } from '../src/client/logic/install-command.ts'
+import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../src/client/logic/install-command.ts'
+import { installedItemsOf, installedNameOf } from '../src/client/logic/installed.ts'
+import { normalize } from '../src/client/logic/normalize.ts'
 import type { HubPlugin } from '../src/client/types.ts'
 
 const TGZ = 'https://github.com/loopx-project/loopx/releases/download/dsh-loopx-plugin-v0.1.1-beta.5/dsh-loopx-plugin-0.1.1-beta.5.tgz'
@@ -74,4 +76,27 @@ test('installTargetOf: npm 包优先，跨仓 release 命令不采信', () => {
     install: { githubCommand: `dsh plugin --profile web add ${TGZ}` },
   } as HubPlugin
   assert.deepEqual(installTargetOf(crossRepo), { target: 'a/y', via: 'github' })
+})
+
+test('release installs remain visible after readback, catalog update and removal', () => {
+  const plugin = normalize({ s: 'widget', r: 'acme/widget', vr: 'v1.2.3' })
+  const oldTarget = 'https://github.com/acme/widget/releases/download/v1.2.2/widget-1.2.2.tgz'
+  const installed = { 'widget-plugin': oldTarget }
+  const versions = { 'acme/widget': { version: 'v1.2.2', updatedAt: '2026-01-01' } }
+  assert.equal(repoFromInstallTarget(oldTarget), 'acme/widget')
+  assert.equal(installedNameOf(plugin, installed, {}), 'widget-plugin')
+  const rows = installedItemsOf([plugin], installed, versions, null, null, null)
+  assert.equal(rows.length, 1)
+  assert.equal(rows[0]!.plugin, plugin)
+  assert.equal(rows[0]!.repo, 'acme/widget')
+  assert.equal(rows[0]!.hasUpdate, true)
+  assert.equal(installedNameOf(plugin, {}, versions), null)
+  assert.deepEqual(installedItemsOf([plugin], {}, versions, null, null, null), [])
+  for (const spec of [
+    oldTarget.replace('acme/widget/', 'other/widget/'),
+    oldTarget.replace('github.com', 'example.com'),
+    oldTarget + '?download=1',
+  ]) {
+    assert.equal(installedNameOf(plugin, { 'widget-plugin': spec }, versions), null)
+  }
 })
