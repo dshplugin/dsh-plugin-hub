@@ -78,20 +78,27 @@ test('installTargetOf: npm 包优先，跨仓 release 命令不采信', () => {
   assert.deepEqual(installTargetOf(crossRepo), { target: 'a/y', via: 'github' })
 })
 
-test('release installs remain visible after readback, catalog update and removal', () => {
+test('repoFromInstallTarget: release 装完仍能认回目录身份（读回 / 更新 / 卸载）', () => {
   const plugin = normalize({ s: 'widget', r: 'acme/widget', vr: 'v1.2.3' })
+  // 宿主记录的依赖 spec 就是当初安装的 release 直链（旧 pin 版本）
   const oldTarget = 'https://github.com/acme/widget/releases/download/v1.2.2/widget-1.2.2.tgz'
   const installed = { 'widget-plugin': oldTarget }
   const versions = { 'acme/widget': { version: 'v1.2.2', updatedAt: '2026-01-01' } }
+
+  // 身份归一化认 release 直链 → 目录条目命中，已安装视图保留目录身份与更新信号
   assert.equal(repoFromInstallTarget(oldTarget), 'acme/widget')
   assert.equal(installedNameOf(plugin, installed, {}), 'widget-plugin')
   const rows = installedItemsOf([plugin], installed, versions, null, null, null)
   assert.equal(rows.length, 1)
   assert.equal(rows[0]!.plugin, plugin)
   assert.equal(rows[0]!.repo, 'acme/widget')
-  assert.equal(rows[0]!.hasUpdate, true)
+  assert.equal(rows[0]!.hasUpdate, true) // 装的 v1.2.2 < 目录 v1.2.3
+
+  // 卸载（依赖表里已无该包名）后不再命中
   assert.equal(installedNameOf(plugin, {}, versions), null)
   assert.deepEqual(installedItemsOf([plugin], {}, versions, null, null, null), [])
+
+  // 跨仓 / 外部主机 / 带 query 的非法直链不认领，回退为自定义安装（repo 为空）
   for (const spec of [
     oldTarget.replace('acme/widget/', 'other/widget/'),
     oldTarget.replace('github.com', 'example.com'),

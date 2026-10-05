@@ -51,6 +51,8 @@ export function installCommandOf(p: HubPlugin, withProfile = false): string {
 /** Normalize a task/install target to its owner/repo display identity. */
 export function repoFromInstallTarget(value: string): string {
   const input = value.trim()
+  // release 直链（预构建 .tgz）走同一条身份归一化：解析出所属仓库，已装态/更新信号才能
+  // 认回目录条目；仅接受固定形态直链，跨仓/非法目标不接受，继续走下面的常规解析。
   const release = githubReleaseTarget(input)
   if (release !== null) return release.repo
   if (/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(input)) return input
