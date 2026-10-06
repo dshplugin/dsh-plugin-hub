@@ -11,7 +11,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import type { HubPlugin, InstallChannel, LocaleId, Translate } from '../types.ts'
-import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../logic/install-command.ts'
+import { executedCommandOf, installCommandOf, installTargetOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import type { InstalledItem } from '../logic/installed.ts'
 
 /** 安装/卸载请求超时（ms）：服务端 preflight + npm 反查可能耗时（各自都有超时，合计约 20~30s），
@@ -222,7 +222,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         : q.kind === 'uninstall' ? t('uninstallFail') : t('installFail')
       // 自定义安装（带入口渠道）：错误正文顶部精准提示「从哪张卡片发起」，目录安装保持原样
       const entry = entryLineOf(t, q.channel)
-      onError(entry ? `${entry}\n${rawDetail}` : rawDetail, q.repo, q.kind, q.command, q.attempts, q.action === 'update')
+      onError(entry ? `${entry}\n${rawDetail}` : rawDetail, q.repo, q.kind, executedCommandOf(q.command, q.attempts), q.attempts, q.action === 'update')
     }
     maybeStopPoll()
   }

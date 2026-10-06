@@ -16,7 +16,7 @@ import { CloseIcon, ConfirmIcon, CopyIcon, LinkIcon } from '../ui/icons.tsx'
 import { ProgressView } from './ProgressView.tsx'
 import { installCommandOf } from '../../logic/install-command.ts'
 import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
-import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
+import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, pnpmPolicyHintOf, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述；
  *  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
@@ -416,7 +416,7 @@ export function ErrorModal({ message, repo, kind, command, attempts, t, env, onC
               : failureKind === 'pnpmPolicy'
               // pnpm 11 供应链安全策略拦截（minimumReleaseAge 拒收发布太新的包 / untrusted origin）：
               // 本机 pnpm 策略不放行，装任何「刚发布/新来源」插件都撞墙 —— 给豁免指引，不引导提 Issue
-              ? h('div', { className: styles.failPrepareHint }, t('failPnpmPolicyHint'))
+              ? h('div', { className: styles.failPrepareHint }, t(pnpmPolicyHintOf(message)))
               : failureKind === 'pnpmUnusedPatch'
               // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm 发现
               // 补丁没被用上就中止整次安装，任何插件都装不进来 —— 给删除条目的指引，不引导提 Issue

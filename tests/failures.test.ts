@@ -484,3 +484,15 @@ test('summarizeError honors a caller-provided budget (issue URL clamp)', () => {
   const msg = `ERR_PNPM_PREPARE_PACKAGE ${'x'.repeat(2000)}`
   assert.ok(summarizeError(msg, 300).length <= 300 + 16)
 })
+
+test('missing tarball integrity is a pnpm policy rejection with specific recovery guidance', async () => {
+  const { pnpmPolicyHintOf } = await import('../src/client/logic/failures.ts')
+  const message = '[ERR_PNPM_MISSING_TARBALL_INTEGRITY] Cannot install package "sample@https://github.com/example/sample/releases/download/v1/sample.tgz": its lockfile entry has no "integrity" field.\nCommand failed\nETIMEDOUT'
+  assert.equal(classifyFailure(message), 'pnpmPolicy')
+  assert.equal(pnpmPolicyHintOf(message), 'failPnpmTarballIntegrityHint')
+  assert.equal(pnpmPolicyHintOf('ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION'), 'failPnpmPolicyHint')
+  assert.equal(pnpmPolicyHintOf('ERR_PNPM_TARBALL_INTEGRITY checksum mismatch'), 'failPnpmPolicyHint')
+  assert.equal(classifyFailure('ERR_PNPM_TARBALL_INTEGRITY checksum mismatch'), 'repo')
+  assert.equal(classifyFailure('a plugin says its integrity is missing'), 'repo')
+  assert.equal(classifyFailure('ERR_PNPM_MISSING_TARBALL_INTEGRITY_OTHER'), 'repo')
+})

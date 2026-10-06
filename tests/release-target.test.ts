@@ -107,3 +107,26 @@ test('repoFromInstallTarget: release 装完仍能认回目录身份（读回 / �
     assert.equal(installedNameOf(plugin, { 'widget-plugin': spec }, versions), null)
   }
 })
+
+test('failure reports use the recorded release command after refresh instead of a Git display fallback', async () => {
+  const { pluginIssueUrl } = await import('../src/client/logic/urls.ts')
+  const { executedCommandOf } = await import('../src/client/logic/install-command.ts')
+  const release = 'dsh plugin --profile desktop add https://github.com/example/sample/releases/download/v1/sample.tgz'
+  const fallback = 'dsh plugin --profile desktop add git+https://github.com/example/sample.git'
+  const attempts = ['npm registry search: no matching package found', release]
+  const url = new URL(pluginIssueUrl('example/sample', 'ERR_PNPM_MISSING_TARBALL_INTEGRITY', null, fallback, attempts))
+  const body = url.searchParams.get('body')!
+  assert.equal(executedCommandOf(fallback, attempts), release)
+  assert.match(body, /lockfile entry without tarball integrity/)
+  assert.ok(body.includes(`实际执行的安装命令：\`${release}\``))
+  assert.ok(!body.includes('git+https://github.com/example/sample.git'))
+  assert.equal(executedCommandOf(undefined, [release, 'dsh plugin --profile desktop add sample@latest']), 'dsh plugin --profile desktop add sample@latest')
+  assert.equal(executedCommandOf(undefined, ['npm install -g sample']), 'npm install -g sample')
+  assert.equal(executedCommandOf(undefined, ['npm registry search: no matching package found']), undefined)
+  assert.equal(executedCommandOf(fallback, ['npm registry search: no matching package found']), undefined)
+  assert.equal(executedCommandOf(fallback, []), undefined)
+  assert.equal(executedCommandOf(fallback), fallback)
+  const unknown = new URL(pluginIssueUrl('example/sample', 'diagnostics only')).searchParams.get('body')!
+  assert.match(unknown, /unknown \(no executed command recorded\)/)
+  assert.ok(!unknown.includes('git+https://github.com/example/sample.git'))
+})

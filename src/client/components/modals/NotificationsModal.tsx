@@ -18,7 +18,7 @@ import type { MouseEvent } from 'react'
 import styles from '../../styles/Modal.module.css'
 import type { EnvInfo, Translate } from '../../types.ts'
 import type { NotificationRecord } from '../../logic/failures.ts'
-import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
+import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, pnpmPolicyHintOf, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
 import type { PendingRestart, QueueTask } from '../../hooks/useTaskQueue.ts'
 import { pluginIssueUrl, pluginSiteUrl } from '../../logic/urls.ts'
 import { CloseIcon } from '../ui/icons.tsx'
@@ -300,7 +300,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     if (kind === 'pnpmPolicy') {
                       // pnpm 11 供应链安全策略拦截（minimumReleaseAge 拒收发布太新的包 / untrusted origin）：
                       // 本机 pnpm 策略不放行，装任何「刚发布/新来源」插件都撞墙 —— 给豁免指引，不引导提 Issue
-                      return h('div', { className: styles.failPrepareHint }, t('failPnpmPolicyHint'))
+                      return h('div', { className: styles.failPrepareHint }, t(pnpmPolicyHintOf(r.message)))
                     }
                     if (kind === 'pnpmUnusedPatch') {
                       // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm
