@@ -10,6 +10,16 @@
 import type { HubPlugin } from '../types.ts'
 import { githubReleaseTarget } from '../../server/services/install/release-target.ts'
 
+/** Backend attempts are chronological; report the last executed command before a display fallback.
+ * These prefixes are the task queue's recorded command shapes, never commands to execute here.
+ */
+export function executedCommandOf(command?: string, attempts?: string[]): string | undefined {
+  if (attempts === undefined) return command
+  return attempts.slice().reverse().find((attempt) =>
+    /^dsh plugin --profile(?:=| )\S+ (?:add|remove|update) \S/.test(attempt)
+    || /^npm install -g \S/.test(attempt))
+}
+
 /**
  * 安装通道决策（用户无感知）：目录探测到 npm 包名 → 用 npm 包名安装
  * （走 npm registry tarball，更快、与 GitHub 网络无关）；其次用「同仓库」的权威

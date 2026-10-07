@@ -153,6 +153,16 @@ export function removeNotification(id: number): NotificationRecord[] {
 
 export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'network' | 'repo'
 
+/** Match the pnpm error code, not a generic mention of checksum or integrity. */
+function missingTarballIntegrity(message: string): boolean {
+  return /\bERR_PNPM_MISSING_TARBALL_INTEGRITY\b/.test(message)
+}
+
+/** The same policy subtype selects recovery copy in live and saved failures. */
+export function pnpmPolicyHintOf(message: string): 'failPnpmTarballIntegrityHint' | 'failPnpmPolicyHint' {
+  return missingTarballIntegrity(message) ? 'failPnpmTarballIntegrityHint' : 'failPnpmPolicyHint'
+}
+
 /**
  * 失败归类：把安装输出归到具体成因，供弹窗文案、是否引导提 Issue 与 issue 预填原因使用。
  * 分界是「本机环境问题」（装任何插件都会同样失败 → 不引导提 Issue）与
@@ -183,7 +193,7 @@ export type FailureKind = 'npmTooOld' | 'dshMissing' | 'gitMissing' | 'pnpmMissi
  * - originRejected：请求的来源没通过本地 hub 服务的校验（服务端 403，正文是裸的
  *   `untrusted origin`）—— 请求在进入安装流程前就被拒，与 pnpm 无关；常见于用非 localhost 的
  *   地址（如局域网 IP）打开市场页面，或宿主页面的 origin 未被识别 → 提示从本机地址打开市场后重试
- * - pnpmPolicy：pnpm 11 的供应链安全策略拒绝安装（`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` /
+ * - pnpmPolicy：pnpm 的供应链安全策略拒绝安装（缺少 tarball integrity、`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` /
  *   `Minimum release age` —— 锁文件里包的发布时间还不满 24 小时被拒；`untrusted origin` ——
  *   依赖来源未被本机 pnpm 信任）→ 提示按子场景给解法（发布未满 24 小时 → `minimumReleaseAge: 0`
  *   豁免或等满 24 小时；untrusted origin → 删除 profile 的 node_modules + pnpm-lock.yaml 清掉
@@ -266,11 +276,11 @@ export function classifyFailure(message: string): FailureKind {
   // 用「整行以它结尾」来区隔 pnpm 的真实报错：pnpm 的形态后面一定跟着 dsh 的上下文
   // （如 `untrusted origin\ndsh: pnpm failed in profile directory …`），不会被本规则命中
   if (/(^|\n)untrusted origin\s*$/.test(message)) return 'originRejected'
-  // pnpm 供应链安全策略拦截（pnpm 11：minimumReleaseAge 拒收「刚发布」的包 /
+  // pnpm 供应链安全策略拦截（缺少 tarball 校验值 / minimumReleaseAge 拒收「刚发布」的包 /
   // untrusted origin 来源不受信任）：pnpm 在、也连得上，纯粹是本机策略不放行 ——
   // 装任何「新发布/非信任来源」的插件都会同样失败。
   // 必须在 pnpmIgnoredBuild 之前 —— 该策略优先于「构建脚本被白名单拦截」，且两者都不引导提 Issue。
-  if (/ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|Minimum release age|untrusted origin/i.test(message)) return 'pnpmPolicy'
+  if (missingTarballIntegrity(message) || /ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|Minimum release age|untrusted origin/i.test(message)) return 'pnpmPolicy'
   // profile 里留着指向旧版本 dsh-plugin 的 patch 声明（ERR_PNPM_UNUSED_PATCH /
   // `The following patches were not used: dsh-plugin@1.4.2`）：本机 pnpm 配置与本次解析到的版本
   // 对不上，pnpm 出于安全直接中止整次安装 —— 任何插件都装不进来 → 提示删条目后重试。

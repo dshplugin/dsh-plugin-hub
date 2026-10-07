@@ -9,7 +9,8 @@
  */
 import type { EnvInfo, HubPlugin, LocaleId } from '../types.ts'
 import { GITHUB_URL, PLUGIN_VERSION, SITE_URL } from './constants.ts'
-import { MAX_CORE_CHARS, classifyFailure, coreErrorCode, summarizeError } from './failures.ts'
+import { MAX_CORE_CHARS, classifyFailure, coreErrorCode, pnpmPolicyHintOf, summarizeError } from './failures.ts'
+import { executedCommandOf } from './install-command.ts'
 import type { FailureKind } from './failures.ts'
 
 /** dsh-plugin.org 中文页挂在 /zh/ 前缀下，英文在根路径。 */
@@ -78,6 +79,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
   // [packaging]（预检/装后校验拦截）单独列：无论走 npm 还是 git 通道，都是分发物不完整
   // （package.json 声明的入口文件在发布物里缺失），作者照此补齐即可。
   const kind = classifyFailure(message)
+  const executed = executedCommandOf(command, attempts)
   // 标题 = 错误原因（非动作词），让 issue 列表一眼可分流
   const title = `[dsh-plugin.org | dsh-plugin-hub] ${reasonTitleOf(kind)}: ${repo}`
   const reason = /\[packaging\]/i.test(message)
@@ -91,7 +93,9 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
             : kind === 'originRejected'
                 ? 'the request never reached the install flow — the local service rejected its origin (local environment issue)'
                 : kind === 'pnpmPolicy'
-                ? 'the pnpm supply-chain policy on the user machine blocked the install (minimum release age for freshly published packages / untrusted origin)'
+                ? pnpmPolicyHintOf(message) === 'failPnpmTarballIntegrityHint'
+                  ? 'pnpm rejected a lockfile entry without tarball integrity; inspect and back up the profile lockfile before resolving it again, keeping integrity checks enabled'
+                  : 'the pnpm supply-chain policy on the user machine blocked the install (minimum release age for freshly published packages / untrusted origin)'
                 : kind === 'pnpmUnusedPatch'
                   ? 'the profile keeps a pnpm patch entry for an older dsh-plugin version, so pnpm aborted the install (local config issue)'
                   : kind === 'fileLocked'
@@ -112,7 +116,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       // 来源说明：标题（链官网）+ 一句来源（链仓库）+ 实际执行的安装命令（含 --profile）与执行结果，链接由常量动态拼接
       `## [DSH Plugin 插件市场](${SITE_URL}) · 安装 Plugin 失败错误信息`,
       `本错误信息由 [dsh-plugin-hub](${GITHUB_URL}) 插件市场的安装程序自动生成，随本次安装失败一并提交。`,
-      `- 实际执行的安装命令：\`${command ?? `dsh plugin${env?.profile ? ` --profile ${env.profile}` : ''} add git+https://github.com/${repo}.git`}\``,
+      `- 实际执行的安装命令：${executed ? `\`${executed}\`` : 'unknown (no executed command recorded)'}`,
       `- 执行结果：安装失败，未能安装该插件。`,
       // 尝试过的安装方式（npm 反查 + 实际执行命令，按先后顺序）：作者据此反推正确的
       // npm 包名 —— 组织 scope 与 GitHub 用户名不一致时仅凭仓库名猜不到，作者看到我们
@@ -176,4 +180,3 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
   }
   return url
 }
-
