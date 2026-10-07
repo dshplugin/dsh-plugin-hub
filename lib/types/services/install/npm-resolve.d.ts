@@ -15,19 +15,13 @@ type NpmSearchPackage = {
     links?: {
         repository?: unknown;
     };
-    repository?: {
-        url?: unknown;
-    };
+    repository?: unknown;
+    dsh?: unknown;
 };
 type NpmSearchObject = {
     package?: NpmSearchPackage;
 };
-/**
- * Pick the installable npm package for one GitHub repository. npm search is a
- * relevance-ranked text search, not an exact repository index, so first filter
- * by repository URL. If a monorepo publishes both a CLI/helper package and a
- * DSH plugin, prefer the package that explicitly advertises the `dsh-plugin`
- * keyword instead of whichever result npm happened to rank first.
- */
+export declare function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string): boolean;
+export declare function isDshNpmPackageForRepo(packageName: string, repo: string, registry?: string): Promise<boolean>;
 export declare function selectNpmPackageForRepo(objects: NpmSearchObject[], repo: string): string | null;
 export {};

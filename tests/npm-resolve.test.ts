@@ -13,7 +13,11 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resolveNpmPackage, selectNpmPackageForRepo } from '../src/server/services/install/npm-resolve.ts'
+import {
+  isDshPackageMetadataForRepo,
+  resolveNpmPackage,
+  selectNpmPackageForRepo,
+} from '../src/server/services/install/npm-resolve.ts'
 
 const ONLINE = process.env.DSH_HUB_TEST_OFFLINE !== '1'
 
@@ -41,6 +45,29 @@ test('selectNpmPackageForRepo: 同仓库存在 launcher 和 DSH plugin 时优先
     { package: { name: 'local-shell-mcp-dsh', keywords: ['dsh-plugin', 'mcp'], links: { repository: 'git+https://github.com/fwerkor/local-shell-mcp.git' } } },
   ]
   assert.equal(selectNpmPackageForRepo(objects, 'fwerkor/local-shell-mcp'), 'local-shell-mcp-dsh')
+})
+
+test('isDshPackageMetadataForRepo: 目录纠错要求同仓库且确实是 DSH plugin', () => {
+  assert.equal(isDshPackageMetadataForRepo({
+    keywords: ['cli'],
+    repository: { url: 'https://github.com/example/plugin.git' },
+  }, 'example/plugin'), false)
+  assert.equal(isDshPackageMetadataForRepo({
+    keywords: ['DSH-Plugin'],
+    repository: { url: 'https://github.com/example/plugin.git' },
+  }, 'example/plugin'), true)
+  assert.equal(isDshPackageMetadataForRepo({
+    dsh: { bundle: {} },
+    repository: 'git+https://github.com/example/plugin.git',
+  }, 'example/plugin'), true)
+  assert.equal(isDshPackageMetadataForRepo({
+    keywords: ['dsh-plugin'],
+    repository: { url: 'https://github.com/other/repo.git' },
+  }, 'example/plugin'), false)
+  assert.equal(isDshPackageMetadataForRepo({
+    keywords: ['dsh-plugin'],
+    repository: { url: 'https://github.com/example/plugin-extra.git' },
+  }, 'example/plugin'), false)
 })
 
 test('selectNpmPackageForRepo: 单个同仓库包保持现有 fallback 行为', () => {

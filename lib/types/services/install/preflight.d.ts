@@ -8,3 +8,8 @@ export interface PreflightResult {
     name: string | null;
 }
 export declare function preflightTarget(target: string): Promise<PreflightResult>;
+/** GitHub codeload tarballs use a dynamic top-level directory (`repo-<sha>/`),
+ * not npm's `package/` prefix. Pick only a package.json directly under that
+ * single archive root; nested monorepo package manifests are intentionally
+ * ignored. Exported for a small parser regression test. */
+export declare function rootPackageEntryOfTarList(listing: string): string | null;

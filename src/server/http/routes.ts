@@ -17,7 +17,7 @@ import { fetchViaCurl, gitLsRemote, probeUrl, systemProxy } from '../services/pr
 import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubRepoOf, githubTarget, globalNpmPackagesOf, hasQueuedTarget, installTargetOf, listPendingRestarts, readProfileArg, startPluginMutation, validPackageName, type LoaderHandle } from '../services/install/install.ts'
 import { githubReleaseTarget } from '../services/install/release-target.ts'
 import { recordInstalledVersion, recordResolvedNpmPackage, readInstalledVersions, removeInstalledVersion } from '../services/profile/installed-versions.ts'
-import { resolveNpmPackage } from '../services/install/npm-resolve.ts'
+import { isDshNpmPackageForRepo, resolveNpmPackage } from '../services/install/npm-resolve.ts'
 import { preflightTarget } from '../services/install/preflight.ts'
 import { isDshPlugin, isEntryLoaded } from '../services/loader.ts'
 import { loadSettings, saveSettings, resetSettings, type HubSettings } from '../services/settings.ts'
@@ -804,13 +804,39 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
             sendJson(response, 400, { error: 'unsupported install target' })
             return
           }
+          const attempts: string[] = []
+          // Catalog metadata may outlive a packaging split: one repository can publish both a
+          // CLI/helper package and a dedicated DSH plugin package. Keep the catalog target when
+          // registry metadata confirms it is a DSH package for this repo. Otherwise inspect the
+          // repository root package.json and use its package name only when that exact registry
+          // package also points back to the repo and identifies as a DSH plugin. This avoids
+          // relying on npm search ranking, which is not a repository index and can omit the
+          // correct package even with a large result window.
+          const catalogRepo = source === 'catalog' ? githubRepoOf(displayRepo) : null
+          if (catalogRepo !== null && release === null && repoTarget === null && validPackageName(rawRepo)) {
+            const catalogTargetIsDsh = await isDshNpmPackageForRepo(rawRepo, catalogRepo, settings.npmRegistry)
+            if (catalogTargetIsDsh) {
+              recordResolvedNpmPackage(profile, catalogRepo, rawRepo)
+            } else {
+              const catalogGitTarget = githubTarget(catalogRepo)
+              if (catalogGitTarget !== null) {
+                const root = await preflightTarget(catalogGitTarget)
+                const rootName = root.ok && root.name !== null && validPackageName(root.name) ? root.name : null
+                if (rootName !== null && rootName !== rawRepo
+                    && await isDshNpmPackageForRepo(rootName, catalogRepo, settings.npmRegistry)) {
+                  attempts.push(`catalog npm target: \`${target}\` → repository root DSH package \`${rootName}\``)
+                  target = rootName
+                  recordResolvedNpmPackage(profile, catalogRepo, rootName)
+                }
+              }
+            }
+          }
           // npm 优先：git 目标先反查该仓库的官方 npm 包，命中则改走 npm 通道。
           // git 分发常缺构建产物/子模块，npm 包是作者发布的完整产物；未命中或
           // 查询失败保留 github 直装（不阻塞安装，预检仍会拦截缺入口文件的情况）。
           // 通用机制，不针对具体插件。
           // 反查本身计入「已尝试的安装方式」：组织 scope 与 GitHub 用户名不一致时仅凭
           // 仓库名猜不到包名，失败提 Issue 时作者看到我们查过的命令就能直接指认正确包名。
-          const attempts: string[] = []
           if (repoTarget !== null) {
             // 反查/记录统一用归一化后的 owner/repo（gitRepo），保证「输入完整链接」也走同一套 npm 反查
             const repoIdentity = gitRepo ?? rawRepo
