@@ -12,6 +12,7 @@
  * 避免同一会话内重复查询 registry。
  */
 import { get } from 'node:https'
+import { githubRepoOf } from '../profile/profile.ts'
 
 /** 反查缓存：repo 小写 → npm 包名（null 表示已确认无对应 npm 包；网络异常不缓存）。 */
 const cache = new Map<string, string | null>()
@@ -45,7 +46,8 @@ type NpmSearchPackage = {
   name?: unknown
   keywords?: unknown
   links?: { repository?: unknown }
-  repository?: { url?: unknown }
+  repository?: unknown
+  dsh?: unknown
 }
 
 type NpmSearchObject = { package?: NpmSearchPackage }
@@ -58,15 +60,57 @@ type NpmSearchResponse = { objects?: NpmSearchObject[] }
  * DSH plugin, prefer the package that explicitly advertises the `dsh-plugin`
  * keyword instead of whichever result npm happened to rank first.
  */
-export function selectNpmPackageForRepo(objects: NpmSearchObject[], repo: string): string | null {
-  const needle = `github.com/${repo}`.toLowerCase()
+function repositoryUrlOf(pkg: NpmSearchPackage): string {
+  if (typeof pkg.repository === 'string') return pkg.repository
+  if (pkg.repository !== null && typeof pkg.repository === 'object') {
+    const url = (pkg.repository as { url?: unknown }).url
+    if (typeof url === 'string') return url
+  }
+  return String(pkg.links?.repository ?? '')
+}
+
+export function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string): boolean {
+  if (githubRepoOf(repositoryUrlOf(pkg))?.toLowerCase() !== repo.toLowerCase()) return false
+  const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : []
+  const keywordMarked = keywords.some((keyword) => typeof keyword === 'string' && keyword.toLowerCase() === 'dsh-plugin')
+  const manifestMarked = pkg.dsh !== null && typeof pkg.dsh === 'object'
+  return keywordMarked || manifestMarked
+}
+
+export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = ''): Promise<boolean> {
+  if (packageName === '' || repo === '') return Promise.resolve(false)
+  const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
+  const url = `${base}/${encodeURIComponent(packageName)}/latest`
+  return new Promise((resolve) => {
+    const req = get(url, { timeout: REQUEST_TIMEOUT_MS }, (res) => {
+      if (res.statusCode !== 200) {
+        res.resume()
+        resolve(false)
+        return
+      }
+      let body = ''
+      res.on('data', (chunk: Buffer) => { body += chunk.toString() })
+      res.on('end', () => {
+        try {
+          resolve(isDshPackageMetadataForRepo(JSON.parse(body) as NpmSearchPackage, repo))
+        } catch {
+          resolve(false)
+        }
+      })
+    })
+    req.on('timeout', () => req.destroy())
+    req.on('error', () => resolve(false))
+  })
+}
+
+function matchingPackagesForRepo(objects: NpmSearchObject[], repo: string): Array<{ name: string; isDshPlugin: boolean }> {
   const matches: Array<{ name: string; isDshPlugin: boolean }> = []
 
   for (const obj of objects) {
     const pkg = obj.package
     if (typeof pkg?.name !== 'string' || pkg.name === '') continue
-    const repoUrl = String(pkg.repository?.url ?? pkg.links?.repository ?? '')
-    if (!repoUrl.toLowerCase().includes(needle)) continue
+    const repoUrl = repositoryUrlOf(pkg)
+    if (githubRepoOf(repoUrl)?.toLowerCase() !== repo.toLowerCase()) continue
     const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : []
     matches.push({
       name: pkg.name,
@@ -74,6 +118,11 @@ export function selectNpmPackageForRepo(objects: NpmSearchObject[], repo: string
     })
   }
 
+  return matches
+}
+
+export function selectNpmPackageForRepo(objects: NpmSearchObject[], repo: string): string | null {
+  const matches = matchingPackagesForRepo(objects, repo)
   return matches.find((candidate) => candidate.isDshPlugin)?.name ?? matches[0]?.name ?? null
 }
 
