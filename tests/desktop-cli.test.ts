@@ -46,6 +46,23 @@ test('desktopCliBootstrap: 认 dsh/ 子目录布局（app.asar/dsh/lib/desktop-c
   }
 })
 
+test('desktopCliBootstrap: 认 DeepSeek Harness 0.2.x 布局（宿主包同目录的 cli.js）', () => {
+  // 宿主入口 = @deepseek-ai/dsh-desktop-host/lib/index.js，保留档 CLI 就是它同目录的 cli.js
+  const asar = makeAsar([
+    'dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/index.js',
+    'dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/cli.js',
+  ])
+  try {
+    const entry = join(asar, 'dsh', 'node_modules', '@deepseek-ai', 'dsh-desktop-host', 'lib', 'index.js')
+    assert.equal(
+      desktopCliBootstrap(entry),
+      join(asar, 'dsh', 'node_modules', '@deepseek-ai', 'dsh-desktop-host', 'lib', 'cli.js'),
+    )
+  } finally {
+    rmSync(join(asar, '..'), { recursive: true, force: true })
+  }
+})
+
 test('desktopCliBootstrap: 布局不认识时返回 null，调用方回退原逻辑', () => {
   // asar 内没有引导脚本（官方改版）：不猜路径，交给 PATH 上的 dsh 兜底
   const asar = makeAsar(['node_modules/@deepseek-ai/dsh-desktop-host/lib/index.js'])
