@@ -176,7 +176,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
     const raw = cmdQuery.trim()
     if (!raw) return
     const parsed = parseDshCommand(raw)
-    if (parsed === null) { setCmdError(t('dshCmdInvalid')); return }
+    if (parsed === null) { setCmdError(t('dshCmdInvalid', { profile })); return }
     // add / update 统一走安装流程：目标已安装时弹窗自动转「更新」覆盖重装（服务端 mode=update 放行），
     // 未安装时即为普通安装 —— 粘贴 `dsh plugin --profile web update dsh-plugin` 这类命令即可更新到最新
     onInstallCustom(parsed.target, { installChannel: 'dsh' })
@@ -303,7 +303,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
         !enableDsh
           ? channelOffRow
           : [
-            h('div', { className: styles.installExample }, t('dshCmdExample')),
+            h('div', { className: styles.installExample }, t('dshCmdExample', { profile })),
             h('div', { className: styles.installRow },
               h('input', {
                 className: cmdError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
@@ -346,7 +346,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
           h('div', { className: modal.modalBody },
             // 格式清单：一行一条；`命令\t说明` 的说明跟在命令后，纯说明行以 \t 开头
             h('div', { className: styles.helpBody },
-              t(HELP_CARDS[helpFor].contentKey).split('\n').map((line, i) => {
+              t(HELP_CARDS[helpFor].contentKey, { profile }).split('\n').map((line, i) => {
                 const [cmd, note] = line.split('\t')
                 return h('div', { key: i, className: styles.helpLine },
                   cmd !== '' ? h('span', { className: styles.helpCmd }, cmd) : null,

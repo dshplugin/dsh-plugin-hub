@@ -59,13 +59,15 @@ export const zh = {
   dshCmdLabel: 'DeepSeek Harness 命令',
   dshCmdPlaceholder: '粘贴官方 dsh plugin 命令',
   dshCmdInsertHubUpdate: '插入更新命令',
-  dshCmdExample: '例如：dsh plugin --profile web add github:owner/repo，或 dsh plugin --profile web update dsh-plugin',
-  dshCmdInvalid: '请输入官方 dsh plugin 命令（--profile 必填，支持 add / update）。例如：dsh plugin --profile web update dsh-plugin',
+  // 示例/校验文案里的 profile 用运行时当前宿主 profile 渲染（{profile} 占位符），
+  // 不写死 web —— 桌面端当前 profile 是 desktop，照抄写死的 web 会装进宿主永不加载的档
+  dshCmdExample: '例如：dsh plugin --profile {profile} add github:owner/repo，或 dsh plugin --profile {profile} update dsh-plugin',
+  dshCmdInvalid: '请输入官方 dsh plugin 命令（--profile 必填，支持 add / update）。例如：dsh plugin --profile {profile} update dsh-plugin',
   installHelp: '帮助',
   helpModalTitle: '支持的命令格式',
   npmInstallHelp: 'lodash、@scope/pkg\t直接输入包名\nnpm install lodash\nnpm i lodash\npnpm add @scope/pkg\npnpm i @scope/pkg\nnpm install -g @scope/cli\t全局安装 CLI 工具，不进「已安装」列表',
   gitInstallHelp: 'owner/repo\nhttps://github.com/owner/repo\ngithub:owner/repo\ngit+https://github.com/owner/repo.git\ngit@github.com:owner/repo.git',
-  dshCmdHelp: 'dsh plugin --profile web add <目标>\t安装\ndsh plugin --profile web update <目标>\t更新已安装目标到最新版本\ndsh plugin --profile=web add <目标>\ndsh plugin --profile=web update <目标>\n\t--profile 必填，官方 CLI 无 -p 简写；<目标> 可为 npm 包名或 github:owner/repo；卸载请用「已安装」列表',
+  dshCmdHelp: 'dsh plugin --profile {profile} add <目标>\t安装\ndsh plugin --profile {profile} update <目标>\t更新已安装目标到最新版本\ndsh plugin --profile={profile} add <目标>\ndsh plugin --profile={profile} update <目标>\n\t--profile 必填（此处已填当前 profile），官方 CLI 无 -p 简写；<目标> 可为 npm 包名或 github:owner/repo；卸载请用「已安装」列表',
   globalNpmHint: '将全局安装 CLI 工具（npm install -g），不会出现在「已安装」列表，无需重启宿主',
   installCliBtn: '安装',
   // 安装通道关闭（安全信任开关关掉后，对应卡片禁用并引导去设置打开）
@@ -319,7 +321,7 @@ export const zh = {
   failNetworkRunDiag: '去系统诊断检测网络',
   // 请求来源没通过本地 hub 服务校验（服务端 403 untrusted origin）：请求根本没进安装流程，
   // 与插件无关 —— 引导从本机地址重新打开市场，不引导提 Issue
-  failOriginRejectedHint: '这次安装请求没有通过插件市场的来源校验，被本地服务直接拒绝，所以安装根本没有开始 —— 与插件本身无关。通常是因为市场页面不是从本机地址打开的（比如用了局域网 IP），或宿主页面的来源未被识别。请从本机的插件市场地址（localhost）重新打开页面后重试；桌面端用户重启一次宿主即可。',
+  failOriginRejectedHint: '这次安装请求没有通过插件市场的来源校验，被本地服务直接拒绝，所以安装根本没有开始 —— 与插件本身无关。通常是因为市场页面不是从本机地址打开的（比如用了局域网 IP），或宿主页面的来源未被识别。请从本机的插件市场地址（localhost）重新打开页面后重试；桌面端用户重启一次宿主即可。若重启宿主后仍然失败，说明当前 dsh-plugin 版本与宿主不兼容，请用以下命令把市场升级到最新版，再重启一次宿主：dsh plugin --profile {profile} add dsh-plugin@latest。',
   failDshMissingHint: '系统找不到 dsh 命令（dsh 未加入系统 PATH），无法调用安装器执行安装。请确认 DeepSeek Harness 已正确安装、dsh 已加入 PATH（或重新安装），然后重试。这不是插件本身的问题。',
   failGitMissingHint: '系统找不到 git 命令（Git 未安装或未加入系统 PATH），无法从 GitHub 源安装插件。请先安装 Git（如 git-scm.com/downloads）或把 git 加入 PATH，重启 DSH 后重试。这不是插件本身的问题。',
   failPnpmMissingHint: '安装器找到了 dsh，但系统里没有 pnpm 命令（dsh 用它来管理 profile 插件）。请先安装 pnpm（如 npm install -g pnpm），确认 pnpm 已加入 PATH 后重试。这不是插件本身的问题。',
@@ -335,6 +337,9 @@ export const zh = {
   failPnpmWorkspaceHint: '安装器调用 pnpm 时报「不能把依赖装到 workspace 根目录」（ERR_PNPM_ADDING_TO_ROOT）：你的 profile 目录被 pnpm 视为 workspace 根目录，而本次安装命令没有声明在根目录操作，pnpm 直接拒绝执行，因此任何插件装进来都会失败。这不是插件本身的问题——可在 profile 目录（~/.dsh/profiles/<profile>）的 .npmrc 里加一行 ignore-workspace-root-check=true 后重试，或把 DeepSeek Harness 升级到最新版再试。',
   failPnpmTarballIntegrityHint: 'pnpm 报 ERR_PNPM_MISSING_TARBALL_INTEGRITY：锁文件中的 tarball 条目没有校验值，无法验证下载的包。先查看完整日志，完全退出 DeepSeek Harness，并检查、备份当前 profile 的 package.json、pnpm-lock.yaml 和 pnpm-workspace.yaml。确认依赖来源后，将 pnpm-lock.yaml 改名保留，再通过同一 DSH 安装器安装适配当前宿主版本的插件，重新生成锁文件。重建会重新解析 profile 依赖，请核对新旧版本；保持完整性校验开启。',
   failPnpmPolicyHint: '安装器调用 pnpm 时被其供应链安全策略拦截——装任何插件都会撞墙，不是插件本身的问题。分两种情况处理：① 提示「Minimum release age」（ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION）：包发布还不满 24 小时，pnpm 11 出于安全会拒收这种刚发布的新包。可在 pnpm 配置（pnpm-workspace.yaml）里加 minimumReleaseAge: 0 豁免，或等满 24 小时后重试。② 提示「untrusted origin」（ERR_PNPM_UNTRUSTED_ORIGIN）：依赖来源不被本机 pnpm 信任，通常是该 profile 里之前用 github: 或非官方 npm 源装过插件，锁文件记录了不受信任的来源。请删除该 profile 目录下的 node_modules 与 pnpm-lock.yaml 后重新安装（可先到「系统日志」或 ~/.dsh/profiles/<profile>/hub.log 查看完整报错）。',
+  // minimumReleaseAge 专属：从报错里算出确切的可重试时刻（{time}），让用户知道「何时能再装」，
+  // 而不是笼统地让等 24 小时（见 issue #121）
+  failPnpmReleaseAgeHint: '安装器调用 pnpm 时被其供应链安全策略拦住了，任何插件装进这个 profile 都会先撞上它——与插件本身无关。原因是这个包发布还不满 24 小时，pnpm 11 出于安全会拒收刚发布的新包，这段时间内该 profile 的安装与卸载都会被拦下。可重试时间：{time}（即该包发布满 24 小时后）。如确需立刻安装，可在 profile 目录（~/.dsh/profiles/<profile>）的 pnpm-workspace.yaml 里加 minimumReleaseAge: 0 豁免，但这会放宽整个 profile 的供应链保护。',
   // 自定义安装三卡片入口的渠道名（报错/日志溯源：本次安装从哪个入口发起）
   installChannelNpm: 'NPM 包',
   installChannelGit: 'GitHub 源码',
@@ -435,13 +440,13 @@ export const en = {
   dshCmdLabel: 'DeepSeek Harness command',
   dshCmdPlaceholder: 'Paste an official dsh plugin command',
   dshCmdInsertHubUpdate: 'Insert update command',
-  dshCmdExample: 'e.g. dsh plugin --profile web add github:owner/repo, or dsh plugin --profile web update dsh-plugin',
-  dshCmdInvalid: 'Paste an official dsh plugin command (--profile required, add / update), e.g. dsh plugin --profile web update dsh-plugin',
+  dshCmdExample: 'e.g. dsh plugin --profile {profile} add github:owner/repo, or dsh plugin --profile {profile} update dsh-plugin',
+  dshCmdInvalid: 'Paste an official dsh plugin command (--profile required, add / update), e.g. dsh plugin --profile {profile} update dsh-plugin',
   installHelp: 'Help',
   helpModalTitle: 'Supported command formats',
   npmInstallHelp: 'lodash or @scope/pkg\tjust type the package name\nnpm install lodash\nnpm i lodash\npnpm add @scope/pkg\npnpm i @scope/pkg\nnpm install -g @scope/cli\tinstalls the CLI globally, not shown in Installed',
   gitInstallHelp: 'owner/repo\nhttps://github.com/owner/repo\ngithub:owner/repo\ngit+https://github.com/owner/repo.git\ngit@github.com:owner/repo.git',
-  dshCmdHelp: 'dsh plugin --profile web add <target>\tinstall\ndsh plugin --profile web update <target>\tupdate an installed target to the latest version\ndsh plugin --profile=web add <target>\ndsh plugin --profile=web update <target>\n\t--profile is required and there is no -p shorthand; <target> can be an npm package or github:owner/repo; uninstall from the Installed list',
+  dshCmdHelp: 'dsh plugin --profile {profile} add <target>\tinstall\ndsh plugin --profile {profile} update <target>\tupdate an installed target to the latest version\ndsh plugin --profile={profile} add <target>\ndsh plugin --profile={profile} update <target>\n\t--profile is required (prefilled with the current profile here) and there is no -p shorthand; <target> can be an npm package or github:owner/repo; uninstall from the Installed list',
   globalNpmHint: 'This installs CLI tools globally (npm install -g). They won\'t appear in Installed and no host restart is needed.',
   installCliBtn: 'Install',
   // Install channel disabled (security-trust toggle off → card disabled, guides to settings)
@@ -697,7 +702,7 @@ export const en = {
   // The request origin did not pass the local hub service check (403 untrusted origin): the request
   // never reached the install flow — nothing to do with the plugin, so point at the local address
   // and do not offer an issue link
-  failOriginRejectedHint: 'This install request did not pass the marketplace origin check and was rejected by the local service, so the install never started — this is not about the plugin itself. It usually means the marketplace page was not opened from a local address (for example a LAN IP), or the host page origin was not recognized. Reopen the marketplace from localhost and retry; on the desktop app, restart the host once.',
+  failOriginRejectedHint: 'This install request did not pass the marketplace origin check and was rejected by the local service, so the install never started — this is not about the plugin itself. It usually means the marketplace page was not opened from a local address (for example a LAN IP), or the host page origin was not recognized. Reopen the marketplace from localhost and retry; on the desktop app, restart the host once. If it still fails after restarting the host, your dsh-plugin version is incompatible with the host — upgrade the marketplace with dsh plugin --profile {profile} add dsh-plugin@latest, then restart the host again.',
   failDshMissingHint: 'The dsh command could not be found (it is not on the system PATH), so the installer could not run. Please make sure DeepSeek Harness is installed correctly and dsh is on your PATH (or reinstall it), then retry. This is not a problem with the plugin itself.',
   failGitMissingHint: 'The git command could not be found (Git is not installed or not on the system PATH), so GitHub-source plugins cannot be installed. Please install Git (e.g. from git-scm.com/downloads) or add git to your PATH, restart DSH, then retry. This is not a problem with the plugin itself.',
   failPnpmMissingHint: 'The installer found dsh, but pnpm is missing on this machine (dsh uses it to manage profile plugins). Please install pnpm first (e.g. npm install -g pnpm), make sure it is on your PATH, then retry. This is not a problem with the plugin itself.',
@@ -714,6 +719,9 @@ export const en = {
   failPnpmWorkspaceHint: 'pnpm refused to add the dependency to the workspace root (ERR_PNPM_ADDING_TO_ROOT): the profile directory is treated as a pnpm workspace root, and this install command did not declare that it operates at the root, so pnpm rejected it outright — no plugin can be installed into that profile. This is not a problem with the plugin itself. Add `ignore-workspace-root-check=true` to the `.npmrc` inside the profile directory (~/.dsh/profiles/<profile>) and retry, or upgrade DeepSeek Harness and try again.',
   failPnpmTarballIntegrityHint: 'pnpm reported ERR_PNPM_MISSING_TARBALL_INTEGRITY: a tarball entry in the lockfile has no checksum to verify the downloaded package. Read the full log, fully quit DeepSeek Harness, and inspect and back up package.json, pnpm-lock.yaml and pnpm-workspace.yaml in the affected profile. Once the dependency sources are verified, rename pnpm-lock.yaml to preserve it, then use the same DSH installer to install a plugin version compatible with the host and regenerate the lockfile. This resolves profile dependencies again: compare the old and new versions, and keep integrity checks enabled.',
   failPnpmPolicyHint: 'The installer was blocked by pnpm supply-chain security policy — every plugin install would hit the same wall, so this is not a problem with the plugin itself. Two cases: ① "Minimum release age" (ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION): the package was published less than 24 hours ago, and pnpm 11 refuses freshly-published packages for safety. Add minimumReleaseAge: 0 to your pnpm config (pnpm-workspace.yaml) to opt out, or wait until the 24 hours have passed and retry. ② "untrusted origin" (ERR_PNPM_UNTRUSTED_ORIGIN): a dependency source is not trusted by this machine, usually because plugins were previously installed via github: or a non-official npm registry, so the lockfile records an untrusted source. Delete node_modules and pnpm-lock.yaml under the profile directory (see System Logs or ~/.dsh/profiles/<profile>/hub.log for the full output), then reinstall.',
+  // minimumReleaseAge only: compute the exact retry time ({time}) from the error so the user knows
+  // when installs will work again, instead of the vague "wait 24 hours" (see issue #121)
+  failPnpmReleaseAgeHint: 'The installer was blocked by pnpm supply-chain security policy, and every plugin installed into this profile would hit the same wall — this is not a problem with the plugin itself. The package was published less than 24 hours ago, and pnpm 11 refuses freshly-published packages for safety, so both installs and removals are blocked for this profile in the meantime. Retry after: {time} (i.e. 24 hours after the package was published). If you must install right now, add minimumReleaseAge: 0 to pnpm-workspace.yaml inside the profile directory (~/.dsh/profiles/<profile>) to opt out, but that loosens supply-chain protection for the whole profile.',
   // Custom install entry channel names (the three cards) — used in error/log traceability
   installChannelNpm: 'NPM package',
   installChannelGit: 'GitHub source',

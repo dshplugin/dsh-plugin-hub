@@ -496,3 +496,21 @@ test('missing tarball integrity is a pnpm policy rejection with specific recover
   assert.equal(classifyFailure('a plugin says its integrity is missing'), 'repo')
   assert.equal(classifyFailure('ERR_PNPM_MISSING_TARBALL_INTEGRITY_OTHER'), 'repo')
 })
+
+test('minimum release age rejection gets its own hint with the exact retry time', async () => {
+  const { pnpmPolicyHintOf, pnpmPolicyHintParams, releaseAgeRetryAfter } = await import('../src/client/logic/failures.ts')
+  // #121：pnpm 拒收「刚发布」包的报错文本（真实样例见 issue #121）
+  const message = '[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION] 1 lockfile entries failed verification:\n'
+    + '  dsh-plugin@1.5.2 was published at 2026-10-08T00:51:35.776Z, within the minimumReleaseAge cutoff (2026-10-07T06:45:12.810Z)'
+  assert.equal(classifyFailure(message), 'pnpmPolicy')
+  // 能从报错里算出发布时间 → 走专属文案（给出确切的「何时可再试」）
+  assert.equal(pnpmPolicyHintOf(message), 'failPnpmReleaseAgeHint')
+  // 发布时间 + 24h，UTC 分钟精度
+  assert.equal(releaseAgeRetryAfter(message), '2026-10-09T00:51Z')
+  assert.deepEqual(pnpmPolicyHintParams(message), { time: '2026-10-09T00:51Z' })
+  // 算不出发布时间（只给了错误码）→ 退回通用文案，且时间参数为空串而非 undefined
+  assert.equal(pnpmPolicyHintOf('[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION] blocked'), 'failPnpmPolicyHint')
+  assert.deepEqual(pnpmPolicyHintParams('[ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION] blocked'), { time: '' })
+  // untrusted origin 不含发布时间 → 仍走通用文案
+  assert.equal(pnpmPolicyHintOf('[ERR_PNPM_UNTRUSTED_ORIGIN] blocked'), 'failPnpmPolicyHint')
+})

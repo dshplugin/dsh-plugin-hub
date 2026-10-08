@@ -158,9 +158,32 @@ function missingTarballIntegrity(message: string): boolean {
   return /\bERR_PNPM_MISSING_TARBALL_INTEGRITY\b/.test(message)
 }
 
-/** The same policy subtype selects recovery copy in live and saved failures. */
-export function pnpmPolicyHintOf(message: string): 'failPnpmTarballIntegrityHint' | 'failPnpmPolicyHint' {
-  return missingTarballIntegrity(message) ? 'failPnpmTarballIntegrityHint' : 'failPnpmPolicyHint'
+/** pnpm 拒收「刚发布」包时，报错里带着发布时间；这里从报错文本算出「发布满 24h」的可重试时刻（UTC，分钟精度）。 */
+export function releaseAgeRetryAfter(message: string): string | null {
+  const match = /published at (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)/.exec(message)
+  if (match === null) return null
+  const published = Date.parse(match[1])
+  if (Number.isNaN(published)) return null
+  return `${new Date(published + 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}Z`
+}
+
+/**
+ * The same policy subtype selects recovery copy in live and saved failures.
+ * minimumReleaseAge 只有在能算出可重试时刻时才走专属文案（给出确切的「何时可再试」），
+ * 算不出时退回通用文案，避免出现「预计可重试时间：」后接空值的残缺句子。
+ */
+export function pnpmPolicyHintOf(message: string): 'failPnpmTarballIntegrityHint' | 'failPnpmReleaseAgeHint' | 'failPnpmPolicyHint' {
+  if (missingTarballIntegrity(message)) return 'failPnpmTarballIntegrityHint'
+  if (/ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|Minimum release age/i.test(message)
+      && releaseAgeRetryAfter(message) !== null) {
+    return 'failPnpmReleaseAgeHint'
+  }
+  return 'failPnpmPolicyHint'
+}
+
+/** 与 pnpmPolicyHintOf 配套的文案参数：release-age 场景给出可重试时刻（{time}）。 */
+export function pnpmPolicyHintParams(message: string): Record<string, string> {
+  return { time: releaseAgeRetryAfter(message) ?? '' }
 }
 
 /**
