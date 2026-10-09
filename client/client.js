@@ -251,10 +251,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			confirmCancel: "取消",
 			doneBtn: "完成",
 			restartNow: "立即重启",
-			restartLater: "稍后重启",
 			restarting: "正在重启…",
 			restartHint: "重启会中断正在进行的安装/卸载任务，其进度将丢失。部分插件（如插件市场、顶层 bundle）需重启后才会生效。",
 			toastRestartDesktop: "桌面端的宿主由应用管理，请在应用菜单（或托盘）选择退出后重新打开，重启后生效",
+			reloadHint: "插件已加载，关闭本窗口后会自动刷新页面生效。",
+			toastInstalledLive: "安装成功，已立即生效",
+			toastInstalledReload: "安装成功，正在自动刷新页面…",
 			done: "完成",
 			restartPendingHint: "安装成功，重启后生效",
 			restartPendingHintUninstall: "卸载成功，重启后移除",
@@ -591,10 +593,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			confirmCancel: "Cancel",
 			doneBtn: "Done",
 			restartNow: "Restart now",
-			restartLater: "Later",
 			restarting: "Restarting…",
 			restartHint: "Restarting interrupts any in-progress install / uninstall task — its progress will be lost. Some plugins (such as plugin markets / top-level bundles) only take effect after a restart.",
 			toastRestartDesktop: "In the desktop app the host is managed by the app: quit from the app menu (or tray) and open it again — the change takes effect after that restart",
+			reloadHint: "The plugin is loaded — closing this window will refresh the page automatically.",
+			toastInstalledLive: "Installed — active now",
+			toastInstalledReload: "Installed — refreshing the page automatically…",
 			done: "Done",
 			restartPendingHint: "Installed — takes effect after restart",
 			restartPendingHintUninstall: "Removed — cleaned up after restart",
@@ -708,42 +712,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$11
 		});
 		var Header_module_css_default = {
-			"version": "qikqja_version",
-			"headerTitleRow": "qikqja_headerTitleRow",
-			"versionBtn": "qikqja_versionBtn",
-			"langBtn": "qikqja_langBtn",
-			"tabActive": "qikqja_tabActive",
-			"segGroup": "qikqja_segGroup",
-			"githubLink": "qikqja_githubLink",
-			"tab": "qikqja_tab",
-			"tabsRow": "qikqja_tabsRow",
-			"taglineLink": "qikqja_taglineLink",
 			"copyIcon": "qikqja_copyIcon",
+			"header": "qikqja_header",
+			"controls": "qikqja_controls",
+			"aboutBtn": "qikqja_aboutBtn",
+			"version": "qikqja_version",
+			"segBtnActive": "qikqja_segBtnActive",
+			"tabCount": "qikqja_tabCount",
 			"tagline": "qikqja_tagline",
-			"segBtn": "qikqja_segBtn",
-			"sortGroup": "qikqja_sortGroup",
+			"hubUpdateBadge": "qikqja_hubUpdateBadge",
 			"resultCount": "qikqja_resultCount",
 			"adBadge": "qikqja_adBadge",
-			"headerRight": "qikqja_headerRight",
-			"adText": "qikqja_adText",
-			"githubIcon": "qikqja_githubIcon",
-			"tabs": "qikqja_tabs",
-			"tabCount": "qikqja_tabCount",
-			"root": "qikqja_root",
-			"resultSeg": "qikqja_resultSeg",
+			"tabsRow": "qikqja_tabsRow",
+			"taglineLink": "qikqja_taglineLink",
+			"segBtn": "qikqja_segBtn",
 			"brandTitle": "qikqja_brandTitle",
-			"header": "qikqja_header",
-			"segBtnActive": "qikqja_segBtnActive",
-			"logoIcon": "qikqja_logoIcon",
-			"hubUpdateBadge": "qikqja_hubUpdateBadge",
-			"searchRow": "qikqja_searchRow",
-			"controls": "qikqja_controls",
-			"adArrow": "qikqja_adArrow",
-			"adBanner": "qikqja_adBanner",
 			"search": "qikqja_search",
-			"aboutBtn": "qikqja_aboutBtn",
+			"langBtn": "qikqja_langBtn",
+			"tabs": "qikqja_tabs",
+			"githubIcon": "qikqja_githubIcon",
+			"headerTitleRow": "qikqja_headerTitleRow",
+			"adArrow": "qikqja_adArrow",
+			"logoIcon": "qikqja_logoIcon",
+			"sortGroup": "qikqja_sortGroup",
+			"versionBtn": "qikqja_versionBtn",
+			"segLabel": "qikqja_segLabel",
+			"root": "qikqja_root",
+			"adText": "qikqja_adText",
 			"title": "qikqja_title",
-			"segLabel": "qikqja_segLabel"
+			"segGroup": "qikqja_segGroup",
+			"resultSeg": "qikqja_resultSeg",
+			"adBanner": "qikqja_adBanner",
+			"headerRight": "qikqja_headerRight",
+			"searchRow": "qikqja_searchRow",
+			"tab": "qikqja_tab",
+			"tabActive": "qikqja_tabActive",
+			"githubLink": "qikqja_githubLink"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
@@ -762,136 +766,136 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$10
 		});
 		var Modal_module_css_default = {
-			"noticeMain": "BiQ1zG_noticeMain",
-			"result": "BiQ1zG_result",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"detailPath": "BiQ1zG_detailPath",
-			"failHead": "BiQ1zG_failHead",
-			"modalIn": "BiQ1zG_modalIn",
-			"toast": "BiQ1zG_toast",
-			"resultDesc": "BiQ1zG_resultDesc",
-			"modalBody": "BiQ1zG_modalBody",
-			"errorTitle": "BiQ1zG_errorTitle",
-			"noticeIgnore": "BiQ1zG_noticeIgnore",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"failedCopyHint": "BiQ1zG_failedCopyHint",
-			"errorBox": "BiQ1zG_errorBox",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
-			"detailArrow": "BiQ1zG_detailArrow",
-			"detailDim": "BiQ1zG_detailDim",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"detailStars": "BiQ1zG_detailStars",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"detailPathBtn": "BiQ1zG_detailPathBtn",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"failNetworkTarget": "BiQ1zG_failNetworkTarget",
-			"confirmIcon": "BiQ1zG_confirmIcon",
-			"modalHead": "BiQ1zG_modalHead",
-			"progressText": "BiQ1zG_progressText",
-			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
-			"progress": "BiQ1zG_progress",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"modalClose": "BiQ1zG_modalClose",
-			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"queueRow": "BiQ1zG_queueRow",
-			"modalLink": "BiQ1zG_modalLink",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
-			"confirmPrimary": "BiQ1zG_confirmPrimary",
-			"detailLink": "BiQ1zG_detailLink",
-			"modalWide": "BiQ1zG_modalWide",
-			"modalValue": "BiQ1zG_modalValue",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"detailStatusText": "BiQ1zG_detailStatusText",
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
 			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"dangerConfirm": "BiQ1zG_dangerConfirm",
-			"noticeList": "BiQ1zG_noticeList",
-			"helpModal": "BiQ1zG_helpModal",
-			"queueSection": "BiQ1zG_queueSection",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"detailStatusPending": "BiQ1zG_detailStatusPending",
-			"toastFail": "BiQ1zG_toastFail",
-			"logModal": "BiQ1zG_logModal",
-			"restartLater": "BiQ1zG_restartLater",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"progressHead": "BiQ1zG_progressHead",
-			"aboutModal": "BiQ1zG_aboutModal",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"detailGrid": "BiQ1zG_detailGrid",
-			"overlay": "BiQ1zG_overlay",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"noticeVersion": "BiQ1zG_noticeVersion",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"aboutMeta": "BiQ1zG_aboutMeta",
-			"failRepo": "BiQ1zG_failRepo",
-			"toastIn": "BiQ1zG_toastIn",
-			"restartNowWarning": "BiQ1zG_restartNowWarning",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"failClear": "BiQ1zG_failClear",
-			"aboutContent": "BiQ1zG_aboutContent",
-			"failList": "BiQ1zG_failList",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
 			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"detailPathText": "BiQ1zG_detailPathText",
-			"queueRowBody": "BiQ1zG_queueRowBody",
+			"failRepo": "BiQ1zG_failRepo",
+			"detailLink": "BiQ1zG_detailLink",
 			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"failKind": "BiQ1zG_failKind",
-			"detailRow": "BiQ1zG_detailRow",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"trustHint": "BiQ1zG_trustHint",
-			"failRow": "BiQ1zG_failRow",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"failedCopyHint": "BiQ1zG_failedCopyHint",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"dangerConfirm": "BiQ1zG_dangerConfirm",
+			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
+			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
 			"detailMono": "BiQ1zG_detailMono",
-			"detailPathActions": "BiQ1zG_detailPathActions",
-			"errorModal": "BiQ1zG_errorModal",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"modal": "BiQ1zG_modal",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"restartNow": "BiQ1zG_restartNow",
-			"failCopy": "BiQ1zG_failCopy",
-			"progressFill": "BiQ1zG_progressFill",
-			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"helpModal": "BiQ1zG_helpModal",
+			"queueRow": "BiQ1zG_queueRow",
+			"modalCopy": "BiQ1zG_modalCopy",
 			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"modalActions": "BiQ1zG_modalActions",
-			"detailLabel": "BiQ1zG_detailLabel",
+			"detailPathText": "BiQ1zG_detailPathText",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"failClear": "BiQ1zG_failClear",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"aboutModal": "BiQ1zG_aboutModal",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"modalIn": "BiQ1zG_modalIn",
+			"detailDim": "BiQ1zG_detailDim",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"modalBody": "BiQ1zG_modalBody",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"errorModal": "BiQ1zG_errorModal",
+			"failRow": "BiQ1zG_failRow",
+			"modalTitle": "BiQ1zG_modalTitle",
 			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"failDiagBtn": "BiQ1zG_failDiagBtn",
+			"detailPathActions": "BiQ1zG_detailPathActions",
+			"failList": "BiQ1zG_failList",
+			"failCopy": "BiQ1zG_failCopy",
+			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"modalActions": "BiQ1zG_modalActions",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"modalWide": "BiQ1zG_modalWide",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"modal": "BiQ1zG_modal",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"progressFill": "BiQ1zG_progressFill",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
+			"overlay": "BiQ1zG_overlay",
+			"modalLink": "BiQ1zG_modalLink",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"failHead": "BiQ1zG_failHead",
+			"confirmIcon": "BiQ1zG_confirmIcon",
+			"failNetworkTarget": "BiQ1zG_failNetworkTarget",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"noticeVersion": "BiQ1zG_noticeVersion",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"detailPath": "BiQ1zG_detailPath",
+			"detailStatusText": "BiQ1zG_detailStatusText",
+			"toast": "BiQ1zG_toast",
+			"progressHead": "BiQ1zG_progressHead",
+			"confirmPrimary": "BiQ1zG_confirmPrimary",
 			"modalRow": "BiQ1zG_modalRow",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
+			"detailLabel": "BiQ1zG_detailLabel",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"modalClose": "BiQ1zG_modalClose",
+			"noticeList": "BiQ1zG_noticeList",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"detailValue": "BiQ1zG_detailValue",
+			"detailPathBtn": "BiQ1zG_detailPathBtn",
+			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
+			"noticeRowOk": "BiQ1zG_noticeRowOk",
 			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"noticeTime": "BiQ1zG_noticeTime",
+			"noticeIgnore": "BiQ1zG_noticeIgnore",
+			"modalCmd": "BiQ1zG_modalCmd",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
 			"errorHint": "BiQ1zG_errorHint",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"logModal": "BiQ1zG_logModal",
+			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
+			"detailStatusPending": "BiQ1zG_detailStatusPending",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
 			"detailModal": "BiQ1zG_detailModal",
-			"detailValue": "BiQ1zG_detailValue"
+			"queueSection": "BiQ1zG_queueSection",
+			"restartLater": "BiQ1zG_restartLater",
+			"restartNow": "BiQ1zG_restartNow",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"trustHint": "BiQ1zG_trustHint",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"detailRow": "BiQ1zG_detailRow",
+			"toastFail": "BiQ1zG_toastFail",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"errorBox": "BiQ1zG_errorBox",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"modalValue": "BiQ1zG_modalValue",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"progressText": "BiQ1zG_progressText",
+			"result": "BiQ1zG_result",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"failKind": "BiQ1zG_failKind",
+			"aboutContent": "BiQ1zG_aboutContent",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"progress": "BiQ1zG_progress",
+			"modalHead": "BiQ1zG_modalHead",
+			"toastIn": "BiQ1zG_toastIn",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"detailGrid": "BiQ1zG_detailGrid",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"aboutMeta": "BiQ1zG_aboutMeta",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"detailArrow": "BiQ1zG_detailArrow",
+			"detailStars": "BiQ1zG_detailStars",
+			"failDiagBtn": "BiQ1zG_failDiagBtn"
 		};
 		//#endregion
 		//#region src/server/services/install/release-target.ts
@@ -1003,7 +1007,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* tsdown 构建时用 define 把 __PLUGIN_VERSION__ 替换成 package.json 的版本号；
 		* node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
 		*/
-		const PLUGIN_VERSION = "1.6.2";
+		const PLUGIN_VERSION = "1.6.3";
 		const CATEGORY_ORDER = [
 			"interface",
 			"session",
@@ -1640,7 +1644,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			*/
 			const hubHasUpdate = (() => {
 				if (!hubUpdateInfo) return false;
-				if (hubUpdateInfo.version === "1.6.2") return false;
+				if (hubUpdateInfo.version === "1.6.3") return false;
 				const publishedAt = hubUpdateInfo.publishedAt;
 				if (publishedAt) {
 					const publishedMs = Date.parse(publishedAt);
@@ -2400,14 +2404,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					refreshInstalled();
 					if (q.kind === "uninstall") {
 						syncInstalledVersion(q.repo, void 0, void 0);
-						onUninstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart);
+						onUninstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.needsReload ?? false);
 					} else {
 						syncInstalledVersion(q.repo, q.version, q.updatedAt);
 						pendingInfoRef.current.set(q.target, {
 							desc: q.desc,
 							version: q.version
 						});
-						onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.action === "update");
+						onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.action === "update", q.needsReload ?? false);
 					}
 				} else {
 					const rawDetail = lines.length > 0 ? [...lines].reverse().join("\n") : q.kind === "uninstall" ? t("uninstallFail") : t("installFail");
@@ -2457,10 +2461,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 							lines = task.lines ?? [];
 							attempts = Array.isArray(task.attempts) ? task.attempts : void 0;
 							const needsRestart = typeof task.needsRestart === "boolean" ? task.needsRestart : q.needsRestart;
+							const needsReload = typeof task.needsReload === "boolean" ? task.needsReload : q.needsReload ?? false;
 							if (status === "done") {
 								const settled = {
 									...q,
-									needsRestart
+									needsRestart,
+									needsReload
 								};
 								if (q.kind === "uninstall") settleDone(settled, lines);
 								else finishQueueTask(true, settled, lines);
@@ -3314,14 +3320,17 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*
 		* Dialog layer for the Plugin Hub: the install-confirm dialog, the uninstall
 		* dialog and the global toast. Both dialogs lock themselves while a mutation
-		* or restart is running, then switch to a result view offering an immediate
-		* restart or a "later" deferral.
+		* is running, then switch to a result view with a single action — "done" for
+		* the common case (the page refreshes on close so the change applies), or a
+		* single "restart now" for the rare changes a refresh cannot pick up.
 		*/
 		/** 完成结果视图：绿色对勾 + 标题/描述；
-		*  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
-		*  通知中心待重启条目常驻（服务端登记，内存态），直到用户点「立即重启」真正重启后才消失；
-		*  needsRestart=false（卸载已即时生效）→ 仅「完成」关闭。 */
-		function ResultView({ title, desc, t, restarting, needsRestart, onRestart, onClose }) {
+		*  终态只有两种：
+		*  - needsRestart=true（刷新解决不了：热挂载失败 / 非 dsh 插件 / 更新）→ 仅一个「立即重启」
+		*    按钮（重启会中断进行中的任务，故仍需用户确认），关闭即放弃；
+		*  - 其余（含 needsReload=true 的「已热挂载、仅剩客户端 UI」）→ 仅「完成」按钮：关闭结果弹窗时
+		*    上层自动刷新页面让插件生效，不再给「稍后/立即刷新」手动选择。 */
+		function ResultView({ title, desc, t, restarting, needsRestart, needsReload, onRestart, onClose }) {
 			return (0, react.createElement)("div", { className: Modal_module_css_default.result }, (0, react.createElement)("div", { className: Modal_module_css_default.resultCheck }, (0, react.createElement)("svg", {
 				className: Modal_module_css_default.resultCheckIcon,
 				viewBox: "0 0 16 16",
@@ -3336,17 +3345,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				strokeLinecap: "round",
 				strokeLinejoin: "round"
 			}))), (0, react.createElement)("div", { className: Modal_module_css_default.resultTitle }, title), desc ? (0, react.createElement)("div", { className: Modal_module_css_default.resultDesc }, desc) : null, needsRestart ? (0, react.createElement)("div", null, [(0, react.createElement)("div", { className: Modal_module_css_default.resultRestarting }, restarting ? t("restarting") : t("restartHint")), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Modal_module_css_default.restartLater,
-				onClick: onClose,
-				disabled: restarting
-			}, t("restartLater")), (0, react.createElement)("button", {
 				className: Modal_module_css_default.restartNowWarning,
 				onClick: onRestart,
 				disabled: restarting
-			}, restarting ? t("restarting") : t("restartNow")))]) : (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
+			}, restarting ? t("restarting") : t("restartNow")))]) : (0, react.createElement)("div", null, [needsReload ? (0, react.createElement)("div", { className: Modal_module_css_default.resultRestarting }, t("reloadHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
 				className: Modal_module_css_default.restartNow,
 				onClick: onClose
-			}, t("done"))));
+			}, t("done")))]));
 		}
 		/**
 		* 信任确认弹窗：安装进入后台队列后弹窗仍可关闭（任务继续），
@@ -3354,7 +3359,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* 目录插件与命令行安装（customTarget 模式）共用同一套确认/进度/结果流程。
 		*/
 		function InstallModal(props) {
-			const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props;
+			const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, needsReload, onClose, onCopy, onInstall, onRestart } = props;
 			const busy = submitting || task !== null && (task.status === "pending" || task.status === "running");
 			const name = customTarget ?? (globalNpm !== void 0 && globalNpm.length > 0 ? globalNpm.join(" ") : void 0) ?? plugin?.displayName ?? plugin?.slug ?? "";
 			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
@@ -3378,6 +3383,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				t,
 				restarting,
 				needsRestart,
+				needsReload,
 				onRestart,
 				onClose
 			}) : (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, !busy ? (0, react.createElement)("div", { className: Modal_module_css_default.confirmIconWrap }, (0, react.createElement)(ConfirmIcon, { type: "question" })) : null, (0, react.createElement)("div", { className: Modal_module_css_default.trustHint }, t("confirmDesc")), (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
@@ -3407,7 +3413,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 		function UninstallModal(props) {
-			const { plugin, done, task, t, langPath, restarting, submitting, needsRestart, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props;
+			const { plugin, done, task, t, langPath, restarting, submitting, needsRestart, needsReload, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props;
 			const busy = submitting || task !== null && (task.status === "pending" || task.status === "running");
 			const name = plugin.displayName ?? plugin.slug;
 			const busyTitle = (label) => langPath === "zh/" ? `${name} 插件${label}` : `${label} ${name}`;
@@ -3431,6 +3437,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				t,
 				restarting,
 				needsRestart,
+				needsReload,
 				onRestart,
 				onClose
 			}) : (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, !busy ? (0, react.createElement)("div", { className: Modal_module_css_default.confirmIconWrap }, (0, react.createElement)(ConfirmIcon, { type: "trash" })) : null, (0, react.createElement)("div", { className: Modal_module_css_default.modalDesc }, t("uninstallDesc")), (0, react.createElement)("div", { className: Modal_module_css_default.modalRow }, (0, react.createElement)("span", { className: Modal_module_css_default.modalLabel }, t("confirmPlugin")), (0, react.createElement)("span", {
@@ -3523,7 +3530,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		/** 全局反馈 Toast：复制成功（反色）/ 安装完成（反色）/ 安装失败（红色）/ 卸载结果 */
 		function Toast({ toast, t }) {
-			const text = toast.kind === "copied" ? t("toastCopied") : toast.kind === "errCopied" ? t("errCopied") : toast.kind === "done" ? t("installDone") : toast.kind === "fail" ? t("installFail") : toast.kind === "removed" ? t("uninstallDone") : toast.kind === "revealFail" ? t("openFolderFail") : toast.kind === "restartDesktop" ? t("toastRestartDesktop") : t("uninstallFail");
+			const text = toast.kind === "copied" ? t("toastCopied") : toast.kind === "errCopied" ? t("errCopied") : toast.kind === "done" ? t("installDone") : toast.kind === "fail" ? t("installFail") : toast.kind === "removed" ? t("uninstallDone") : toast.kind === "revealFail" ? t("openFolderFail") : toast.kind === "restartDesktop" ? t("toastRestartDesktop") : toast.kind === "installedLive" ? t("toastInstalledLive") : toast.kind === "installedReload" ? t("toastInstalledReload") : t("uninstallFail");
 			const fail = toast.kind === "fail" || toast.kind === "removeFail" || toast.kind === "revealFail" || toast.kind === "restartDesktop";
 			return (0, react.createElement)("div", {
 				key: toast.id,
@@ -3531,7 +3538,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, text);
 		}
 		/** 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出，
-		*  与通知中心待重启条目同一交互（说明 + 稍后重启 / 立即重启），
+		*  与通知中心待重启条目同一交互（红色警告说明 + 单个「立即重启」），
 		*  避免行内按钮误触直接触发宿主重启。 */
 		function RestartConfirmModal({ t, restarting, onClose, onRestartNow }) {
 			return (0, react.createElement)("div", {
@@ -3549,11 +3556,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				"aria-label": t("errorClose"),
 				onClick: onClose
 			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, (0, react.createElement)("div", { className: Modal_module_css_default.confirmIconWrap }, (0, react.createElement)(ConfirmIcon, { type: "warning" })), (0, react.createElement)("div", { className: Modal_module_css_default.failPrepareHint }, t("restartHint")), (0, react.createElement)("div", { className: Modal_module_css_default.modalActions }, (0, react.createElement)("button", {
-				className: Modal_module_css_default.restartLater,
-				type: "button",
-				disabled: restarting,
-				onClick: onClose
-			}, t("restartLater")), (0, react.createElement)("button", {
 				className: Modal_module_css_default.restartNowWarning,
 				type: "button",
 				disabled: restarting,
@@ -3972,10 +3974,6 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: Modal_module_css_default.queueRowDesc,
 				title: p.desc
 			}, p.desc) : null, (0, react.createElement)("div", { className: Modal_module_css_default.queueRowBody }, (0, react.createElement)("span", { className: Modal_module_css_default.pendingRowStatus }, p.kind === "uninstall" ? t("restartPendingHintUninstall") : t("restartPendingHint")), (0, react.createElement)("span", { className: Modal_module_css_default.pendingRowActions }, (0, react.createElement)("button", {
-				className: Modal_module_css_default.restartLater,
-				disabled: restarting,
-				onClick: onClose
-			}, t("restartLater")), (0, react.createElement)("button", {
 				className: Modal_module_css_default.restartNow,
 				disabled: restarting,
 				onClick: onRestart
@@ -4280,40 +4278,40 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$9
 		});
 		var List_module_css_default = {
-			"fork": "_3XaZHa_fork",
-			"stateActions": "_3XaZHa_stateActions",
-			"diagBtn": "_3XaZHa_diagBtn",
-			"state": "_3XaZHa_state",
-			"footer": "_3XaZHa_footer",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"list": "_3XaZHa_list",
-			"actions": "_3XaZHa_actions",
-			"moreSentinel": "_3XaZHa_moreSentinel",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"footLink": "_3XaZHa_footLink",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"detailBtn": "_3XaZHa_detailBtn",
-			"topics": "_3XaZHa_topics",
-			"stats": "_3XaZHa_stats",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"card": "_3XaZHa_card",
-			"body": "_3XaZHa_body",
-			"star": "_3XaZHa_star",
 			"cardMain": "_3XaZHa_cardMain",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
 			"updateBadge": "_3XaZHa_updateBadge",
-			"verified": "_3XaZHa_verified",
-			"cardTitle": "_3XaZHa_cardTitle",
+			"footer": "_3XaZHa_footer",
 			"installBtn": "_3XaZHa_installBtn",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"date": "_3XaZHa_date",
-			"cardHead": "_3XaZHa_cardHead",
+			"fork": "_3XaZHa_fork",
+			"body": "_3XaZHa_body",
+			"diagBtn": "_3XaZHa_diagBtn",
+			"verified": "_3XaZHa_verified",
+			"cardSide": "_3XaZHa_cardSide",
+			"list": "_3XaZHa_list",
 			"topic": "_3XaZHa_topic",
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"card": "_3XaZHa_card",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"cardTitle": "_3XaZHa_cardTitle",
 			"desc": "_3XaZHa_desc",
-			"cardSide": "_3XaZHa_cardSide"
+			"versionBadge": "_3XaZHa_versionBadge",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"cardHead": "_3XaZHa_cardHead",
+			"stateDesc": "_3XaZHa_stateDesc",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"moreSentinel": "_3XaZHa_moreSentinel",
+			"star": "_3XaZHa_star",
+			"date": "_3XaZHa_date",
+			"actions": "_3XaZHa_actions",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"stats": "_3XaZHa_stats",
+			"footLink": "_3XaZHa_footLink",
+			"state": "_3XaZHa_state",
+			"topics": "_3XaZHa_topics",
+			"stateActions": "_3XaZHa_stateActions"
 		};
 		//#endregion
 		//#region src/client/hooks/useIncrementalList.ts
@@ -4520,14 +4518,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$8
 		});
 		var SectionTabs_module_css_default = {
-			"tabActive": "_7tvizq_tabActive",
 			"tabIcon": "_7tvizq_tabIcon",
-			"noticeCount": "_7tvizq_noticeCount",
 			"root": "_7tvizq_root",
 			"noticeIcon": "_7tvizq_noticeIcon",
 			"noticeBtn": "_7tvizq_noticeBtn",
+			"noticeCount": "_7tvizq_noticeCount",
 			"tab": "_7tvizq_tab",
 			"tabCount": "_7tvizq_tabCount",
+			"tabActive": "_7tvizq_tabActive",
 			"tabCountActive": "_7tvizq_tabCountActive"
 		};
 		//#endregion
@@ -4605,42 +4603,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$7
 		});
 		var InstalledView_module_css_default = {
-			"rowMeta": "_1nXeGW_rowMeta",
 			"updateBadge": "_1nXeGW_updateBadge",
-			"rowCategory": "_1nXeGW_rowCategory",
-			"emptyDesc": "_1nXeGW_emptyDesc",
-			"segRow": "_1nXeGW_segRow",
-			"rowRestart": "_1nXeGW_rowRestart",
-			"segBtn": "_1nXeGW_segBtn",
-			"list": "_1nXeGW_list",
-			"rowUninstall": "_1nXeGW_rowUninstall",
-			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
-			"root": "_1nXeGW_root",
-			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
-			"rowSourceTag": "_1nXeGW_rowSourceTag",
-			"searchWrap": "_1nXeGW_searchWrap",
-			"rowMain": "_1nXeGW_rowMain",
-			"rowTitle": "_1nXeGW_rowTitle",
-			"statusPending": "_1nXeGW_statusPending",
-			"rowUpdate": "_1nXeGW_rowUpdate",
-			"rowRepo": "_1nXeGW_rowRepo",
-			"rowTitleLine": "_1nXeGW_rowTitleLine",
 			"versionBadge": "_1nXeGW_versionBadge",
-			"rowDetail": "_1nXeGW_rowDetail",
-			"segBtnActive": "_1nXeGW_segBtnActive",
+			"segBtn": "_1nXeGW_segBtn",
+			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
+			"rowTitle": "_1nXeGW_rowTitle",
 			"rowDesc": "_1nXeGW_rowDesc",
-			"exampleRow": "_1nXeGW_exampleRow",
-			"exampleBadge": "_1nXeGW_exampleBadge",
-			"toolbar": "_1nXeGW_toolbar",
-			"empty": "_1nXeGW_empty",
-			"statusInactive": "_1nXeGW_statusInactive",
-			"rowActions": "_1nXeGW_rowActions",
-			"searchInput": "_1nXeGW_searchInput",
-			"emptyTitle": "_1nXeGW_emptyTitle",
-			"segLabel": "_1nXeGW_segLabel",
 			"row": "_1nXeGW_row",
+			"rowRepo": "_1nXeGW_rowRepo",
+			"rowMeta": "_1nXeGW_rowMeta",
+			"empty": "_1nXeGW_empty",
+			"rowCategory": "_1nXeGW_rowCategory",
+			"segRow": "_1nXeGW_segRow",
+			"searchWrap": "_1nXeGW_searchWrap",
+			"rowActions": "_1nXeGW_rowActions",
+			"list": "_1nXeGW_list",
+			"segBtnActive": "_1nXeGW_segBtnActive",
+			"emptyDesc": "_1nXeGW_emptyDesc",
+			"exampleBadge": "_1nXeGW_exampleBadge",
+			"statusInactive": "_1nXeGW_statusInactive",
+			"statusDot": "_1nXeGW_statusDot",
+			"rowRestart": "_1nXeGW_rowRestart",
+			"rowUninstall": "_1nXeGW_rowUninstall",
+			"searchInput": "_1nXeGW_searchInput",
+			"toolbar": "_1nXeGW_toolbar",
+			"segLabel": "_1nXeGW_segLabel",
+			"rowTitleLine": "_1nXeGW_rowTitleLine",
+			"statusPending": "_1nXeGW_statusPending",
+			"root": "_1nXeGW_root",
+			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
+			"rowUpdate": "_1nXeGW_rowUpdate",
+			"exampleRow": "_1nXeGW_exampleRow",
+			"rowDetail": "_1nXeGW_rowDetail",
+			"rowSourceTag": "_1nXeGW_rowSourceTag",
 			"segGroup": "_1nXeGW_segGroup",
-			"statusDot": "_1nXeGW_statusDot"
+			"emptyTitle": "_1nXeGW_emptyTitle",
+			"rowMain": "_1nXeGW_rowMain"
 		};
 		//#endregion
 		//#region src/client/components/views/InstalledView.tsx
@@ -4886,28 +4884,28 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$6
 		});
 		var CustomInstallView_module_css_default = {
-			"helpLine": "zISxCG_helpLine",
-			"installError": "zISxCG_installError",
-			"installInput": "zISxCG_installInput",
-			"installCardDisabled": "zISxCG_installCardDisabled",
-			"installHelpBtn": "zISxCG_installHelpBtn",
 			"installBtn": "zISxCG_installBtn",
-			"installCards": "zISxCG_installCards",
 			"installCard": "zISxCG_installCard",
-			"installExample": "zISxCG_installExample",
-			"root": "zISxCG_root",
-			"helpCmd": "zISxCG_helpCmd",
-			"helpNote": "zISxCG_helpNote",
-			"helpBody": "zISxCG_helpBody",
-			"installInsertBtn": "zISxCG_installInsertBtn",
-			"installCardHead": "zISxCG_installCardHead",
-			"desc": "zISxCG_desc",
-			"installLabel": "zISxCG_installLabel",
-			"channelOffText": "zISxCG_channelOffText",
 			"channelOff": "zISxCG_channelOff",
-			"installInputError": "zISxCG_installInputError",
+			"installError": "zISxCG_installError",
+			"helpCmd": "zISxCG_helpCmd",
 			"installRow": "zISxCG_installRow",
-			"channelOffBtn": "zISxCG_channelOffBtn"
+			"root": "zISxCG_root",
+			"installCardHead": "zISxCG_installCardHead",
+			"installCards": "zISxCG_installCards",
+			"channelOffBtn": "zISxCG_channelOffBtn",
+			"installHelpBtn": "zISxCG_installHelpBtn",
+			"helpBody": "zISxCG_helpBody",
+			"installExample": "zISxCG_installExample",
+			"installInsertBtn": "zISxCG_installInsertBtn",
+			"installInputError": "zISxCG_installInputError",
+			"desc": "zISxCG_desc",
+			"installCardDisabled": "zISxCG_installCardDisabled",
+			"channelOffText": "zISxCG_channelOffText",
+			"helpNote": "zISxCG_helpNote",
+			"helpLine": "zISxCG_helpLine",
+			"installLabel": "zISxCG_installLabel",
+			"installInput": "zISxCG_installInput"
 		};
 		//#endregion
 		//#region src/client/components/views/CustomInstallView.tsx
@@ -5197,30 +5195,30 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$5
 		});
 		var SettingsView_module_css_default = {
-			"pageHeader": "_506LLG_pageHeader",
-			"proxyControl": "_506LLG_proxyControl",
-			"settingControlStack": "_506LLG_settingControlStack",
-			"resetBtn": "_506LLG_resetBtn",
-			"proxyHint": "_506LLG_proxyHint",
-			"proxyHintOk": "_506LLG_proxyHintOk",
-			"settingControl": "_506LLG_settingControl",
-			"pageTitle": "_506LLG_pageTitle",
-			"settingLabel": "_506LLG_settingLabel",
-			"sidebar": "_506LLG_sidebar",
-			"navIcon": "_506LLG_navIcon",
-			"settingRowStack": "_506LLG_settingRowStack",
-			"textInput": "_506LLG_textInput",
 			"root": "_506LLG_root",
-			"controlDropdown": "_506LLG_controlDropdown",
-			"settingRow": "_506LLG_settingRow",
-			"pageDesc": "_506LLG_pageDesc",
-			"navItem": "_506LLG_navItem",
-			"card": "_506LLG_card",
-			"proxyHintFail": "_506LLG_proxyHintFail",
 			"content": "_506LLG_content",
-			"settingTitle": "_506LLG_settingTitle",
+			"pageHeader": "_506LLG_pageHeader",
+			"pageTitle": "_506LLG_pageTitle",
+			"card": "_506LLG_card",
+			"navIcon": "_506LLG_navIcon",
+			"settingRow": "_506LLG_settingRow",
+			"settingDesc": "_506LLG_settingDesc",
+			"settingControl": "_506LLG_settingControl",
+			"proxyHintOk": "_506LLG_proxyHintOk",
+			"sidebar": "_506LLG_sidebar",
+			"pageDesc": "_506LLG_pageDesc",
+			"proxyControl": "_506LLG_proxyControl",
+			"navItem": "_506LLG_navItem",
+			"proxyHintFail": "_506LLG_proxyHintFail",
 			"navItemActive": "_506LLG_navItemActive",
-			"settingDesc": "_506LLG_settingDesc"
+			"settingControlStack": "_506LLG_settingControlStack",
+			"settingTitle": "_506LLG_settingTitle",
+			"settingLabel": "_506LLG_settingLabel",
+			"controlDropdown": "_506LLG_controlDropdown",
+			"proxyHint": "_506LLG_proxyHint",
+			"settingRowStack": "_506LLG_settingRowStack",
+			"resetBtn": "_506LLG_resetBtn",
+			"textInput": "_506LLG_textInput"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
@@ -5239,18 +5237,18 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$4
 		});
 		var Dropdown_module_css_default = {
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
-			"dropdown": "B_Gxsq_dropdown",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownArrow": "B_Gxsq_dropdownArrow",
 			"dropdownLabel": "B_Gxsq_dropdownLabel",
 			"dropdownFill": "B_Gxsq_dropdownFill",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
 			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
 			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownCount": "B_Gxsq_dropdownCount",
 			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownCount": "B_Gxsq_dropdownCount"
+			"dropdownItem": "B_Gxsq_dropdownItem"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Toggle.module.css.mjs
@@ -5269,9 +5267,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$3
 		});
 		var Toggle_module_css_default = {
+			"knob": "k-cD4G_knob",
 			"toggleOn": "k-cD4G_toggleOn",
-			"toggle": "k-cD4G_toggle",
-			"knob": "k-cD4G_knob"
+			"toggle": "k-cD4G_toggle"
 		};
 		//#endregion
 		//#region src/client/components/ui/Toggle.tsx
@@ -5371,29 +5369,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$2
 		});
 		var DiagnosticsView_module_css_default = {
-			"meta": "k9eRya_meta",
-			"badgeIdle": "k9eRya_badgeIdle",
-			"envCopyBtn": "k9eRya_envCopyBtn",
-			"badgeOk": "k9eRya_badgeOk",
-			"summaryOk": "k9eRya_summaryOk",
 			"summaryRunning": "k9eRya_summaryRunning",
-			"envDesc": "k9eRya_envDesc",
-			"display": "k9eRya_display",
-			"badgeRunning": "k9eRya_badgeRunning",
-			"headHint": "k9eRya_headHint",
-			"summaryFail": "k9eRya_summaryFail",
-			"badge": "k9eRya_badge",
-			"head": "k9eRya_head",
-			"name": "k9eRya_name",
-			"panel": "k9eRya_panel",
-			"badgeFail": "k9eRya_badgeFail",
-			"envRow": "k9eRya_envRow",
-			"row": "k9eRya_row",
-			"diagPulse": "k9eRya_diagPulse",
 			"runBtn": "k9eRya_runBtn",
+			"panel": "k9eRya_panel",
 			"envTitle": "k9eRya_envTitle",
+			"row": "k9eRya_row",
+			"envRow": "k9eRya_envRow",
+			"badgeRunning": "k9eRya_badgeRunning",
+			"meta": "k9eRya_meta",
+			"name": "k9eRya_name",
+			"badgeOk": "k9eRya_badgeOk",
+			"badgeFail": "k9eRya_badgeFail",
+			"envCopyBtn": "k9eRya_envCopyBtn",
+			"summaryOk": "k9eRya_summaryOk",
+			"envDesc": "k9eRya_envDesc",
+			"diagPulse": "k9eRya_diagPulse",
+			"head": "k9eRya_head",
+			"headHint": "k9eRya_headHint",
+			"display": "k9eRya_display",
+			"summaryFail": "k9eRya_summaryFail",
 			"envLabel": "k9eRya_envLabel",
-			"summary": "k9eRya_summary"
+			"badge": "k9eRya_badge",
+			"summary": "k9eRya_summary",
+			"badgeIdle": "k9eRya_badgeIdle"
 		};
 		//#endregion
 		//#region src/client/components/views/DiagnosticsView.tsx
@@ -5571,57 +5569,57 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$1
 		});
 		var LogsView_module_css_default = {
-			"catSettings": "_3j77BW_catSettings",
-			"time": "_3j77BW_time",
+			"footCount": "_3j77BW_footCount",
+			"list": "_3j77BW_list",
+			"badge": "_3j77BW_badge",
 			"moreEnd": "_3j77BW_moreEnd",
-			"pathDialogHint": "_3j77BW_pathDialogHint",
-			"panel": "_3j77BW_panel",
-			"entry": "_3j77BW_entry",
+			"badgeError": "_3j77BW_badgeError",
+			"pathDialogReset": "_3j77BW_pathDialogReset",
+			"badgeInfo": "_3j77BW_badgeInfo",
+			"empty": "_3j77BW_empty",
+			"footActions": "_3j77BW_footActions",
+			"catSettings": "_3j77BW_catSettings",
+			"catSystem": "_3j77BW_catSystem",
+			"clearBtn": "_3j77BW_clearBtn",
+			"catDiagnostics": "_3j77BW_catDiagnostics",
+			"pathDraft": "_3j77BW_pathDraft",
+			"footFail": "_3j77BW_footFail",
+			"pathDialogFoot": "_3j77BW_pathDialogFoot",
+			"searchInput": "_3j77BW_searchInput",
+			"badgeSuccess": "_3j77BW_badgeSuccess",
+			"pathDialogRow": "_3j77BW_pathDialogRow",
+			"badgeWarn": "_3j77BW_badgeWarn",
 			"pathDialogDesc": "_3j77BW_pathDialogDesc",
 			"filterChip": "_3j77BW_filterChip",
 			"pathText": "_3j77BW_pathText",
-			"badge": "_3j77BW_badge",
-			"empty": "_3j77BW_empty",
-			"previewRow": "_3j77BW_previewRow",
+			"headActions": "_3j77BW_headActions",
+			"event": "_3j77BW_event",
+			"filterChipActive": "_3j77BW_filterChipActive",
+			"headHint": "_3j77BW_headHint",
+			"head": "_3j77BW_head",
+			"catUninstall": "_3j77BW_catUninstall",
+			"actions": "_3j77BW_actions",
+			"logList": "_3j77BW_logList",
+			"pathDialog": "_3j77BW_pathDialog",
+			"catBadge": "_3j77BW_catBadge",
+			"time": "_3j77BW_time",
+			"message": "_3j77BW_message",
+			"panel": "_3j77BW_panel",
+			"entry": "_3j77BW_entry",
+			"more": "_3j77BW_more",
+			"pathRow": "_3j77BW_pathRow",
+			"foot": "_3j77BW_foot",
+			"pathLabel": "_3j77BW_pathLabel",
+			"catInstall": "_3j77BW_catInstall",
 			"search": "_3j77BW_search",
 			"badgeDebug": "_3j77BW_badgeDebug",
-			"catInstall": "_3j77BW_catInstall",
-			"foot": "_3j77BW_foot",
-			"pathDialogReset": "_3j77BW_pathDialogReset",
-			"catSystem": "_3j77BW_catSystem",
-			"logList": "_3j77BW_logList",
-			"pathDraft": "_3j77BW_pathDraft",
-			"event": "_3j77BW_event",
-			"more": "_3j77BW_more",
-			"badgeSuccess": "_3j77BW_badgeSuccess",
-			"head": "_3j77BW_head",
-			"clearBtn": "_3j77BW_clearBtn",
-			"footCount": "_3j77BW_footCount",
-			"badgeInfo": "_3j77BW_badgeInfo",
-			"catUninstall": "_3j77BW_catUninstall",
-			"list": "_3j77BW_list",
-			"footActions": "_3j77BW_footActions",
-			"filterChipActive": "_3j77BW_filterChipActive",
-			"pathDialog": "_3j77BW_pathDialog",
-			"searchInput": "_3j77BW_searchInput",
-			"footFail": "_3j77BW_footFail",
-			"headActions": "_3j77BW_headActions",
-			"pathDialogRow": "_3j77BW_pathDialogRow",
-			"filterBar": "_3j77BW_filterBar",
-			"catBadge": "_3j77BW_catBadge",
-			"catDiagnostics": "_3j77BW_catDiagnostics",
-			"headHint": "_3j77BW_headHint",
-			"pathDialogFoot": "_3j77BW_pathDialogFoot",
-			"actions": "_3j77BW_actions",
-			"pathRow": "_3j77BW_pathRow",
-			"message": "_3j77BW_message",
-			"pathLabel": "_3j77BW_pathLabel",
-			"footPath": "_3j77BW_footPath",
-			"badgeError": "_3j77BW_badgeError",
-			"linkBtn": "_3j77BW_linkBtn",
-			"badgeWarn": "_3j77BW_badgeWarn",
 			"catUpdate": "_3j77BW_catUpdate",
-			"btn": "_3j77BW_btn"
+			"footPath": "_3j77BW_footPath",
+			"pathDialogHint": "_3j77BW_pathDialogHint",
+			"btn": "_3j77BW_btn",
+			"linkBtn": "_3j77BW_linkBtn",
+			"filterBar": "_3j77BW_filterBar",
+			"previewRow": "_3j77BW_previewRow"
 		};
 		//#endregion
 		//#region src/client/components/modals/LogsModal.tsx
@@ -6503,10 +6501,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			/** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
 			const [installDone, setInstallDone] = (0, react.useState)(false);
 			const [uninstallDone, setUninstallDone] = (0, react.useState)(false);
-			/** 结果视图是否给「立即重启」：服务端任务终态带出（卸载时 loader 已即时移除 → false 只给「完成」；
-			*  true 时通知中心待重启条目同步常驻，直到用户点「立即重启」真正重启后才消失） */
-			const [installNeedsRestart, setInstallNeedsRestart] = (0, react.useState)(true);
-			const [uninstallNeedsRestart, setUninstallNeedsRestart] = (0, react.useState)(true);
+			/** 结果视图是否给「立即重启」：服务端任务终态带出。仅刷新解决不了的兜底场景
+			*  （热挂载失败 / 非 dsh 插件 / 更新）为 true；其余（热挂载成功、卸载已即时停用）为 false，
+			*  结果视图只给「完成」，关闭时自动刷新页面生效 */
+			const [installNeedsRestart, setInstallNeedsRestart] = (0, react.useState)(false);
+			const [uninstallNeedsRestart, setUninstallNeedsRestart] = (0, react.useState)(false);
+			/** 结果视图是否显示「关闭后自动刷新」说明：插件已热挂进运行中 loader（安装）、或卸载后
+			*  插件面板仍残留在当前页面（卸载）。关闭弹窗即整页刷新，不给手动刷新按钮。 */
+			const [installNeedsReload, setInstallNeedsReload] = (0, react.useState)(false);
+			const [uninstallNeedsReload, setUninstallNeedsReload] = (0, react.useState)(false);
 			/** 结果视图「立即重启」：请求宿主重启后进入等待，服务回来后整页刷新 */
 			const [restarting, setRestarting] = (0, react.useState)(false);
 			/** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
@@ -6531,30 +6534,41 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			(0, react.useEffect)(() => {
 				ensurePluginCss();
 			}, [view]);
+			/** 后台任务（弹窗已关）完成且只需刷新页面即生效时，等结果 Toast 读完再整页刷新：
+			*  新插件（或卸载后残留）的客户端资源要重新加载页面才会生效，无需重启宿主。 */
+			const scheduleAutoReload = () => {
+				window.setTimeout(() => window.location.reload(), 1600);
+			};
 			const queue = useTaskQueue({
 				t,
 				langKey,
 				refreshInstalled: catalog.refreshInstalled,
-				onInstallDone: (viaModal, repo, needsRestart, update) => {
+				onInstallDone: (viaModal, repo, needsRestart, update, needsReload) => {
+					const reload = needsReload === true;
 					setInstallNeedsRestart(needsRestart);
+					setInstallNeedsReload(reload);
 					if (viaModal) setInstallDone(true);
 					else setToast({
 						id: Date.now(),
-						kind: "done"
+						kind: reload ? "installedReload" : needsRestart ? "done" : "installedLive"
 					});
+					if (!viaModal && reload) scheduleAutoReload();
 					setNotifications(addSuccess({
 						kind: "install",
 						action: update ? "update" : "install",
 						repo: repo ?? ""
 					}));
 				},
-				onUninstallDone: (viaModal, repo, needsRestart) => {
+				onUninstallDone: (viaModal, repo, needsRestart, needsReload) => {
+					const reload = needsReload === true;
 					setUninstallNeedsRestart(needsRestart);
+					setUninstallNeedsReload(reload);
 					if (viaModal) setUninstallDone(true);
 					else setToast({
 						id: Date.now(),
 						kind: "removed"
 					});
+					if (!viaModal && reload) scheduleAutoReload();
 					setNotifications(addSuccess({
 						kind: "uninstall",
 						repo: repo ?? ""
@@ -6728,6 +6742,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				});
 			};
 			/** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。
+			*  只在刷新解决不了的兜底场景（热挂载失败 / 非 dsh 插件 / 更新）出现。
 			*  桌面端宿主归应用壳管（服务端回 `desktop: true` 且不重启）：不轮询，改提示退出重开。 */
 			const requestRestart = async () => {
 				if (restarting) return;
@@ -6880,7 +6895,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				openSection: settingsSection,
 				onConsumedOpenSection: () => setSettingsSection(null)
 			}), showHubUpdate && (0, react.createElement)(HubUpdateModal, {
-				info: catalog.hubUpdateInfo ?? { version: "1.6.2" },
+				info: catalog.hubUpdateInfo ?? { version: "1.6.3" },
 				lang,
 				t,
 				hasUpdate: catalog.hubHasUpdate,
@@ -6970,7 +6985,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				cliOnly: confirmPlugin.install?.webInstallable === false,
 				submitting: queue.submitting,
 				needsRestart: installNeedsRestart,
-				onClose: () => setConfirmPlugin(null),
+				needsReload: installNeedsReload,
+				onClose: () => {
+					const reload = installDone && installNeedsReload;
+					setConfirmPlugin(null);
+					if (reload) window.location.reload();
+				},
 				onCopy: () => copyCommand(confirmPlugin),
 				onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : void 0),
 				onRestart: () => setShowRestartConfirm(true)
@@ -6986,10 +7006,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				cliOnly: false,
 				submitting: queue.submitting,
 				needsRestart: installNeedsRestart,
+				needsReload: installNeedsReload,
 				onClose: () => {
+					const reload = installDone && installNeedsReload;
 					setInstallDone(false);
 					setConfirmCustomTarget(null);
 					setConfirmCustomChannel(null);
+					if (reload) window.location.reload();
 				},
 				onCopy: () => {
 					doCopy(`pnpm add ${confirmCustomTarget}`);
@@ -7015,10 +7038,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				cliOnly: false,
 				submitting: queue.submitting,
 				needsRestart: installNeedsRestart,
+				needsReload: installNeedsReload,
 				onClose: () => {
+					const reload = installDone && installNeedsReload;
 					setInstallDone(false);
 					setConfirmGlobalNpm(null);
 					setConfirmCustomChannel(null);
+					if (reload) window.location.reload();
 				},
 				onCopy: () => {
 					doCopy(`npm install -g ${confirmGlobalNpm.pkgs.join(" ")}`);
@@ -7038,10 +7064,13 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				restarting,
 				submitting: queue.submitting,
 				needsRestart: uninstallNeedsRestart,
+				needsReload: uninstallNeedsReload,
 				onClose: () => {
+					const reload = uninstallDone && uninstallNeedsReload;
 					setUninstallDone(false);
 					setUninstallPlugin(null);
 					setUninstallItem(null);
+					if (reload) window.location.reload();
 				},
 				onCancel: () => {
 					setUninstallPlugin(null);

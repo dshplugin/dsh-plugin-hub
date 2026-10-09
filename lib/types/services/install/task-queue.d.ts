@@ -55,8 +55,9 @@ export declare function startPluginMutation(options: {
     globalNpm?: string[];
     /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
     displayTarget?: string;
-    /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
-    uninstallLoader?: LoaderHandle;
+    /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目，两类操作都尽量立即生效
+     *  （缺失时安装/卸载仍需重启） */
+    loader?: LoaderHandle;
     /** 入队前已尝试的安装方式（npm registry 反查等）：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
     attempts?: string[];
     /** 更新已安装的 npm 包（mode=update）：命令显式带 @latest，让 pnpm 真正解析最新版本 */
@@ -93,8 +94,8 @@ export declare function runPluginMutation(options: {
     task?: InstallTask;
     /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
     displayTarget?: string;
-    /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
-    uninstallLoader?: LoaderHandle;
+    /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目（缺失时仍需重启） */
+    loader?: LoaderHandle;
     /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
     globalNpm?: string[];
 }): Promise<InstallResult>;
