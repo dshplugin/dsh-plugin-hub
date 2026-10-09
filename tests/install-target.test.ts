@@ -7,11 +7,43 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf, profileFromArgv } from '../src/server/services/profile/profile.ts'
+import { githubRefOf, githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf, profileFromArgv } from '../src/server/services/profile/profile.ts'
 
 test('githubTarget: emits an explicit HTTPS Git URL', () => {
   assert.equal(githubTarget('GanyuanRan/Aegis'), 'git+https://github.com/GanyuanRan/Aegis.git')
   assert.equal(githubTarget('unsafe/value/with/too/many/segments'), null)
+})
+
+test('githubTarget: preserves an explicitly pinned Git ref (issue #130)', () => {
+  assert.equal(
+    githubTarget('GanyuanRan/Aegis', 'v2.12.2'),
+    'git+https://github.com/GanyuanRan/Aegis.git#v2.12.2',
+  )
+  assert.equal(
+    githubTarget('GanyuanRan/Aegis', '490ffb7e91699238c1bf9bc7a4c569a1397b0bd0'),
+    'git+https://github.com/GanyuanRan/Aegis.git#490ffb7e91699238c1bf9bc7a4c569a1397b0bd0',
+  )
+  // 空 / 缺省 ref 与旧行为一致（不给片段）
+  assert.equal(githubTarget('GanyuanRan/Aegis', null), 'git+https://github.com/GanyuanRan/Aegis.git')
+  assert.equal(githubTarget('GanyuanRan/Aegis', ''), 'git+https://github.com/GanyuanRan/Aegis.git')
+})
+
+test('githubRefOf: extracts a validated explicit Git ref, rejects unsafe forms', () => {
+  assert.equal(githubRefOf('git+https://github.com/GanyuanRan/Aegis.git#v2.12.2'), 'v2.12.2')
+  assert.equal(githubRefOf('https://github.com/GanyuanRan/Aegis.git#main'), 'main')
+  assert.equal(githubRefOf('github:o/r#490ffb7e91699238c1bf9bc7a4c569a1397b0bd0'), '490ffb7e91699238c1bf9bc7a4c569a1397b0bd0')
+  assert.equal(githubRefOf('o/r#v2.12.2'), 'v2.12.2')
+  assert.equal(githubRefOf('git+ssh://git@github.com/o/r.git#release/1.0'), 'release/1.0')
+  // 无片段 / 空片段 / 片段含非法字符 / 基底不是 GitHub 地址 → null
+  assert.equal(githubRefOf('git+https://github.com/GanyuanRan/Aegis.git'), null)
+  assert.equal(githubRefOf('#v1.2.3'), null)
+  assert.equal(githubRefOf('git+https://github.com/GanyuanRan/Aegis.git#'), null)
+  assert.equal(githubRefOf('git+https://github.com/GanyuanRan/Aegis.git#bad ref'), null)
+  assert.equal(githubRefOf('git+https://github.com/GanyuanRan/Aegis.git#.hidden'), null)
+  assert.equal(githubRefOf('https://example.com/o/r.git#v1'), null)
+  assert.equal(githubRefOf('lodash#v1'), null)
+  // 普通网页链接的 `#…` 是页面锚点（#readme），不是 Git ref
+  assert.equal(githubRefOf('https://github.com/GanyuanRan/Aegis#readme'), null)
 })
 
 test('githubRepoOf: recognizes canonical and legacy GitHub targets', () => {

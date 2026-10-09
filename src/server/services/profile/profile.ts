@@ -49,10 +49,36 @@ export function profileDirectory(profile: string): string {
   return join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'profiles', profile)
 }
 
-/** Build a safe explicit HTTPS Git target, or null when the repo is unsafe. */
-export function githubTarget(repo: string): string | null {
+/** Build a safe explicit HTTPS Git target, or null when the repo is unsafe.
+ *  When `ref` is given it is appended as a Git ref (`#tag` / `#commit`) so an
+ *  explicitly pinned revision reaches the installer instead of being dropped. */
+export function githubTarget(repo: string, ref?: string | null): string | null {
   if (typeof repo !== 'string' || !REPO_RE.test(repo)) return null
-  return `git+https://github.com/${repo}.git`
+  const url = `git+https://github.com/${repo}.git`
+  return ref === undefined || ref === null || ref === '' ? url : `${url}#${ref}`
+}
+
+/**
+ * Extract a validated explicit Git ref (`#<ref>`) from a GitHub spec, or null.
+ * Only the fragment of a Git-style address qualifies — a pinned tag/commit is
+ * user intent and must survive target normalization, whereas `#…` on a plain
+ * web URL (`https://github.com/o/r#readme`) is a page anchor, not a ref.
+ * Git-style = `git+…` / `github:` / `git@…` / `…​.git` / bare `owner/repo`.
+ * Grammar mirrors a Git ref: no leading `.`/`-`, no `#`/whitespace.
+ */
+const GIT_REF_RE = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/
+
+export function githubRefOf(value: string): string | null {
+  if (typeof value !== 'string') return null
+  const input = value.trim()
+  const hash = input.indexOf('#')
+  if (hash <= 0) return null
+  const base = input.slice(0, hash)
+  if (githubRepoOf(base) === null) return null
+  const gitStyle = /^(?:git\+|github:|git@)/i.test(base) || /\.git$/i.test(base) || !base.includes('://')
+  if (!gitStyle) return null
+  const ref = input.slice(hash + 1)
+  return GIT_REF_RE.test(ref) ? ref : null
 }
 
 /**
