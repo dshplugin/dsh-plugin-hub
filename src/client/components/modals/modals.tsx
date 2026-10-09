@@ -5,8 +5,9 @@
  *
  * Dialog layer for the Plugin Hub: the install-confirm dialog, the uninstall
  * dialog and the global toast. Both dialogs lock themselves while a mutation
- * or restart is running, then switch to a result view offering an immediate
- * restart or a "later" deferral.
+ * is running, then switch to a result view with a single action — "done" for
+ * the common case (the page refreshes on close so the change applies), or a
+ * single "restart now" for the rare changes a refresh cannot pick up.
  */
 import { createElement as h } from 'react'
 import type { MouseEvent } from 'react'
@@ -19,17 +20,21 @@ import { pluginDetailUrl, pluginIssueUrl, pluginSiteUrl } from '../../logic/urls
 import { classifyFailure, missingRegistryPackageOf, npmTooLowVersion, pnpmPolicyHintOf, pnpmPolicyHintParams, unreachableTargetOf, registryHostOf } from '../../logic/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述；
- *  needsRestart=true（插件需重启才生效）→ 「稍后重启 / 立即重启」按钮对，点稍后重启后
- *  通知中心待重启条目常驻（服务端登记，内存态），直到用户点「立即重启」真正重启后才消失；
- *  needsRestart=false（卸载已即时生效）→ 仅「完成」关闭。 */
+ *  终态只有两种：
+ *  - needsRestart=true（刷新解决不了：热挂载失败 / 非 dsh 插件 / 更新）→ 仅一个「立即重启」
+ *    按钮（重启会中断进行中的任务，故仍需用户确认），关闭即放弃；
+ *  - 其余（含 needsReload=true 的「已热挂载、仅剩客户端 UI」）→ 仅「完成」按钮：关闭结果弹窗时
+ *    上层自动刷新页面让插件生效，不再给「稍后/立即刷新」手动选择。 */
 function ResultView({
-  title, desc, t, restarting, needsRestart, onRestart, onClose,
+  title, desc, t, restarting, needsRestart, needsReload, onRestart, onClose,
 }: {
   title: string
   desc: string
   t: Translate
   restarting: boolean
   needsRestart: boolean
+  /** 仅刷新页面即生效（插件已热挂载）：给一句自动刷新说明，按钮仍是「完成」 */
+  needsReload?: boolean
   onRestart: () => void
   onClose: () => void
 }) {
@@ -56,13 +61,15 @@ function ResultView({
       ? h('div', null, [
         h('div', { className: styles.resultRestarting }, restarting ? t('restarting') : t('restartHint')),
         h('div', { className: styles.modalActions },
-          h('button', { className: styles.restartLater, onClick: onClose, disabled: restarting }, t('restartLater')),
           h('button', { className: styles.restartNowWarning, onClick: onRestart, disabled: restarting },
             restarting ? t('restarting') : t('restartNow')),
         ),
       ])
-      : h('div', { className: styles.modalActions },
-        h('button', { className: styles.restartNow, onClick: onClose }, t('done'))),
+      : h('div', null, [
+        needsReload ? h('div', { className: styles.resultRestarting }, t('reloadHint')) : null,
+        h('div', { className: styles.modalActions },
+          h('button', { className: styles.restartNow, onClick: onClose }, t('done'))),
+      ]),
   )
 }
 
@@ -85,8 +92,10 @@ export interface InstallModalProps {
   cliOnly: boolean
   /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
-  /** 完成结果是否需重启才生效：true → 「稍后重启 / 立即重启」；false → 仅「完成」 */
+  /** 完成结果是否需重启才生效：true → 仅给「立即重启」；false → 仅「完成」（关闭即自动刷新） */
   needsRestart: boolean
+  /** 完成结果是否只需刷新页面即生效（插件已热挂载）：true → 结果视图显示自动刷新说明 */
+  needsReload: boolean
   onClose: () => void
   onCopy: () => void
   onInstall: () => void
@@ -99,7 +108,7 @@ export interface InstallModalProps {
  * 目录插件与命令行安装（customTarget 模式）共用同一套确认/进度/结果流程。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, onClose, onCopy, onInstall, onRestart } = props
+  const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, needsReload, onClose, onCopy, onInstall, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分；
   // 命令行安装无插件元数据 → 直接用输入的目标展示；全局 npm 安装 → 包列表空格拼接
@@ -139,6 +148,7 @@ export function InstallModal(props: InstallModalProps) {
           t,
           restarting,
           needsRestart,
+          needsReload,
           onRestart,
           onClose,
         })
@@ -219,8 +229,11 @@ export interface UninstallModalProps {
   restarting: boolean
   /** 卸载请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
-  /** 完成结果是否需重启才生效：true → 「稍后重启 / 立即重启」；false（loader 已即时移除）→ 仅「完成」 */
+  /** 完成结果是否需重启才生效：true（停用失败等刷新解决不了的场景）→ 仅给「立即重启」；
+   *  false（loader 已即时停用）→ 仅「完成」，关闭即自动刷新页面摘除插件面板 */
   needsRestart: boolean
+  /** 卸载的插件带客户端 UI 且已即时停用：面板要刷新页面才摘除 → 结果视图给自动刷新说明 */
+  needsReload?: boolean
   onClose: () => void
   onCancel: () => void
   onCopyCommand: () => void
@@ -230,7 +243,7 @@ export interface UninstallModalProps {
 
 /** 卸载确认弹窗：确认/进行中（后台队列，可关闭）；完成后切换为结果视图（成功即生效，仅「完成」关闭）。 */
 export function UninstallModal(props: UninstallModalProps) {
-  const { plugin, done, task, t, langPath, restarting, submitting, needsRestart, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
+  const { plugin, done, task, t, langPath, restarting, submitting, needsRestart, needsReload, onClose, onCancel, onCopyCommand, onConfirm, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名，与安装弹窗一致，并用状态色区分
   const name = plugin.displayName ?? plugin.slug
@@ -266,6 +279,7 @@ export function UninstallModal(props: UninstallModalProps) {
           t,
           restarting,
           needsRestart,
+          needsReload,
           onRestart,
           onClose,
         })
@@ -504,7 +518,9 @@ export function Toast({ toast, t }: { toast: ToastState; t: Translate }) {
           : toast.kind === 'removed' ? t('uninstallDone')
             : toast.kind === 'revealFail' ? t('openFolderFail')
               : toast.kind === 'restartDesktop' ? t('toastRestartDesktop')
-                : t('uninstallFail')
+                : toast.kind === 'installedLive' ? t('toastInstalledLive')
+                  : toast.kind === 'installedReload' ? t('toastInstalledReload')
+                    : t('uninstallFail')
   const fail = toast.kind === 'fail' || toast.kind === 'removeFail' || toast.kind === 'revealFail' || toast.kind === 'restartDesktop'
   return h('div', {
     key: toast.id,
@@ -513,7 +529,7 @@ export function Toast({ toast, t }: { toast: ToastState; t: Translate }) {
 }
 
 /** 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出，
- *  与通知中心待重启条目同一交互（说明 + 稍后重启 / 立即重启），
+ *  与通知中心待重启条目同一交互（红色警告说明 + 单个「立即重启」），
  *  避免行内按钮误触直接触发宿主重启。 */
 export function RestartConfirmModal({ t, restarting, onClose, onRestartNow }: {
   t: Translate
@@ -542,12 +558,7 @@ export function RestartConfirmModal({ t, restarting, onClose, onRestartNow }: {
         ),
         h('div', { className: styles.failPrepareHint }, t('restartHint')),
         h('div', { className: styles.modalActions },
-          h('button', {
-            className: styles.restartLater,
-            type: 'button',
-            disabled: restarting,
-            onClick: onClose,
-          }, t('restartLater')),
+          // 关闭本弹窗即视为「稍后」，只保留单个「立即重启」
           h('button', {
             className: styles.restartNowWarning,
             type: 'button',

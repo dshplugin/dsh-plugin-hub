@@ -16,7 +16,7 @@ import { CAPTURE_LIMIT_BYTES, MAX_TASKS, MAX_TASK_LINES } from './install-types.
 import { npmTooLowMarker } from './npm-check.ts'
 import { cleanLine, estimateProgress } from '../profile/progress.ts'
 import type { LoaderHandle } from '../loader.ts'
-import { removeLoadedEntry } from '../loader.ts'
+import { hasClientUi, isDshPlugin, mountLoadedEntry, removeLoadedEntry } from '../loader.ts'
 import { addPendingRestart, clearPendingRestart } from '../profile/pending-restart.ts'
 import { addAllowBuildsKey, githubRepoOf, parseAllowBuildsKey, profileDirectory } from '../profile/profile.ts'
 import { appendLog } from '../log.ts'
@@ -256,8 +256,9 @@ export function startPluginMutation(options: {
   globalNpm?: string[]
   /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
   displayTarget?: string
-  /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
-  uninstallLoader?: LoaderHandle
+  /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目，两类操作都尽量立即生效
+   *  （缺失时安装/卸载仍需重启） */
+  loader?: LoaderHandle
   /** 入队前已尝试的安装方式（npm registry 反查等）：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
   attempts?: string[]
   /** 更新已安装的 npm 包（mode=update）：命令显式带 @latest，让 pnpm 真正解析最新版本 */
@@ -266,7 +267,10 @@ export function startPluginMutation(options: {
    *  任务输出行与系统日志据此溯源「从哪个入口发起」；目录插件安装不传 */
   installChannel?: 'npm' | 'git' | 'dsh'
 }): InstallTask {
-  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, globalNpm: options.globalNpm, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false, installChannel: options.installChannel }
+  // 卸载入队时先快照「该包是否带客户端 UI」：卸载完成后包已从磁盘删除，读不到 package.json，
+  // 只能在此刻取；卸载成功且曾存活时据此决定是否要刷新页面摘除插件面板
+  const hadClientUi = options.action === 'remove' ? hasClientUi(options.profile, options.target) : undefined
+  const task: InstallTask = { id: nextTaskId, target: options.target, displayTarget: options.displayTarget, globalNpm: options.globalNpm, action: options.action, status: 'pending', timedOut: false, exitCode: null, progress: 0, lines: [], attempts: options.attempts ?? [], needsRestart: false, hadClientUi, installChannel: options.installChannel }
   nextTaskId = nextTaskId >= Number.MAX_SAFE_INTEGER ? 1 : nextTaskId + 1
   tasks.set(task.id, task)
   if (tasks.size > MAX_TASKS) {
@@ -367,14 +371,14 @@ function spawnMutation(options: {
   task?: InstallTask
   /** 待重启行的展示目标（owner/repo）：与 mutation 目标解耦——卸载的 mutation 目标是 npm 包名，展示要回退到仓库名 */
   displayTarget?: string
-  /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
-  uninstallLoader?: LoaderHandle
+  /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目（缺失时仍需重启） */
+  loader?: LoaderHandle
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
   globalNpm?: string[]
   /** 更新已安装的 npm 包（mode=update）：命令显式带 @latest，让 pnpm 真正解析最新版本 */
   updateNpm?: boolean
 }): Promise<InstallResult> {
-  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, uninstallLoader, globalNpm, updateNpm } = options
+  const { action, profile, target, timeoutMs = 5 * 60 * 1000, env, task, displayTarget, loader, globalNpm, updateNpm } = options
   // 全局 npm 安装：直接 spawn 本机 npm（`npm install -g <pkgs>`），不是 dsh plugin 命令
   const isGlobalNpm = (globalNpm ?? []).length > 0
   const invocation = isGlobalNpm
@@ -555,18 +559,30 @@ function spawnMutation(options: {
           if (isGlobalNpm) {
             // 全局 npm 安装：装的是本机 CLI 工具（如 dsh-tui），不进任何 profile，无需宿主重启
             task.needsRestart = false
-          } else if (action === 'remove' && uninstallLoader) {
-            // 卸载成功 → 主动从运行中 loader 停用该包条目；
-            // 仅当宿主从未加载过它（磁盘已干净）才判「无需重启」；
-            // 只要曾在 loader 中存活（停用过 live entry）就仍要求重启——
-            // 带 UI 的插件（侧边栏面板等宿主启动时渲染的槽位）disable 后不会
-            // 主动消失，重启才能立即摘除面板
-            const removed = await removeLoadedEntry(uninstallLoader, target)
-            task.needsRestart = !removed
-            if (removed) clearPendingRestart(displayTarget ?? target)
-            else addPendingRestart(displayTarget ?? target, 'uninstall')
+          } else if (action === 'remove' && loader) {
+            // 卸载成功 → 主动从运行中 loader 停用该包条目：
+            //  - 停用成功：服务端即时卸载；带客户端 UI 的插件面板要页面刷新才摘除（无需重启宿主）
+            //  - 停用失败 / 超时：回退「待重启」兜底清理（刷新解决不了，登记常驻提醒）
+            const removal = await removeLoadedEntry(loader, target)
+            task.needsRestart = !removal.ok
+            task.needsReload = removal.ok && removal.live && task.hadClientUi === true
+            if (task.needsRestart) addPendingRestart(displayTarget ?? target, 'uninstall')
+            else clearPendingRestart(displayTarget ?? target)
+          } else if (action !== 'remove' && !isUpdate && loader) {
+            // 安装成功 → 尝试把新插件热挂进运行中 loader，让插件无需重启宿主即生效。
+            // 挂上了：服务端即时生效；带客户端 UI 的插件还需页面重新加载（宿主按请求现场
+            //   拼装 __DSH_BOOT__ 注入清单，网页端与桌面端一致，刷新即可）。
+            // 挂不上 / 非 dsh 插件 / 无法定位包名：回退「待重启」提醒（保证不静默失效）。
+            const { name } = verifyInstalledEntry(profile, target)
+            if (name !== null && isDshPlugin(profile, name) && await mountLoadedEntry(loader, name)) {
+              task.needsReload = hasClientUi(profile, name)
+              task.needsRestart = false
+            } else {
+              task.needsRestart = true
+              addPendingRestart(displayTarget ?? target, 'install')
+            }
           } else {
-            // 安装/更新成功（或卸载但无 loader 引用）→ 登记待重启：
+            // 更新（ESM 缓存下热挂取不到新代码）/ 无 loader 的安装或卸载 → 登记待重启：
             // 插件要宿主重启才会挂载/卸载干净，重启前一直提醒；展示目标用 displayTarget（owner/repo）
             task.needsRestart = true
             addPendingRestart(displayTarget ?? target, action === 'remove' ? 'uninstall' : 'install')
@@ -660,8 +676,8 @@ export async function runPluginMutation(options: {
   task?: InstallTask
   /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
   displayTarget?: string
-  /** 运行中 loader：卸载成功后主动移除条目、立即生效（缺失时卸载仍需重启清理） */
-  uninstallLoader?: LoaderHandle
+  /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目（缺失时仍需重启） */
+  loader?: LoaderHandle
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
   globalNpm?: string[]
 }): Promise<InstallResult> {

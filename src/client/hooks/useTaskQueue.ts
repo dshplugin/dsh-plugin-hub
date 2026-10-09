@@ -48,10 +48,13 @@ export interface QueueTask {
   command?: string
   /** 尝试过的安装方式（npm registry 反查 + 实际执行命令，按先后顺序）：失败时 issue 预填一并贴给作者 */
   attempts?: string[]
-  /** 完成结果是否需要重启才生效（服务端任务终态带出；默认 true 保持老行为：弹窗给重启选项）。
-   *  卸载时 loader 已即时移除 → false，结果视图只显示「完成」；true 时弹窗给「稍后重启/立即重启」，
-   *  通知中心待重启条目（服务端登记）同步常驻，直到用户点「立即重启」。 */
+  /** 完成结果是否需要重启才生效（服务端任务终态带出）。默认 true 保底：数据缺失时不静默视为已生效。
+   *  仅刷新解决不了的兜底场景（热挂载失败 / 非 dsh 插件 / 更新）为 true，结果视图给「立即重启」；
+   *  其余（热挂载成功、卸载已即时停用、全局安装）为 false，结果视图仅「完成」。 */
   needsRestart: boolean
+  /** 完成结果是否只需刷新页面即生效（插件已热挂进运行中 loader，或卸载后插件面板仍残留在当前页面）：
+   *  true 时关闭结果弹窗 / Toast 消失后由上层自动刷新页面，不给手动刷新按钮。 */
+  needsReload?: boolean
 }
 
 /** 客户端待重启项：镜像服务端内存列表 + 本地补齐的展示信息（简介/版本）。 */
@@ -71,10 +74,11 @@ export interface TaskQueueOptions {
   langKey?: LocaleId
   refreshInstalled: () => void
   /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录；
-   *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）。
+   *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）；
+   *  needsReload 表示是否只需刷新页面即生效（热挂载成功、或卸载后插件面板仍残留）。
    *  update 表示实际执行的是更新（覆盖重装）而非首次安装：通知中心据此显示「更新成功」而非「安装成功」。 */
-  onInstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean, update?: boolean) => void
-  onUninstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean) => void
+  onInstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean, update?: boolean, needsReload?: boolean) => void
+  onUninstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean, needsReload?: boolean) => void
   /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 尝试过的安装方式（npm 反查/执行命令，可缺省）+ 是否更新。 */
   onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[], update?: boolean) => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
@@ -207,13 +211,13 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       if (q.kind === 'uninstall') {
         // 卸载成功：清掉本地版本记录
         void syncInstalledVersion(q.repo, undefined, undefined)
-        onUninstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart)
+        onUninstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.needsReload ?? false)
       } else {
         // 安装成功：记录安装时的目录信号（版本 + 仓库更新时间），供「有更新」比对；
         // 同时缓存展示信息，待重启列表（服务端已登记）合并时直接补齐简介/版本
         void syncInstalledVersion(q.repo, q.version, q.updatedAt)
         pendingInfoRef.current.set(q.target, { desc: q.desc, version: q.version })
-        onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.action === 'update')
+        onInstallDone(modalTaskRef.current === q.id, q.repo, q.needsRestart, q.action === 'update', q.needsReload ?? false)
       }
     } else {
       // 失败：完整展示全部输出行（最新在前，逆序为日志阅读顺序），不裁剪
@@ -261,16 +265,17 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     try {
       const res = await fetch(`/dsh-plugin-hub/status?task=${q.id}`, { cache: 'no-store' })
       if (res.ok) {
-        const data = await res.json() as { task?: { status?: string; lines?: string[]; attempts?: string[]; needsRestart?: unknown } }
+        const data = await res.json() as { task?: { status?: string; lines?: string[]; attempts?: string[]; needsRestart?: unknown; needsReload?: unknown } }
         const task = data.task
         if (task !== undefined) {
           status = task.status ?? 'failed'
           lines = task.lines ?? []
           attempts = Array.isArray(task.attempts) ? task.attempts : undefined
-          // 终态带出的「是否需要重启」覆盖本地（服务端 done 时按 loader 即时移除情况设置）
+          // 终态带出的「是否需要重启 / 是否只需刷新」覆盖本地（服务端 done 时按 loader 热挂/即时移除情况设置）
           const needsRestart = typeof task.needsRestart === 'boolean' ? task.needsRestart : q.needsRestart
+          const needsReload = typeof task.needsReload === 'boolean' ? task.needsReload : (q.needsReload ?? false)
           if (status === 'done') {
-            const settled = { ...q, needsRestart }
+            const settled = { ...q, needsRestart, needsReload }
             // 卸载成功走进度过渡动画；安装成功直接收尾
             if (q.kind === 'uninstall') settleDone(settled, lines)
             else finishQueueTask(true, settled, lines)

@@ -122,11 +122,8 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                     h('span', { className: styles.pendingRowStatus },
                       p.kind === 'uninstall' ? t('restartPendingHintUninstall') : t('restartPendingHint')),
                     h('span', { className: styles.pendingRowActions },
-                      h('button', {
-                        className: styles.restartLater,
-                        disabled: restarting,
-                        onClick: onClose,
-                      }, t('restartLater')),
+                      // 兜底项：刷新解决不了（热挂载失败 / 非 dsh 插件 / 更新）才登记待重启；
+                      // 关闭本弹窗即视为「稍后」，只在真正需要时给单个「立即重启」
                       h('button', {
                         className: styles.restartNow,
                         disabled: restarting,

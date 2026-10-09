@@ -263,13 +263,17 @@ export const zh = {
   requestTimeout: '请求超时：无法访问 GitHub 或网络不稳定，请稍后重试',
   confirmCancel: '取消',
   doneBtn: '完成',
-  // 结果视图：部分插件需重启后才挂载，提供「立即重启 / 稍后重启」选择
+  // 结果视图兜底：仅当「刷新解决不了」时（热挂载失败 / 非 dsh 插件 / 更新）才出现单个「立即重启」；
+  // 关闭弹窗即视为「稍后」，不再单独给「稍后重启」按钮
   restartNow: '立即重启',
-  restartLater: '稍后重启',
   restarting: '正在重启…',
   restartHint: '重启会中断正在进行的安装/卸载任务，其进度将丢失。部分插件（如插件市场、顶层 bundle）需重启后才会生效。',
   // 桌面端宿主归应用壳管、插件重启不了它：点「立即重启」时改提示用户退出重开
   toastRestartDesktop: '桌面端的宿主由应用管理，请在应用菜单（或托盘）选择退出后重新打开，重启后生效',
+  // 装完即生效：插件已热挂进运行中 loader，结果弹窗关闭时自动刷新页面（无需用户点按钮）
+  reloadHint: '插件已加载，关闭本窗口后会自动刷新页面生效。',
+  toastInstalledLive: '安装成功，已立即生效',
+  toastInstalledReload: '安装成功，正在自动刷新页面…',
   done: '完成',
   // 待重启：装完没重启的插件常驻提醒，直到宿主真正重启
   restartPendingHint: '安装成功，重启后生效',
@@ -647,13 +651,18 @@ export const en = {
   requestTimeout: 'Request timed out: GitHub may be unreachable or the network is unstable — try again later',
   confirmCancel: 'Cancel',
   doneBtn: 'Done',
-  // Result view: some plugins need a restart to mount — offer restart now / later
+  // Result-view fallback: the single "Restart now" only appears when a refresh cannot help
+  // (hot-mount failure / non-dsh plugin / update); closing the modal means "later"
   restartNow: 'Restart now',
-  restartLater: 'Later',
   restarting: 'Restarting…',
   restartHint: 'Restarting interrupts any in-progress install / uninstall task — its progress will be lost. Some plugins (such as plugin markets / top-level bundles) only take effect after a restart.',
   // Desktop: the app shell owns the host, so plugins cannot restart it — tell the user to quit and reopen
   toastRestartDesktop: 'In the desktop app the host is managed by the app: quit from the app menu (or tray) and open it again — the change takes effect after that restart',
+  // Applied without a restart: the install was hot-mounted into the running loader;
+  // the page auto-refreshes on close (no manual refresh button)
+  reloadHint: 'The plugin is loaded — closing this window will refresh the page automatically.',
+  toastInstalledLive: 'Installed — active now',
+  toastInstalledReload: 'Installed — refreshing the page automatically…',
   done: 'Done',
   restartPendingHint: 'Installed — takes effect after restart',
   restartPendingHintUninstall: 'Removed — cleaned up after restart',

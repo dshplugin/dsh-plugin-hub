@@ -103,10 +103,15 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   /** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
   const [installDone, setInstallDone] = useState(false)
   const [uninstallDone, setUninstallDone] = useState(false)
-  /** 结果视图是否给「立即重启」：服务端任务终态带出（卸载时 loader 已即时移除 → false 只给「完成」；
-   *  true 时通知中心待重启条目同步常驻，直到用户点「立即重启」真正重启后才消失） */
-  const [installNeedsRestart, setInstallNeedsRestart] = useState(true)
-  const [uninstallNeedsRestart, setUninstallNeedsRestart] = useState(true)
+  /** 结果视图是否给「立即重启」：服务端任务终态带出。仅刷新解决不了的兜底场景
+   *  （热挂载失败 / 非 dsh 插件 / 更新）为 true；其余（热挂载成功、卸载已即时停用）为 false，
+   *  结果视图只给「完成」，关闭时自动刷新页面生效 */
+  const [installNeedsRestart, setInstallNeedsRestart] = useState(false)
+  const [uninstallNeedsRestart, setUninstallNeedsRestart] = useState(false)
+  /** 结果视图是否显示「关闭后自动刷新」说明：插件已热挂进运行中 loader（安装）、或卸载后
+   *  插件面板仍残留在当前页面（卸载）。关闭弹窗即整页刷新，不给手动刷新按钮。 */
+  const [installNeedsReload, setInstallNeedsReload] = useState(false)
+  const [uninstallNeedsReload, setUninstallNeedsReload] = useState(false)
   /** 结果视图「立即重启」：请求宿主重启后进入等待，服务回来后整页刷新 */
   const [restarting, setRestarting] = useState(false)
   /** 操作失败完整信息 + 所属插件仓库 + 失败类型（决定弹窗标题「安装失败/卸载失败」）+ 实际执行的安装命令 + 尝试过的安装方式（issue 预填用） */
@@ -129,23 +134,39 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   // 挂载与每次切换视图时比对全局 CSS 清单，把缺失的样式补注入回去 —— 用户无需再手动点击恢复。
   useEffect(() => { ensurePluginCss() }, [view])
 
+  /** 后台任务（弹窗已关）完成且只需刷新页面即生效时，等结果 Toast 读完再整页刷新：
+   *  新插件（或卸载后残留）的客户端资源要重新加载页面才会生效，无需重启宿主。 */
+  const scheduleAutoReload = () => {
+    window.setTimeout(() => window.location.reload(), 1600)
+  }
+
   const queue = useTaskQueue({
     t,
     // 界面语言带给服务端：网络预检等错误消息按用户语言提示（中文界面给中文，英文界面给英文）
     langKey,
     refreshInstalled: catalog.refreshInstalled,
-    onInstallDone: (viaModal, repo, needsRestart, update) => {
+    onInstallDone: (viaModal, repo, needsRestart, update, needsReload) => {
+      const reload = needsReload === true
       setInstallNeedsRestart(needsRestart)
+      setInstallNeedsReload(reload)
       if (viaModal) setInstallDone(true)
-      else setToast({ id: Date.now(), kind: 'done' })
+      // 弹窗外的后台安装：给结果 toast；需要页面重载时（热挂载的客户端 UI）读完后自动刷新
+      else setToast({
+        id: Date.now(),
+        kind: reload ? 'installedReload' : needsRestart ? 'done' : 'installedLive',
+      })
+      if (!viaModal && reload) scheduleAutoReload()
       // 安装成功也写入通知记录：通知中心里成功与失败都能看到。
       // action 区分「安装成功」与「更新成功」（更新 = 覆盖重装，同一执行通道）
       setNotifications(addSuccess({ kind: 'install', action: update ? 'update' : 'install', repo: repo ?? '' }))
     },
-    onUninstallDone: (viaModal, repo, needsRestart) => {
+    onUninstallDone: (viaModal, repo, needsRestart, needsReload) => {
+      const reload = needsReload === true
       setUninstallNeedsRestart(needsRestart)
+      setUninstallNeedsReload(reload)
       if (viaModal) setUninstallDone(true)
       else setToast({ id: Date.now(), kind: 'removed' })
+      if (!viaModal && reload) scheduleAutoReload()
       setNotifications(addSuccess({ kind: 'uninstall', repo: repo ?? '' }))
     },
     onError: (message, repo, kind, command, attempts, update) => {
@@ -312,6 +333,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   }
 
   /** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。
+   *  只在刷新解决不了的兜底场景（热挂载失败 / 非 dsh 插件 / 更新）出现。
    *  桌面端宿主归应用壳管（服务端回 `desktop: true` 且不重启）：不轮询，改提示退出重开。 */
   const requestRestart = async () => {
     if (restarting) return
@@ -628,7 +650,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       cliOnly: confirmPlugin.install?.webInstallable === false,
       submitting: queue.submitting,
       needsRestart: installNeedsRestart,
-      onClose: () => setConfirmPlugin(null),
+      needsReload: installNeedsReload,
+      // 结果弹窗关闭即生效：安装热挂载的插件要页面重载才渲染客户端 UI → 自动刷新，无需用户点按钮
+      onClose: () => {
+        const reload = installDone && installNeedsReload
+        setConfirmPlugin(null)
+        if (reload) window.location.reload()
+      },
       onCopy: () => copyCommand(confirmPlugin),
       onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true } : undefined),
       // 重启：结果视图「立即重启」也会中断进行中的任务 → 先弹重启确认弹窗
@@ -648,10 +676,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       cliOnly: false,
       submitting: queue.submitting,
       needsRestart: installNeedsRestart,
+      needsReload: installNeedsReload,
       onClose: () => {
+        const reload = installDone && installNeedsReload
         setInstallDone(false)
         setConfirmCustomTarget(null)
         setConfirmCustomChannel(null)
+        if (reload) window.location.reload()
       },
       onCopy: () => {
         doCopy(`pnpm add ${confirmCustomTarget}`)
@@ -679,10 +710,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       cliOnly: false,
       submitting: queue.submitting,
       needsRestart: installNeedsRestart,
+      needsReload: installNeedsReload,
       onClose: () => {
+        const reload = installDone && installNeedsReload
         setInstallDone(false)
         setConfirmGlobalNpm(null)
         setConfirmCustomChannel(null)
+        if (reload) window.location.reload()
       },
       onCopy: () => {
         doCopy(`npm install -g ${confirmGlobalNpm.pkgs.join(' ')}`)
@@ -702,10 +736,14 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       restarting,
       submitting: queue.submitting,
       needsRestart: uninstallNeedsRestart,
+      needsReload: uninstallNeedsReload,
+      // 卸载后插件面板要页面重载才摘除（带 UI 的插件）→ 关闭结果弹窗即自动刷新
       onClose: () => {
+        const reload = uninstallDone && uninstallNeedsReload
         setUninstallDone(false)
         setUninstallPlugin(null)
         setUninstallItem(null)
+        if (reload) window.location.reload()
       },
       onCancel: () => {
         setUninstallPlugin(null)
@@ -763,7 +801,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onRunDiagnostics: openDiagnostics,
       onClose: () => setErrorMsg(null),
     }),
-    // 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出，稍后重启 / 立即重启
+    // 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出（兜底场景），单个「立即重启」，关闭即视为稍后
     showRestartConfirm && h(RestartConfirmModal, {
       t,
       restarting,
