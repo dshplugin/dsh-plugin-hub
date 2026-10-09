@@ -311,15 +311,25 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     if (!ok) setToast({ id: Date.now(), kind: 'revealFail' })
   }
 
-  /** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。 */
+  /** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。
+   *  桌面端宿主归应用壳管（服务端回 `desktop: true` 且不重启）：不轮询，改提示退出重开。 */
   const requestRestart = async () => {
     if (restarting) return
     setRestarting(true)
+    let desktop = false
     try {
       // 响应可能在宿主进程被 kill 前返回，也可能直接断连 —— 两种都属正常
-      await fetch('/dsh-plugin-hub/restart', { method: 'POST' })
+      const res = await fetch('/dsh-plugin-hub/restart', { method: 'POST' })
+      const data = await res.json() as { desktop?: boolean }
+      desktop = data.desktop === true
     } catch {
       /* 服务已终止，无需处理 */
+    }
+    if (desktop) {
+      // 宿主不会重启，轮询等不到新服务：直接给出正确口径
+      setRestarting(false)
+      setToast({ id: Date.now(), kind: 'restartDesktop' })
+      return
     }
     // 轮询同源端点，服务恢复后整页 reload（让新挂载的 bundle 完全初始化）
     let attempts = 0

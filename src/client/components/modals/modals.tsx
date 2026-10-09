@@ -503,8 +503,9 @@ export function Toast({ toast, t }: { toast: ToastState; t: Translate }) {
         : toast.kind === 'fail' ? t('installFail')
           : toast.kind === 'removed' ? t('uninstallDone')
             : toast.kind === 'revealFail' ? t('openFolderFail')
-              : t('uninstallFail')
-  const fail = toast.kind === 'fail' || toast.kind === 'removeFail' || toast.kind === 'revealFail'
+              : toast.kind === 'restartDesktop' ? t('toastRestartDesktop')
+                : t('uninstallFail')
+  const fail = toast.kind === 'fail' || toast.kind === 'removeFail' || toast.kind === 'revealFail' || toast.kind === 'restartDesktop'
   return h('div', {
     key: toast.id,
     className: fail ? `${styles.toast} ${styles.toastFail}` : styles.toast,

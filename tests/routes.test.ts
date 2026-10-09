@@ -7,6 +7,8 @@
  * (src/server/http/routes.ts). This predicate is the whole CSRF defence:
  * it must accept the desktop host page, whose origin is the app's own
  * scheme (`dsh-app://app`) rather than a localhost URL (dsh-plugin-hub#70).
+ * Also covers the desktop-host predicate that keeps /restart from killing
+ * the host it cannot restart (dsh-plugin-hub#139).
  *
  * Run with the Node built-in test runner: `npm test` (Node >= 22.6 with
  * type stripping). No extra test dependencies required.
@@ -14,7 +16,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { IncomingMessage } from 'node:http'
-import { isSameOrigin } from '../src/server/http/routes.ts'
+import { isDesktopHost, isSameOrigin } from '../src/server/http/routes.ts'
 
 /** Minimal request stand-in: the predicate only reads these two headers. */
 function req(headers: { origin?: string; host?: string }): IncomingMessage {
@@ -72,4 +74,21 @@ test('isSameOrigin: malformed headers are rejected', () => {
   assert.equal(isSameOrigin(req({ origin: 'http://localhost:3081' })), false)
   assert.equal(isSameOrigin(req({ origin: 'null', host: 'localhost:3081' })), false)
   assert.equal(isSameOrigin(req({ origin: 'not a url', host: 'localhost:3081' })), false)
+})
+
+test('isDesktopHost: only the Electron-managed desktop host counts as desktop (issue #139)', () => {
+  // 只有 `ELECTRON_RUN_AS_NODE=1`（壳用 Electron 二进制以 Node 模式跑宿主）算桌面端：
+  // 该分支下 /restart 不 kill 宿主，改由客户端提示退出重开
+  const saved = process.env.ELECTRON_RUN_AS_NODE
+  try {
+    delete process.env.ELECTRON_RUN_AS_NODE
+    assert.equal(isDesktopHost(), false)
+    process.env.ELECTRON_RUN_AS_NODE = '0'
+    assert.equal(isDesktopHost(), false)
+    process.env.ELECTRON_RUN_AS_NODE = '1'
+    assert.equal(isDesktopHost(), true)
+  } finally {
+    if (saved === undefined) delete process.env.ELECTRON_RUN_AS_NODE
+    else process.env.ELECTRON_RUN_AS_NODE = saved
+  }
 })

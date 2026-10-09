@@ -1,5 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { readProfileArg, type LoaderHandle } from '../services/install/install.ts';
+/**
+ * 宿主是否由桌面应用壳托管（`ELECTRON_RUN_AS_NODE=1`：壳用 Electron 二进制以 Node 模式跑宿主）。
+ * 桌面端的宿主归应用壳管，插件重启不了它，也不该去 kill —— 详见 /restart 路由。
+ */
+export declare function isDesktopHost(): boolean;
 export interface WebRoute {
     kind: 'exact';
     path: string;

@@ -268,6 +268,8 @@ export const zh = {
   restartLater: '稍后重启',
   restarting: '正在重启…',
   restartHint: '重启会中断正在进行的安装/卸载任务，其进度将丢失。部分插件（如插件市场、顶层 bundle）需重启后才会生效。',
+  // 桌面端宿主归应用壳管、插件重启不了它：点「立即重启」时改提示用户退出重开
+  toastRestartDesktop: '桌面端的宿主由应用管理，请在应用菜单（或托盘）选择退出后重新打开，重启后生效',
   done: '完成',
   // 待重启：装完没重启的插件常驻提醒，直到宿主真正重启
   restartPendingHint: '安装成功，重启后生效',
@@ -650,6 +652,8 @@ export const en = {
   restartLater: 'Later',
   restarting: 'Restarting…',
   restartHint: 'Restarting interrupts any in-progress install / uninstall task — its progress will be lost. Some plugins (such as plugin markets / top-level bundles) only take effect after a restart.',
+  // Desktop: the app shell owns the host, so plugins cannot restart it — tell the user to quit and reopen
+  toastRestartDesktop: 'In the desktop app the host is managed by the app: quit from the app menu (or tray) and open it again — the change takes effect after that restart',
   done: 'Done',
   restartPendingHint: 'Installed — takes effect after restart',
   restartPendingHintUninstall: 'Removed — cleaned up after restart',

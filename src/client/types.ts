@@ -77,7 +77,7 @@ export interface TaskState {
   lines: string[]
 }
 
-export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail'
+export type ToastKind = 'copied' | 'errCopied' | 'done' | 'fail' | 'removed' | 'removeFail' | 'revealFail' | 'restartDesktop'
 
 export interface ToastState {
   id: number

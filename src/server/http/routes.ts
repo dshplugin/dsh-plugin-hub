@@ -28,6 +28,7 @@ import { appendLog, clearLog, readLog, logFilePath, defaultLogFilePath, customLo
  * 不用 `/bin/sh -c`：Windows 无 /bin/sh，且 lsof/nohup 仅 POSIX 存在。
  * 由 `spawn(process.execPath, ['-e', SCRIPT, port], { detached, stdio:'ignore' })` 孵化，
  * 宿主进程被 kill 后仍能完成「停旧 → 等端口释放 → 拉起新 dsh web」。
+ * 端口探测不到监听进程时不再假装重启（记一行日志后退出，见脚本内注释）。
  */
 const HOST_RESTART_SCRIPT = String.raw`const C = require('node:child_process')
 const F = require('node:fs')
@@ -54,7 +55,16 @@ function findPids() {
   return String(out.stdout || '').split(/\s+/).filter(Boolean)
 }
 
-for (const pid of findPids()) {
+const targets = findPids()
+// 一个监听进程都没找到 = 端口探测本身就失败了（netstat 输出格式 / 本地化差异），
+// 旧宿主仍占着端口。此时再拉一个 dsh web 只会在日志里以 EADDRINUSE 静默退出，
+// 用户却看到「重启完成」——不制造这种假象，留一行可诊断的记录后退出。
+if (targets.length === 0) {
+  logLine('restart aborted: no listener found on port ' + port)
+  process.exit(0)
+}
+
+for (const pid of targets) {
   try {
     if (win) C.spawnSync('taskkill', ['/pid', pid, '/t', '/f'])
     else process.kill(Number(pid), 'SIGTERM')
@@ -67,6 +77,14 @@ let tries = 0
   setTimeout(waitForStop, 250)
 })()
 
+function logLine(msg) {
+  try {
+    const dir = P.join(O.homedir(), '.dsh', 'logs')
+    F.mkdirSync(dir, { recursive: true })
+    F.appendFileSync(P.join(dir, 'dsh-web-' + port + '.log'), '[' + new Date().toISOString() + '] ' + msg + '\n')
+  } catch {}
+}
+
 function startHost() {
   const dir = P.join(O.homedir(), '.dsh', 'logs')
   F.mkdirSync(dir, { recursive: true })
@@ -78,6 +96,14 @@ function startHost() {
   })
   child.unref()
 }`
+
+/**
+ * 宿主是否由桌面应用壳托管（`ELECTRON_RUN_AS_NODE=1`：壳用 Electron 二进制以 Node 模式跑宿主）。
+ * 桌面端的宿主归应用壳管，插件重启不了它，也不该去 kill —— 详见 /restart 路由。
+ */
+export function isDesktopHost(): boolean {
+  return process.env.ELECTRON_RUN_AS_NODE === '1'
+}
 
 export interface WebRoute {
   kind: 'exact'
@@ -1109,6 +1135,15 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
       path: '/dsh-plugin-hub/restart',
       handler: (request, response) => {
         if (!requireTrustedPost(request, response)) return
+        // 桌面端：宿主由应用壳托管，插件重启不了它。Windows 上 `taskkill /T` 会把发起
+        // 重启的助手一起结束（助手是宿主的子进程），壳再把这次外部 kill 判成宿主崩溃
+        // 弹「应用无法启动或已意外停止」；退一步说，脱离壳拉起的 `dsh web` 也服务不了
+        // 桌面 UI（缺壳注入的 desktop:boot）。故不 kill、不拉新宿主，由客户端改提示
+        // 用户从菜单/托盘退出后重新打开。
+        if (isDesktopHost()) {
+          sendJson(response, 200, { ok: false, desktop: true })
+          return
+        }
         // 当前宿主监听端口来自请求 Host 头（localhost:7923），解析失败回退 7923
         const host = request.headers.host ?? ''
         const portMatch = host.match(/:(\d+)$/)
