@@ -380,6 +380,8 @@ export const zh = {
   versionHint: '查看版本信息与更新记录',
   hubCurrentTitle: '当前版本',
   hubCurrentDesc: '你正在使用 v{version}，已是最新版本。',
+  // 暂缓提示：远端确有新版本，但发布未满 24 小时（pnpm 供应链安全门槛），与「已是最新」严格区分
+  hubPendingDesc: '最新版 v{version} 已发布，但发布尚未满 24 小时：此时更新会被 pnpm 静默回退到旧版本，因此暂不提示。稍后这里会自动出现更新入口。',
   hubUpToDate: '已是最新版本',
   // 头部「关注我们」弹窗：平台介绍 + 用户反馈群二维码（内容由 Worker /about Markdown 推送，非写死）
   followUs: '关注我们',
@@ -769,6 +771,8 @@ export const en = {
   versionHint: 'View version info and changelog',
   hubCurrentTitle: 'Current version',
   hubCurrentDesc: 'You are on v{version} — this is the latest version.',
+  // Deferred notice: a newer release exists but is still inside pnpm's 24h supply-chain window
+  hubPendingDesc: 'v{version} has been released, but it is still within the 24-hour window where pnpm silently falls back to the older version, so the update is not offered yet. The update entry will appear here shortly.',
   hubUpToDate: 'Up to date',
   // Header "Follow us" modal: platform intro + user feedback group QR (content pushed via Worker /about Markdown)
   followUs: 'Follow us',

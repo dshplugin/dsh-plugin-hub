@@ -109,6 +109,17 @@ export interface HubUpdateInfo {
   notes?: string | Record<string, string> | null
 }
 
+/**
+ * Hub 自我更新状态 —— 供版本弹窗选文案与按钮，四态互斥：
+ *  - `none`      未取到接口中心信息（拉取失败）→ 只说当前版本，不提示更新
+ *  - `available` 远端有更新且已过供应链安全门槛 → 提示更新
+ *  - `pending`   远端有更新但发布未满门槛（见 useCatalog）→ 暂缓提示并说明原因
+ *  - `latest`    与远端最新版一致 → 确已最新
+ * 「有新版但暂缓提示」必须与「确已最新」分开：两者若共用文案，弹窗会在本机版本落后时
+ * 谎称「你正在使用 v{远端最新版}，已是最新」（见 issue #145）。
+ */
+export type HubUpdateState = 'none' | 'available' | 'pending' | 'latest'
+
 /** Worker 返回的「关注我们」内容（content 为 Markdown，可字符串或 {zh,en} 双语言对象）。 */
 export interface HubAboutInfo {
   /** Markdown 平台介绍 + 反馈群二维码；可传字符串，或 { zh, en } 双语言对象按界面语言取 */

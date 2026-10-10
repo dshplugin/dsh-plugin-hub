@@ -12,7 +12,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { HubPlugin, LocaleId } from '../types.ts'
 import { HUB_REPO, PLUGIN_VERSION } from '../logic/constants.ts'
-import type { HubAboutInfo, HubUpdateInfo } from '../types.ts'
+import type { HubAboutInfo, HubUpdateInfo, HubUpdateState } from '../types.ts'
 import type { SortKey } from '../logic/constants.ts'
 import { fetchCatalog, fetchStats } from '../data/catalog.ts'
 import { fetchHubAbout, fetchHubUpdate } from '../data/hub.ts'
@@ -196,30 +196,32 @@ export function useCatalog(lang: LocaleId) {
   )
 
   /**
-   * Hub 自身是否有可用更新：Hub 就是当前运行的应用（始终已安装，无需 installedName 命中）。
+   * Hub 自身更新状态：Hub 就是当前运行的应用（始终已安装，无需 installedName 命中）。
    * 以 Worker 版本控制中心返回的「最新版本」为准，与当前运行的版本号比对——
    * 构建时注入的 PLUGIN_VERSION 是运行 bundle 的真实版本；测试/异常场景缺失时
    * 回退到安装时记录的版本。版本号不等即新版（版本号只在发版时变更，绝无降级场景）。
    *
    * 另加 pnpm 供应链安全门槛：新版本发布还不满 24 小时（+30 分钟缓冲）时，pnpm 会静默
    * 回退到旧版本，此时若提示「可更新」用户点了也更新不到。publishedAt 由接口中心按 npm
-   * registry 真实发布时间下发（同源），据此判断最准。
+   * registry 真实发布时间下发（同源），据此判断最准。门槛命中要单列成 `pending` 而不是
+   * 落回「无更新」——回落会让弹窗在本机版本落后时谎称「已是最新」（issue #145）。
    */
-  const hubHasUpdate = (() => {
-    if (!hubUpdateInfo) return false
-    const current = PLUGIN_VERSION || versions[HUB_REPO]?.version || null
-    if (current === null || hubUpdateInfo.version === current) return false
+  const hubCurrentVersion = PLUGIN_VERSION || versions[HUB_REPO]?.version || ''
+  const hubUpdateState: HubUpdateState = (() => {
+    if (!hubUpdateInfo) return 'none'
+    if (hubCurrentVersion === '' || hubUpdateInfo.version === hubCurrentVersion) return 'latest'
     const publishedAt = hubUpdateInfo.publishedAt
     if (publishedAt) {
       const publishedMs = Date.parse(publishedAt)
       if (!Number.isNaN(publishedMs)) {
         // 24 小时 + 30 分钟缓冲（防网络/CDN 边缘时间偏差）
         const MIN_RELEASE_AGE_MS = 24 * 60 * 60 * 1000 + 30 * 60 * 1000
-        if (Date.now() - publishedMs < MIN_RELEASE_AGE_MS) return false
+        if (Date.now() - publishedMs < MIN_RELEASE_AGE_MS) return 'pending'
       }
     }
-    return true
+    return 'available'
   })()
+  const hubHasUpdate = hubUpdateState === 'available'
 
   /** 当前分类下的插件（「全部」时为整个目录）。 */
   const categoryPlugins = useMemo(() => {
@@ -271,6 +273,8 @@ export function useCatalog(lang: LocaleId) {
     installedVersion,
     hasUpdate,
     hubHasUpdate,
+    hubUpdateState,
+    hubCurrentVersion,
     hubUpdateInfo,
     hubAboutInfo,
     refreshHub,

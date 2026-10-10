@@ -533,12 +533,14 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
             onConsumedOpenSection: () => setSettingsSection(null),
           }),
     // Hub 版本信息弹窗：版本号/徽标点击打开 —— 有更新显示新版本 + 变更记录 + 「直接更新」，
-    // 无更新显示当前版本 + 记录 + 「已是最新」。Worker 拉取失败时兜底展示当前版本号。
+    // 暂缓提示显示同一标题但只给「稍后再说」，无更新显示当前版本 + 记录 + 「已是最新」。
+    // 版本号与本机版本一律由 hubUpdateState / hubCurrentVersion 决定，不用远端版号冒充本机。
     showHubUpdate && h(HubUpdateModal, {
       info: catalog.hubUpdateInfo ?? { version: PLUGIN_VERSION },
+      state: catalog.hubUpdateState,
+      currentVersion: catalog.hubCurrentVersion,
       lang,
       t,
-      hasUpdate: catalog.hubHasUpdate,
       onClose: () => setShowHubUpdate(false),
       onProceed: () => {
         setShowHubUpdate(false)
