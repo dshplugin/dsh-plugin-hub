@@ -257,6 +257,24 @@ export function gitLsRemote(url: string, proxy: string, timeoutMs: number): Prom
 }
 
 /**
+ * 请求一个 URL 并返回重定向后的最终地址（curl -I -L -w %{url_effective}）。
+ * 供 GitHub 仓库改名解析使用：对已改名仓库 GitHub 回 301，跟随跳转后的最终地址
+ * 即规范地址。与其它 GitHub 访问同口径 —— curl 子进程注入代理 env（Node 内置
+ * http(s) 读不到系统代理，直连在部分网络下不可达）。
+ * 未发生跳转（200/404）、网络失败或 curl 不可用都返回 null，调用方保留原始地址。
+ */
+export async function finalUrl(url: string, proxy: string, timeoutMs: number): Promise<string | null> {
+  const discard = process.platform === 'win32' ? 'NUL' : '/dev/null'
+  const r = await curlWithTlsFallback([
+    '-sS', '-I', '-L', '-o', discard, '-w', '%{url_effective}',
+    '--max-time', String(Math.max(1, Math.round(timeoutMs / 1000))),
+    url,
+  ], proxyEnv(proxy), timeoutMs)
+  const final = r.stdout.trim()
+  return r.code === 0 && final !== '' ? final : null
+}
+
+/**
  * curl 子进程抓取响应体（与 probeUrl 同一套代理 env 注入与 TLS 参数兜底）。
  * 供服务端 /catalog 代理路由使用：目录/统计数据经此拉到服务端再转给浏览器，
  * 使「目录数据请求走设置里的代理」与 npm / git 安装通道口径一致。

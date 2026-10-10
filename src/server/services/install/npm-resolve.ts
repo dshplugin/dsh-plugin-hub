@@ -13,6 +13,7 @@
  */
 import { get } from 'node:https'
 import { githubRepoOf } from '../profile/profile.ts'
+import { finalUrl } from '../probe.ts'
 
 /** 反查缓存：repo 小写 → npm 包名（null 表示已确认无对应 npm 包；网络异常不缓存）。 */
 const cache = new Map<string, string | null>()
@@ -30,16 +31,21 @@ const SEARCH_RESULT_LIMIT = 250
  * 安装仍会重试反查，避免一次瞬时故障把整个会话锁死在 git 通道。
  * registry 参数：npm 镜像源地址，空串 = 官方源；与安装通道吃同一 registry，
  * 保证「配置了镜像」时反查和安装走同一个源（镜像节点同步完整时结果一致）。
+ * proxy 参数：GitHub 改名跳转探测走的代理（与安装/诊断同一口径）。
  * 慢网络下失败不阻塞安装。
  */
-export function resolveNpmPackage(repo: string, registry = ''): Promise<string | null> {
+export async function resolveNpmPackage(repo: string, registry = '', proxy = ''): Promise<string | null> {
   const key = repo.toLowerCase()
-  if (cache.has(key)) return Promise.resolve(cache.get(key) ?? null)
-  const name = searchRepo(repo, registry)
-  void name.then((found) => {
-    if (found !== undefined) cache.set(key, found)
-  })
-  return name.then((found) => found ?? null)
+  if (cache.has(key)) return cache.get(key) ?? null
+  let found = await searchRepo(repo, registry)
+  // 仓库改名后 npm 包的 repository 已指向新名，按旧名反查不到：跟随一次 GitHub 的
+  // 改名跳转拿到规范名再查一遍（旧地址本身仍可用，只是仓库名变了）。
+  if (found === null) {
+    const canonical = await canonicalRepo(repo, proxy)
+    if (canonical !== '' && canonical.toLowerCase() !== key) found = await searchRepo(canonical, registry)
+  }
+  if (found !== undefined) cache.set(key, found)
+  return found ?? null
 }
 
 type NpmSearchPackage = {
@@ -77,7 +83,7 @@ export function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string)
   return keywordMarked || manifestMarked
 }
 
-export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = ''): Promise<boolean> {
+export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = '', proxy = ''): Promise<boolean> {
   if (packageName === '' || repo === '') return Promise.resolve(false)
   const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
   const url = `${base}/${encodeURIComponent(packageName)}/latest`
@@ -91,16 +97,38 @@ export function isDshNpmPackageForRepo(packageName: string, repo: string, regist
       let body = ''
       res.on('data', (chunk: Buffer) => { body += chunk.toString() })
       res.on('end', () => {
-        try {
-          resolve(isDshPackageMetadataForRepo(JSON.parse(body) as NpmSearchPackage, repo))
-        } catch {
-          resolve(false)
-        }
+        void (async () => {
+          try {
+            const pkg = JSON.parse(body) as NpmSearchPackage
+            if (isDshPackageMetadataForRepo(pkg, repo)) {
+              resolve(true)
+              return
+            }
+            // 仓库改名后包元数据指向新名：按原名不匹配时，用 GitHub 跳转后的规范名复核一次
+            const canonical = await canonicalRepo(repo, proxy)
+            resolve(canonical !== '' && isDshPackageMetadataForRepo(pkg, canonical))
+          } catch {
+            resolve(false)
+          }
+        })()
       })
     })
     req.on('timeout', () => req.destroy())
     req.on('error', () => resolve(false))
   })
+}
+
+/**
+ * 解析仓库改名后的规范 `owner/repo`：GitHub 对已改名仓库返回 301，跟随跳转取最终地址。
+ * 与其它 GitHub 访问同口径走 curl + 代理 env（Node 内置 https 读不到系统代理）。
+ * 未改名、仓库不存在、网络失败或 curl 不可用都返回 ''，调用方按原名继续。
+ */
+async function canonicalRepo(repo: string, proxy: string): Promise<string> {
+  if (githubRepoOf(repo) === null) return ''
+  const key = repo.toLowerCase()
+  const final = await finalUrl(`https://github.com/${repo}`, proxy, REQUEST_TIMEOUT_MS)
+  const canonical = final === null ? null : githubRepoOf(final)
+  return canonical !== null && canonical.toLowerCase() !== key ? canonical : ''
 }
 
 function matchingPackagesForRepo(objects: NpmSearchObject[], repo: string): Array<{ name: string; isDshPlugin: boolean }> {
