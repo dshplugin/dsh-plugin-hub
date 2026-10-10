@@ -312,7 +312,7 @@ export const zh = {
   // prepare 构建脚本实际执行失败（git 分发缺子模块/构建产物）：插件打包分发问题，应提 Issue
   failPrepareHint: '该插件安装时的构建脚本执行失败（git 分发常缺失子模块或构建产物），属插件打包分发问题。请向作者仓库提交 Issue 反馈。',
   // 安装前预检 / 装后校验拦截（[packaging]）：git 分发缺构建产物、入口文件不存在 = 插件未适配官方默认安装方式
-  failPackagingHint: '该插件不支持官方默认安装方式：其 git 分发缺少构建产物（package.json 声明的入口文件在仓库中不存在），说明作者未适配官方安装流程。请到作者仓库提交 Issue 反馈，请其提交构建产物或发布 npm 版。',
+  failPackagingHint: '该插件不支持官方默认安装方式：其 git 分发缺少构建产物（package.json 声明的入口文件在仓库中不存在），说明作者未适配官方安装流程。请到作者仓库提交 Issue 反馈，请其提交构建产物、改用预构建 release `.tgz` 直链（`releases/download/<tag>/<asset>.tgz`），或发布完整的 npm 版。',
   // 原生依赖构建脚本被 pnpm 默认拦截（如 node-pty 的 ERR_PNPM_IGNORED_BUILDS）：只影响带原生模块的插件，属插件依赖打包问题，应提 Issue
   failIgnoredBuild: '该插件或其依赖需要执行构建脚本，被 pnpm 的安全白名单（allowBuilds）默认拦截导致安装失败（如原生模块 node-pty、或 git 安装时插件的 prepare 脚本）—— 其他插件不受影响，属该插件的依赖/打包问题。建议向作者仓库一键反馈，请作者改用预编译版本（如 node-pty-prebuilt-multiarch）或移除安装期构建。',
   // npm arborist 内部崩溃（edgesOut）＋ 本机 npm 版本过低：npm 自身已知缺陷，不是插件问题，升级 npm 即可
@@ -700,7 +700,7 @@ export const en = {
   // prepare script actually failed (git tarball misses submodules/build output): a packaging issue of the plugin itself — file an issue
   failPrepareHint: 'This plugin failed while running its build scripts during install (git tarballs often miss submodules or build output). This is a packaging issue of the plugin itself — please report it to the author repository.',
   // Pre-install / post-install guard hit ([packaging]): git distribution lacks build output, entry file missing = not adapted to the official default install method
-  failPackagingHint: 'This plugin does not support the official default install method: its git distribution lacks the build output (the entry file declared in package.json is not in the repository), so it has not been adapted to the official install flow. Please file an Issue on the author\'s repo asking for committed build output or an npm release.',
+  failPackagingHint: 'This plugin does not support the official default install method: its git distribution lacks the build output (the entry file declared in package.json is not in the repository), so it has not been adapted to the official install flow. Please file an Issue on the author\'s repo asking for committed build output, a prebuilt release `.tgz` (`releases/download/<tag>/<asset>.tgz`), or a complete npm release.',
   // native-module build scripts ignored by pnpm by default (e.g. node-pty, ERR_PNPM_IGNORED_BUILDS): only affects plugins with native deps — a dependency/packaging issue of the plugin itself, file an issue
   failIgnoredBuild: 'This plugin (or its dependencies) needs to run build scripts, which pnpm blocks by default via its allowBuilds allowlist, so the install fails (e.g. native modules like node-pty, or the plugin\'s own prepare script on git installs) — other plugins are unaffected. This is a dependency/packaging issue of the plugin itself. Please report it to the author repository and ask the author to ship a prebuilt variant (e.g. node-pty-prebuilt-multiarch) or drop install-time builds.',
   failNpmTooLow: 'Your local npm may be too old: npm crashed internally while resolving the plugin\'s dependencies (a known npm bug — not a plugin issue). Please upgrade npm and retry: npm install -g npm@latest',

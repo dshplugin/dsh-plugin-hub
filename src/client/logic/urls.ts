@@ -124,12 +124,12 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
       ...(attempts && attempts.length > 0
         ? ['', '## Attempted install channels（已尝试的安装方式）', ...attempts.map((a) => `- ${a}`)]
         : []),
-      // [packaging] 场景：说明两种官方安装通道（npm 包 / git 直装），当前插件在对应通道下分发不完整
+      // [packaging] 场景：说明三种官方安装通道（npm 包 / git 直装 / 预构建 release .tgz），当前插件在对应通道下分发不完整
       ...(/\[packaging\]/i.test(message)
         ? [
           '',
           '## 安装方式说明',
-          'DSH 插件支持两种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）与 `dsh plugin add git+https://github.com/owner/repo.git`（Git 直装，仓库需提交构建产物或在 package.json 提供 `prepare` 脚本）。当前插件的分发物缺少 package.json 声明的入口文件，请按所用通道补齐后重新发布。',
+          'DSH 插件支持三种官方安装通道：`dsh plugin add <npm-package>`（npm 分发，需发布完整构建产物）、`dsh plugin add git+https://github.com/owner/repo.git`（Git 直装，仓库需提交构建产物），以及预构建 release 包 `dsh plugin add https://github.com/owner/repo/releases/download/<tag>/<asset>.tgz`（仓库不便提交构建产物时的推荐方式）。注意：pnpm ≥10 默认拦截依赖构建脚本，Git 直装不会执行包内 `prepare`，请勿依赖它生成产物。当前插件的分发物缺少 package.json 声明的入口文件，请提交构建产物、改用 release `.tgz` 直链，或发布完整的 npm 包。',
         ]
         : []),
       '',
