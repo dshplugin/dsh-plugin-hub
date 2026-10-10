@@ -32,10 +32,14 @@ const SEARCH_RESULT_LIMIT = 250
  * 保证「配置了镜像」时反查和安装走同一个源（镜像节点同步完整时结果一致）。
  * 慢网络下失败不阻塞安装。
  */
-export function resolveNpmPackage(repo: string, registry = ''): Promise<string | null> {
+export async function resolveNpmPackage(repo: string, registry = ''): Promise<string | null> {
   const key = repo.toLowerCase()
   if (cache.has(key)) return Promise.resolve(cache.get(key) ?? null)
-  const name = searchRepo(repo, registry)
+  const name = searchRepo(repo, registry).then(async (found) => {
+    if (found !== null) return found
+    const canonical = await canonicalRepo(repo)
+    return canonical.toLowerCase() === key ? found : searchRepo(canonical, registry)
+  })
   void name.then((found) => {
     if (found !== undefined) cache.set(key, found)
   })
@@ -77,7 +81,7 @@ export function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string)
   return keywordMarked || manifestMarked
 }
 
-export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = ''): Promise<boolean> {
+export async function isDshNpmPackageForRepo(packageName: string, repo: string, registry = ''): Promise<boolean> {
   if (packageName === '' || repo === '') return Promise.resolve(false)
   const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
   const url = `${base}/${encodeURIComponent(packageName)}/latest`
@@ -90,9 +94,11 @@ export function isDshNpmPackageForRepo(packageName: string, repo: string, regist
       }
       let body = ''
       res.on('data', (chunk: Buffer) => { body += chunk.toString() })
-      res.on('end', () => {
+      res.on('end', async () => {
         try {
-          resolve(isDshPackageMetadataForRepo(JSON.parse(body) as NpmSearchPackage, repo))
+          const pkg = JSON.parse(body) as NpmSearchPackage
+          resolve(isDshPackageMetadataForRepo(pkg, repo)
+            || isDshPackageMetadataForRepo(pkg, await canonicalRepo(repo)))
         } catch {
           resolve(false)
         }
@@ -101,6 +107,19 @@ export function isDshNpmPackageForRepo(packageName: string, repo: string, regist
     req.on('timeout', () => req.destroy())
     req.on('error', () => resolve(false))
   })
+}
+
+async function canonicalRepo(repo: string): Promise<string> {
+  if (githubRepoOf(repo) === null) return repo
+  try {
+    const response = await fetch(`https://github.com/${repo}`, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
+    return response.ok ? githubRepoOf(response.url) ?? repo : repo
+  } catch {
+    return repo
+  }
 }
 
 function matchingPackagesForRepo(objects: NpmSearchObject[], repo: string): Array<{ name: string; isDshPlugin: boolean }> {

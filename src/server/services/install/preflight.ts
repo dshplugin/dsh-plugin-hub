@@ -59,7 +59,9 @@ export async function preflightTarget(target: string): Promise<PreflightResult> 
     if (meta === null) return { ok: true, missing: null, name: null }
     const entry = resolvePackageEntry(meta)
     const inTar = await hasTarEntry(tar, `${rootPrefix}${entry}`)
-    return { ok: inTar, missing: inTar ? null : entry, name: typeof meta.name === 'string' ? meta.name : null }
+    const prepare = (meta.scripts as { prepare?: unknown } | undefined)?.prepare
+    const ok = inTar || (typeof prepare === 'string' && prepare.trim() !== '')
+    return { ok, missing: ok ? null : entry, name: typeof meta.name === 'string' ? meta.name : null }
   } catch {
     return { ok: true, missing: null, name: null }
   } finally {
