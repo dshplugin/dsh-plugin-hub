@@ -50,15 +50,28 @@
 | API | 语义 | 源码位置 |
 | --- | --- | --- |
 | `ctx.loader.entries()` | 遍历整棵树的全部条目（含嵌套子树） | `EntryTree.entries()` L160-166 |
-| `ctx.loader.create({ name, config })` | 动态装载一个插件条目 | `EntryTree.create()` L215-222 |
-| `ctx.loader.remove(id)` | 停止并移除一个条目（官方推荐入口） | `Loader.remove()` L224-228 |
+| `ctx.loader.create({ name, config })` | 动态装载一个插件条目（**安装热挂载用**） | `EntryTree.create()` L215-222 |
+| `ctx.loader.resolve(id)` | 按 id 解析条目（确认 fiber 真的起来了） | `Loader.resolve()` |
+| `entry.update({ disabled }, create?, force?)` | live-disable / 启用一个条目（**卸载用**；`force=true` 覆盖初始化竞态） | `Entry.update()` |
+| `ctx.loader.remove(id)` | 停止并移除一个条目（`resolve` → `EntryGroup.remove` → `tree.write`） | `Loader.remove()` L224-228 |
 | `entry.id` | 条目标识；嵌套条目带 `父id:子id` 前缀 | `Entry.get id()` L344-348 |
 | `entry.options.name` | 条目名 == npm 包名 | `Entry.options` L331 |
 | `entry.parent.remove(id)` | 底层移除：`_dispose` → unlink → 删 store → emit `loader/partial-dispose` | `EntryGroup.remove()` L68-75 |
 
-**关键结论（本项目卸载修复的依据）**：
-- `Loader.remove(id)` 内部还会调 `tree.write()`，但 `EntryTree.write()` 默认是 **no-op**（官方注释："Persistent is supplied by subclasses"，而 `Loader` 本身没有子类化它）。所以 **`ctx.loader.remove` 是纯运行时操作，不会把配置树写进 cordis.yml**——下次重启配置树仍由 patch 重新合成。
-- 条目被移除时 fiber 会被 dispose，官方机制随之触发 client-modules 对账（见 1.4）。
+**关键结论（本项目"装完即生效"的依据）**：
+
+- **卸载走 live-disable，不走 remove**：对匹配条目 `entry.update({ disabled: true }, false, true)`。
+  这条路径走 `Entry.update` 的 disabled 分支，**不触发 `tree.write()`**（不会把运行态条目烘焙回
+  `cordis.yml`），也不依赖嵌套子树的 id 解析 —— 比 `loader.remove(id)` 更稳。
+  fiber 被 dispose 后由 client-modules 对账摘除（见 1.4）。实现见
+  `src/server/services/loader.ts` 的 `removeLoadedEntry()`。
+- **安装走热挂载**：`ctx.loader.create({ name })` 在运行中 loader 里新建条目并启动，
+  语义等价于 profile bundle patch 的 `- insert: - name: <pkg>` 行；再 `resolve(id)` 确认
+  fiber 真的起来了（`Entry._init` 的 import 失败只 `logger.error` 不抛，条目会建出来但 fiber 为空）。
+  实现见 `loader.ts` 的 `mountLoadedEntry()`。
+- `EntryTree.write()` 默认是 **no-op**（官方注释："Persistent is supplied by subclasses"，
+  而 `Loader` 本身没有子类化它）。所以 **disable 与 create 都是纯运行时操作，不会写盘**——
+  重启后配置树仍由 profile 的 bundles 清单重新合成，不会重复挂载。
 
 ### 1.4 client-modules（`ctx.clientModules`）—— Web 插件表
 
@@ -68,11 +81,13 @@
 - 扫描宿主 loader 的 entry，找出声明了 `dsh.client` 的包，组合出 `window.__DSH_BOOT__` 图，在 `/plugins/<id>/client.js` 提供各 bundle。
 - 每行 entry 形如：`{ id（==包名）, url: '/plugins/<id>/client.js?rev=<rev>', rev（bundle 内容哈希）, inject?, immediately?, external? }`；整图还有 `rev`（对所有行再哈希，任何行变化图就变）。
 - **`rev` 是缓存失效锚点**（基于内容哈希，不是 HTTP 缓存）。
-- **包元数据按名缓存且永不过期**，插件集合的变更在重启后生效；fiber 重启复用其行与 rev。
+- **包元数据按名缓存且永不过期**（读 package.json 取 inject/external 等），但**条目清单是运行时的**：
+  `__DSH_BOOT__` 注入图由宿主服务端**按请求现场拼装**（`src/server/services/loader.ts` 注释），
+  条目增删经对账（下一段）后，**刷新页面即反映，不需要重启宿主**；fiber 重启复用其行与 rev。
 - **增量扫描 + 对账**（这是本项目"卸载即时生效"的机制基础）：
   - fiber 构造或 dispose 时发出 cordis `internal/plugin` 事件 → 该 entry 名被标脏 → 一次微任务 flush 把脏名与**实时 loader entry** 对账。
   - 对账逻辑（`processOne()` L281-297）：若实时 loader 里已无该 entry（`entry.fiber` 为 null / entry 不存在）→ `table.delete(name)` → 该行从 `__DSH_BOOT__` 图移除。
-  - 因此：**从 loader 移除条目 → fiber dispose → 对账 → 刷新页面就不再加载它**。这正是 `src/server/services/install.ts` 的 `removeLoadedEntry()` 依赖的官方机制。
+  - 因此：**条目被 dispose（移除或 live-disable）→ 对账 → 刷新页面就不再加载它**。这正是 `src/server/services/loader.ts` 的 `removeLoadedEntry()` 依赖的官方机制。
 - 官方 API：`graph()` / `clientPath(id)` / `rebuilt(id)`（HMR 用，内容变才改 rev）/ `onRebuilt(listener)` / `onGraphChanged(listener)`。
 - **404 是大声失败**：`GET /plugins/<id>/client.js` 对未知 id 或不可读 bundle 返回 404，不可读 bundle 不会表现为假成功 —— 这就是第三方插件卸载后刷新报 "failed to import loader entry" 的来源。
 
@@ -81,7 +96,10 @@
 官方文档：<https://deepseek-harness.github.io/deepseek-harness/reference/subsystems/web-server>
 
 - 本插件通过 `ctx.inject(['webServer'], cb)` 在 web server 就绪后注册 `/dsh-plugin-hub/*` 路由。
-- 浏览器 bundle 通过同源 HTTP 与这些路由通信（本插件 `src/server/http/routes.ts`）。
+- 浏览器 bundle 通过同源 HTTP 与这些路由通信（本插件 `src/server/http/routes.ts`，
+  完整路由表见 [architecture.md](architecture.md)）。
+- 所有变更请求（install / uninstall / settings / restart…）都过同源校验：`Host` 必须是回环，
+  再比对归一化后的「主机名:端口」（CSRF 防线，见 `routes.ts` 的 `isSameOrigin()`）。
 
 ---
 
@@ -100,13 +118,15 @@
 
 | 结论 | 出处 | 影响 |
 | --- | --- | --- |
-| 插件集合变更在重启后生效（loader 树是运行时的唯一真源） | reference client-modules「扫描」 | 安装后需重启才挂载 —— 我们的「待重启」提示 |
-| 卸载后运行中的 loader 仍持有旧条目，刷新会因 client.js 404 崩 | `processOne()` 对账 + 「404 大声失败」 | 卸载成功后必须 `ctx.loader.remove` 条目即时生效（本项目 `removeLoadedEntry`），移除失败才提示待重启 |
-| `ctx.loader.remove` 不持久化（`tree.write()` 是 no-op） | cordis-plugin-loader `Loader.remove` L224-228、L656 | 移除是纯运行时操作，重启后由 patch 重新合成配置树 |
-| fiber dispose → `internal/plugin` → 对账移除 client 行 | dsh-client-modules L140-152、L281-297 | 卸载移除 loader 条目后刷新页面不再加载该插件 |
+| loader 树是运行时的唯一真源，`__DSH_BOOT__` 图按请求现场拼装 | reference client-modules；`services/loader.ts` 注释 | 安装 / 卸载热操作后**刷新页面**即生效，只有热操作失败才退化为「待重启」 |
+| 卸载后运行中的 loader 仍持有旧条目，刷新会因 client.js 404 崩 | `processOne()` 对账 + 「404 大声失败」 | 卸载成功后必须 live-disable 该条目（本项目 `removeLoadedEntry`），失败才提示待重启 |
+| live-disable（`entry.update({ disabled: true })`）与 `loader.create` 都不写盘（`tree.write()` 是 no-op） | cordis-plugin-loader `Loader.remove` L224-228、L656 | 两者都是纯运行时操作，重启后由 profile 的 bundles 清单重新合成配置树，不会重复挂载 |
+| fiber dispose → `internal/plugin` → 对账移除 client 行 | dsh-client-modules L140-152、L281-297 | 卸载（移除或 disable）后刷新页面不再加载该插件 |
+| 热挂载必须用 `loader.resolve(id)` 复核 fiber 是否真的起来 | cordis `Entry._init`：import 失败只 `logger.error` 不抛（见 `loader.ts` 注释） | 条目会建出来但 fiber 为空 → 复核不通过就回退「待重启」，不能报假成功 |
+| 更新（update）走 ESM 缓存，热挂载拿不到新代码 | 本项目排查（`task-queue.ts`） | 更新一律登记「待重启」，不尝试热挂载 |
 | 浏览器 HTTP 缓存导致接口数据过期 | 实际踩坑（dsh-plugin-hub） | 所有 `/dsh-plugin-hub/*` 与在线 API 必须 `cache: 'no-store'` |
 | profile 目录每次启动 `cordis.yml` 被重写为 `[]` | dsh `lib/profile-boot-*.js` `prepareProfile()` | 持久化配置要写在 patch 文件，不是 cordis.yml |
-| `dsh plugin remove` 只改 package.json / lock / node_modules，不动运行中 loader | 官方 CLI 行为 + 本项目排查 | 卸载即时生效必须由本插件主动 `loader.remove` |
+| `dsh plugin remove` 只改 package.json / lock / node_modules，不动运行中 loader | 官方 CLI 行为 + 本项目排查 | 卸载即时生效必须由本插件主动 live-disable loader 条目 |
 
 ---
 
