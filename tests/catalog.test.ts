@@ -72,7 +72,11 @@ test('pluginIssueUrl: 标题点明错误原因，不再用 Install/Remove 动作
 test('installCommandOf: GitHub source uses an explicit HTTPS URL', () => {
   const p = normalize({ s: 'aegis', n: 'Aegis', r: 'ganyuanran/aegis' })
   assert.equal(installCommandOf(p), 'dsh plugin add git+https://github.com/ganyuanran/aegis.git')
-  assert.equal(installCommandOf(p, true), 'dsh plugin --profile web add git+https://github.com/ganyuanran/aegis.git')
+  // 档位由调用方给出（不再是写死的 web）：withProfile 只是「要不要带 --profile」的开关
+  assert.equal(
+    installCommandOf(p, true, 'web'),
+    'dsh plugin --profile web add git+https://github.com/ganyuanran/aegis.git',
+  )
 })
 
 test('repoFromInstallTarget: keeps catalog identity across Git target formats', () => {

@@ -10,6 +10,52 @@
 import type { HubPlugin } from '../types.ts'
 import { githubReleaseTarget } from '../../server/services/install/release-target.ts'
 
+/** The profile the catalog stamps onto every entry that is not tied to a specific
+ *  one. It is a publishing placeholder, not a chosen target: measured against the
+ *  live catalog, all 13448 entries carry `--profile web` and none names another
+ *  profile. Copying such a command on any other host — DSH Desktop runs the
+ *  `desktop` profile — installs into the wrong profile, so it is re-pointed at
+ *  the one this host actually serves. */
+const CATALOG_DEFAULT_PROFILE = 'web'
+
+/** The profile token of a `dsh plugin` command (`--profile web` / `--profile=web`). */
+const PROFILE_ARG_RE = /(\s--profile(?:=|\s+))(\S+)(?=\s|$)/
+
+/** The profile this host serves, learned from `GET /dsh-plugin-hub/env`.
+ *  Held at module scope so every command builder — including the ones called from
+ *  plain render paths — reads the same value without threading it through props. */
+let activeProfile = ''
+
+/** Record the profile the host reports, so generated commands target it.
+ *  @param profile - profile name from the /env snapshot; anything else clears it. */
+export function setActiveProfile(profile: string | undefined): void {
+  activeProfile = typeof profile === 'string' ? profile.trim() : ''
+}
+
+/** The profile the host reports, or '' before `/env` has answered. */
+export function getActiveProfile(): string {
+  return activeProfile
+}
+
+/**
+ * Re-point a catalog command at the profile this host serves.
+ *
+ * The catalog's command is authoritative for CLI-only plugins, which need their
+ * own profile (`--profile dsh-tui`) that cannot be inferred from the package name.
+ * Those name a profile other than {@link CATALOG_DEFAULT_PROFILE} and are kept
+ * verbatim; only the blanket placeholder is replaced, so a Desktop user copying
+ * it installs into `desktop` instead of `web`.
+ *
+ * @param command - a catalog command or any generated `dsh plugin ...` string.
+ * @param profile - profile to target; '' leaves the command untouched.
+ * @returns the command targeting `profile`, or the original when nothing applies.
+ */
+export function retargetProfile(command: string, profile: string): string {
+  if (command === '' || profile === '' || profile === CATALOG_DEFAULT_PROFILE) return command
+  return command.replace(PROFILE_ARG_RE, (match, prefix: string, name: string) =>
+    name === CATALOG_DEFAULT_PROFILE ? `${prefix}${profile}` : match)
+}
+
 /** Backend attempts are chronological; report the last executed command before a display fallback.
  * These prefixes are the task queue's recorded command shapes, never commands to execute here.
  */
@@ -42,20 +88,26 @@ export function installTargetOf(p: HubPlugin): { target: string; via: 'npm' | 'r
 
 /** 展示用安装命令（复制/弹窗）：目录下发的权威命令优先（CLI-only 插件如 dsh-tui
  *  需专属 profile（--profile dsh-tui），无法从 repo/npm 包名推断，必须用官方命令）；
- *  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。 */
-export function installCommandOf(p: HubPlugin, withProfile = false): string {
+ *  常规插件无目录命令时按通道回退生成：npm 显示包名，git 显示显式 HTTPS URL。
+ *  目录命令里的默认档位占位符会改写成宿主真实档位 —— 见 {@link retargetProfile}；
+ *  插件自带的专属档位原样保留。
+ *  @param profile - profile to target; defaults to the one `/env` reported.
+ */
+export function installCommandOf(p: HubPlugin, withProfile = false, profile = getActiveProfile()): string {
   const { target, via } = installTargetOf(p)
-  if (via === 'npm') {
-    const cmd = p.install?.command
-    if (cmd) return cmd
-  } else {
-    // release 与 git 通道共用目录下发的 githubCommand（git+ 显式 HTTPS 或 release 直链）
-    const cmd = p.install?.githubCommand
-    if (cmd) return cmd
-  }
-  const prefix = `dsh plugin${withProfile ? ' --profile web' : ''} add `
+  const catalog = via === 'npm' ? p.install?.command : p.install?.githubCommand
+  if (catalog) return retargetProfile(catalog, profile)
+  const prefix = `dsh plugin${withProfile && profile !== '' ? ` --profile ${profile}` : ''} add `
   if (via === 'npm' || via === 'release') return `${prefix}${target}`
   return `${prefix}git+https://github.com/${target}.git`
+}
+
+/** 卸载命令（复制/弹窗）：官方 CLI 要求 --profile，缺省会被直接拒绝
+ *  （`error: required option '--profile <name>' not specified`），故带上宿主档位。
+ *  @param profile - profile to target; defaults to the one `/env` reported.
+ */
+export function uninstallCommandOf(name: string, profile = getActiveProfile()): string {
+  return profile === '' ? `dsh plugin remove ${name}` : `dsh plugin --profile ${profile} remove ${name}`
 }
 
 /** Normalize a task/install target to its owner/repo display identity. */

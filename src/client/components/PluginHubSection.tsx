@@ -13,7 +13,7 @@ import type { MouseEvent } from 'react'
 import styles from '../styles/Header.module.css'
 import modalStyles from '../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, InstallChannel, SectionProps, ToastState } from '../types.ts'
-import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
+import { installCommandOf, repoFromInstallTarget, setActiveProfile, uninstallCommandOf } from '../logic/install-command.ts'
 import { PLUGIN_VERSION } from '../logic/constants.ts'
 import { ensurePluginCss } from '../logic/ensure-plugin-css.ts'
 import { getEnv, revealInstallFolder } from '../data/host.ts'
@@ -126,7 +126,13 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [env, setEnv] = useState<EnvInfo | null>(null)
   useEffect(() => {
     let alive = true
-    void getEnv().then((info) => { if (alive) setEnv(info) })
+    void getEnv().then((info) => {
+      if (!alive) return
+      setEnv(info)
+      // 命令生成统一按宿主真实档位：目录下发的命令都写着 --profile web，
+      // 桌面端（desktop 档）照抄会装进 web 档（see retargetProfile）。
+      setActiveProfile(info?.profile)
+    })
     return () => { alive = false }
   }, [])
 
@@ -322,7 +328,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const copyUninstallCommand = async () => {
     const name = uninstallItem ? uninstallItem.name : (uninstallPlugin ? catalog.installedName(uninstallPlugin) : null)
     if (!name) return
-    const ok = await doCopy(`dsh plugin remove ${name}`)
+    const ok = await doCopy(uninstallCommandOf(name, env?.profile))
     if (ok) setToast({ id: Date.now(), kind: 'copied' })
   }
 
@@ -495,7 +501,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               enableDsh: hubSettings.enableDshInstall,
               onOpenSettings: () => setView('settings'),
               // 当前 profile：一键插入的 Hub 更新命令用它拼 --profile
-              profile: env?.profile ?? 'web',
+              // 不回退 'web'：未拿到 /env 时留空，命令就不带 --profile，好过指向错误档位
+              profile: env?.profile ?? '',
               onInstallCustom: (raw, opts) => {
                 const target = raw.trim()
                 if (!target) return

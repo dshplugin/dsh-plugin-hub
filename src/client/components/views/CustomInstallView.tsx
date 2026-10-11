@@ -123,9 +123,13 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
   enableDsh: boolean
   /** 引导去「设置 → 安全信任」打开被关闭的通道开关 */
   onOpenSettings: () => void
-  /** 当前 dsh profile 名（宿主 /env 快照）：一键插入的更新命令用它拼 --profile */
+  /** 当前 dsh profile 名（宿主 /env 快照）：一键插入的更新命令用它拼 --profile。
+   *  未拿到前为空串（不回退 'web'）：文案退化为占位符、插入按钮隐藏，
+   *  避免生成一条指向错误档位的命令。 */
   profile: string
 }) {
+  /** 文案展示用：档位未知时给占位符，而不是一个具体的（可能是错的）档位名 */
+  const profileLabel = profile === '' ? '<profile>' : profile
   /** 自定义安装：NPM 包输入与格式错误（'' = 无错误） */
   const [npmQuery, setNpmQuery] = useState('')
   const [npmError, setNpmError] = useState('')
@@ -176,7 +180,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
     const raw = cmdQuery.trim()
     if (!raw) return
     const parsed = parseDshCommand(raw)
-    if (parsed === null) { setCmdError(t('dshCmdInvalid', { profile })); return }
+    if (parsed === null) { setCmdError(t('dshCmdInvalid', { profile: profileLabel })); return }
     // add / update 统一走安装流程：目标已安装时弹窗自动转「更新」覆盖重装（服务端 mode=update 放行），
     // 未安装时即为普通安装 —— 粘贴 `dsh plugin --profile web update dsh-plugin` 这类命令即可更新到最新
     onInstallCustom(parsed.target, { installChannel: 'dsh' })
@@ -185,6 +189,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
   }
   /** 一键插入 DSH Plugin Hub 自身的更新命令：按当前 profile 拼官方命令填进输入框，用户确认后提交 */
   const insertHubUpdate = () => {
+    if (profile === '') return
     setCmdQuery(`dsh plugin --profile ${profile} update dsh-plugin`)
     setCmdError('')
   }
@@ -292,7 +297,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
           }, h(HelpIcon)),
           // 一键插入 Hub 自身的更新命令：按当前 profile 拼 `dsh plugin --profile <p> update dsh-plugin`
           // 填入输入框（命令卡片被安全开关禁用时不显示，插入后也提交不了）
-          enableDsh
+          enableDsh && profile !== ''
             ? h('button', {
               type: 'button',
               className: styles.installInsertBtn,
@@ -303,7 +308,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
         !enableDsh
           ? channelOffRow
           : [
-            h('div', { className: styles.installExample }, t('dshCmdExample', { profile })),
+            h('div', { className: styles.installExample }, t('dshCmdExample', { profile: profileLabel })),
             h('div', { className: styles.installRow },
               h('input', {
                 className: cmdError ? `${styles.installInput} ${styles.installInputError}` : styles.installInput,
@@ -346,7 +351,7 @@ export function CustomInstallView({ t, onInstallCustom, enableNpm, enableGit, en
           h('div', { className: modal.modalBody },
             // 格式清单：一行一条；`命令\t说明` 的说明跟在命令后，纯说明行以 \t 开头
             h('div', { className: styles.helpBody },
-              t(HELP_CARDS[helpFor].contentKey, { profile }).split('\n').map((line, i) => {
+              t(HELP_CARDS[helpFor].contentKey, { profile: profileLabel }).split('\n').map((line, i) => {
                 const [cmd, note] = line.split('\t')
                 return h('div', { key: i, className: styles.helpLine },
                   cmd !== '' ? h('span', { className: styles.helpCmd }, cmd) : null,

@@ -997,8 +997,8 @@ export function mountPluginHubRoutes(webServer: WebServerService, profile: strin
                 } else {
                   attempts.push(`package name conflict: \`${gitRepo}\` declares npm name \`${declared}\`, which is already present in the profile and cannot be matched to this repo (that npm name is likely registered by another repository)`)
                   const error = lang === 'zh'
-                    ? `already installed: ${declared} —— ${gitRepo} 声明的 npm 包名「${declared}」已存在于当前 profile，且无法匹配到本仓库（该包名在 npm 上可能被其他仓库占用）。请先移除现有的 ${declared}（dsh plugin remove ${declared}），再重新安装；或改装该包名对应的官方 npm 包。`
-                    : `already installed: ${declared} — ${gitRepo} declares the npm package name "${declared}", which is already present in the profile and cannot be matched to this repo (that npm name is likely registered by another repository). Remove the existing ${declared} dependency (dsh plugin remove ${declared}) first, then retry; or install the official npm package under that name.`
+                    ? `already installed: ${declared} —— ${gitRepo} 声明的 npm 包名「${declared}」已存在于当前 profile，且无法匹配到本仓库（该包名在 npm 上可能被其他仓库占用）。请先移除现有的 ${declared}（dsh plugin --profile ${profile} remove ${declared}），再重新安装；或改装该包名对应的官方 npm 包。`
+                    : `already installed: ${declared} — ${gitRepo} declares the npm package name "${declared}", which is already present in the profile and cannot be matched to this repo (that npm name is likely registered by another repository). Remove the existing ${declared} dependency (dsh plugin --profile ${profile} remove ${declared}) first, then retry; or install the official npm package under that name.`
                   sendJson(response, 409, { error, attempts })
                   return
                 }
