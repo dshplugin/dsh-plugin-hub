@@ -16,6 +16,10 @@
 
 .tab,
 .tabActive {
+  /* 标签不折行：窄容器下保持单行，避免中文被逐字竖排 */
+  white-space: nowrap;
+  /* 容器再窄也不压缩 tab：拒绝收缩，转为横向溢出而不是纵向下坠 */
+  flex-shrink: 0;
   position: relative;
   display: inline-flex;
   align-items: center;
