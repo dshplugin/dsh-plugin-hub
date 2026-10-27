@@ -56,6 +56,19 @@ test('npmInstallTargetOf: 钉住版本优先，其次 @latest，git/全局安装
   assert.equal(npmInstallTargetOf('dsh-tui', { update: true, global: true, pinned: 'dsh-tui@1.0.0' }), 'dsh-tui')
 })
 
+test('npm add explicitly selects latest even when the profile is not marked as an update', () => {
+  const add = { update: false, global: false, add: true }
+  assert.equal(npmInstallTargetOf('dsh-openwrite', add), 'dsh-openwrite@latest')
+  assert.equal(npmInstallTargetOf('@scope/plugin', add), '@scope/plugin@latest')
+  assert.equal(npmInstallTargetOf('dsh-plugin', { ...add, pinned: 'dsh-plugin@2.2.3' }), 'dsh-plugin@2.2.3')
+  assert.equal(npmInstallTargetOf('dsh-openwrite@0.2.28', add), 'dsh-openwrite@0.2.28')
+  assert.equal(npmInstallTargetOf('@scope/plugin@next', add), '@scope/plugin@next')
+  assert.equal(npmInstallTargetOf('https://example.test/plugin.tgz', add), 'https://example.test/plugin.tgz')
+  assert.equal(npmInstallTargetOf('owner/repo', add), 'owner/repo')
+  assert.equal(npmInstallTargetOf('dsh-openwrite', { ...add, global: true }), 'dsh-openwrite')
+  assert.equal(npmInstallTargetOf('dsh-openwrite', { update: false, global: false, add: false }), 'dsh-openwrite')
+})
+
 test('installTargetOf: strips an official dsh plugin command down to its target', () => {
   // 官方唯一形式：`dsh plugin --profile <name> <add|update> <target>`（--profile 必填、无 -p 简写）；
   // 支持 --profile=<name> 等号形式；update 动词同样剥成裸目标（更新已安装目标到最新）；

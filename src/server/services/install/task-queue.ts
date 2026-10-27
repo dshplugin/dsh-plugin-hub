@@ -20,7 +20,7 @@ import { cleanLine, estimateProgress } from '../profile/progress.ts'
 import type { LoaderHandle } from '../loader.ts'
 import { hasClientUi, isDshPlugin, mountLoadedEntry, removeLoadedEntry } from '../loader.ts'
 import { addPendingRestart, clearPendingRestart } from '../profile/pending-restart.ts'
-import { addAllowBuildsKey, bundleIncludes, githubRepoOf, parseAllowBuildsKey, profileDirectory } from '../profile/profile.ts'
+import { addAllowBuildsKey, bundleIncludes, githubRepoOf, parseAllowBuildsKey, profileDirectory, validPackageName } from '../profile/profile.ts'
 import { appendLog } from '../log.ts'
 import { commandOnPath, gitMissingDetail } from './preflight.ts'
 import { isTransportFailure, registryHost } from './registry-fallback.ts'
@@ -218,12 +218,13 @@ export function desktopCliBootstrap(entry: string): string | null {
 
 /**
  * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过供应链门禁的版本），
- * 其次更新走 `@latest`，git 源与全局 npm 安装保持原样。
+ * 其次 npm add/更新走 `@latest`，避免普通安装复用旧精确依赖。
+ * 卸载、已有版本 spec、git 源与全局 npm 安装保持原样。
  */
-export function npmInstallTargetOf(target: string, opts: { update: boolean; global: boolean; pinned?: string }): string {
+export function npmInstallTargetOf(target: string, opts: { update: boolean; global: boolean; pinned?: string; add?: boolean }): string {
   if (opts.global || githubRepoOf(target) !== null) return target
   if (opts.pinned !== undefined && opts.pinned !== '') return opts.pinned
-  return opts.update ? `${target}@latest` : target
+  return (opts.update || opts.add) && validPackageName(target) ? `${target}@latest` : target
 }
 
 function stopChild(child: ReturnType<typeof spawn>): void {
@@ -432,15 +433,16 @@ function spawnMutation(options: {
     && (process.versions as Record<string, string | undefined>).electron !== undefined) {
     pushLine(task, '[desktop-cli-fallback] running inside Electron but no desktop CLI bootstrap was found — falling back to dsh on PATH (a desktop-managed profile will be rejected)')
   }
-  // 更新已安装的 npm 包：显式指定 @latest。pnpm add <pkg>（无版本）对已存在依赖
+  // 安装/更新 npm 包：显式指定 @latest。pnpm add <pkg>（无版本）对已存在依赖
   // （尤其精确 spec 如 "1.3.0"）是幂等的 —— 输出 "Already up to date" 且不改 package.json，
-  // 导致「更新成功」但实际仍停留在旧版本；git 地址与全局安装不受此影响。
+  // 普通安装也可能遇到旧 profile/失败安装留下的精确依赖，导致选回不兼容旧包。
+  // git 地址与全局安装不受此影响。
   // update 动作实际执行 `add <target>@latest`（pnpm 对已存在依赖带显式版本即原位覆盖升级），
   // CLI 动词仍透传 add —— 不执行官方 update 动词，避免与既有覆盖重装机制分叉。
   const isUpdate = action === 'update' || updateNpm === true
   const cliAction = action === 'update' ? 'add' : action
   // 钉住版本优先于 @latest：提示的是「已过门禁」的版本，装 latest 会被 pnpm 拒绝
-  const npmUpdateTarget = npmInstallTargetOf(target, { update: isUpdate, global: isGlobalNpm, pinned: installSpec })
+  const npmUpdateTarget = npmInstallTargetOf(target, { update: isUpdate, global: isGlobalNpm, pinned: installSpec, add: cliAction === 'add' })
   const args = isGlobalNpm
     ? ['install', '-g', ...(globalNpm ?? [])]
     : [...invocation.prefixArgs, 'plugin', '--profile', profile, cliAction, npmUpdateTarget]
