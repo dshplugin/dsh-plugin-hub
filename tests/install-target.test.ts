@@ -49,23 +49,26 @@ test('npmInstallTargetOf: 钉住版本优先，其次 @latest，git/全局安装
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: true, global: false, pinned: 'dsh-plugin@2.0.5' }), 'dsh-plugin@2.0.5')
   // 普通更新没钉版本 → @latest（pnpm 对已存在依赖才真正升级）
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: true, global: false }), 'dsh-plugin@latest')
-  // 普通安装原样
+  // 未声明 add 意图（非安装动作）原样
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: false, global: false }), 'dsh-plugin')
   // 钉版本对 git 源与全局 npm 不生效
   assert.equal(npmInstallTargetOf('owner/repo', { update: true, global: false, pinned: 'owner/repo@2.0.5' }), 'owner/repo')
   assert.equal(npmInstallTargetOf('dsh-tui', { update: true, global: true, pinned: 'dsh-tui@1.0.0' }), 'dsh-tui')
 })
 
-test('npm add explicitly selects latest even when the profile is not marked as an update', () => {
+test('npmInstallTargetOf: add 也显式 @latest，其余 spec 原样', () => {
+  // 普通安装不再原样透传：pnpm 会留用 profile 里遗留的精确旧依赖
   const add = { update: false, global: false, add: true }
   assert.equal(npmInstallTargetOf('dsh-openwrite', add), 'dsh-openwrite@latest')
   assert.equal(npmInstallTargetOf('@scope/plugin', add), '@scope/plugin@latest')
+  // 钉版本、已带版本/tag、tarball、git 源、全局安装都不补 @latest
   assert.equal(npmInstallTargetOf('dsh-plugin', { ...add, pinned: 'dsh-plugin@2.2.3' }), 'dsh-plugin@2.2.3')
   assert.equal(npmInstallTargetOf('dsh-openwrite@0.2.28', add), 'dsh-openwrite@0.2.28')
   assert.equal(npmInstallTargetOf('@scope/plugin@next', add), '@scope/plugin@next')
   assert.equal(npmInstallTargetOf('https://example.test/plugin.tgz', add), 'https://example.test/plugin.tgz')
   assert.equal(npmInstallTargetOf('owner/repo', add), 'owner/repo')
   assert.equal(npmInstallTargetOf('dsh-openwrite', { ...add, global: true }), 'dsh-openwrite')
+  // 非 add 意图（如 remove）原样
   assert.equal(npmInstallTargetOf('dsh-openwrite', { update: false, global: false, add: false }), 'dsh-openwrite')
 })
 

@@ -40,12 +40,13 @@ export declare function cancelTask(id: number): boolean;
 export declare function desktopCliBootstrap(entry: string): string | null;
 /**
  * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过供应链门禁的版本），
- * 其次更新走 `@latest`，git 源与全局 npm 安装保持原样。
+ * 其次 npm 的 add/update 都显式 `@latest`；git 源、全局安装、已带版本/tag 的 spec 保持原样。
  */
 export declare function npmInstallTargetOf(target: string, opts: {
     update: boolean;
     global: boolean;
     pinned?: string;
+    add?: boolean;
 }): string;
 /**
  * 插件变更入队并返回其任务。任务严格串行：队列 worker 只在上一个结束后才启动下一个。

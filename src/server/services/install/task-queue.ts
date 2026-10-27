@@ -218,13 +218,14 @@ export function desktopCliBootstrap(entry: string): string | null {
 
 /**
  * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过供应链门禁的版本），
- * 其次 npm add/更新走 `@latest`，避免普通安装复用旧精确依赖。
- * 卸载、已有版本 spec、git 源与全局 npm 安装保持原样。
+ * 其次 npm 的 add/update 都显式 `@latest`；git 源、全局安装、已带版本/tag 的 spec 保持原样。
  */
 export function npmInstallTargetOf(target: string, opts: { update: boolean; global: boolean; pinned?: string; add?: boolean }): string {
   if (opts.global || githubRepoOf(target) !== null) return target
   if (opts.pinned !== undefined && opts.pinned !== '') return opts.pinned
-  return (opts.update || opts.add) && validPackageName(target) ? `${target}@latest` : target
+  // 裸包名才补 @latest：pnpm 对已存在的精确 spec 是幂等的，不显式要求就会留用旧版本
+  if (!(opts.update || opts.add) || !validPackageName(target)) return target
+  return `${target}@latest`
 }
 
 function stopChild(child: ReturnType<typeof spawn>): void {
@@ -433,12 +434,9 @@ function spawnMutation(options: {
     && (process.versions as Record<string, string | undefined>).electron !== undefined) {
     pushLine(task, '[desktop-cli-fallback] running inside Electron but no desktop CLI bootstrap was found — falling back to dsh on PATH (a desktop-managed profile will be rejected)')
   }
-  // 安装/更新 npm 包：显式指定 @latest。pnpm add <pkg>（无版本）对已存在依赖
-  // （尤其精确 spec 如 "1.3.0"）是幂等的 —— 输出 "Already up to date" 且不改 package.json，
-  // 普通安装也可能遇到旧 profile/失败安装留下的精确依赖，导致选回不兼容旧包。
-  // git 地址与全局安装不受此影响。
-  // update 动作实际执行 `add <target>@latest`（pnpm 对已存在依赖带显式版本即原位覆盖升级），
-  // CLI 动词仍透传 add —— 不执行官方 update 动词，避免与既有覆盖重装机制分叉。
+  // 安装/更新 npm 包都显式 @latest：pnpm add <pkg>（无版本）对已存在的精确 spec 是幂等的，
+  // 会原样留用旧版本（更新不生效，普通安装也可能装回不支持当前宿主的旧包）。
+  // update 动作同样执行 `add <target>@latest`，CLI 动词透传 add，不与官方 update 动词分叉。
   const isUpdate = action === 'update' || updateNpm === true
   const cliAction = action === 'update' ? 'add' : action
   // 钉住版本优先于 @latest：提示的是「已过门禁」的版本，装 latest 会被 pnpm 拒绝
