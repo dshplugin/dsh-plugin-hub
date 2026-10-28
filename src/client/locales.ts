@@ -482,6 +482,10 @@ export const zh = {
   update: '可更新',
   updateAvailable: '有更新',
   updateAvailableHint: '检测到更新：有版本号的仓库比对版本号，无版本号的仓库比对仓库最近更新时间',
+  // 门禁暂缓：新版本发布未满 24 小时，此时安装会被 pnpm 静默回退（或直接拒绝），
+  // 给出确切可重试时刻，而不是让徽标静默消失、让用户以为已经是最新
+  updatePending: '暂缓到 {time} 后可更新',
+  updatePendingHint: '新版本发布未满 24 小时，pnpm 供应链门禁会拦下；到时间后再更新即可',
   hubUpdateHint: '检测到 DSH Plugin Hub 新版本，点击查看更新内容并更新',
   hubUpdateTitle: 'DSH Plugin Hub 有新版本',
   hubUpdateDesc: 'v{version} 已发布，点击下方按钮即可更新，完成后需重启宿主生效。',
@@ -977,6 +981,8 @@ export const en = {
   update: 'Update',
   updateAvailable: 'Update available',
   updateAvailableHint: 'An update was detected: repos with a release are compared by tag, repos without one by last push time',
+  updatePending: 'Update available after {time}',
+  updatePendingHint: 'The new release is less than 24 hours old, so the pnpm supply-chain hold rejects it until then',
   hubUpdateHint: 'A new DSH Plugin Hub version is available — click to view the changelog and update',
   hubUpdateTitle: 'A new DSH Plugin Hub version is available',
   hubUpdateDesc: 'v{version} has been released — click below to update, then restart the host to apply it.',

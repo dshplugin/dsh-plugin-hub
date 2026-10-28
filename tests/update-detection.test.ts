@@ -5,7 +5,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { hasUpdateOf, installedItemsOf } from '../src/client/logic/installed.ts'
-import { compareVersions, isUpdateOffered, MIN_RELEASE_AGE_MS } from '../src/client/logic/release-age.ts'
+import { compareVersions, isUpdateOffered, MIN_RELEASE_AGE_MS, updateDecision } from '../src/client/logic/release-age.ts'
 import type { HubPlugin } from '../src/client/types.ts'
 import type { InstalledVersionSignal } from '../src/client/logic/installed.ts'
 
@@ -96,4 +96,21 @@ test('isUpdateOffered: only offer an update npm can actually install', () => {
   // 查询失败 / 没有账本记录 → 交回原有判定，不吞掉真实更新
   assert.equal(isUpdateOffered(null, '1.1.0', now), true)
   assert.equal(isUpdateOffered({ version: '1.2.0', publishedAt: matured }, null, now), true)
+})
+
+test('updateDecision: 只有门禁命中才给可重试时刻', () => {
+  const now = Date.parse('2026-10-25T00:00:00Z')
+  const fresh = new Date(now - 60_000).toISOString()
+  const matured = new Date(now - MIN_RELEASE_AGE_MS - 60_000).toISOString()
+  // 发布不满门禁：不提示，但给出确切可重试时刻（前端据此显示「暂缓到 xx:xx」）
+  assert.deepEqual(updateDecision({ version: '1.2.0', publishedAt: fresh }, '1.1.0', now), {
+    offered: false,
+    pendingUntil: Date.parse(fresh) + MIN_RELEASE_AGE_MS,
+  })
+  // 已过门禁且确实更高：正常提示
+  assert.deepEqual(updateDecision({ version: '1.2.0', publishedAt: matured }, '1.1.0', now), { offered: true, pendingUntil: null })
+  // npm 上没有更高版本（作者只打了 release）：拦下但没有可等待的时刻
+  assert.deepEqual(updateDecision({ version: '1.1.0', publishedAt: matured }, '1.1.0', now), { offered: false, pendingUntil: null })
+  // 查不到发布信息：交回原有判定
+  assert.deepEqual(updateDecision(null, '1.1.0', now), { offered: true, pendingUntil: null })
 })

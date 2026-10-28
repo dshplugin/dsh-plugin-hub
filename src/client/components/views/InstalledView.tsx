@@ -17,6 +17,7 @@ import styles from '../../styles/InstalledView.module.css'
 import type { LocaleId, Translate } from '../../types.ts'
 import type { InstalledItem } from '../../logic/installed.ts'
 import { CATEGORY_LABELS, categoryLabel } from '../../logic/constants.ts'
+import { clockTime } from '../../logic/format.ts'
 import { SortArrowIcon } from '../ui/icons.tsx'
 
 const INSTALLED_SORTS = ['sortName', 'sortInstalledAt', 'sortStars', 'sortForks'] as const
@@ -108,7 +109,10 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
           : null,
         item.hasUpdate
           ? h('span', { className: styles.updateBadge, title: t('updateAvailableHint') }, t('updateAvailable'))
-          : null,
+          : item.pendingUntil != null
+            // 门禁暂缓：更新存在但还装不上，给确切时刻，避免看起来「已是最新」
+            ? h('span', { className: styles.updateBadge, title: t('updatePendingHint') }, t('updatePending', { time: clockTime(item.pendingUntil) }))
+            : null,
       ),
       // 来源标签列（行尾、操作按钮前，右对齐固定）：目录插件 →「插件市场」（品牌色），
       // 命令行安装 →「手动安装」（琥珀色）；两词 4 字等宽，所有条目标签同列对齐

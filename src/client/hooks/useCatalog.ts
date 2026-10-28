@@ -16,7 +16,7 @@ import type { SortKey } from '../logic/constants.ts'
 import { fetchCatalog, fetchStats } from '../data/catalog.ts'
 import { fetchHubAbout, fetchHubUpdate } from '../data/hub.ts'
 import { fetchInstalled, fetchNpmReleaseAge, type NpmReleaseInfo } from '../data/host.ts'
-import { isReleaseTooFresh, isUpdateOffered, pickHubUpdate } from '../logic/release-age.ts'
+import { isReleaseTooFresh, pickHubUpdate, updateDecision } from '../logic/release-age.ts'
 import {
   hasUpdateOf, installedItemsOf, installedNameOf, installedVersionOf, npmPackageOf,
 } from '../logic/installed.ts'
@@ -248,15 +248,23 @@ export function useCatalog(lang: LocaleId) {
    *  - npm 上最新版并不高于已装版本 —— 更新走的是 `pkg@latest`，此时无论目录标到哪个 tag，
    *    都不可能装上（作者可能只打了 GitHub release 没发 npm），提示只会变成永远点不掉的循环。
    */
-  const updateBlocked = useMemo(() => {
-    const blocked = new Set<string>()
-    if (!releaseAgeReady) return blocked
+  const updateDecisions = useMemo(() => {
+    const map = new Map<string, { offered: boolean; pendingUntil: number | null }>()
+    if (!releaseAgeReady) return map
     const now = Date.now()
     for (const pkg of releaseAgeCandidates) {
-      if (!isUpdateOffered(releaseAge.releases[pkg] ?? null, installedByPackage.get(pkg) ?? null, now)) blocked.add(pkg)
+      map.set(pkg, updateDecision(releaseAge.releases[pkg] ?? null, installedByPackage.get(pkg) ?? null, now))
+    }
+    return map
+  }, [releaseAgeReady, releaseAgeCandidates, releaseAge.releases, installedByPackage])
+
+  const updateBlocked = useMemo(() => {
+    const blocked = new Set<string>()
+    for (const [pkg, decision] of updateDecisions) {
+      if (!decision.offered) blocked.add(pkg)
     }
     return blocked
-  }, [releaseAgeReady, releaseAgeCandidates, releaseAge.releases, installedByPackage])
+  }, [updateDecisions])
 
   /**
    * 是否有更新：仅对已安装插件有意义。
@@ -267,18 +275,33 @@ export function useCatalog(lang: LocaleId) {
   const hasUpdate = (p: HubPlugin): boolean => {
     if (!hasUpdateOf(p, installed, versions)) return false
     const pkg = npmPackageOf(p, versions)
-    return pkg === null || !updateBlocked.has(pkg)
+    if (pkg === null) return true
+    // 复核没回来时先不亮：否则会出现「先亮有更新、几秒后又撤掉」
+    return releaseAgeReady && !updateBlocked.has(pkg)
   }
 
-  /** 已安装项统一列表（目录元数据 + 运行时信息合并）：被拦下的去掉更新标记，驱动「已安装」tab。 */
+  /** 更新被门禁暂缓时的可重试时刻（毫秒）；未安装/无更新/非门禁原因 → null。 */
+  const updatePendingUntil = (p: HubPlugin): number | null => {
+    if (!hasUpdateOf(p, installed, versions)) return null
+    const pkg = npmPackageOf(p, versions)
+    if (pkg === null) return null
+    return updateDecisions.get(pkg)?.pendingUntil ?? null
+  }
+
+  /** 已安装项统一列表（目录元数据 + 运行时信息合并）：校验未就绪/被拦下的去掉更新标记、
+   *  门禁暂缓的带上可重试时刻，驱动「已安装」tab。 */
   const installedItems = useMemo<InstalledItem[]>(() => {
-    if (updateBlocked.size === 0) return rawInstalledItems
     return rawInstalledItems.map((item) => {
       if (!item.hasUpdate || !item.plugin) return item
       const pkg = npmPackageOf(item.plugin, versions)
-      return pkg !== null && updateBlocked.has(pkg) ? { ...item, hasUpdate: false } : item
+      if (pkg === null) return item
+      if (!releaseAgeReady) return { ...item, hasUpdate: false }
+      const decision = updateDecisions.get(pkg)
+      return decision === undefined || decision.offered
+        ? item
+        : { ...item, hasUpdate: false, pendingUntil: decision.pendingUntil }
     })
-  }, [rawInstalledItems, updateBlocked, versions])
+  }, [rawInstalledItems, releaseAgeReady, updateDecisions, versions])
 
   /**
    * Hub 自身更新状态：Hub 就是当前运行的应用（始终已安装，无需 installedName 命中）。
@@ -353,6 +376,7 @@ export function useCatalog(lang: LocaleId) {
     installedName,
     installedVersion,
     hasUpdate,
+    updatePendingUntil,
     hubHasUpdate,
     hubUpdateState,
     hubUpdateTarget,

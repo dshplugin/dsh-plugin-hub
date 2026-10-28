@@ -24,3 +24,13 @@ export function relTime(iso: string | undefined, t: Translate): string {
   if (days < 365) return t('monthsAgo', { months: Math.floor(days / 30) })
   return t('yearsAgo', { years: Math.floor(days / 365) })
 }
+
+/** 具体时刻：当天只给「时:分」，跨天再补「月/日」，用于「暂缓到何时可更新」。 */
+export function clockTime(ms: number): string {
+  const at = new Date(ms)
+  const now = new Date()
+  const hh = String(at.getHours()).padStart(2, '0')
+  const mm = String(at.getMinutes()).padStart(2, '0')
+  const sameDay = at.getFullYear() === now.getFullYear() && at.getMonth() === now.getMonth() && at.getDate() === now.getDate()
+  return sameDay ? `${hh}:${mm}` : `${at.getMonth() + 1}/${at.getDate()} ${hh}:${mm}`
+}

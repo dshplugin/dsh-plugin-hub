@@ -14,7 +14,7 @@ import type { LocaleId, Translate } from '../../types.ts'
 import type { InstalledItem } from '../../logic/installed.ts'
 import { CATEGORY_LABELS, categoryLabel } from '../../logic/constants.ts'
 import { pluginDetailUrl } from '../../logic/urls.ts'
-import { fmtStars } from '../../logic/format.ts'
+import { clockTime, fmtStars } from '../../logic/format.ts'
 import { CloseIcon, CopyIcon, FolderIcon, LinkIcon } from '../ui/icons.tsx'
 
 /** ISO 安装时间 → 本地可读；非法值返回 null（行内不显示）。 */
@@ -69,7 +69,10 @@ export function InstalledDetailModal({ item, t, lang, langPath, onClose, onUpdat
             item.installedVersion && item.catalogVersion
               ? t('versionUpHint', { from: item.installedVersion, to: item.catalogVersion })
               : t('updateAvailableHint'))
-          : null,
+          : item.pendingUntil != null
+            // 门禁暂缓：给确切可重试时刻，而不是让「有更新」静默消失
+            ? h('div', { className: styles.detailUpdateHint }, t('updatePending', { time: clockTime(item.pendingUntil) }))
+            : null,
         // 详情信息网格：分类 / 状态 / 版本 / 收录入口 / 包名 / 统计 / 安装路径 / 安装时间 / 最后更新
         h('div', { className: styles.detailGrid },
           p?.category

@@ -42,6 +42,8 @@ export interface InstalledItem {
   catalogVersion: string | null
   /** 是否有可用更新（有版本比版本，无版本比仓库更新时间） */
   hasUpdate: boolean
+  /** 更新被供应链门禁暂缓时的可重试时刻（毫秒）；无更新/非门禁原因 → null */
+  pendingUntil: number | null
   /** 是否已加载进运行中 loader（官方 ctx.loader 对账）；false = 已安装但未挂载（装完未重启） */
   loaded: boolean
   /** 是否真正的 dsh 插件（包内声明 dsh 配置 / 在 profile bundles 清单）：
@@ -230,6 +232,7 @@ export function installedItemsOf(
       installedAt: rec?.installedAt ?? null,
       catalogVersion: p.version ?? null,
       hasUpdate: hasUpdateOf(p, installed, versions),
+      pendingUntil: null,
       loaded: loadedNames?.includes(name) ?? false,
       dshCapable: dshCapableNames?.includes(name) ?? false,
     })
@@ -254,6 +257,7 @@ export function installedItemsOf(
       catalogVersion: null,
       // 目录外没有目录信号可比，无法判断是否有更新
       hasUpdate: false,
+      pendingUntil: null,
       loaded: loadedNames?.includes(name) ?? false,
       dshCapable: dshCapableNames?.includes(name) ?? false,
     })

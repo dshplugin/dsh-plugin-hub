@@ -433,6 +433,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			update: "可更新",
 			updateAvailable: "有更新",
 			updateAvailableHint: "检测到更新：有版本号的仓库比对版本号，无版本号的仓库比对仓库最近更新时间",
+			updatePending: "暂缓到 {time} 后可更新",
+			updatePendingHint: "新版本发布未满 24 小时，pnpm 供应链门禁会拦下；到时间后再更新即可",
 			hubUpdateHint: "检测到 DSH Plugin Hub 新版本，点击查看更新内容并更新",
 			hubUpdateTitle: "DSH Plugin Hub 有新版本",
 			hubUpdateDesc: "v{version} 已发布，点击下方按钮即可更新，完成后需重启宿主生效。",
@@ -872,6 +874,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			update: "Update",
 			updateAvailable: "Update available",
 			updateAvailableHint: "An update was detected: repos with a release are compared by tag, repos without one by last push time",
+			updatePending: "Update available after {time}",
+			updatePendingHint: "The new release is less than 24 hours old, so the pnpm supply-chain hold rejects it until then",
 			hubUpdateHint: "A new DSH Plugin Hub version is available — click to view the changelog and update",
 			hubUpdateTitle: "A new DSH Plugin Hub version is available",
 			hubUpdateDesc: "v{version} has been released — click below to update, then restart the host to apply it.",
@@ -908,42 +912,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$11
 		});
 		var Header_module_css_default = {
+			"segLabel": "qikqja_segLabel",
+			"root": "qikqja_root",
 			"headerTitleRow": "qikqja_headerTitleRow",
+			"tabCount": "qikqja_tabCount",
+			"search": "qikqja_search",
+			"tagline": "qikqja_tagline",
+			"resultCount": "qikqja_resultCount",
+			"taglineLink": "qikqja_taglineLink",
+			"title": "qikqja_title",
+			"segBtnActive": "qikqja_segBtnActive",
+			"versionBtn": "qikqja_versionBtn",
+			"tab": "qikqja_tab",
+			"segBtn": "qikqja_segBtn",
+			"searchRow": "qikqja_searchRow",
+			"logoIcon": "qikqja_logoIcon",
+			"sortGroup": "qikqja_sortGroup",
+			"header": "qikqja_header",
 			"controls": "qikqja_controls",
 			"langBtn": "qikqja_langBtn",
-			"adBanner": "qikqja_adBanner",
-			"adArrow": "qikqja_adArrow",
 			"githubLink": "qikqja_githubLink",
 			"githubIcon": "qikqja_githubIcon",
-			"searchRow": "qikqja_searchRow",
-			"aboutBtn": "qikqja_aboutBtn",
-			"tabs": "qikqja_tabs",
-			"logoIcon": "qikqja_logoIcon",
-			"tabActive": "qikqja_tabActive",
-			"tagline": "qikqja_tagline",
-			"adText": "qikqja_adText",
-			"segBtn": "qikqja_segBtn",
-			"tabsRow": "qikqja_tabsRow",
-			"resultCount": "qikqja_resultCount",
-			"sortGroup": "qikqja_sortGroup",
 			"brandTitle": "qikqja_brandTitle",
-			"title": "qikqja_title",
-			"hubUpdateBadge": "qikqja_hubUpdateBadge",
-			"resultSeg": "qikqja_resultSeg",
-			"versionBtn": "qikqja_versionBtn",
-			"segLabel": "qikqja_segLabel",
-			"tabCount": "qikqja_tabCount",
-			"copyIcon": "qikqja_copyIcon",
-			"adBadge": "qikqja_adBadge",
-			"tab": "qikqja_tab",
-			"search": "qikqja_search",
-			"segBtnActive": "qikqja_segBtnActive",
+			"adBanner": "qikqja_adBanner",
+			"tabActive": "qikqja_tabActive",
 			"segGroup": "qikqja_segGroup",
-			"headerRight": "qikqja_headerRight",
-			"header": "qikqja_header",
+			"tabsRow": "qikqja_tabsRow",
+			"copyIcon": "qikqja_copyIcon",
 			"version": "qikqja_version",
-			"taglineLink": "qikqja_taglineLink",
-			"root": "qikqja_root"
+			"resultSeg": "qikqja_resultSeg",
+			"headerRight": "qikqja_headerRight",
+			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"adBadge": "qikqja_adBadge",
+			"adText": "qikqja_adText",
+			"adArrow": "qikqja_adArrow",
+			"aboutBtn": "qikqja_aboutBtn",
+			"tabs": "qikqja_tabs"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
@@ -962,142 +966,142 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$10
 		});
 		var Modal_module_css_default = {
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"dangerConfirm": "BiQ1zG_dangerConfirm",
-			"modalIn": "BiQ1zG_modalIn",
+			"detailPathActions": "BiQ1zG_detailPathActions",
 			"noticeHead": "BiQ1zG_noticeHead",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"detailMono": "BiQ1zG_detailMono",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"detailValue": "BiQ1zG_detailValue",
-			"noticeIgnore": "BiQ1zG_noticeIgnore",
-			"modal": "BiQ1zG_modal",
-			"detailPath": "BiQ1zG_detailPath",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"detailRow": "BiQ1zG_detailRow",
-			"failKindTitle": "BiQ1zG_failKindTitle",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"detailPathText": "BiQ1zG_detailPathText",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"errorModal": "BiQ1zG_errorModal",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"toastIn": "BiQ1zG_toastIn",
+			"failRepoLabel": "BiQ1zG_failRepoLabel",
 			"queueSection": "BiQ1zG_queueSection",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"queueRowBody": "BiQ1zG_queueRowBody",
-			"failList": "BiQ1zG_failList",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"modalLink": "BiQ1zG_modalLink",
-			"aboutContent": "BiQ1zG_aboutContent",
-			"overlay": "BiQ1zG_overlay",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"failClear": "BiQ1zG_failClear",
-			"failReason": "BiQ1zG_failReason",
-			"restartLater": "BiQ1zG_restartLater",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"failCopy": "BiQ1zG_failCopy",
-			"modalActions": "BiQ1zG_modalActions",
-			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"progressText": "BiQ1zG_progressText",
-			"errorHint": "BiQ1zG_errorHint",
-			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
-			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"progressHead": "BiQ1zG_progressHead",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"failKind": "BiQ1zG_failKind",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"failRow": "BiQ1zG_failRow",
+			"progressFill": "BiQ1zG_progressFill",
 			"queueRowTrack": "BiQ1zG_queueRowTrack",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"detailStatusPending": "BiQ1zG_detailStatusPending",
+			"overlay": "BiQ1zG_overlay",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"detailPathBtn": "BiQ1zG_detailPathBtn",
+			"confirmIcon": "BiQ1zG_confirmIcon",
+			"modalValue": "BiQ1zG_modalValue",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"failReason": "BiQ1zG_failReason",
+			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"noticeRow": "BiQ1zG_noticeRow",
 			"aboutModal": "BiQ1zG_aboutModal",
 			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"detailStatusPending": "BiQ1zG_detailStatusPending",
-			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"confirmPrimary": "BiQ1zG_confirmPrimary",
-			"stripCancel": "BiQ1zG_stripCancel",
-			"noticeMain": "BiQ1zG_noticeMain",
-			"restartNow": "BiQ1zG_restartNow",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"resultRestarting": "BiQ1zG_resultRestarting",
-			"failRepo": "BiQ1zG_failRepo",
-			"detailPathBtn": "BiQ1zG_detailPathBtn",
-			"failHead": "BiQ1zG_failHead",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"progress": "BiQ1zG_progress",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"noticeVersion": "BiQ1zG_noticeVersion",
-			"failedCopyHint": "BiQ1zG_failedCopyHint",
-			"noticeList": "BiQ1zG_noticeList",
-			"detailStatusText": "BiQ1zG_detailStatusText",
-			"trustHint": "BiQ1zG_trustHint",
-			"detailLabel": "BiQ1zG_detailLabel",
-			"failRepoLabel": "BiQ1zG_failRepoLabel",
-			"toastFail": "BiQ1zG_toastFail",
-			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
-			"modalBody": "BiQ1zG_modalBody",
-			"detailGrid": "BiQ1zG_detailGrid",
-			"detailLink": "BiQ1zG_detailLink",
-			"failNetworkTarget": "BiQ1zG_failNetworkTarget",
-			"restartNowWarning": "BiQ1zG_restartNowWarning",
-			"result": "BiQ1zG_result",
-			"failDiagBtn": "BiQ1zG_failDiagBtn",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"modalHead": "BiQ1zG_modalHead",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"detailPathActions": "BiQ1zG_detailPathActions",
-			"modalValue": "BiQ1zG_modalValue",
-			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"aboutMeta": "BiQ1zG_aboutMeta",
-			"confirmIcon": "BiQ1zG_confirmIcon",
-			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
-			"helpModal": "BiQ1zG_helpModal",
-			"progressFill": "BiQ1zG_progressFill",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"logModal": "BiQ1zG_logModal",
-			"failMisjudgeLink": "BiQ1zG_failMisjudgeLink",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"failKind": "BiQ1zG_failKind",
-			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
-			"failRepoUrl": "BiQ1zG_failRepoUrl",
-			"detailArrow": "BiQ1zG_detailArrow",
-			"detailStars": "BiQ1zG_detailStars",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"detailModal": "BiQ1zG_detailModal",
-			"modalClose": "BiQ1zG_modalClose",
-			"failRow": "BiQ1zG_failRow",
-			"modalDesc": "BiQ1zG_modalDesc",
 			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"modalWide": "BiQ1zG_modalWide",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"bundleDeselectedHint": "BiQ1zG_bundleDeselectedHint",
-			"detailDim": "BiQ1zG_detailDim",
-			"modalRow": "BiQ1zG_modalRow",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"failCopy": "BiQ1zG_failCopy",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"failedCopyHint": "BiQ1zG_failedCopyHint",
+			"queueRowPct": "BiQ1zG_queueRowPct",
 			"modalCmd": "BiQ1zG_modalCmd",
-			"errorTitle": "BiQ1zG_errorTitle",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"errorBox": "BiQ1zG_errorBox",
-			"queuedHint": "BiQ1zG_queuedHint",
+			"detailModal": "BiQ1zG_detailModal",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
 			"queueRow": "BiQ1zG_queueRow",
+			"trustHint": "BiQ1zG_trustHint",
+			"errorBox": "BiQ1zG_errorBox",
+			"progressHead": "BiQ1zG_progressHead",
+			"noticeIgnore": "BiQ1zG_noticeIgnore",
+			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
+			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
+			"dangerConfirm": "BiQ1zG_dangerConfirm",
+			"detailRow": "BiQ1zG_detailRow",
+			"detailDim": "BiQ1zG_detailDim",
+			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
+			"modalIn": "BiQ1zG_modalIn",
+			"detailStars": "BiQ1zG_detailStars",
+			"detailLabel": "BiQ1zG_detailLabel",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"failClear": "BiQ1zG_failClear",
+			"detailPath": "BiQ1zG_detailPath",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"failNetworkTarget": "BiQ1zG_failNetworkTarget",
+			"modalRow": "BiQ1zG_modalRow",
+			"queueRowDesc": "BiQ1zG_queueRowDesc",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
+			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"stripCancel": "BiQ1zG_stripCancel",
+			"modalHead": "BiQ1zG_modalHead",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"hubUpdateMetaItem": "BiQ1zG_hubUpdateMetaItem",
+			"modalClose": "BiQ1zG_modalClose",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"restartNow": "BiQ1zG_restartNow",
+			"failList": "BiQ1zG_failList",
+			"hubUpdateMeta": "BiQ1zG_hubUpdateMeta",
+			"detailArrow": "BiQ1zG_detailArrow",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"progress": "BiQ1zG_progress",
+			"detailMono": "BiQ1zG_detailMono",
+			"modalBody": "BiQ1zG_modalBody",
+			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"modal": "BiQ1zG_modal",
+			"toastIn": "BiQ1zG_toastIn",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"detailGrid": "BiQ1zG_detailGrid",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"noticeVersion": "BiQ1zG_noticeVersion",
+			"modalActions": "BiQ1zG_modalActions",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"toastFail": "BiQ1zG_toastFail",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"bundleDeselectedHint": "BiQ1zG_bundleDeselectedHint",
+			"aboutContent": "BiQ1zG_aboutContent",
+			"aboutMeta": "BiQ1zG_aboutMeta",
+			"detailLink": "BiQ1zG_detailLink",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"modalLink": "BiQ1zG_modalLink",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"resultRestarting": "BiQ1zG_resultRestarting",
+			"modalWide": "BiQ1zG_modalWide",
+			"failDiagBtn": "BiQ1zG_failDiagBtn",
+			"failHead": "BiQ1zG_failHead",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"detailPathText": "BiQ1zG_detailPathText",
+			"detailValue": "BiQ1zG_detailValue",
+			"queueRowTarget": "BiQ1zG_queueRowTarget",
+			"failKindTitle": "BiQ1zG_failKindTitle",
+			"confirmPrimary": "BiQ1zG_confirmPrimary",
+			"errorModal": "BiQ1zG_errorModal",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"failMisjudgeLink": "BiQ1zG_failMisjudgeLink",
+			"helpModal": "BiQ1zG_helpModal",
+			"result": "BiQ1zG_result",
 			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
+			"detailStatusText": "BiQ1zG_detailStatusText",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"restartLater": "BiQ1zG_restartLater",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"errorHint": "BiQ1zG_errorHint",
+			"noticeList": "BiQ1zG_noticeList",
+			"failRepoUrl": "BiQ1zG_failRepoUrl",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"failRepo": "BiQ1zG_failRepo",
+			"failBigIssue": "BiQ1zG_failBigIssue",
 			"toast": "BiQ1zG_toast",
-			"resultDesc": "BiQ1zG_resultDesc"
+			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"logModal": "BiQ1zG_logModal",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"progressText": "BiQ1zG_progressText"
 		};
 		//#endregion
 		//#region src/server/services/install/release-target.ts
@@ -1187,7 +1191,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* tsdown 构建时用 define 把 __PLUGIN_VERSION__ 替换成 package.json 的版本号；
 		* node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
 		*/
-		const PLUGIN_VERSION = "2.2.3";
+		const PLUGIN_VERSION = "2.2.4";
 		const CATEGORY_ORDER = [
 			"interface",
 			"session",
@@ -1585,14 +1589,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		*
 		* 更新命令执行的是 `pkg@latest`，所以「目录里标的版本」不是最终能装上的版本：
 		* 作者可能只打了 GitHub release 没发 npm —— 此时提示会变成永远点不掉的循环。
-		* 任一信息缺失（查不到发布信息 / 没有已装版本记录）返回 true，交回调用方原有判定：
+		* 任一信息缺失（查不到发布信息 / 没有已装版本记录）返回 offered，交回调用方原有判定：
 		* 宁可提示，也不因为一次查询失败把真实更新吃掉。
 		*/
-		function isUpdateOffered(release, installedVersion, now) {
-			if (release === null) return true;
-			if (isReleaseTooFresh(release.publishedAt, now)) return false;
-			if (installedVersion !== null && compareVersions(release.version, installedVersion) <= 0) return false;
-			return true;
+		function updateDecision(release, installedVersion, now) {
+			if (release === null) return {
+				offered: true,
+				pendingUntil: null
+			};
+			if (isReleaseTooFresh(release.publishedAt, now)) {
+				const ms = Date.parse(release.publishedAt);
+				return {
+					offered: false,
+					pendingUntil: Number.isNaN(ms) ? null : ms + MIN_RELEASE_AGE_MS
+				};
+			}
+			if (installedVersion !== null && compareVersions(release.version, installedVersion) <= 0) return {
+				offered: false,
+				pendingUntil: null
+			};
+			return {
+				offered: true,
+				pendingUntil: null
+			};
 		}
 		/**
 		* 选出本次真正该提示的更新版本。
@@ -1767,6 +1786,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					installedAt: rec?.installedAt ?? null,
 					catalogVersion: p.version ?? null,
 					hasUpdate: hasUpdateOf(p, installed, versions),
+					pendingUntil: null,
 					loaded: loadedNames?.includes(name) ?? false,
 					dshCapable: dshCapableNames?.includes(name) ?? false
 				});
@@ -1787,6 +1807,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					installedAt: rec?.installedAt ?? null,
 					catalogVersion: null,
 					hasUpdate: false,
+					pendingUntil: null,
 					loaded: loadedNames?.includes(name) ?? false,
 					dshCapable: dshCapableNames?.includes(name) ?? false
 				});
@@ -2020,18 +2041,23 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			*  - npm 上最新版并不高于已装版本 —— 更新走的是 `pkg@latest`，此时无论目录标到哪个 tag，
 			*    都不可能装上（作者可能只打了 GitHub release 没发 npm），提示只会变成永远点不掉的循环。
 			*/
-			const updateBlocked = (0, react.useMemo)(() => {
-				const blocked = /* @__PURE__ */ new Set();
-				if (!releaseAgeReady) return blocked;
+			const updateDecisions = (0, react.useMemo)(() => {
+				const map = /* @__PURE__ */ new Map();
+				if (!releaseAgeReady) return map;
 				const now = Date.now();
-				for (const pkg of releaseAgeCandidates) if (!isUpdateOffered(releaseAge.releases[pkg] ?? null, installedByPackage.get(pkg) ?? null, now)) blocked.add(pkg);
-				return blocked;
+				for (const pkg of releaseAgeCandidates) map.set(pkg, updateDecision(releaseAge.releases[pkg] ?? null, installedByPackage.get(pkg) ?? null, now));
+				return map;
 			}, [
 				releaseAgeReady,
 				releaseAgeCandidates,
 				releaseAge.releases,
 				installedByPackage
 			]);
+			const updateBlocked = (0, react.useMemo)(() => {
+				const blocked = /* @__PURE__ */ new Set();
+				for (const [pkg, decision] of updateDecisions) if (!decision.offered) blocked.add(pkg);
+				return blocked;
+			}, [updateDecisions]);
 			/**
 			* 是否有更新：仅对已安装插件有意义。
 			* 双信号判定——有 release 版本的比版本；无版本（repo 不打 tag）的比仓库最近更新时间
@@ -2041,22 +2067,38 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const hasUpdate = (p) => {
 				if (!hasUpdateOf(p, installed, versions)) return false;
 				const pkg = npmPackageOf(p, versions);
-				return pkg === null || !updateBlocked.has(pkg);
+				if (pkg === null) return true;
+				return releaseAgeReady && !updateBlocked.has(pkg);
 			};
-			/** 已安装项统一列表（目录元数据 + 运行时信息合并）：被拦下的去掉更新标记，驱动「已安装」tab。 */
+			/** 更新被门禁暂缓时的可重试时刻（毫秒）；未安装/无更新/非门禁原因 → null。 */
+			const updatePendingUntil = (p) => {
+				if (!hasUpdateOf(p, installed, versions)) return null;
+				const pkg = npmPackageOf(p, versions);
+				if (pkg === null) return null;
+				return updateDecisions.get(pkg)?.pendingUntil ?? null;
+			};
+			/** 已安装项统一列表（目录元数据 + 运行时信息合并）：校验未就绪/被拦下的去掉更新标记、
+			*  门禁暂缓的带上可重试时刻，驱动「已安装」tab。 */
 			const installedItems = (0, react.useMemo)(() => {
-				if (updateBlocked.size === 0) return rawInstalledItems;
 				return rawInstalledItems.map((item) => {
 					if (!item.hasUpdate || !item.plugin) return item;
 					const pkg = npmPackageOf(item.plugin, versions);
-					return pkg !== null && updateBlocked.has(pkg) ? {
+					if (pkg === null) return item;
+					if (!releaseAgeReady) return {
 						...item,
 						hasUpdate: false
-					} : item;
+					};
+					const decision = updateDecisions.get(pkg);
+					return decision === void 0 || decision.offered ? item : {
+						...item,
+						hasUpdate: false,
+						pendingUntil: decision.pendingUntil
+					};
 				});
 			}, [
 				rawInstalledItems,
-				updateBlocked,
+				releaseAgeReady,
+				updateDecisions,
 				versions
 			]);
 			/**
@@ -2070,7 +2112,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			* registry 真实发布时间下发（同源），据此判断最准。门槛命中要单列成 `pending` 而不是
 			* 落回「无更新」——回落会让弹窗在本机版本落后时谎称「已是最新」。
 			*/
-			const hubCurrentVersion = "2.2.3";
+			const hubCurrentVersion = "2.2.4";
 			const hubUpdateResult = hubUpdateInfo === null ? {
 				state: "none",
 				target: null
@@ -2133,6 +2175,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				installedName,
 				installedVersion,
 				hasUpdate,
+				updatePendingUntil,
 				hubHasUpdate,
 				hubUpdateState,
 				hubUpdateTarget,
@@ -4485,6 +4528,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			if (days < 365) return t("monthsAgo", { months: Math.floor(days / 30) });
 			return t("yearsAgo", { years: Math.floor(days / 365) });
 		}
+		/** 具体时刻：当天只给「时:分」，跨天再补「月/日」，用于「暂缓到何时可更新」。 */
+		function clockTime(ms) {
+			const at = new Date(ms);
+			const now = /* @__PURE__ */ new Date();
+			const hh = String(at.getHours()).padStart(2, "0");
+			const mm = String(at.getMinutes()).padStart(2, "0");
+			return at.getFullYear() === now.getFullYear() && at.getMonth() === now.getMonth() && at.getDate() === now.getDate() ? `${hh}:${mm}` : `${at.getMonth() + 1}/${at.getDate()} ${hh}:${mm}`;
+		}
 		//#endregion
 		//#region src/client/components/modals/InstalledDetailModal.tsx
 		/**
@@ -4524,7 +4575,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, (0, react.createElement)(CloseIcon))), (0, react.createElement)("div", { className: Modal_module_css_default.modalBody }, p?.description ? (0, react.createElement)("div", { className: Modal_module_css_default.modalDesc }, p.description) : null, hasUpdate ? (0, react.createElement)("div", { className: Modal_module_css_default.detailUpdateHint }, item.installedVersion && item.catalogVersion ? t("versionUpHint", {
 				from: item.installedVersion,
 				to: item.catalogVersion
-			}) : t("updateAvailableHint")) : null, (0, react.createElement)("div", { className: Modal_module_css_default.detailGrid }, p?.category ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("detailCategory")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, categoryLabel(CATEGORY_LABELS, p.category, lang))) : null, (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("statusLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", {
+			}) : t("updateAvailableHint")) : item.pendingUntil != null ? (0, react.createElement)("div", { className: Modal_module_css_default.detailUpdateHint }, t("updatePending", { time: clockTime(item.pendingUntil) })) : null, (0, react.createElement)("div", { className: Modal_module_css_default.detailGrid }, p?.category ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("detailCategory")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, categoryLabel(CATEGORY_LABELS, p.category, lang))) : null, (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("statusLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", {
 				className: item.loaded ? Modal_module_css_default.detailStatusRunning : Modal_module_css_default.detailStatusPending,
 				"aria-hidden": "true"
 			}), (0, react.createElement)("span", { className: Modal_module_css_default.detailStatusText }, item.loaded ? t("statusRunning") : t("statusPending")))), item.installedVersion ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("installedVersionLabel")), (0, react.createElement)("span", { className: Modal_module_css_default.detailValue }, (0, react.createElement)("span", { className: Modal_module_css_default.detailMono }, item.installedVersion), item.catalogVersion && item.catalogVersion !== item.installedVersion ? (0, react.createElement)("span", { className: Modal_module_css_default.detailArrow }, "→", (0, react.createElement)("span", { className: Modal_module_css_default.detailMono }, item.catalogVersion), (0, react.createElement)("span", { className: Modal_module_css_default.detailDim }, t("catalogLatest"))) : null)) : null, item.repo ? (0, react.createElement)("div", { className: Modal_module_css_default.detailRow }, (0, react.createElement)("span", { className: Modal_module_css_default.detailLabel }, t("detailCatalog")), (0, react.createElement)("a", {
@@ -5103,40 +5154,40 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$9
 		});
 		var List_module_css_default = {
-			"cardTitle": "_3XaZHa_cardTitle",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"list": "_3XaZHa_list",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"desc": "_3XaZHa_desc",
-			"footLink": "_3XaZHa_footLink",
-			"card": "_3XaZHa_card",
-			"topics": "_3XaZHa_topics",
-			"footer": "_3XaZHa_footer",
-			"star": "_3XaZHa_star",
-			"cardSide": "_3XaZHa_cardSide",
-			"cardMain": "_3XaZHa_cardMain",
-			"date": "_3XaZHa_date",
-			"cardHead": "_3XaZHa_cardHead",
-			"state": "_3XaZHa_state",
-			"stats": "_3XaZHa_stats",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"moreSentinel": "_3XaZHa_moreSentinel",
-			"installBtn": "_3XaZHa_installBtn",
-			"body": "_3XaZHa_body",
-			"detailBtn": "_3XaZHa_detailBtn",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"diagBtn": "_3XaZHa_diagBtn",
-			"topic": "_3XaZHa_topic",
-			"fork": "_3XaZHa_fork",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"stateActions": "_3XaZHa_stateActions",
-			"verified": "_3XaZHa_verified",
+			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
 			"actions": "_3XaZHa_actions",
-			"installBtnInstalled": "_3XaZHa_installBtnInstalled"
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"footer": "_3XaZHa_footer",
+			"state": "_3XaZHa_state",
+			"body": "_3XaZHa_body",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"stateDesc": "_3XaZHa_stateDesc",
+			"stats": "_3XaZHa_stats",
+			"verified": "_3XaZHa_verified",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"list": "_3XaZHa_list",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"cardSide": "_3XaZHa_cardSide",
+			"date": "_3XaZHa_date",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
+			"cardMain": "_3XaZHa_cardMain",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"topics": "_3XaZHa_topics",
+			"footLink": "_3XaZHa_footLink",
+			"installBtn": "_3XaZHa_installBtn",
+			"star": "_3XaZHa_star",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"fork": "_3XaZHa_fork",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"topic": "_3XaZHa_topic",
+			"card": "_3XaZHa_card",
+			"cardHead": "_3XaZHa_cardHead",
+			"moreSentinel": "_3XaZHa_moreSentinel",
+			"desc": "_3XaZHa_desc",
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"diagBtn": "_3XaZHa_diagBtn",
+			"stateActions": "_3XaZHa_stateActions"
 		};
 		//#endregion
 		//#region src/client/hooks/useIncrementalList.ts
@@ -5184,11 +5235,12 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* 目录列表里的单张插件卡片：名称/分类/verified 徽标、描述 + 标签、Star/Fork/日期
 		* 统计，以及详情/安装/卸载动作。
 		*/
-		function PluginCard({ plugin: p, copied, installedName, installedVersion, hasUpdate, t, langKey, langPath, onInstall, onUninstall }) {
+		function PluginCard({ plugin: p, copied, installedName, installedVersion, hasUpdate, updatePendingUntil, t, langKey, langPath, onInstall, onUninstall }) {
 			const repo = p.source?.repo ?? "";
 			const isCopied = copied === repo;
 			const isInstalled = installedName(p) !== null;
 			const update = hasUpdate(p);
+			const pendingUntil = isInstalled && !update ? updatePendingUntil(p) : null;
 			const versionShown = isInstalled ? installedVersion(p) : p.version;
 			return (0, react.createElement)("div", { className: List_module_css_default.card }, (0, react.createElement)("div", { className: List_module_css_default.cardMain }, (0, react.createElement)("div", { className: List_module_css_default.cardHead }, (0, react.createElement)("div", {
 				className: List_module_css_default.cardTitle,
@@ -5199,7 +5251,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, versionShown) : null, update ? (0, react.createElement)("span", {
 				className: List_module_css_default.updateBadge,
 				title: t("updateAvailableHint")
-			}, t("updateAvailable")) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null), p.description ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
+			}, t("updateAvailable")) : null, pendingUntil !== null ? (0, react.createElement)("span", {
+				className: List_module_css_default.updateBadge,
+				title: t("updatePendingHint")
+			}, t("updatePending", { time: clockTime(pendingUntil) })) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null), p.description ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
 				key: topic,
 				className: List_module_css_default.topic
 			}, topic))) : null), (0, react.createElement)("div", { className: List_module_css_default.cardSide }, (0, react.createElement)("div", { className: List_module_css_default.stats }, (0, react.createElement)("span", { className: List_module_css_default.star }, "★ ", fmtStars(p.stats?.stargazers_count)), (0, react.createElement)("span", { className: List_module_css_default.fork }, t("fork"), " ", fmtStars(p.stats?.forks_count)), (0, react.createElement)("span", { className: List_module_css_default.date }, relTime(p.dates?.repoUpdatedAt, t))), repo ? (0, react.createElement)("div", { className: List_module_css_default.actions }, (0, react.createElement)("a", {
@@ -5234,7 +5289,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* 目录列表：承载加载/失败/空三态、插件卡片与计数页脚的滚动容器。分类或安装状态
 		* 筛选变化时重置滚动位置，避免替换后的内容被误当成「没变化」。
 		*/
-		function CatalogList({ plugins, failed, visible, total, t, langPath, reload, forceReload, category, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall, hasProxy, onOpenDiagnostics }) {
+		function CatalogList({ plugins, failed, visible, total, t, langPath, reload, forceReload, category, copied, installedName, installedVersion, hasUpdate, updatePendingUntil, langKey, onInstall, onUninstall, hasProxy, onOpenDiagnostics }) {
 			/** 列表滚动容器：分类/搜索切换后列表内容替换但 scrollTop 保留，会让用户误以为列表没更新，需重置回顶部 */
 			const listRef = (0, react.useRef)(null);
 			/** 增量渲染：全量目录太大（4400+），只渲染首批，滚动接近底部时自动追加下一批 */
@@ -5262,6 +5317,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				installedName,
 				installedVersion,
 				hasUpdate,
+				updatePendingUntil,
 				t,
 				langKey,
 				langPath,
@@ -5317,6 +5373,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				installedName: catalog.installedName,
 				installedVersion: catalog.installedVersion,
 				hasUpdate: catalog.hasUpdate,
+				updatePendingUntil: catalog.updatePendingUntil,
 				langKey,
 				onInstall,
 				onUninstall,
@@ -5341,16 +5398,16 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$8
 		});
 		var SectionTabs_module_css_default = {
-			"noticeIcon": "_7tvizq_noticeIcon",
-			"noticeBtn": "_7tvizq_noticeBtn",
-			"tabLabel": "_7tvizq_tabLabel",
-			"tabIcon": "_7tvizq_tabIcon",
-			"noticeCount": "_7tvizq_noticeCount",
 			"tabCount": "_7tvizq_tabCount",
-			"tabActive": "_7tvizq_tabActive",
-			"root": "_7tvizq_root",
+			"tabCountActive": "_7tvizq_tabCountActive",
+			"tabIcon": "_7tvizq_tabIcon",
+			"noticeIcon": "_7tvizq_noticeIcon",
 			"tab": "_7tvizq_tab",
-			"tabCountActive": "_7tvizq_tabCountActive"
+			"root": "_7tvizq_root",
+			"tabLabel": "_7tvizq_tabLabel",
+			"noticeBtn": "_7tvizq_noticeBtn",
+			"noticeCount": "_7tvizq_noticeCount",
+			"tabActive": "_7tvizq_tabActive"
 		};
 		//#endregion
 		//#region src/client/components/layout/SectionTabs.tsx
@@ -5426,42 +5483,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$7
 		});
 		var InstalledView_module_css_default = {
-			"updateBadge": "_1nXeGW_updateBadge",
-			"rowUninstall": "_1nXeGW_rowUninstall",
-			"searchInput": "_1nXeGW_searchInput",
-			"rowRestart": "_1nXeGW_rowRestart",
-			"segLabel": "_1nXeGW_segLabel",
-			"searchWrap": "_1nXeGW_searchWrap",
-			"exampleBadge": "_1nXeGW_exampleBadge",
-			"emptyDesc": "_1nXeGW_emptyDesc",
-			"rowDetail": "_1nXeGW_rowDetail",
-			"segBtn": "_1nXeGW_segBtn",
-			"rowUpdate": "_1nXeGW_rowUpdate",
-			"row": "_1nXeGW_row",
-			"exampleRow": "_1nXeGW_exampleRow",
-			"segRow": "_1nXeGW_segRow",
-			"segBtnActive": "_1nXeGW_segBtnActive",
-			"rowTitle": "_1nXeGW_rowTitle",
-			"statusPending": "_1nXeGW_statusPending",
-			"root": "_1nXeGW_root",
 			"rowMeta": "_1nXeGW_rowMeta",
-			"emptyTitle": "_1nXeGW_emptyTitle",
-			"rowActions": "_1nXeGW_rowActions",
-			"rowCategory": "_1nXeGW_rowCategory",
-			"rowRepo": "_1nXeGW_rowRepo",
-			"rowTitleLine": "_1nXeGW_rowTitleLine",
-			"statusInactive": "_1nXeGW_statusInactive",
-			"rowSourceTag": "_1nXeGW_rowSourceTag",
-			"segGroup": "_1nXeGW_segGroup",
-			"rowDesc": "_1nXeGW_rowDesc",
-			"rowMain": "_1nXeGW_rowMain",
 			"versionBadge": "_1nXeGW_versionBadge",
-			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
-			"statusDot": "_1nXeGW_statusDot",
+			"searchInput": "_1nXeGW_searchInput",
+			"segBtnActive": "_1nXeGW_segBtnActive",
+			"rowRestart": "_1nXeGW_rowRestart",
+			"rowDetail": "_1nXeGW_rowDetail",
 			"toolbar": "_1nXeGW_toolbar",
 			"empty": "_1nXeGW_empty",
+			"rowActions": "_1nXeGW_rowActions",
+			"rowTitleLine": "_1nXeGW_rowTitleLine",
+			"rowDesc": "_1nXeGW_rowDesc",
+			"statusDot": "_1nXeGW_statusDot",
 			"list": "_1nXeGW_list",
-			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub"
+			"exampleRow": "_1nXeGW_exampleRow",
+			"rowUninstall": "_1nXeGW_rowUninstall",
+			"rowRepo": "_1nXeGW_rowRepo",
+			"rowCategory": "_1nXeGW_rowCategory",
+			"rowMain": "_1nXeGW_rowMain",
+			"exampleBadge": "_1nXeGW_exampleBadge",
+			"statusPending": "_1nXeGW_statusPending",
+			"rowSourceTag": "_1nXeGW_rowSourceTag",
+			"updateBadge": "_1nXeGW_updateBadge",
+			"rowTitle": "_1nXeGW_rowTitle",
+			"searchWrap": "_1nXeGW_searchWrap",
+			"rowUpdate": "_1nXeGW_rowUpdate",
+			"emptyTitle": "_1nXeGW_emptyTitle",
+			"statusInactive": "_1nXeGW_statusInactive",
+			"segRow": "_1nXeGW_segRow",
+			"segLabel": "_1nXeGW_segLabel",
+			"emptyDesc": "_1nXeGW_emptyDesc",
+			"root": "_1nXeGW_root",
+			"segGroup": "_1nXeGW_segGroup",
+			"segBtn": "_1nXeGW_segBtn",
+			"row": "_1nXeGW_row",
+			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
+			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual"
 		};
 		//#endregion
 		//#region src/client/components/views/InstalledView.tsx
@@ -5529,7 +5586,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, item.installedVersion) : null, item.hasUpdate ? (0, react.createElement)("span", {
 				className: InstalledView_module_css_default.updateBadge,
 				title: t("updateAvailableHint")
-			}, t("updateAvailable")) : null), (0, react.createElement)("span", {
+			}, t("updateAvailable")) : item.pendingUntil != null ? (0, react.createElement)("span", {
+				className: InstalledView_module_css_default.updateBadge,
+				title: t("updatePendingHint")
+			}, t("updatePending", { time: clockTime(item.pendingUntil) })) : null), (0, react.createElement)("span", {
 				className: isCustom ? `${InstalledView_module_css_default.rowSourceTag} ${InstalledView_module_css_default.rowSourceTagManual}` : `${InstalledView_module_css_default.rowSourceTag} ${InstalledView_module_css_default.rowSourceTagHub}`,
 				title: isCustom ? t("manualInstallHint") : t("hubInstallHint")
 			}, isCustom ? t("manualInstall") : t("hubInstall")), (0, react.createElement)("div", { className: InstalledView_module_css_default.rowActions }, !item.loaded && item.dshCapable && pendingRestart ? (0, react.createElement)("button", {
@@ -5705,27 +5765,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$6
 		});
 		var CustomInstallView_module_css_default = {
-			"helpCmd": "zISxCG_helpCmd",
-			"installError": "zISxCG_installError",
-			"installInputError": "zISxCG_installInputError",
-			"installBtn": "zISxCG_installBtn",
-			"installExample": "zISxCG_installExample",
-			"installRow": "zISxCG_installRow",
-			"root": "zISxCG_root",
-			"installCard": "zISxCG_installCard",
-			"installCardDisabled": "zISxCG_installCardDisabled",
-			"installCards": "zISxCG_installCards",
-			"installCardHead": "zISxCG_installCardHead",
-			"channelOffText": "zISxCG_channelOffText",
-			"installLabel": "zISxCG_installLabel",
 			"installHelpBtn": "zISxCG_installHelpBtn",
-			"channelOff": "zISxCG_channelOff",
-			"channelOffBtn": "zISxCG_channelOffBtn",
-			"helpLine": "zISxCG_helpLine",
+			"installCardDisabled": "zISxCG_installCardDisabled",
+			"channelOffText": "zISxCG_channelOffText",
+			"installCard": "zISxCG_installCard",
+			"helpBody": "zISxCG_helpBody",
+			"helpCmd": "zISxCG_helpCmd",
 			"helpNote": "zISxCG_helpNote",
+			"channelOff": "zISxCG_channelOff",
+			"installBtn": "zISxCG_installBtn",
+			"installCards": "zISxCG_installCards",
+			"root": "zISxCG_root",
+			"helpLine": "zISxCG_helpLine",
+			"channelOffBtn": "zISxCG_channelOffBtn",
 			"desc": "zISxCG_desc",
+			"installLabel": "zISxCG_installLabel",
+			"installExample": "zISxCG_installExample",
 			"installInput": "zISxCG_installInput",
-			"helpBody": "zISxCG_helpBody"
+			"installCardHead": "zISxCG_installCardHead",
+			"installInputError": "zISxCG_installInputError",
+			"installRow": "zISxCG_installRow",
+			"installError": "zISxCG_installError"
 		};
 		//#endregion
 		//#region src/client/components/views/CustomInstallView.tsx
@@ -5881,30 +5941,30 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$5
 		});
 		var SettingsView_module_css_default = {
-			"settingTitle": "_506LLG_settingTitle",
-			"content": "_506LLG_content",
-			"pageTitle": "_506LLG_pageTitle",
-			"navIcon": "_506LLG_navIcon",
-			"settingControlStack": "_506LLG_settingControlStack",
-			"proxyHintFail": "_506LLG_proxyHintFail",
-			"controlDropdown": "_506LLG_controlDropdown",
-			"sidebar": "_506LLG_sidebar",
-			"root": "_506LLG_root",
-			"navItemActive": "_506LLG_navItemActive",
-			"settingRowStack": "_506LLG_settingRowStack",
-			"pageDesc": "_506LLG_pageDesc",
 			"settingControl": "_506LLG_settingControl",
-			"textInput": "_506LLG_textInput",
-			"resetBtn": "_506LLG_resetBtn",
-			"navItem": "_506LLG_navItem",
-			"card": "_506LLG_card",
-			"settingRow": "_506LLG_settingRow",
-			"pageHeader": "_506LLG_pageHeader",
-			"settingDesc": "_506LLG_settingDesc",
-			"proxyHintOk": "_506LLG_proxyHintOk",
-			"settingLabel": "_506LLG_settingLabel",
+			"proxyControl": "_506LLG_proxyControl",
 			"proxyHint": "_506LLG_proxyHint",
-			"proxyControl": "_506LLG_proxyControl"
+			"pageTitle": "_506LLG_pageTitle",
+			"content": "_506LLG_content",
+			"textInput": "_506LLG_textInput",
+			"proxyHintFail": "_506LLG_proxyHintFail",
+			"navIcon": "_506LLG_navIcon",
+			"navItem": "_506LLG_navItem",
+			"settingDesc": "_506LLG_settingDesc",
+			"card": "_506LLG_card",
+			"resetBtn": "_506LLG_resetBtn",
+			"navItemActive": "_506LLG_navItemActive",
+			"settingControlStack": "_506LLG_settingControlStack",
+			"proxyHintOk": "_506LLG_proxyHintOk",
+			"settingRow": "_506LLG_settingRow",
+			"sidebar": "_506LLG_sidebar",
+			"pageHeader": "_506LLG_pageHeader",
+			"settingTitle": "_506LLG_settingTitle",
+			"settingLabel": "_506LLG_settingLabel",
+			"settingRowStack": "_506LLG_settingRowStack",
+			"root": "_506LLG_root",
+			"controlDropdown": "_506LLG_controlDropdown",
+			"pageDesc": "_506LLG_pageDesc"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
@@ -5923,18 +5983,18 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$4
 		});
 		var Dropdown_module_css_default = {
-			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
-			"dropdownBtn": "B_Gxsq_dropdownBtn",
-			"dropdownArrow": "B_Gxsq_dropdownArrow",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
-			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
 			"dropdownFill": "B_Gxsq_dropdownFill",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
+			"dropdownArrow": "B_Gxsq_dropdownArrow",
+			"dropdownItem": "B_Gxsq_dropdownItem",
+			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
+			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
+			"dropdownLabel": "B_Gxsq_dropdownLabel",
 			"dropdown": "B_Gxsq_dropdown",
-			"dropdownItem": "B_Gxsq_dropdownItem"
+			"dropdownBtn": "B_Gxsq_dropdownBtn",
+			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Toggle.module.css.mjs
@@ -5953,8 +6013,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$3
 		});
 		var Toggle_module_css_default = {
-			"knob": "k-cD4G_knob",
 			"toggle": "k-cD4G_toggle",
+			"knob": "k-cD4G_knob",
 			"toggleOn": "k-cD4G_toggleOn"
 		};
 		//#endregion
@@ -6052,29 +6112,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$2
 		});
 		var DiagnosticsView_module_css_default = {
-			"envDesc": "k9eRya_envDesc",
-			"meta": "k9eRya_meta",
-			"summary": "k9eRya_summary",
-			"display": "k9eRya_display",
-			"summaryOk": "k9eRya_summaryOk",
-			"panel": "k9eRya_panel",
-			"badge": "k9eRya_badge",
-			"badgeRunning": "k9eRya_badgeRunning",
-			"envCopyBtn": "k9eRya_envCopyBtn",
-			"summaryRunning": "k9eRya_summaryRunning",
-			"row": "k9eRya_row",
-			"name": "k9eRya_name",
-			"badgeIdle": "k9eRya_badgeIdle",
-			"summaryFail": "k9eRya_summaryFail",
-			"headHint": "k9eRya_headHint",
 			"head": "k9eRya_head",
-			"envRow": "k9eRya_envRow",
-			"diagPulse": "k9eRya_diagPulse",
 			"envLabel": "k9eRya_envLabel",
-			"badgeOk": "k9eRya_badgeOk",
+			"summary": "k9eRya_summary",
+			"envDesc": "k9eRya_envDesc",
+			"summaryOk": "k9eRya_summaryOk",
+			"headHint": "k9eRya_headHint",
+			"panel": "k9eRya_panel",
+			"name": "k9eRya_name",
 			"envTitle": "k9eRya_envTitle",
 			"runBtn": "k9eRya_runBtn",
-			"badgeFail": "k9eRya_badgeFail"
+			"display": "k9eRya_display",
+			"badgeOk": "k9eRya_badgeOk",
+			"summaryFail": "k9eRya_summaryFail",
+			"badgeFail": "k9eRya_badgeFail",
+			"badge": "k9eRya_badge",
+			"meta": "k9eRya_meta",
+			"envRow": "k9eRya_envRow",
+			"envCopyBtn": "k9eRya_envCopyBtn",
+			"row": "k9eRya_row",
+			"badgeIdle": "k9eRya_badgeIdle",
+			"badgeRunning": "k9eRya_badgeRunning",
+			"diagPulse": "k9eRya_diagPulse",
+			"summaryRunning": "k9eRya_summaryRunning"
 		};
 		//#endregion
 		//#region src/client/components/views/DiagnosticsView.tsx
@@ -6249,57 +6309,57 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$1
 		});
 		var LogsView_module_css_default = {
-			"catInstall": "_3j77BW_catInstall",
-			"clearBtn": "_3j77BW_clearBtn",
-			"btn": "_3j77BW_btn",
-			"logList": "_3j77BW_logList",
-			"pathDialogDesc": "_3j77BW_pathDialogDesc",
-			"filterBar": "_3j77BW_filterBar",
-			"footActions": "_3j77BW_footActions",
-			"more": "_3j77BW_more",
-			"list": "_3j77BW_list",
-			"badgeSuccess": "_3j77BW_badgeSuccess",
-			"pathLabel": "_3j77BW_pathLabel",
-			"badgeWarn": "_3j77BW_badgeWarn",
-			"pathText": "_3j77BW_pathText",
-			"catSystem": "_3j77BW_catSystem",
-			"catUninstall": "_3j77BW_catUninstall",
-			"pathDraft": "_3j77BW_pathDraft",
-			"pathDialog": "_3j77BW_pathDialog",
-			"filterChipActive": "_3j77BW_filterChipActive",
-			"head": "_3j77BW_head",
-			"previewRow": "_3j77BW_previewRow",
-			"catBadge": "_3j77BW_catBadge",
-			"footCount": "_3j77BW_footCount",
-			"searchInput": "_3j77BW_searchInput",
-			"actions": "_3j77BW_actions",
-			"search": "_3j77BW_search",
-			"pathDialogHint": "_3j77BW_pathDialogHint",
-			"catDiagnostics": "_3j77BW_catDiagnostics",
-			"time": "_3j77BW_time",
-			"pathDialogReset": "_3j77BW_pathDialogReset",
-			"filterChip": "_3j77BW_filterChip",
-			"linkBtn": "_3j77BW_linkBtn",
-			"moreEnd": "_3j77BW_moreEnd",
-			"foot": "_3j77BW_foot",
-			"headActions": "_3j77BW_headActions",
-			"badgeError": "_3j77BW_badgeError",
-			"footPath": "_3j77BW_footPath",
-			"entry": "_3j77BW_entry",
-			"message": "_3j77BW_message",
-			"badge": "_3j77BW_badge",
-			"badgeInfo": "_3j77BW_badgeInfo",
-			"catUpdate": "_3j77BW_catUpdate",
-			"badgeDebug": "_3j77BW_badgeDebug",
 			"catSettings": "_3j77BW_catSettings",
-			"event": "_3j77BW_event",
-			"pathDialogFoot": "_3j77BW_pathDialogFoot",
-			"empty": "_3j77BW_empty",
+			"catDiagnostics": "_3j77BW_catDiagnostics",
+			"catSystem": "_3j77BW_catSystem",
+			"catBadge": "_3j77BW_catBadge",
+			"badge": "_3j77BW_badge",
+			"logList": "_3j77BW_logList",
+			"filterBar": "_3j77BW_filterBar",
+			"pathText": "_3j77BW_pathText",
+			"pathDialogHint": "_3j77BW_pathDialogHint",
+			"head": "_3j77BW_head",
+			"footActions": "_3j77BW_footActions",
+			"moreEnd": "_3j77BW_moreEnd",
+			"btn": "_3j77BW_btn",
+			"list": "_3j77BW_list",
+			"pathDialogReset": "_3j77BW_pathDialogReset",
 			"headHint": "_3j77BW_headHint",
 			"pathDialogRow": "_3j77BW_pathDialogRow",
-			"pathRow": "_3j77BW_pathRow",
+			"filterChipActive": "_3j77BW_filterChipActive",
+			"event": "_3j77BW_event",
+			"pathDialog": "_3j77BW_pathDialog",
+			"more": "_3j77BW_more",
+			"footCount": "_3j77BW_footCount",
+			"badgeError": "_3j77BW_badgeError",
+			"badgeInfo": "_3j77BW_badgeInfo",
+			"badgeDebug": "_3j77BW_badgeDebug",
+			"time": "_3j77BW_time",
+			"filterChip": "_3j77BW_filterChip",
+			"message": "_3j77BW_message",
+			"panel": "_3j77BW_panel",
+			"pathDialogDesc": "_3j77BW_pathDialogDesc",
+			"linkBtn": "_3j77BW_linkBtn",
+			"pathDialogFoot": "_3j77BW_pathDialogFoot",
+			"pathDraft": "_3j77BW_pathDraft",
+			"clearBtn": "_3j77BW_clearBtn",
+			"search": "_3j77BW_search",
+			"headActions": "_3j77BW_headActions",
+			"badgeSuccess": "_3j77BW_badgeSuccess",
+			"badgeWarn": "_3j77BW_badgeWarn",
+			"actions": "_3j77BW_actions",
+			"catUpdate": "_3j77BW_catUpdate",
 			"footFail": "_3j77BW_footFail",
-			"panel": "_3j77BW_panel"
+			"catUninstall": "_3j77BW_catUninstall",
+			"entry": "_3j77BW_entry",
+			"previewRow": "_3j77BW_previewRow",
+			"pathLabel": "_3j77BW_pathLabel",
+			"searchInput": "_3j77BW_searchInput",
+			"pathRow": "_3j77BW_pathRow",
+			"catInstall": "_3j77BW_catInstall",
+			"empty": "_3j77BW_empty",
+			"footPath": "_3j77BW_footPath",
+			"foot": "_3j77BW_foot"
 		};
 		//#endregion
 		//#region src/client/components/modals/LogsModal.tsx
@@ -7573,7 +7633,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				openSection: settingsSection,
 				onConsumedOpenSection: () => setSettingsSection(null)
 			}), showHubUpdate && (0, react.createElement)(HubUpdateModal, {
-				info: catalog.hubUpdateTarget ?? catalog.hubUpdateInfo ?? { version: "2.2.3" },
+				info: catalog.hubUpdateTarget ?? catalog.hubUpdateInfo ?? { version: "2.2.4" },
 				state: catalog.hubUpdateState,
 				currentVersion: catalog.hubCurrentVersion,
 				lang,

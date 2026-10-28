@@ -61,23 +61,44 @@ export function compareVersions(a: string | null | undefined, b: string | null |
   return 0
 }
 
+/** 「可更新」判定结果：是否提示，以及被供应链门禁拦下时的到期时刻。 */
+export interface UpdateDecision {
+  offered: boolean
+  /** 发布未满门槛 → 可重试时刻（毫秒）；非门禁原因（npm 上没有更高版本）→ null */
+  pendingUntil: number | null
+}
+
 /**
  * 是否值得提示「可更新」：npm 上最新可安装版本确实比已装版本新，且已过供应链门禁。
  *
  * 更新命令执行的是 `pkg@latest`，所以「目录里标的版本」不是最终能装上的版本：
  * 作者可能只打了 GitHub release 没发 npm —— 此时提示会变成永远点不掉的循环。
- * 任一信息缺失（查不到发布信息 / 没有已装版本记录）返回 true，交回调用方原有判定：
+ * 任一信息缺失（查不到发布信息 / 没有已装版本记录）返回 offered，交回调用方原有判定：
  * 宁可提示，也不因为一次查询失败把真实更新吃掉。
  */
+export function updateDecision(
+  release: { version: string; publishedAt: string } | null,
+  installedVersion: string | null,
+  now: number,
+): UpdateDecision {
+  if (release === null) return { offered: true, pendingUntil: null }
+  if (isReleaseTooFresh(release.publishedAt, now)) {
+    const ms = Date.parse(release.publishedAt)
+    return { offered: false, pendingUntil: Number.isNaN(ms) ? null : ms + MIN_RELEASE_AGE_MS }
+  }
+  if (installedVersion !== null && compareVersions(release.version, installedVersion) <= 0) {
+    return { offered: false, pendingUntil: null }
+  }
+  return { offered: true, pendingUntil: null }
+}
+
+/** 是否提示「可更新」（只要布尔结果的场景）。 */
 export function isUpdateOffered(
   release: { version: string; publishedAt: string } | null,
   installedVersion: string | null,
   now: number,
 ): boolean {
-  if (release === null) return true
-  if (isReleaseTooFresh(release.publishedAt, now)) return false
-  if (installedVersion !== null && compareVersions(release.version, installedVersion) <= 0) return false
-  return true
+  return updateDecision(release, installedVersion, now).offered
 }
 
 /**

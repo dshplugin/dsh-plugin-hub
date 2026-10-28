@@ -11,16 +11,18 @@ import styles from '../../styles/List.module.css'
 import type { HubPlugin, LocaleId, Translate } from '../../types.ts'
 import { CATEGORY_LABELS, categoryLabel } from '../../logic/constants.ts'
 import { pluginDetailUrl } from '../../logic/urls.ts'
-import { fmtStars, relTime } from '../../logic/format.ts'
+import { fmtStars, clockTime, relTime } from '../../logic/format.ts'
 
-export function PluginCard({ plugin: p, copied, installedName, installedVersion, hasUpdate, t, langKey, langPath, onInstall, onUninstall }: {
+export function PluginCard({ plugin: p, copied, installedName, installedVersion, hasUpdate, updatePendingUntil, t, langKey, langPath, onInstall, onUninstall }: {
   plugin: HubPlugin
   copied: string | null
   installedName: (p: HubPlugin) => string | null
   /** 已安装版本号（安装时从目录信号记录；无 release 的仓库为空，无版本号可展示） */
   installedVersion: (p: HubPlugin) => string | null
-  /** 已安装且目录有更新（有版本比版本、无版本比仓库更新时间） */
+  /** 已安装且目录有更新（有版本比版本、无版本比仓库更新时间）；门禁复核未就绪时为 false */
   hasUpdate: (p: HubPlugin) => boolean
+  /** 更新被供应链门禁暂缓时的可重试时刻（毫秒）；无则 null */
+  updatePendingUntil: (p: HubPlugin) => number | null
   t: Translate
   langKey: LocaleId
   langPath: string
@@ -33,6 +35,8 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
   const pkg = installedName(p)
   const isInstalled = pkg !== null
   const update = hasUpdate(p)
+  // 门禁暂缓：更新确实存在但现在装不上，给确切时刻而不是让徽标静默消失
+  const pendingUntil = isInstalled && !update ? updatePendingUntil(p) : null
   // 版本号展示：已安装 → 当前已装版本（最能反映用户状态）；未安装 → 目录最新版本
   const versionShown = isInstalled ? installedVersion(p) : p.version
 
@@ -44,6 +48,9 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
         versionShown ? h('span', { className: styles.versionBadge, title: t('version') }, versionShown) : null,
         // 已安装且有更新：醒目提示（有 release 比版本号、无 release 比仓库最近更新时间）
         update ? h('span', { className: styles.updateBadge, title: t('updateAvailableHint') }, t('updateAvailable')) : null,
+        pendingUntil !== null
+          ? h('span', { className: styles.updateBadge, title: t('updatePendingHint') }, t('updatePending', { time: clockTime(pendingUntil) }))
+          : null,
         p.category ? h('span', { className: styles.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null,
         p.compatibility?.status === 'verified'
           ? h('span', { className: styles.verified }, t('verified'))

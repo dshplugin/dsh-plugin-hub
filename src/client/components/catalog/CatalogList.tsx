@@ -13,7 +13,7 @@ import { siteUrl } from '../../logic/urls.ts'
 import { useIncrementalList } from '../../hooks/useIncrementalList.ts'
 import { PluginCard } from './PluginCard.tsx'
 
-export function CatalogList({ plugins, failed, visible, total, t, langPath, reload, forceReload, category, copied, installedName, installedVersion, hasUpdate, langKey, onInstall, onUninstall, hasProxy, onOpenDiagnostics }: {
+export function CatalogList({ plugins, failed, visible, total, t, langPath, reload, forceReload, category, copied, installedName, installedVersion, hasUpdate, updatePendingUntil, langKey, onInstall, onUninstall, hasProxy, onOpenDiagnostics }: {
   plugins: HubPlugin[] | null
   failed: boolean
   visible: HubPlugin[]
@@ -28,6 +28,8 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
   installedName: (p: HubPlugin) => string | null
   installedVersion: (p: HubPlugin) => string | null
   hasUpdate: (p: HubPlugin) => boolean
+  /** 更新被供应链门禁暂缓时的可重试时刻（毫秒）；无则 null */
+  updatePendingUntil: (p: HubPlugin) => number | null
   langKey: LocaleId
   onInstall: (p: HubPlugin, opts?: { update?: boolean }) => void
   onUninstall: (p: HubPlugin) => void
@@ -72,6 +74,7 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
         installedName,
         installedVersion,
         hasUpdate,
+        updatePendingUntil,
         t,
         langKey,
         langPath,
