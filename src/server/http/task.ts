@@ -10,6 +10,7 @@ import { join } from 'node:path'
 import { activeTask, cancelTask, dumpLoaderEntries, getTask, githubTarget, listPendingRestarts, validPackageName, type LoaderHandle } from '../services/install/install.ts'
 import { readInstalledVersions, recordInstalledVersion, removeInstalledVersion } from '../services/profile/installed-versions.ts'
 import { isDshPlugin, isEntryLoaded } from '../services/loader.ts'
+import { runtimeExecPath } from '../services/runtime-exec.ts'
 import { profileDirectory, readInstalled } from './catalog.ts'
 import { hostEnv } from './diagnostics.ts'
 import { HOST_RESTART_SCRIPT, isDesktopHost, readJsonBody, requireMethod, requireTrustedPost, sendJson, type WebRoute, type WebServerService } from './shared.ts'
@@ -96,9 +97,9 @@ export function registerTaskRoutes(webServer: WebServerService, profile: string,
         // detached 子进程完成「停旧进程 → 等端口释放 → 后台拉起 dsh web」，
         // 即使当前宿主（即本插件所在进程）被 kill，重启仍会继续执行。
         // 不用 /bin/sh：Windows 无此路径，且 lsof/nohup 等仅 POSIX 存在，
-        // 故孵化 node(process.execPath) 跑跨平台脚本 —— Windows 用
+        // 故孵化 node(runtimeExecPath()) 跑跨平台脚本 —— Windows 用
         // netstat + taskkill + shell:true 解析 dsh.cmd，POSIX 用 lsof + SIGTERM。
-        spawn(process.execPath, ['-e', HOST_RESTART_SCRIPT, String(port)], { detached: true, stdio: 'ignore' }).unref()
+        spawn(runtimeExecPath(), ['-e', HOST_RESTART_SCRIPT, String(port)], { detached: true, stdio: 'ignore' }).unref()
         sendJson(response, 200, { ok: true, port })
       },
     },

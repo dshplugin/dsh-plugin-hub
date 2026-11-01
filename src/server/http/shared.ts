@@ -11,7 +11,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 /**
  * 跨平台宿主重启脚本（以 `node -e` 运行，独立于宿主进程）。
  * 不用 `/bin/sh -c`：Windows 无 /bin/sh，且 lsof/nohup 仅 POSIX 存在。
- * 由 `spawn(process.execPath, ['-e', SCRIPT, port], { detached, stdio:'ignore' })` 孵化，
+ * 由 `spawn(runtimeExecPath(), ['-e', SCRIPT, port], { detached, stdio:'ignore' })` 孵化，
  * 宿主进程被 kill 后仍能完成「停旧 → 等端口释放 → 拉起新 dsh web」。
  * 端口探测不到监听进程时不再假装重启（记一行日志后退出，见脚本内注释）。
  */

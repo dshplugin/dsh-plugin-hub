@@ -26,6 +26,7 @@ import { commandOnPath, gitMissingDetail } from './preflight.ts'
 import { isTransportFailure, registryHost } from './registry-fallback.ts'
 import { dshTooOldMarker } from './dsh-compat.ts'
 import { OutputDecoder } from './decode-output.ts'
+import { runtimeExecPath } from '../runtime-exec.ts'
 
 /** 内存任务注册表，按任务 id 索引。 */
 const tasks = new Map<number, InstallTask>()
@@ -169,7 +170,8 @@ function cliInvocation(profile: string): Invocation {
     const bootstrap = desktopCliBootstrap(entry)
     if (bootstrap !== null) {
       return {
-        file: process.execPath,
+        // Android 上 execPath 是 linker64，直接用会把 --expose-internals 当可执行文件
+        file: runtimeExecPath(),
         prefixArgs: ['--expose-internals', bootstrap],
         // cwd 用 profile 目录（asar 路径不能作 cwd），不存在时由 spawnCwdFor 回退
         cwd: spawnCwdFor(profile),
@@ -181,7 +183,7 @@ function cliInvocation(profile: string): Invocation {
     if (/[\\/](?:bin\.(?:js|ts)|dsh)$/.test(entry)) {
       const absoluteEntry = resolve(entry)
       return {
-        file: process.execPath,
+        file: runtimeExecPath(),
         prefixArgs: [...process.execArgv, absoluteEntry],
         cwd: dirname(absoluteEntry),
         useShell: false,
