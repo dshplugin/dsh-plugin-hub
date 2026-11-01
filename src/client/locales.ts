@@ -353,6 +353,7 @@ export const zh = {
   failPnpmStoreHint: '安装器调用 pnpm 时报「store 位置不匹配」（ERR_PNPM_UNEXPECTED_STORE）：你的 profile 目录里旧插件依赖是用另一个大版本的 pnpm 生成的，当前 pnpm 出于安全不认旧目录，导致任何插件装进该 profile 都会失败。请删除该 profile 目录下的 node_modules 与 pnpm-lock.yaml（可先到「系统日志」或 ~/.dsh/profiles/<profile>/hub.log 查看完整报错），再重新安装。这不是插件本身的问题。',
   failPnpmUnusedPatchHint: '安装器调用 pnpm 时报「有些补丁没有被使用」（ERR_PNPM_UNUSED_PATCH）：你的 profile 里留着一条指向旧版本 dsh-plugin 的补丁声明（例如 dsh-plugin@1.4.2），而本次安装解析到的版本已经不是它，pnpm 出于安全直接中止整次安装，因此任何插件都装不进来。这不是插件本身的问题——请在 profile 目录（~/.dsh/profiles/<profile>）的 pnpm-workspace.yaml（pnpm 11 及以上）或 package.json 的 pnpm.patchedDependencies（pnpm 10）里删除该 dsh-plugin 补丁条目后重试。',
   failProfileStateHint: '安装器调用 pnpm 时报 profile 的元数据与当前环境对不上（如 ERR_PNPM_OUTDATED_LOCKFILE / ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND / ERR_PNPM_BAD_PM_VERSION / ERR_PNPM_PATCH_NOT_APPLIED）：profile 里的 pnpm-lock.yaml、package.json 或补丁声明与当前 pnpm 版本不一致，pnpm 在真正装插件之前就中止了，所以这个 profile 里装任何插件都会失败。这不是插件本身的问题——请在 profile 目录（~/.dsh/profiles/<profile>）里删除 pnpm-lock.yaml 后重试（pnpm 会按当前依赖重新生成）；若报的是 packageManager 版本不符，把 package.json 里的 packageManager 字段改成当前 pnpm 的大版本或直接删掉该字段；仍不行请重建该 profile 的依赖。',
+  failProfileYamlHint: '安装器调用 pnpm 时报「YAML 配置损坏」（duplicated mapping key）：profile 目录里的 pnpm-workspace.yaml 或 pnpm-lock.yaml 出现了重复的键（多见于手工编辑、合并冲突残留，或第三方工具重复写入同一条目）。pnpm 在解析阶段就直接退出，依赖根本没开始装，所以这个 profile 里装任何插件都会失败。这不是插件本身的问题——请打开 ~/.dsh/profiles/<profile>/ 检查这两个文件，删掉重复的那一行或那一段；不确定该改哪一处时，可以先删掉 pnpm-lock.yaml（必要时连 node_modules 一起）让 pnpm 重新生成，然后重试。',
   failNodeEngineHint: '这个插件（或它的某个依赖）声明了更高的 Node / pnpm 版本要求（ERR_PNPM_UNSUPPORTED_ENGINE / EBADENGINE），当前版本不满足，pnpm 在安装阶段直接拒绝。这不是插件本身的问题——请把 Node 升级到要求的版本（nvm / fnm 切换，或安装新版 Node.js），确认 node -v 与 pnpm -v 都满足要求后重试。',
   // 404 依赖：点名 registry 上不存在的那个包（取不到包名时跳过这行），再给删除条目的指引
   failPnpmMissingDepTarget: '{pkg} 在 npm registry 上不存在（404）',
@@ -389,6 +390,8 @@ export const zh = {
   failReason_pnpmPolicy: '版本未满最小发布年龄，或缺完整性校验 / 来源不可信。',
   failKind_pnpmUnusedPatch: 'profile 残留旧补丁声明',
   failReason_pnpmUnusedPatch: 'profile 里留着指向旧版本 dsh-plugin 的补丁，pnpm 出于安全中止了安装。',
+  failKind_profileYamlCorrupted: 'profile 的 YAML 配置损坏',
+  failReason_profileYamlCorrupted: 'profile 目录里的 pnpm-workspace.yaml 或 pnpm-lock.yaml 有重复的键，pnpm 在解析阶段就退出了。',
   failKind_profileState: 'profile 的 pnpm 元数据与本机不一致',
   failReason_profileState: 'profile 的 lockfile / package.json / packageManager 版本与当前 pnpm 对不上，安装没开始就被中止。',
   failKind_nodeEngine: '本机 Node / pnpm 版本不满足要求',
@@ -852,6 +855,7 @@ export const en = {
   failPnpmStoreHint: 'pnpm reported an unexpected store location (ERR_PNPM_UNEXPECTED_STORE): the profile directory was previously set up with a different major version of pnpm, and the current pnpm refuses to reuse it — no plugin can be installed into that profile. Delete node_modules and pnpm-lock.yaml under the profile directory (see System Logs or ~/.dsh/profiles/<profile>/hub.log for the full output), then reinstall. This is not a problem with the plugin itself.',
   failPnpmUnusedPatchHint: 'pnpm reported that some patches were not used (ERR_PNPM_UNUSED_PATCH): your profile still holds a patch entry for an older dsh-plugin version (for example dsh-plugin@1.4.2), while this install resolved a different version, so pnpm aborts the whole install for safety — no plugin can be installed into that profile. This is not a problem with the plugin itself. Remove that dsh-plugin patch entry from pnpm-workspace.yaml (pnpm 11+) or from pnpm.patchedDependencies in package.json (pnpm 10) inside the profile directory (~/.dsh/profiles/<profile>), then retry.',
   failProfileStateHint: 'pnpm reported that the profile metadata does not match the current environment (e.g. ERR_PNPM_OUTDATED_LOCKFILE / ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND / ERR_PNPM_BAD_PM_VERSION / ERR_PNPM_PATCH_NOT_APPLIED): pnpm-lock.yaml, package.json or the patch declarations inside the profile disagree with the pnpm version in use, so pnpm aborts before installing anything — every plugin install into this profile will fail. This is not a problem with the plugin itself. Delete pnpm-lock.yaml inside the profile directory (~/.dsh/profiles/<profile>) and retry (pnpm regenerates it from the declared dependencies); if the error is about packageManager, set that field in package.json to the current pnpm major or remove it; if it still fails, rebuild the profile dependencies.',
+  failProfileYamlHint: 'pnpm reported a broken YAML config (duplicated mapping key): a YAML file inside the profile directory — pnpm-workspace.yaml or pnpm-lock.yaml — contains a duplicate key, usually after a manual edit, a leftover merge conflict, or a tool writing the same entry twice. pnpm stops at parse time and nothing is installed, so every plugin install into this profile fails the same way. This is not a problem with the plugin itself. Open ~/.dsh/profiles/<profile>/ and remove the duplicated line or block; if you are not sure which file to fix, delete pnpm-lock.yaml (and node_modules if needed) so pnpm regenerates them, then retry.',
   failNodeEngineHint: 'This plugin (or one of its dependencies) declares a higher Node / pnpm version (ERR_PNPM_UNSUPPORTED_ENGINE / EBADENGINE), which the current one does not satisfy, so pnpm refuses at install time. This is not a problem with the plugin itself. Upgrade Node to the required version (switch with nvm / fnm, or install a newer Node.js), confirm node -v and pnpm -v both satisfy it, then retry.',
   // 缺失依赖：点名 404 的包（解析不出时跳过该行），再给删除指引
   failPnpmMissingDepTarget: '{pkg} was not found on the npm registry (404)',
@@ -888,6 +892,8 @@ export const en = {
   failReason_pnpmPolicy: 'The version is younger than the minimum release age, or an integrity / trust check failed.',
   failKind_pnpmUnusedPatch: 'stale patch entry in the profile',
   failReason_pnpmUnusedPatch: 'The profile keeps a patch for an older dsh-plugin version, so pnpm aborted for safety.',
+  failKind_profileYamlCorrupted: 'profile YAML config is corrupted',
+  failReason_profileYamlCorrupted: 'A YAML file in the profile directory has a duplicate key, so pnpm aborts at parse time.',
   failKind_profileState: 'profile pnpm metadata does not match this machine',
   failReason_profileState: 'The profile lockfile / package.json / packageManager version disagrees with the current pnpm, so the install aborts before starting.',
   failKind_nodeEngine: 'Node / pnpm on this machine is below the required version',

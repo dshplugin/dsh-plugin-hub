@@ -26,6 +26,7 @@ import { commandOnPath, gitMissingDetail } from './preflight.ts'
 import { isTransportFailure, registryHost } from './registry-fallback.ts'
 import { dshTooOldMarker } from './dsh-compat.ts'
 import { OutputDecoder } from './decode-output.ts'
+import { profileYamlMarker } from './profile-yaml.ts'
 import { runtimeExecPath } from '../runtime-exec.ts'
 
 /** 内存任务注册表，按任务 id 索引。 */
@@ -811,6 +812,18 @@ function annotateNpmTooLow(result: InstallResult, options: {
   return { ...result, stderr: `${result.stderr}\n${line}`, error: result.error ? `${result.error}\n${line}` : line }
 }
 
+/** 安装失败且 profile 的 YAML 配置解析不了（重复键/缩进错误）→ 注入 [profile-yaml] 标记。
+ *  判据见 profile-yaml.ts：这类失败发生在依赖解析之前，与插件、源、网络都无关。 */
+function annotateProfileYaml(result: InstallResult, options: {
+  task?: InstallTask
+}): InstallResult {
+  if (result.exitCode === 0 && !result.timedOut) return result
+  const line = profileYamlMarker(`${result.stderr}\n${result.stdout}`)
+  if (line === null) return result
+  if (options.task && options.task.status !== 'cancelled') pushLine(options.task, line)
+  return { ...result, stderr: `${result.stderr}\n${line}`, error: result.error ? `${result.error}\n${line}` : line }
+}
+
 /** 安装失败且日志含 404 时，用官方源复查一次并注入标记（逻辑见 registry-check.ts）。
  *  异步是因为要联网；只在失败路径上发生。 */
 async function annotateRegistryMissing(result: InstallResult, options: {
@@ -970,6 +983,9 @@ export async function runPluginMutation(options: {
       }
     }
   }
+  // profile 里的 YAML 配置（pnpm-workspace.yaml / pnpm-lock.yaml）解析失败 → 追加 [profile-yaml]
+  // 标记，前端给「修本机文件」的步骤，不引导向插件仓库提 Issue
+  result = annotateProfileYaml(result, options)
   // 包在 registry 不存在（404）→ 官方源复查，区分「作者的依赖缺失/包被删」与「本机镜像源滞后」
   result = await annotateRegistryMissing(result, options)
   // 插件声明的最低 DSH 版本高于当前宿主 → 追加 [dsh-too-old] 标记，前端提示先升级 DSH

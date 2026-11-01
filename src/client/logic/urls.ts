@@ -48,6 +48,7 @@ function reasonTitleOf(kind: FailureKind, action: FailureAction): string {
     case 'npmTooOld': return `npm too old for this ${word}`
     case 'nodeEngine': return `Node / pnpm on the user machine is below the version this ${word} requires`
     case 'profileState': return `the user profile's pnpm metadata does not match the local pnpm for this ${word}`
+    case 'profileYamlCorrupted': return 'the user profile has a corrupted YAML config (duplicated mapping key)'
     case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmMissing': return 'pnpm command not found on the user machine'
     case 'pnpmStore': return 'pnpm store version mismatch on the user machine'

@@ -327,6 +327,12 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 发现补丁没被用上就中止安装，任何插件都装不进来 —— 不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
                     }
+                    if (kind === 'profileYamlCorrupted') {
+                      // profile 里的 YAML 配置解析不了（pnpm-workspace.yaml / pnpm-lock.yaml 有重复键、
+                      // 缩进坏了）：pnpm 在依赖解析之前就退出，该 profile 内的安装都会失败 ——
+                      // 给修复/重建指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failProfileYamlHint'))
+                    }
                     if (kind === 'profileState') {
                       // profile 的 pnpm 元数据与本机不一致（lockfile 过期 / packageManager 版本不符 /
                       // 补丁未生效）：pnpm 在真正装插件之前就中止，该 profile 内的安装都会失败 ——

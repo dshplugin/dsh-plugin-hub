@@ -920,3 +920,17 @@ test('minimum release age rejection gets its own hint with the exact retry time'
   // untrusted origin 不含发布时间 → 仍走通用文案
   assert.equal(pnpmPolicyHintOf('[ERR_PNPM_UNTRUSTED_ORIGIN] blocked'), 'failPnpmPolicyHint')
 })
+
+test('a corrupted YAML config in the profile is a local issue, not a plugin one', () => {
+  // #562：pnpm 解析 profile 的 pnpm-workspace.yaml / pnpm-lock.yaml 时撞上重复键，
+  // 依赖解析之前就退出 —— 日志尾部还带着 Command failed，必须优先归到本机配置
+  const message = '[ERROR] duplicated mapping key (10:3)\n'
+    + 'dsh: plugin command failed; diagnostics: C:\\Users\\u\\.dsh\\profiles\\desktop\\.plugin-manager\\logs\\operation-x\\pnpm.log\n'
+    + '[exit 1]\n[pnpm log] DSH did not echo pnpm output — recovered the operation log from disk\n'
+    + 'Command failed with exit code 1: "E:\\deepseek\\DeepSeek Harness.exe" --expose-internals "pnpm.mjs" add "dsh-plugin@2.2.5"'
+  assert.equal(classifyFailure(message), 'profileYamlCorrupted')
+  // 服务端标记同样命中（乱码免疫的入口）
+  assert.equal(classifyFailure('[profile-yaml] pnpm could not parse a YAML file in the profile directory'), 'profileYamlCorrupted')
+  // YAML 缩进错误也属同一类
+  assert.equal(classifyFailure('bad indentation of a mapping entry (12:5)'), 'profileYamlCorrupted')
+})

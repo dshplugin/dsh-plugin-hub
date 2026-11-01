@@ -148,7 +148,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
+export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
 
 /** 失败动作口径：标题、上报正文与提示文案按安装/更新/卸载取词，不写死「安装」。 */
 export type FailureAction = 'install' | 'update' | 'uninstall'
@@ -254,6 +254,10 @@ export function classifyFailure(message: string): FailureKind {
   if (missingTarballIntegrity(message) || mismatchedTarballIntegrity(message) || /ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|ERR_PNPM_NO_MATURE_MATCHING_VERSION|Minimum release age|minimumReleaseAge|untrusted origin/i.test(message)) return 'pnpmPolicy'
   // profile 残留旧版本 patch 声明，pnpm 中止安装。必须在兜底之前
   if (/ERR_PNPM_UNUSED_PATCH|patches were not used/i.test(message)) return 'pnpmUnusedPatch'
+  // profile 里的 YAML 配置解析失败（pnpm-workspace.yaml / pnpm-lock.yaml 有重复键、缩进坏了）：
+  // pnpm 在依赖解析之前就退出，装任何插件都会同样失败，属本机 profile 配置问题。
+  // 必须在 profileState / pluginPrepare 之前 —— 日志尾部常带 `Command failed: … pnpm.mjs add …`
+  if (/\[profile-yaml\]|duplicated mapping key|bad indentation of a (?:mapping|sequence) entry/i.test(message)) return 'profileYamlCorrupted'
   // profile 的 pnpm 元数据与本机不一致（lockfile 过期 / 找不到可安装的 manifest / packageManager
   // 版本不符 / 补丁未生效 / workspace 依赖缺失）：都是 profile 自身状态，这个 profile 里装任何
   // 插件都会同样失败。必须在 pluginPrepare 之前 —— 这类错误常被 pnpm 包一层 Command failed
@@ -356,7 +360,7 @@ const PEER_WARN_RE = /missing peer|issues with peer dependencies|peer dependenci
 /** 安装器自己打的诊断标记行：它们本身就是「为什么没有日志 / 卡在哪一步」的证据，
  *  不含 CORE_LINE_RE 的关键词，必须无条件保留 —— 否则上报正文会退回成只剩宿主那句摘要，
  *  我们又拿不到任何可排查的信息（#382/#393 就是这样）。 */
-const MARKER_LINE_RE = /^\[(?:pnpm log|no-output|desktop-cli-fallback|dsh-too-old|host-spawn|npm-too-low|git-missing|npm-missing|pnpm-missing|dsh-missing|network|packaging|registry-missing|registry-mirror-lag|registry-fallback|allow build|stale pipe|install-channel|internal|exit\b|timed out)/i
+const MARKER_LINE_RE = /^\[(?:pnpm log|no-output|desktop-cli-fallback|dsh-too-old|host-spawn|npm-too-low|git-missing|npm-missing|pnpm-missing|dsh-missing|network|packaging|profile-yaml|registry-missing|registry-mirror-lag|registry-fallback|allow build|stale pipe|install-channel|internal|exit\b|timed out)/i
 /** 提交 issue 时正文里错误摘要的上限字符数。GitHub 请求行上限 8192 字节，
  * 固定模板与 URL 编码开销约 1~2K，核心错误（以 ASCII 日志为主）可安全带到 ~5K；
  * 仍超长时 pluginIssueUrl 会逐档缩小核心预算，最终 URL 不会超限。 */

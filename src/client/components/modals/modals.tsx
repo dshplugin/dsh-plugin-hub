@@ -462,6 +462,10 @@ export function ErrorModal({ message, repo, action, command, attempts, t, env, o
               // profile 里留着指向旧版本 dsh-plugin 的补丁声明（ERR_PNPM_UNUSED_PATCH）：pnpm 发现
               // 补丁没被用上就中止整次安装，任何插件都装不进来 —— 给删除条目的指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmUnusedPatchHint'))
+              : failureKind === 'profileYamlCorrupted'
+              // profile 里的 YAML 配置解析不了（pnpm-workspace.yaml / pnpm-lock.yaml 有重复键、缩进坏了）：
+              // pnpm 在依赖解析之前就退出，该 profile 内的安装都会失败 —— 给修复/重建指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failProfileYamlHint'))
               : failureKind === 'profileState'
               // profile 的 pnpm 元数据与本机不一致（lockfile 过期 / packageManager 版本不符 /
               // 补丁未生效）：pnpm 在真正装插件之前就中止，该 profile 内的安装都会失败 ——
