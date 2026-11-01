@@ -36,5 +36,10 @@ export declare function parseAllowBuildsKey(output: string): string | null;
  * 向 profile 的 pnpm-workspace.yaml 追加一条 `allowBuilds` 记录：与已有条目合并，
  * 其余 yaml 保持不变；重写时丢弃损坏的占位条目（pnpm 安装失败的 bug 会写入
  * 字面量 `set this to true or false`）。
+ *
+ * 任何形态的既有 `allowBuilds` 都会被**整体替换**成规范化块：块写法、行内数组
+ * `allowBuilds: ["a@1"]`、以及末尾无换行的 `allowBuilds:` 都算命中。否则会在文件里
+ * 再多写一个同名键 —— pnpm 解析时直接报 `duplicated mapping key`，该 profile 里
+ * 所有插件都装不上（#562）。
  */
 export declare function addAllowBuildsKey(profile: string, key: string): void;
