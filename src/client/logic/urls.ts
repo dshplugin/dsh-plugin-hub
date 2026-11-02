@@ -49,6 +49,7 @@ function reasonTitleOf(kind: FailureKind, action: FailureAction): string {
     case 'nodeEngine': return `Node / pnpm on the user machine is below the version this ${word} requires`
     case 'profileState': return `the user profile's pnpm metadata does not match the local pnpm for this ${word}`
     case 'profileYamlCorrupted': return 'the user profile has a corrupted YAML config (duplicated mapping key)'
+    case 'profileLocalBuild': return 'a local (file:/link:) plugin already in the user profile has a failing build script'
     case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmMissing': return 'pnpm command not found on the user machine'
     case 'pnpmStore': return 'pnpm store version mismatch on the user machine'
@@ -113,6 +114,8 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
         ? 'network connectivity issue on the user side (DNS, proxy, firewall, or a blocked connection)'
       : kind === 'tlsTrust'
         ? 'the local certificate chain is not trusted by Node/pnpm (corporate SSL inspection, antivirus web shield, or a local MITM proxy) — local environment issue'
+      : kind === 'profileLocalBuild'
+        ? 'no plugin-side cause found — pnpm rejects a build script of a local (file:/link:) package that already exists in the user profile, so every install into that profile fails the same way (local environment issue)'
       : kind === 'localEnv'
         ? 'no evidence of a plugin-side cause; the log shows local-environment signals (system error codes, certificates/proxy, or a broken local config), so this is reported for triage of the classifier only'
       : kind === 'dshTooOld'
@@ -128,7 +131,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
         : kind === 'pluginPrepare'
           ? 'plugin prepare/build script failed during install (packaging/distribution issue)'
           : kind === 'pnpmIgnoredBuild'
-            ? 'plugin depends on a native module whose build script pnpm blocks by default (use a prebuilt variant)'
+            ? 'a package in this plugin\'s install tree (the plugin itself or one of its dependencies) declares a build script that pnpm blocks by default; pnpm fails the whole install until it is approved, and the blocked script is not necessarily a native module'
             : kind === 'originRejected'
                 ? 'the request never reached the install flow — the local service rejected its origin (local environment issue)'
                 : kind === 'pnpmPolicy'

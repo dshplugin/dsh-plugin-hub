@@ -148,7 +148,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
+export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileLocalBuild' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
 
 /** 失败动作口径：标题、上报正文与提示文案按安装/更新/卸载取词，不写死「安装」。 */
 export type FailureAction = 'install' | 'update' | 'uninstall'
@@ -167,6 +167,20 @@ export function actionWordZh(action: FailureAction): string {
 export function actionOfRecord(rec: { kind: NotificationRecord['kind']; action?: FailureAction }): FailureAction {
   if (rec.action !== undefined) return rec.action
   return rec.kind === 'uninstall' ? 'uninstall' : rec.kind === 'update' ? 'update' : 'install'
+}
+
+/**
+ * `Ignored build scripts:` 名单是否**全部**是 profile 本地的 file:/link: 依赖。
+ * 已发布插件无法依赖用户机器上的本地路径，这类条目只可能来自 profile 里已有的别的插件；
+ * 而 pnpm 每次 add 都会重校验整棵 profile 依赖树，本地包构建失败会让本次安装同样失败，
+ * 与本次要装的插件无关。
+ */
+function localBuildScriptsOnly(message: string): boolean {
+  const line = /Ignored build scripts:\s*([^\n]*)/i.exec(message)?.[1] ?? ''
+  const specs = line.split(',').map((spec) => spec.trim()).filter((spec) => spec !== '')
+  if (specs.length === 0) return false
+  // pnpm 写成 `dsh-purge@file:../../vendor/dsh-purge`；容错无版本号的 `file:...` 裸写法
+  return specs.every((spec) => /(?:^|@)(?:file|link):/i.test(spec))
 }
 
 /** 只匹配 pnpm 的错误码，不匹配泛泛出现的 checksum / integrity 字样。 */
@@ -269,6 +283,9 @@ export function classifyFailure(message: string): FailureKind {
   // 文件系统写不进去（ENOSPC/EROFS/EMFILE/ENFILE）。必须在 network 之前判：
   // 磁盘满时日志尾部混超时特征，先判网络会误报成「网络不通」
   if (/os error 112\b|os error 19\b|ERROR_DISK_FULL|ERROR_WRITE_PROTECT|\bENOSPC\b|\bEROFS\b|\bEMFILE\b|\bENFILE\b|no space left on device|read-only file system|too many open files/i.test(message)) return 'fsUnavailable'
+  // 名单全是本地 file:/link: 依赖时，失败只能来自 profile 自身的包重校验：归本机状态，
+  // 不能记到本次插件头上。必须在 pnpmIgnoredBuild 之前，否则会被它先按插件侧接走
+  if (localBuildScriptsOnly(message)) return 'profileLocalBuild'
   // 构建脚本被 allowBuilds 拦截。必须在 network 之前判：日志尾部混重试残留的连接失败特征
   if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:|ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED/i.test(message)) return 'pnpmIgnoredBuild'
   // npm 源拒绝了访问（401/403）：私有源要登录凭据，或当前网络/IP 不被源允许。

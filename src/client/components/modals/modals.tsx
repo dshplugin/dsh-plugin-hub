@@ -466,6 +466,10 @@ export function ErrorModal({ message, repo, action, command, attempts, t, env, o
               // profile 里的 YAML 配置解析不了（pnpm-workspace.yaml / pnpm-lock.yaml 有重复键、缩进坏了）：
               // pnpm 在依赖解析之前就退出，该 profile 内的安装都会失败 —— 给修复/重建指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failProfileYamlHint'))
+              : failureKind === 'profileLocalBuild'
+              // 被拦的构建脚本属于 profile 里已有的 file:/link: 本地插件，不是本次装的插件：
+              // pnpm 每次 add 都重校验整棵树，该 profile 内的安装都会失败 —— 给定位/移除指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failProfileLocalBuildHint'))
               : failureKind === 'profileState'
               // profile 的 pnpm 元数据与本机不一致（lockfile 过期 / packageManager 版本不符 /
               // 补丁未生效）：pnpm 在真正装插件之前就中止，该 profile 内的安装都会失败 ——

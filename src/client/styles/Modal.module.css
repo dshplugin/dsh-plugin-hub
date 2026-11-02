@@ -1487,17 +1487,54 @@ a.failRepo:hover .failRepoUrl {
   max-width: calc(100vw - 48px);
 }
 
-/* 版本 / 发布时间元信息行：小号标签并排，弱化但可读 */
-.hubUpdateMeta {
+/* 版本条：版本号是这一屏的主信息，状态胶囊紧跟其后，发布时间靠右作为附属说明。
+   三者在同一行、字号与颜色分层，用户一眼就能分清「版本号」与「状态」 */
+.hubVersionBar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 14px;
-  font-size: 12px;
-  line-height: 18px;
+  gap: 4px 10px;
 }
 
-.hubUpdateMetaItem {
+.hubVersionNumber {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+  color: var(--hub-text-primary);
+}
+
+/* 状态胶囊：颜色本身就是区分，读不到文案也能分辨最新 / 可更新 / 暂缓 */
+.hubStateChip {
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.hubStateLatest {
+  color: var(--hub-success);
+  border-color: var(--hub-success-border);
+  background: var(--hub-success-tint);
+}
+
+.hubStateAvailable {
+  color: var(--hub-warn);
+  border-color: var(--hub-warn-border);
+  background: var(--hub-warn-tint);
+}
+
+.hubStatePending {
+  color: var(--hub-text-tertiary);
+  border-color: var(--hub-border-2);
+}
+
+.hubVersionDate {
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 18px;
   color: var(--hub-text-tertiary);
 }
 

@@ -37,6 +37,13 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
   const pending = state === 'pending'
   // 展示的版本号：提示更新/暂缓提示时是远端新版本；否则是本机当前版本
   const shownVersion = hasUpdate || pending ? info.version : currentVersion || info.version
+  // 状态胶囊：颜色 + 文案在同一处说清「已是最新 / 可更新 / 暂缓提示」，
+  // 用户不必在多个版本号之间来回对照才判断出自己在哪种状态
+  const chip = hasUpdate
+    ? { className: styles.hubStateAvailable, label: t('hubVersionStateAvailable') }
+    : pending
+      ? { className: styles.hubStatePending, label: t('hubVersionStatePending') }
+      : { className: styles.hubStateLatest, label: t('hubVersionStateLatest') }
   // 变更记录：字符串直接使用；{zh,en} 对象按界面语言取，缺哪种补哪种，全缺则不出记录区
   const notesRaw = typeof info.notes === 'string'
     ? info.notes
@@ -45,7 +52,13 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
         ? (info.notes.en ?? info.notes.zh ?? '')
         : (info.notes.zh ?? info.notes.en ?? '')
       : ''
-  const notesHtml = notesRaw.trim() ? renderMarkdown(notesRaw) : null
+  // 记录开头的 H1 只是重复「DSH Plugin Hub vX」，版本已在顶部展示过；去掉后正文直接进入内容。
+  // 去掉后若没有正文（记录只有标题），保底仍显示原文，避免空盒子
+  const notesStripped = notesRaw.replace(/^\s*#\s*DSH Plugin Hub[^\n]*\n+/, '')
+  const notesBody = notesStripped.trim() === '' ? notesRaw : notesStripped
+  const notesHtml = notesBody.trim() ? renderMarkdown(notesBody) : null
+  // 说明只在需要动作或需要解释时出现：已是最新时胶囊已说明状态，不再重复一句话
+  const desc = hasUpdate ? t('hubUpdateDesc') : pending ? t('hubPendingDesc') : null
   // 发布时间：ISO 字符串转本地可读格式；非法值静默隐藏
   let published: string | null = null
   if (info.publishedAt) {
@@ -66,18 +79,18 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
         h('div', { className: styles.modalTitle }, t(hasUpdate || pending ? 'hubUpdateTitle' : 'hubCurrentTitle')),
         h('button', {
           className: styles.modalClose,
-          'aria-label': t('confirmCancel'),
+          'aria-label': t('close'),
           onClick: () => onClose(),
         }, h(CloseIcon)),
       ),
-      h('div', { className: styles.modalDesc },
-        t(hasUpdate ? 'hubUpdateDesc' : pending ? 'hubPendingDesc' : 'hubCurrentDesc', { version: shownVersion })),
-      h('div', { className: styles.hubUpdateMeta },
-        h('span', { className: styles.hubUpdateMetaItem }, `${t('version')} ${shownVersion}`),
+      h('div', { className: styles.hubVersionBar },
+        h('span', { className: styles.hubVersionNumber }, `v${shownVersion}`),
+        h('span', { className: `${styles.hubStateChip} ${chip.className}` }, chip.label),
         published
-          ? h('span', { className: styles.hubUpdateMetaItem }, `${t('hubUpdatePublished')} ${published}`)
+          ? h('span', { className: styles.hubVersionDate }, `${t('hubUpdatePublished')} ${published}`)
           : null,
       ),
+      desc ? h('div', { className: styles.modalDesc }, desc) : null,
       notesHtml
         ? h('div', {
           className: styles.hubUpdateNotes,
@@ -90,7 +103,7 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
             h('button', { className: styles.restartLater, onClick: onClose }, t('hubUpdateLater')),
             h('button', { className: styles.modalInstall, onClick: onProceed }, t('updateNow')),
           ]
-          : h('button', { className: styles.modalInstall, onClick: onClose }, t(pending ? 'hubUpdateLater' : 'hubUpToDate')),
+          : h('button', { className: styles.modalInstall, onClick: onClose }, t('close')),
       ),
     ),
   )

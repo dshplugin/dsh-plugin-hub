@@ -79,4 +79,5 @@ export declare function fetchViaCurl(url: string, proxy: string, timeoutMs: numb
     ok: boolean;
     body: string;
     reason: ProbeFailReason | null;
+    detail: string | null;
 }>;

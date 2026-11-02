@@ -53,11 +53,13 @@ test('pluginIssueUrl: the default action keeps the historical install wording', 
 })
 
 test('pluginIssueUrl: an allowlist-blocked build is reported to the author as a plugin-side issue', () => {
-  // pnpmIgnoredBuild 现在走作者仓库：正文原因面向作者（建议改用预构建产物），不再当作插件中心分诊
+  // 构建脚本被拦仍归插件侧（安装器已自动放行并重试过）；但正文只说清是被拦的构建脚本，
+  // 不假定它是原生模块，也不假定它一定是插件的直接依赖
   const allowBlocked = '[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: node-pty@1.1.0'
   const { title, body } = decodeTargets(pluginIssueUrl('owner/repo', allowBlocked, null, 'dsh plugin add owner/repo'))
   assert.ok(title.includes('build scripts blocked by pnpm allowlist'), title)
-  assert.ok(body.includes('use a prebuilt variant'), body)
+  assert.ok(body.includes('declares a build script that pnpm blocks by default'), body)
+  assert.ok(!body.includes('native module whose build script'), body)
 })
 
 test('hubIssueUrl: title and body follow the action (unclassified removal)', () => {

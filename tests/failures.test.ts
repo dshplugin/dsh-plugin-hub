@@ -934,3 +934,22 @@ test('a corrupted YAML config in the profile is a local issue, not a plugin one'
   // YAML 缩进错误也属同一类
   assert.equal(classifyFailure('bad indentation of a mapping entry (12:5)'), 'profileYamlCorrupted')
 })
+
+test('a blocked build script of a local file:/link: package belongs to the profile, not the plugin', () => {
+  // 本地 file:/link: 包的构建脚本被拦时，失败跟着 profile 走：装任何插件都会同样失败，
+  // 归类必须落到本机状态，否则作者会被要求去修别人的包
+  const message = '[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: dsh-purge@file:../../vendor/dsh-purge\n'
+    + 'dsh: plugin command failed; diagnostics: C:\\Users\\u\\AppData\\.dsh\\profiles\\desktop\\.plugin-manager\\logs\\operation-zZSaHy\\pnpm.log\n'
+    + 'node_modules/dsh-purge postinstall: Error: Cannot find module \'..\\scripts\\ensure-profile-bundle.mjs\'\n'
+    + '[ELIFECYCLE] Command failed with exit code 1.'
+  assert.equal(classifyFailure(message), 'profileLocalBuild')
+  // link: 同理
+  assert.equal(classifyFailure('[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: dsh-x@link:../x'), 'profileLocalBuild')
+  // 混合名单（既有本地包、也有 registry 包）仍按插件侧处理：交给 allowBuilds 放行路径
+  assert.equal(
+    classifyFailure('[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: node-pty@1.1.0, dsh-purge@file:../p'),
+    'pnpmIgnoredBuild',
+  )
+  // 真实依赖（registry 包）仍按原样归到插件侧
+  assert.equal(classifyFailure('[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: node-pty@1.1.0'), 'pnpmIgnoredBuild')
+})

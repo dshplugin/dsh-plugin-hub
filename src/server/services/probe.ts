@@ -287,13 +287,29 @@ export async function finalUrl(url: string, proxy: string, timeoutMs: number): P
  */
 export function fetchViaCurl(
   url: string, proxy: string, timeoutMs: number,
-): Promise<{ ok: boolean; body: string; reason: ProbeFailReason | null }> {
+): Promise<{ ok: boolean; body: string; reason: ProbeFailReason | null; detail: string | null }> {
   // 同样用 -sS：正文之外还要 stderr 里的 TLS 失败线索（被 stderr 收集，不外泄给用户）。
-  // --compressed：目录 JSON 约 3.6MB，源站支持 gzip，压缩后弱网下也能在超时内拉完。
-  const args = ['-sS', '--compressed', '--max-time', String(Math.max(1, Math.round(timeoutMs / 1000))), url]
-  return curlWithTlsFallback(args, proxyEnv(proxy), timeoutMs).then((r) => ({
-    ok: r.code === 0,
-    body: r.stdout,
-    reason: r.code !== 0 && tlsRevocationBlocked(r.stderr) ? 'tlsRevocation' : null,
-  }))
+  // 编码不用 --compressed 的自动协商，而是明确只接受 gzip：协商会让服务端按本机 curl 声明的
+  // 能力回 br / zstd，解不开时 curl 非零退出且正文为空，目录拉取直接失败；而 gzip 的解码器
+  // 每个 curl 都有，对 JSON 的压缩率也够。
+  const gzip = ['-H', 'Accept-Encoding: gzip', '--compressed']
+  const attempt = (extra: string[]): string[] => [
+    '-sS', ...gzip, ...extra, '--max-time', String(Math.max(1, Math.round(timeoutMs / 1000))), url,
+  ]
+  return curlWithTlsFallback(attempt([]), proxyEnv(proxy), timeoutMs).then(async (first) => {
+    // 首轮失败（连接被重置 / 编码解不开 / HTTP/2 流异常）时退到 HTTP/1.1 再试一次：
+    // Windows 自带 curl 与大响应 + HTTP/2 的组合偶发流级失败，换协议版本代价最小；
+    // 只在真失败时才多一次请求。
+    const r = first.code === 0
+      ? first
+      : await curlWithTlsFallback(attempt(['--http1.1']), proxyEnv(proxy), timeoutMs)
+    const failed = r.code !== 0 || r.stdout === ''
+    return {
+      ok: !failed,
+      body: r.stdout,
+      reason: failed && tlsRevocationBlocked(r.stderr) ? 'tlsRevocation' : null,
+      // 只留退出码与 stderr 末行：正文不进错误详情，且要够短才能在界面上完整显示
+      detail: failed ? `curl exit ${r.code ?? 'null'}: ${r.stderr.trim().split('\n').slice(-1)[0] ?? ''}`.slice(0, 300) : null,
+    }
+  })
 }
