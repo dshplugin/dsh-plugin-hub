@@ -39,11 +39,25 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
   const pendingUntil = isInstalled && !update ? updatePendingUntil(p) : null
   // 版本号展示：已安装 → 当前已装版本（最能反映用户状态）；未安装 → 目录最新版本
   const versionShown = isInstalled ? installedVersion(p) : p.version
+  // 目录只下发作者 GitHub 账号，缺省时从仓库地址推导
+  const author = p.ownerSlug ?? repo.split('/')[0]?.toLowerCase() ?? ''
 
   return h('div', { className: styles.card },
     h('div', { className: styles.cardMain },
-      h('div', { className: styles.cardHead },
-        h('div', { className: styles.cardTitle, title: p.description ?? '' }, p.displayName ?? p.slug),
+      // 第一行只放名称 + 版本 + 更新状态：这三样是判断「这是什么、我装没装、要不要更新」的全部依据，
+      // 必须始终可见；长仓库名在此行内省略号收尾，不把版本与更新徽标挤出去
+      h('div', { className: styles.cardTitleRow },
+        // 名称本身是通往主站详情页的链接：悬停变色即可点，省掉「先找按钮再点」的一步。
+        // 无仓库地址时退回纯文本（没有可跳转的目标）
+        repo
+          ? h('a', {
+            className: styles.cardTitle,
+            href: pluginDetailUrl(p, langPath),
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            title: p.description ?? '',
+          }, p.displayName ?? p.slug)
+          : h('div', { className: styles.cardTitle, title: p.description ?? '' }, p.displayName ?? p.slug),
         // 版本号紧跟插件名称：有版本才显示（无 release 的仓库不展示版本号）
         versionShown ? h('span', { className: styles.versionBadge, title: t('version') }, versionShown) : null,
         // 已安装且有更新：醒目提示（有 release 比版本号、无 release 比仓库最近更新时间）
@@ -51,11 +65,17 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
         pendingUntil !== null
           ? h('span', { className: styles.updateBadge, title: t('updatePendingHint') }, t('updatePending', { time: clockTime(pendingUntil) }))
           : null,
-        p.category ? h('span', { className: styles.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null,
-        p.compatibility?.status === 'verified'
-          ? h('span', { className: styles.verified }, t('verified'))
-          : null,
       ),
+      // 作者与分类同属背景信息：单独一行，不与名称抢宽度，也不参与是否要装/更新的判断
+      (author || p.category || p.compatibility?.status === 'verified')
+        ? h('div', { className: styles.cardBadgeRow },
+          author ? h('span', { className: styles.authorBadge, title: t('author') }, `@${author}`) : null,
+          p.category ? h('span', { className: styles.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null,
+          p.compatibility?.status === 'verified'
+            ? h('span', { className: styles.verified }, t('verified'))
+            : null,
+        )
+        : null,
       // 描述始终显示：站点英文数据缺翻译时 description 回退成中文也照常展示 ——
       // 描述是了解插件的第一入口，语言不一致也不该省略。
       p.description ? h('p', { className: styles.desc }, p.description) : null,

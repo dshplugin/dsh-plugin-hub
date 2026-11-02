@@ -221,7 +221,7 @@
   background: var(--hub-text-tertiary);
 }
 
-/* 主信息：名称 + 已装版本 + 有更新徽标 */
+/* 主信息：名称 + 已装版本 + 有更新徽标（同一行，名称超长时省略，徽标不被挤走） */
 .rowMain {
   display: flex;
   align-items: baseline;
@@ -230,25 +230,56 @@
   flex: 1 1 auto;
 }
 
+/* 右上角 Star / Fork：靠右单行，配色与插件市场列表一致（星标琥珀、Fork 次级灰） */
+.rowStats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.rowStar {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-warn);
+}
+
+.rowFork {
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--hub-text-tertiary);
+}
+
 .rowTitle {
   font-size: 12px;
   line-height: 18px;
   font-weight: 600;
   color: var(--hub-text-primary);
+  flex: 0 1 auto;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 名称是主站详情页链接：不做成蓝色下划线，悬停才点明可点 */
+  text-decoration: none;
 }
 
-/* 已装版本：等宽弱化小字 */
+a.rowTitle:hover {
+  color: var(--hub-brand);
+  text-decoration: underline;
+}
+
+/* 已装版本：等宽弱化小字。描边透明但保留 1px，与同行的「有更新」「插件市场」等高 */
 .versionBadge {
   flex-shrink: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 10px;
+  line-height: 14px;
   color: var(--hub-text-tertiary);
   background: var(--hub-bg-hover);
+  border: 1px solid transparent;
   border-radius: 4px;
   padding: 0 5px;
 }
@@ -256,8 +287,8 @@
 /* 有更新徽标：品牌色实底小圆标 */
 .updateBadge {
   flex-shrink: 0;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 10px;
+  line-height: 14px;
   font-weight: 500;
   color: var(--hub-warn);
   background: var(--hub-warn-tint);
@@ -274,8 +305,8 @@
   width: 60px;
   box-sizing: border-box;
   text-align: center;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 10px;
+  line-height: 14px;
   font-weight: 500;
   border-radius: 4px;
   padding: 0 4px;
@@ -300,8 +331,8 @@
    与「有更新」实底区分，表达「这是示例项目，宿主不加载」 */
 .exampleBadge {
   flex-shrink: 0;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 10px;
+  line-height: 14px;
   font-weight: 500;
   color: var(--hub-brand);
   background: var(--hub-brand-tint);
@@ -338,16 +369,34 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 仓库名是主站详情页链接：默认与普通文字无异，悬停才提示可点 */
+  text-decoration: none;
+}
+
+a.rowRepo:hover {
+  color: var(--hub-brand);
+  text-decoration: underline;
 }
 
 .rowCategory {
   flex-shrink: 0;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 10px;
+  line-height: 14px;
   color: var(--hub-text-tertiary);
   background: var(--hub-bg-hover);
+  border: 1px solid transparent;
   border-radius: 4px;
-  padding: 0 6px;
+  padding: 0 5px;
+}
+
+/* 来源标签 + 操作按钮行：独立成行靠右成组，名称行只留名称/版本/更新状态 */
+.rowActionLine {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-left: 16px;
+  min-width: 0;
 }
 
 /* —— 行操作：详情 / 更新 / 卸载 —— */
@@ -359,14 +408,16 @@
   flex-shrink: 0;
 }
 
-/* 详情：中性细边框按钮，与卸载同款描边样式（视觉成组） */
+/* 详情：默认无边框（低频操作不抢视觉），悬停才出现描边与底色成为按钮形状。
+   描边保留 1px 透明而非 none，保证与同行的更新/卸载按钮同高、文字基线对齐 */
 .rowDetail {
   font-family: inherit;
   font-size: 12px;
   line-height: 18px;
+  font-weight: 500;
   color: var(--hub-text-secondary);
   background: transparent;
-  border: 1px solid var(--hub-border-2);
+  border: 1px solid transparent;
   border-radius: 6px;
   padding: 2px 10px;
   cursor: pointer;
@@ -376,7 +427,7 @@
 
 .rowDetail:hover {
   color: var(--hub-text-primary);
-  border-color: var(--hub-border-ghost);
+  border-color: var(--hub-border-2);
   background: var(--hub-bg-hover);
 }
 
@@ -403,7 +454,8 @@
   border-color: var(--hub-warning);
 }
 
-/* 更新：琥珀色实底小按钮（与插件市场「可更新」同色），仅在「有更新」时出现 */
+/* 更新：琥珀色实底小按钮（与插件市场「可更新」同色），仅在「有更新」时出现。
+   与详情/卸载同度量（1px 描边 + 2px 内距），否则实底按钮会比描边按钮窄一圈 */
 .rowUpdate {
   font-family: inherit;
   font-size: 12px;
@@ -411,9 +463,9 @@
   font-weight: 500;
   color: #fff;
   background: var(--hub-warn);
-  border: none;
+  border: 1px solid var(--hub-warn);
   border-radius: 6px;
-  padding: 3px 10px;
+  padding: 2px 10px;
   cursor: pointer;
   user-select: none;
   transition: background 120ms ease;
@@ -428,6 +480,7 @@
   font-family: inherit;
   font-size: 12px;
   line-height: 18px;
+  font-weight: 500;
   color: var(--hub-danger);
   background: transparent;
   border: 1px solid var(--hub-danger-border-soft);

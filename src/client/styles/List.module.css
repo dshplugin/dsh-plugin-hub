@@ -52,7 +52,8 @@
   gap: 4px;
 }
 
-.cardHead {
+/* 名称行：名称可收缩到省略号，版本与更新徽标不收缩 —— 长仓库名不会把状态挤没 */
+.cardTitleRow {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -60,24 +61,53 @@
 }
 
 .cardTitle {
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 13px;
   line-height: 18px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 链接形态但不做成蓝色下划线：沿用标题颜色，悬停才点明可点 */
+  color: inherit;
+  text-decoration: none;
+  transition: color 120ms ease;
 }
 
+a.cardTitle:hover {
+  color: var(--hub-brand);
+  text-decoration: underline;
+}
+
+/* 分类 / 验证徽标行：与名称行分开，长名称与多枚徽标互不抢宽度 */
+.cardBadgeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 徽章统一度量：字号 / 行高 / 内距 / 描边一致，同屏并排时不会一大一小。
+   以 14px 行高 + 1px 描边收成 16px 高的轻量标签，不与名称行争视觉重量 */
 .categoryBadge,
 .verified,
+.authorBadge,
 .versionBadge,
 .updateBadge {
   flex-shrink: 0;
   font-size: 10px;
-  line-height: 16px;
+  line-height: 14px;
   border-radius: 4px;
-  padding: 0 6px;
+  padding: 0 5px;
   border: 1px solid transparent;
+}
+
+/* 作者：等宽字体 + 中性灰，与分类（品牌蓝）、已验证（绿）区分，避免一行里多个彩色标签抢注意力 */
+.authorBadge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--hub-text-tertiary);
+  border-color: var(--hub-border-ghost);
 }
 
 .categoryBadge {

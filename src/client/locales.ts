@@ -471,6 +471,9 @@ export const zh = {
   installEntryLine: '安装入口：{c}。',
   reportIssue: '去插件仓库提交 Issue',
   detail: '打开详情',
+  // 已安装行按钮：打开与点行内空白处相同的本地详情弹窗
+  installDetail: '安装详情',
+  author: '作者',
   noResult: '没有找到匹配的插件',
   noResultDesc: '换个关键词试试，或前往网站浏览全部插件。',
   today: '今天更新',
@@ -979,6 +982,9 @@ export const en = {
   installEntryLine: 'Install entry: {c}.',
   reportIssue: 'Report an Issue to the plugin repo',
   detail: 'Open details',
+  // Installed-row local details button: opens the same dialog as clicking the row body
+  installDetail: 'Install details',
+  author: 'Author',
   noResult: 'No plugins match your search',
   noResultDesc: 'Try another keyword, or browse all plugins on the website.',
   today: 'updated today',

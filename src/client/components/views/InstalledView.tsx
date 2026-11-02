@@ -17,7 +17,8 @@ import styles from '../../styles/InstalledView.module.css'
 import type { LocaleId, Translate } from '../../types.ts'
 import type { InstalledItem } from '../../logic/installed.ts'
 import { CATEGORY_LABELS, categoryLabel } from '../../logic/constants.ts'
-import { clockTime } from '../../logic/format.ts'
+import { clockTime, fmtStars } from '../../logic/format.ts'
+import { pluginSiteUrl } from '../../logic/urls.ts'
 import { SortArrowIcon } from '../ui/icons.tsx'
 
 const INSTALLED_SORTS = ['sortName', 'sortInstalledAt', 'sortStars', 'sortForks'] as const
@@ -101,9 +102,20 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
             : item.dshCapable ? t('statusInactive')
               : t('exampleHint'),
       }),
-      // 主信息：名称 + 已装版本 + 有更新徽标（flex 撑满，超长省略）
+      // 主信息：名称 + 已装版本 + 有更新徽标（同一行，名称超长时省略，徽标不被挤走）。
+      // 名称本身是主站详情页链接：点它直接跳官网，点行内其它位置仍是本地面板。
+      // 阻止冒泡，避免一次点击同时打开本地详情弹窗和新标签页
       h('div', { className: styles.rowMain },
-        h('span', { className: styles.rowTitle }, name),
+        repo
+          ? h('a', {
+            className: styles.rowTitle,
+            href: pluginSiteUrl(repo),
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            title: t('detail'),
+            onClick: (e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation(),
+          }, name)
+          : h('span', { className: styles.rowTitle }, name),
         item.installedVersion
           ? h('span', { className: styles.versionBadge, title: t('installedVersionLabel') }, item.installedVersion)
           : null,
@@ -114,15 +126,51 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
             ? h('span', { className: styles.updateBadge, title: t('updatePendingHint') }, t('updatePending', { time: clockTime(item.pendingUntil) }))
             : null,
       ),
-      // 来源标签列（行尾、操作按钮前，右对齐固定）：目录插件 →「插件市场」（品牌色），
-      // 命令行安装 →「手动安装」（琥珀色）；两词 4 字等宽，所有条目标签同列对齐
+      // 右上角 Star / Fork：与插件市场列表同一口径，装之前看过的热度在已安装里也能对照。
+      // 自定义安装没有目录元数据（plugin === null），没有可展示的统计
+      item.plugin
+        ? h('div', { className: styles.rowStats },
+          h('span', { className: styles.rowStar }, '\u2605 ', fmtStars(item.plugin.stats?.stargazers_count)),
+          h('span', { className: styles.rowFork }, t('fork'), ' ', fmtStars(item.plugin.stats?.forks_count)),
+        )
+        : null,
+    ),
+    // 示例项目徽标单独一行（非 dsh 插件）：标签较长也能完整显示，不挤压名称行
+    !item.dshCapable
+      ? h('div', { className: styles.exampleRow },
+        h('span', { className: styles.exampleBadge, title: t('exampleHint') }, t('exampleLabel')),
+      )
+      : null,
+    // 第二行：仓库 · 分类 · 来源（与名称左对齐缩进，独立成行不再挤压名称）。
+    // 来源标签恒定存在，故此行恒渲染：仓库与分类缺失时仍要能看到它是从哪装进来的
+    h('div', { className: styles.rowMeta },
+      // 仓库名同样指向主站详情页；与名称一样阻止冒泡，不连带打开本地详情弹窗
+      item.repo
+        ? h('a', {
+          className: styles.rowRepo,
+          href: pluginSiteUrl(item.repo),
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          title: t('detail'),
+          onClick: (e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation(),
+        }, item.repo)
+        : null,
+      category ? h('span', { className: styles.rowCategory },
+        categoryLabel(CATEGORY_LABELS, category, langKey)) : null,
+      // 来源标签：目录插件 →「插件市场」（品牌色），命令行安装 →「手动安装」（琥珀色）
       h('span', {
         className: isCustom
           ? `${styles.rowSourceTag} ${styles.rowSourceTagManual}`
           : `${styles.rowSourceTag} ${styles.rowSourceTagHub}`,
         title: isCustom ? t('manualInstallHint') : t('hubInstallHint'),
       }, isCustom ? t('manualInstall') : t('hubInstall')),
-      // 行操作：重启（dsh 插件待重启时）/ 详情 / 更新（有更新时）/ 卸载 —— 按钮点击不触发行打开详情
+    ),
+    // 第三行（仅目录插件）：简介单独一行展示，超长以省略号收尾
+    desc ? h('div', { className: styles.rowDesc, title: desc }, desc) : null,
+    // 最后一行：操作按钮单独成行、靠右，名称与版本号那条线不再被按钮挤窄
+    h('div', { className: styles.rowActionLine },
+      // 行操作：重启（dsh 插件待重启时）/ 在 Finder 中显示 / 安装详情 / 更新（有更新时）/ 卸载
+      // —— 按钮点击不触发行打开详情
       h('div', { className: styles.rowActions },
         // 装完未挂载、且在待重启列表里的 dsh 插件：给「重启」入口，点了宿主重启后插件即生效；
         // 已重启但仍加载失败（不在待重启列表）不显示「重启」，改为灰点「未激活」
@@ -134,8 +182,7 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
             onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onRestart() },
           }, t('restart'))
           : null,
-        // 支持文件管理器定位的平台（macOS / Linux）：行内该位改为打开安装目录按钮；
-        // 行点击本身即打开详情弹窗，故不支持的平台（如 Windows）不显示此按钮
+        // 支持文件管理器定位的平台（macOS / Linux）才显示打开安装目录按钮
         canReveal
           ? h('button', {
             className: styles.rowDetail,
@@ -143,6 +190,13 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
             onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onReveal(item) },
           }, revealLabel)
           : null,
+        // 安装详情：显式入口，打开与点行内空白处同一个本地详情弹窗
+        h('button', {
+          className: styles.rowDetail,
+          type: 'button',
+          title: t('detail'),
+          onClick: (e: MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); onOpenDetail(item) },
+        }, t('installDetail')),
         item.hasUpdate && item.plugin
           ? h('button', {
             className: styles.rowUpdate,
@@ -158,22 +212,6 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
         }, t('uninstall')),
       ),
     ),
-    // 示例项目徽标单独一行（非 dsh 插件）：标签较长也能完整显示，不挤压名称行
-    !item.dshCapable
-      ? h('div', { className: styles.exampleRow },
-        h('span', { className: styles.exampleBadge, title: t('exampleHint') }, t('exampleLabel')),
-      )
-      : null,
-    // 第二行：仓库 · 分类（与名称左对齐缩进，独立成行不再挤压名称）
-    repo || category
-      ? h('div', { className: styles.rowMeta },
-        item.repo ? h('span', { className: styles.rowRepo }, item.repo) : null,
-        category ? h('span', { className: styles.rowCategory },
-          categoryLabel(CATEGORY_LABELS, category, langKey)) : null,
-      )
-      : null,
-    // 第三行（仅目录插件）：简介单独一行展示，超长以省略号收尾
-    desc ? h('div', { className: styles.rowDesc, title: desc }, desc) : null,
   )
 }
 
