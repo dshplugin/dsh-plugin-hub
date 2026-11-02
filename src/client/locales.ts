@@ -510,10 +510,10 @@ export const zh = {
   close: '关闭',
   // 暂缓提示：远端确有新版本，但发布未满 24 小时（pnpm 供应链安全门槛），与「已是最新」严格区分
   hubPendingDesc: '最新版已发布，但发布尚未满 24 小时：此时更新会被 pnpm 静默回退到旧版本，因此暂不提示。稍后这里会自动出现更新入口。',
-  // 头部「关注我们」弹窗：平台介绍 + 用户反馈群二维码（内容由 Worker /about Markdown 推送，非写死）
+  // 头部「关注我们」弹窗：平台介绍（内容由 Worker /about Markdown 推送，非写死）
   followUs: '关注我们',
   aboutTitle: '关注我们',
-  aboutDesc: '了解 DSH Plugin Hub 是做什么的，加入用户反馈群随时交流。',
+  aboutDesc: '了解 DSH Plugin Hub 是做什么的，访问主站浏览插件，或到 GitHub 提交 Issue。',
   aboutEmpty: '内容暂未发布，敬请期待。',
   aboutUpdated: '更新于',
   empty: '该分类暂无插件',
@@ -1019,10 +1019,10 @@ export const en = {
   close: 'Close',
   // 暂缓提示：确有新版本，但仍在 pnpm 24h 供应链门禁窗口内
   hubPendingDesc: 'The latest version has been released, but it is still within the 24-hour window where pnpm silently falls back to the older version, so the update is not offered yet. The update entry will appear here shortly.',
-  // 头部「关注我们」弹窗：平台介绍 + 用户反馈群二维码（内容由 Worker /about 以 Markdown 推送）
+  // 头部「关注我们」弹窗：平台介绍（内容由 Worker /about 以 Markdown 推送）
   followUs: 'Follow us',
   aboutTitle: 'Follow us',
-  aboutDesc: 'Learn what DSH Plugin Hub does and join our user feedback group.',
+  aboutDesc: 'Learn what DSH Plugin Hub does — browse plugins on the website, or open an Issue on GitHub.',
   aboutEmpty: 'Content not published yet — stay tuned.',
   aboutUpdated: 'Updated',
   empty: 'No plugins in this category yet',
