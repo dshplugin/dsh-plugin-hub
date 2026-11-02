@@ -6,7 +6,7 @@
 
 # DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
 
-**5,686 DeepSeek Harness (DSH) plugins indexed, all hand-verified, in one community hub, updated daily. Browse, search, download and install by category — free, human-verified, traceable.**
+**The community hub and directory for DeepSeek Harness (DSH) plugins: 20,000+ plugins indexed on the site, including 5,000+ published to npm that install in one click from the Plugin Hub (all hand-verified). Updated daily — browse, search, download and install by category, free and fully sourced.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -29,7 +29,7 @@
 DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-market-en.png?v=2.2.5" alt="DSH Plugin Hub plugin market UI" width="840">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-market-en.png?v=2.3.1" alt="DSH Plugin Hub plugin market UI" width="840">
 </p>
 
 ## Plugin Hub Features
@@ -48,7 +48,7 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 **Rich catalog · human-curated**
 
-- Indexes **5,686** community plugins, all hand-verified, curated and released every day by [dsh-plugin.org](https://dsh-plugin.org)
+- Indexes **20,000+** community plugins on the site, **5,000+** of which ship an npm package and install in one click from the Plugin Hub; curated daily by [dsh-plugin.org](https://dsh-plugin.org), with every installable entry hand-verified
 - Covers UI & experience, sessions & messages, memory & context, tooling and more — browse by category or search straight to it
 - Every plugin shows its verification status (verified), star / fork ratings, version and last-update time — fully sourced
 
@@ -68,8 +68,8 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 **Installed plugins · Custom install**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-installed-en.png?v=2.2.5" alt="Installed plugins" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-custom-install-en.png?v=2.2.5" alt="Custom install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-installed-en.png?v=2.3.1" alt="Installed plugins" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-custom-install-en.png?v=2.3.1" alt="Custom install" width="400">
 </p>
 
 Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row · Installs any plugin outside the catalog via an npm package, GitHub source or a DSH command
@@ -77,8 +77,8 @@ Manages every installed plugin with search, source filters and sorting, plus upd
 **Settings · System logs**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-settings-en.png?v=2.2.5" alt="Settings" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-system-logs-en.png?v=2.2.5" alt="System logs" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-settings-en.png?v=2.3.1" alt="Settings" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-system-logs-en.png?v=2.3.1" alt="System logs" width="400">
 </p>
 
 Centralizes update checks, npm mirror, proxy channel, trust toggles, diagnostics and log location · Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer
@@ -86,8 +86,8 @@ Centralizes update checks, npm mirror, proxy channel, trust toggles, diagnostics
 **Confirm install · Confirm uninstall**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-install-confirm-en.png?v=2.2.5" alt="Confirm install" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-uninstall-confirm-en.png?v=2.2.5" alt="Confirm uninstall" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-install-confirm-en.png?v=2.3.1" alt="Confirm install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-uninstall-confirm-en.png?v=2.3.1" alt="Confirm uninstall" width="400">
 </p>
 
 Shows the plugin, its source repo and the command before anything runs; the install starts only after confirmation · Shows what will be removed and its source; nothing is removed until the user confirms
@@ -95,8 +95,8 @@ Shows the plugin, its source repo and the command before anything runs; the inst
 **Confirm update · Notifications**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-update-confirm-en.png?v=2.2.5" alt="Confirm update" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-2-5/dsh-plugin-hub-notifications-en.png?v=2.2.5" alt="Notifications" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-update-confirm-en.png?v=2.3.1" alt="Confirm update" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-notifications-en.png?v=2.3.1" alt="Notifications" width="400">
 </p>
 
 Pops up when a newer version is found; confirming overwrite-installs in place to the latest release · Gathers install / remove / update history, live task progress and pending-restart reminders in one place
@@ -116,7 +116,7 @@ Same data source as the hub — human-verified, updated daily · Browse every in
 
 ## Why DSH Plugin Hub
 
-The DSH Plugin Hub indexes **5,686** DeepSeek Harness plugins (DSH), all hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
+The DSH Plugin Hub lists **5,000+** npm-installable DeepSeek Harness plugins (out of **20,000+** indexed on the site), all hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
 
 ### Always Fresh
 
