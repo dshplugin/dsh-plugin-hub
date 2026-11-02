@@ -424,6 +424,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			installEntryLine: "安装入口：{c}。",
 			reportIssue: "去插件仓库提交 Issue",
 			detail: "打开详情",
+			installDetail: "安装详情",
+			author: "作者",
 			noResult: "没有找到匹配的插件",
 			noResultDesc: "换个关键词试试，或前往网站浏览全部插件。",
 			today: "今天更新",
@@ -873,6 +875,8 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			installEntryLine: "Install entry: {c}.",
 			reportIssue: "Report an Issue to the plugin repo",
 			detail: "Open details",
+			installDetail: "Install details",
+			author: "Author",
 			noResult: "No plugins match your search",
 			noResultDesc: "Try another keyword, or browse all plugins on the website.",
 			today: "updated today",
@@ -928,42 +932,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$11
 		});
 		var Header_module_css_default = {
-			"copyIcon": "qikqja_copyIcon",
-			"adBanner": "qikqja_adBanner",
-			"adBadge": "qikqja_adBadge",
-			"taglineLink": "qikqja_taglineLink",
-			"tab": "qikqja_tab",
-			"tabActive": "qikqja_tabActive",
+			"langBtn": "qikqja_langBtn",
+			"tabs": "qikqja_tabs",
 			"tabsRow": "qikqja_tabsRow",
 			"tagline": "qikqja_tagline",
-			"githubIcon": "qikqja_githubIcon",
-			"header": "qikqja_header",
-			"searchRow": "qikqja_searchRow",
+			"tabActive": "qikqja_tabActive",
 			"headerRight": "qikqja_headerRight",
-			"segBtnActive": "qikqja_segBtnActive",
-			"tabs": "qikqja_tabs",
-			"headerTitleRow": "qikqja_headerTitleRow",
-			"segBtn": "qikqja_segBtn",
-			"logoIcon": "qikqja_logoIcon",
-			"githubLink": "qikqja_githubLink",
-			"version": "qikqja_version",
-			"title": "qikqja_title",
-			"segLabel": "qikqja_segLabel",
-			"adArrow": "qikqja_adArrow",
-			"versionBtn": "qikqja_versionBtn",
-			"segGroup": "qikqja_segGroup",
-			"root": "qikqja_root",
-			"sortGroup": "qikqja_sortGroup",
-			"search": "qikqja_search",
-			"adText": "qikqja_adText",
-			"hubUpdateBadge": "qikqja_hubUpdateBadge",
-			"langBtn": "qikqja_langBtn",
-			"brandTitle": "qikqja_brandTitle",
 			"aboutBtn": "qikqja_aboutBtn",
-			"resultCount": "qikqja_resultCount",
+			"segBtn": "qikqja_segBtn",
+			"versionBtn": "qikqja_versionBtn",
+			"brandTitle": "qikqja_brandTitle",
+			"title": "qikqja_title",
+			"version": "qikqja_version",
+			"header": "qikqja_header",
+			"copyIcon": "qikqja_copyIcon",
+			"segGroup": "qikqja_segGroup",
+			"resultSeg": "qikqja_resultSeg",
+			"adArrow": "qikqja_adArrow",
+			"adText": "qikqja_adText",
+			"adBanner": "qikqja_adBanner",
 			"tabCount": "qikqja_tabCount",
+			"taglineLink": "qikqja_taglineLink",
+			"root": "qikqja_root",
+			"logoIcon": "qikqja_logoIcon",
+			"hubUpdateBadge": "qikqja_hubUpdateBadge",
+			"headerTitleRow": "qikqja_headerTitleRow",
 			"controls": "qikqja_controls",
-			"resultSeg": "qikqja_resultSeg"
+			"segLabel": "qikqja_segLabel",
+			"resultCount": "qikqja_resultCount",
+			"segBtnActive": "qikqja_segBtnActive",
+			"adBadge": "qikqja_adBadge",
+			"search": "qikqja_search",
+			"githubIcon": "qikqja_githubIcon",
+			"githubLink": "qikqja_githubLink",
+			"sortGroup": "qikqja_sortGroup",
+			"tab": "qikqja_tab",
+			"searchRow": "qikqja_searchRow"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Modal.module.css.mjs
@@ -982,147 +986,147 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$10
 		});
 		var Modal_module_css_default = {
-			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
-			"modalLink": "BiQ1zG_modalLink",
-			"progressHead": "BiQ1zG_progressHead",
-			"failNetworkTarget": "BiQ1zG_failNetworkTarget",
-			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
-			"detailModal": "BiQ1zG_detailModal",
-			"toastFail": "BiQ1zG_toastFail",
-			"queuedHint": "BiQ1zG_queuedHint",
-			"failBigIssue": "BiQ1zG_failBigIssue",
-			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"hubVersionNumber": "BiQ1zG_hubVersionNumber",
+			"detailPathText": "BiQ1zG_detailPathText",
 			"queueRowTarget": "BiQ1zG_queueRowTarget",
-			"progressTrack": "BiQ1zG_progressTrack",
-			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
+			"queueRowHead": "BiQ1zG_queueRowHead",
+			"noticeMain": "BiQ1zG_noticeMain",
+			"dangerConfirm": "BiQ1zG_dangerConfirm",
+			"logModal": "BiQ1zG_logModal",
+			"modalIn": "BiQ1zG_modalIn",
+			"failClear": "BiQ1zG_failClear",
+			"failReason": "BiQ1zG_failReason",
+			"failEmpty": "BiQ1zG_failEmpty",
+			"detailMono": "BiQ1zG_detailMono",
+			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
+			"failList": "BiQ1zG_failList",
+			"modalClose": "BiQ1zG_modalClose",
+			"noticeList": "BiQ1zG_noticeList",
+			"queuedHint": "BiQ1zG_queuedHint",
+			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
+			"hubVersionBar": "BiQ1zG_hubVersionBar",
 			"failRepo": "BiQ1zG_failRepo",
+			"queueRowBody": "BiQ1zG_queueRowBody",
+			"failKindInstall": "BiQ1zG_failKindInstall",
+			"modal": "BiQ1zG_modal",
+			"confirmPrimary": "BiQ1zG_confirmPrimary",
+			"noticeRemove": "BiQ1zG_noticeRemove",
+			"queueRowPct": "BiQ1zG_queueRowPct",
+			"failRepoLabel": "BiQ1zG_failRepoLabel",
+			"failCopy": "BiQ1zG_failCopy",
+			"hubStatePending": "BiQ1zG_hubStatePending",
+			"noticeRowOk": "BiQ1zG_noticeRowOk",
+			"detailStatusText": "BiQ1zG_detailStatusText",
+			"overlay": "BiQ1zG_overlay",
+			"queueRow": "BiQ1zG_queueRow",
+			"noticeTextOk": "BiQ1zG_noticeTextOk",
+			"noticeVersion": "BiQ1zG_noticeVersion",
+			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
+			"aboutMeta": "BiQ1zG_aboutMeta",
+			"pendingRowActions": "BiQ1zG_pendingRowActions",
+			"detailStars": "BiQ1zG_detailStars",
+			"modalInstall": "BiQ1zG_modalInstall",
+			"noticeRowMain": "BiQ1zG_noticeRowMain",
+			"restartLater": "BiQ1zG_restartLater",
+			"progressTrack": "BiQ1zG_progressTrack",
+			"errorHint": "BiQ1zG_errorHint",
+			"queueSection": "BiQ1zG_queueSection",
+			"helpModal": "BiQ1zG_helpModal",
 			"stripCancel": "BiQ1zG_stripCancel",
+			"restartNowWarning": "BiQ1zG_restartNowWarning",
+			"failNetworkTarget": "BiQ1zG_failNetworkTarget",
+			"modalActions": "BiQ1zG_modalActions",
+			"modalRow": "BiQ1zG_modalRow",
+			"failRepoUrl": "BiQ1zG_failRepoUrl",
+			"bundleDeselectedHint": "BiQ1zG_bundleDeselectedHint",
+			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
+			"detailLink": "BiQ1zG_detailLink",
+			"queueRowStatus": "BiQ1zG_queueRowStatus",
+			"aboutContent": "BiQ1zG_aboutContent",
+			"overlayIn": "BiQ1zG_overlayIn",
+			"resultDesc": "BiQ1zG_resultDesc",
+			"noticeTextFail": "BiQ1zG_noticeTextFail",
+			"errorModal": "BiQ1zG_errorModal",
+			"aboutModal": "BiQ1zG_aboutModal",
+			"failKind": "BiQ1zG_failKind",
+			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
+			"modalHead": "BiQ1zG_modalHead",
+			"hubStateLatest": "BiQ1zG_hubStateLatest",
+			"confirmIcon": "BiQ1zG_confirmIcon",
+			"hubVersionDate": "BiQ1zG_hubVersionDate",
+			"linkIcon": "BiQ1zG_linkIcon",
+			"detailPath": "BiQ1zG_detailPath",
 			"resultRestarting": "BiQ1zG_resultRestarting",
 			"queueRowDesc": "BiQ1zG_queueRowDesc",
-			"failedCopyHint": "BiQ1zG_failedCopyHint",
-			"noticeMain": "BiQ1zG_noticeMain",
-			"modalLabel": "BiQ1zG_modalLabel",
-			"detailGrid": "BiQ1zG_detailGrid",
-			"resultCheck": "BiQ1zG_resultCheck",
-			"detailStatusPending": "BiQ1zG_detailStatusPending",
-			"noticeTextOk": "BiQ1zG_noticeTextOk",
-			"modalCmdText": "BiQ1zG_modalCmdText",
-			"noticeRowMain": "BiQ1zG_noticeRowMain",
-			"queueRowStatus": "BiQ1zG_queueRowStatus",
-			"errorModal": "BiQ1zG_errorModal",
-			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
-			"noticeVersion": "BiQ1zG_noticeVersion",
-			"modalRow": "BiQ1zG_modalRow",
-			"failClear": "BiQ1zG_failClear",
-			"errorTitle": "BiQ1zG_errorTitle",
-			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
-			"toast": "BiQ1zG_toast",
-			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
-			"resultDesc": "BiQ1zG_resultDesc",
-			"failEmpty": "BiQ1zG_failEmpty",
-			"hubVersionBar": "BiQ1zG_hubVersionBar",
-			"detailRow": "BiQ1zG_detailRow",
-			"queueRowBody": "BiQ1zG_queueRowBody",
-			"detailPathActions": "BiQ1zG_detailPathActions",
-			"noticeTime": "BiQ1zG_noticeTime",
-			"failCopy": "BiQ1zG_failCopy",
-			"hubVersionDate": "BiQ1zG_hubVersionDate",
-			"dangerConfirm": "BiQ1zG_dangerConfirm",
-			"toastIn": "BiQ1zG_toastIn",
-			"failRepoLabel": "BiQ1zG_failRepoLabel",
-			"helpModal": "BiQ1zG_helpModal",
-			"failReason": "BiQ1zG_failReason",
-			"hubStateLatest": "BiQ1zG_hubStateLatest",
-			"progress": "BiQ1zG_progress",
-			"restartNow": "BiQ1zG_restartNow",
-			"detailLabel": "BiQ1zG_detailLabel",
-			"modalTitleBusy": "BiQ1zG_modalTitleBusy",
-			"noticeHead": "BiQ1zG_noticeHead",
-			"hubStatePending": "BiQ1zG_hubStatePending",
-			"detailValue": "BiQ1zG_detailValue",
-			"modalCmd": "BiQ1zG_modalCmd",
-			"detailStatusRunning": "BiQ1zG_detailStatusRunning",
-			"overlayIn": "BiQ1zG_overlayIn",
-			"errorBox": "BiQ1zG_errorBox",
-			"errorHint": "BiQ1zG_errorHint",
-			"modalTitleQueued": "BiQ1zG_modalTitleQueued",
-			"failMisjudgeLink": "BiQ1zG_failMisjudgeLink",
-			"hubStateChip": "BiQ1zG_hubStateChip",
-			"failRepoUrl": "BiQ1zG_failRepoUrl",
-			"noticeRow": "BiQ1zG_noticeRow",
-			"modalInstall": "BiQ1zG_modalInstall",
-			"modalValue": "BiQ1zG_modalValue",
-			"linkIcon": "BiQ1zG_linkIcon",
-			"detailMono": "BiQ1zG_detailMono",
-			"detailStars": "BiQ1zG_detailStars",
-			"queueRowHead": "BiQ1zG_queueRowHead",
-			"hubUpdateModal": "BiQ1zG_hubUpdateModal",
-			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
-			"noticeList": "BiQ1zG_noticeList",
-			"modalCopy": "BiQ1zG_modalCopy",
-			"trustHint": "BiQ1zG_trustHint",
-			"noticeIgnore": "BiQ1zG_noticeIgnore",
-			"confirmIcon": "BiQ1zG_confirmIcon",
-			"noticeTextFail": "BiQ1zG_noticeTextFail",
-			"restartLater": "BiQ1zG_restartLater",
-			"noticeRemove": "BiQ1zG_noticeRemove",
-			"modalTitle": "BiQ1zG_modalTitle",
-			"detailArrow": "BiQ1zG_detailArrow",
-			"aboutModal": "BiQ1zG_aboutModal",
-			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
-			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
-			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
-			"progressText": "BiQ1zG_progressText",
-			"modalIn": "BiQ1zG_modalIn",
-			"failKindInstall": "BiQ1zG_failKindInstall",
-			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
-			"pendingRowActions": "BiQ1zG_pendingRowActions",
-			"hubVersionNumber": "BiQ1zG_hubVersionNumber",
-			"resultTitle": "BiQ1zG_resultTitle",
-			"failKindUninstall": "BiQ1zG_failKindUninstall",
-			"detailPathText": "BiQ1zG_detailPathText",
-			"queueRow": "BiQ1zG_queueRow",
-			"failPrepareHint": "BiQ1zG_failPrepareHint",
-			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
-			"failKind": "BiQ1zG_failKind",
-			"detailPath": "BiQ1zG_detailPath",
-			"failList": "BiQ1zG_failList",
-			"failDiagBtn": "BiQ1zG_failDiagBtn",
-			"modalHead": "BiQ1zG_modalHead",
-			"modalCancel": "BiQ1zG_modalCancel",
-			"logModal": "BiQ1zG_logModal",
-			"modalDesc": "BiQ1zG_modalDesc",
-			"uninstallConfirm": "BiQ1zG_uninstallConfirm",
-			"failKindTitle": "BiQ1zG_failKindTitle",
-			"detailStatusText": "BiQ1zG_detailStatusText",
-			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
-			"modalCmdCopy": "BiQ1zG_modalCmdCopy",
-			"noticeFoot": "BiQ1zG_noticeFoot",
-			"detailPathBtn": "BiQ1zG_detailPathBtn",
-			"modalBody": "BiQ1zG_modalBody",
-			"modal": "BiQ1zG_modal",
-			"errorCopySoft": "BiQ1zG_errorCopySoft",
-			"aboutMeta": "BiQ1zG_aboutMeta",
-			"failHead": "BiQ1zG_failHead",
-			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
-			"modalClose": "BiQ1zG_modalClose",
-			"progressFillFail": "BiQ1zG_progressFillFail",
-			"hubStateAvailable": "BiQ1zG_hubStateAvailable",
-			"aboutContent": "BiQ1zG_aboutContent",
-			"overlay": "BiQ1zG_overlay",
-			"modalWide": "BiQ1zG_modalWide",
-			"confirmPrimary": "BiQ1zG_confirmPrimary",
-			"failRow": "BiQ1zG_failRow",
-			"bundleDeselectedHint": "BiQ1zG_bundleDeselectedHint",
-			"progressFill": "BiQ1zG_progressFill",
-			"detailDim": "BiQ1zG_detailDim",
-			"queueSection": "BiQ1zG_queueSection",
-			"queueRowPct": "BiQ1zG_queueRowPct",
-			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
-			"detailLink": "BiQ1zG_detailLink",
-			"queueRowTrack": "BiQ1zG_queueRowTrack",
 			"result": "BiQ1zG_result",
-			"modalActions": "BiQ1zG_modalActions"
+			"modalCmd": "BiQ1zG_modalCmd",
+			"resultCheck": "BiQ1zG_resultCheck",
+			"progress": "BiQ1zG_progress",
+			"hubStateChip": "BiQ1zG_hubStateChip",
+			"modalCancel": "BiQ1zG_modalCancel",
+			"detailGrid": "BiQ1zG_detailGrid",
+			"detailModal": "BiQ1zG_detailModal",
+			"detailPathBtn": "BiQ1zG_detailPathBtn",
+			"noticeTime": "BiQ1zG_noticeTime",
+			"modalLabel": "BiQ1zG_modalLabel",
+			"noticeIgnore": "BiQ1zG_noticeIgnore",
+			"noticeRow": "BiQ1zG_noticeRow",
+			"modalDesc": "BiQ1zG_modalDesc",
+			"progressFill": "BiQ1zG_progressFill",
+			"hubStateAvailable": "BiQ1zG_hubStateAvailable",
+			"failedCopyHint": "BiQ1zG_failedCopyHint",
+			"failMisjudgeLink": "BiQ1zG_failMisjudgeLink",
+			"modalCmdText": "BiQ1zG_modalCmdText",
+			"modalCloseIcon": "BiQ1zG_modalCloseIcon",
+			"toastIn": "BiQ1zG_toastIn",
+			"detailPathActions": "BiQ1zG_detailPathActions",
+			"modalTitle": "BiQ1zG_modalTitle",
+			"failRow": "BiQ1zG_failRow",
+			"failKindTitle": "BiQ1zG_failKindTitle",
+			"cliOnlyHint": "BiQ1zG_cliOnlyHint",
+			"noticeFoot": "BiQ1zG_noticeFoot",
+			"progressHead": "BiQ1zG_progressHead",
+			"errorCopySoft": "BiQ1zG_errorCopySoft",
+			"queueSectionTitle": "BiQ1zG_queueSectionTitle",
+			"trustHint": "BiQ1zG_trustHint",
+			"progressFillFail": "BiQ1zG_progressFillFail",
+			"detailLabel": "BiQ1zG_detailLabel",
+			"confirmIconWrap": "BiQ1zG_confirmIconWrap",
+			"detailValue": "BiQ1zG_detailValue",
+			"detailStatusPending": "BiQ1zG_detailStatusPending",
+			"queueRowTrack": "BiQ1zG_queueRowTrack",
+			"noticeBadgeFail": "BiQ1zG_noticeBadgeFail",
+			"modalValue": "BiQ1zG_modalValue",
+			"modalLink": "BiQ1zG_modalLink",
+			"errorBox": "BiQ1zG_errorBox",
+			"noticeRowUpdate": "BiQ1zG_noticeRowUpdate",
+			"modalBody": "BiQ1zG_modalBody",
+			"resultTitle": "BiQ1zG_resultTitle",
+			"detailArrow": "BiQ1zG_detailArrow",
+			"errorTitle": "BiQ1zG_errorTitle",
+			"noticeUpdateGo": "BiQ1zG_noticeUpdateGo",
+			"failDiagBtn": "BiQ1zG_failDiagBtn",
+			"confirmIconDanger": "BiQ1zG_confirmIconDanger",
+			"progressText": "BiQ1zG_progressText",
+			"modalCopy": "BiQ1zG_modalCopy",
+			"failPrepareHint": "BiQ1zG_failPrepareHint",
+			"resultCheckIcon": "BiQ1zG_resultCheckIcon",
+			"noticeHead": "BiQ1zG_noticeHead",
+			"restartNow": "BiQ1zG_restartNow",
+			"toast": "BiQ1zG_toast",
+			"toastFail": "BiQ1zG_toastFail",
+			"noticeBadgeOk": "BiQ1zG_noticeBadgeOk",
+			"noticeBadgeIcon": "BiQ1zG_noticeBadgeIcon",
+			"detailDim": "BiQ1zG_detailDim",
+			"failBigIssue": "BiQ1zG_failBigIssue",
+			"detailRow": "BiQ1zG_detailRow",
+			"modalWide": "BiQ1zG_modalWide",
+			"failKindUninstall": "BiQ1zG_failKindUninstall",
+			"detailUpdateHint": "BiQ1zG_detailUpdateHint",
+			"pendingRowStatus": "BiQ1zG_pendingRowStatus",
+			"hubUpdateNotes": "BiQ1zG_hubUpdateNotes",
+			"failHead": "BiQ1zG_failHead"
 		};
 		//#endregion
 		//#region src/server/services/install/release-target.ts
@@ -1212,7 +1216,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		* tsdown 构建时用 define 把 __PLUGIN_VERSION__ 替换成 package.json 的版本号；
 		* node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
 		*/
-		const PLUGIN_VERSION = "2.3.0";
+		const PLUGIN_VERSION = "2.3.1";
 		const CATEGORY_ORDER = [
 			"interface",
 			"session",
@@ -2133,7 +2137,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			* registry 真实发布时间下发（同源），据此判断最准。门槛命中要单列成 `pending` 而不是
 			* 落回「无更新」——回落会让弹窗在本机版本落后时谎称「已是最新」。
 			*/
-			const hubCurrentVersion = "2.3.0";
+			const hubCurrentVersion = "2.3.1";
 			const hubUpdateResult = hubUpdateInfo === null ? {
 				state: "none",
 				target: null
@@ -5190,7 +5194,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/List.module.css.mjs
-		const css$9 = "._3XaZHa_body{flex-direction:column;flex:1;min-height:0;display:flex}._3XaZHa_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}._3XaZHa_moreSentinel{flex-shrink:0;height:1px}._3XaZHa_card{border:1px solid var(--hub-border-2);background:var(--hub-bg-1);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}._3XaZHa_card:hover{border-color:var(--hub-brand);background:var(--hub-bg-2)}._3XaZHa_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}._3XaZHa_cardHead{align-items:center;gap:6px;min-width:0;display:flex}._3XaZHa_cardTitle{white-space:nowrap;text-overflow:ellipsis;font-size:13px;font-weight:600;line-height:18px;overflow:hidden}._3XaZHa_categoryBadge,._3XaZHa_verified,._3XaZHa_versionBadge,._3XaZHa_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_categoryBadge{color:var(--hub-brand);border-color:var(--hub-border-ghost)}._3XaZHa_verified{color:var(--hub-success);border-color:var(--hub-success-border)}._3XaZHa_versionBadge{color:var(--hub-text-secondary);border-color:var(--hub-border-input)}._3XaZHa_updateBadge{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3XaZHa_desc{color:var(--hub-text-secondary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}._3XaZHa_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}._3XaZHa_topic{color:var(--hub-text-tertiary);background:var(--hub-bg-3);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}._3XaZHa_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}._3XaZHa_star{color:var(--hub-warn);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_fork{color:var(--hub-text-tertiary);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_date{color:var(--hub-text-tertiary);white-space:nowrap;font-size:10px;line-height:14px}._3XaZHa_installBtn,._3XaZHa_installBtnCopied,._3XaZHa_installBtnInstalled,._3XaZHa_installBtnUpdate,._3XaZHa_uninstallBtn,._3XaZHa_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}._3XaZHa_installBtnInstalled{color:var(--hub-success);background:var(--hub-success-tint);cursor:default;-webkit-user-select:none;user-select:none;border:none}._3XaZHa_installBtnUpdate{color:#fff;background:var(--hub-warn);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtnUpdate:hover{background:var(--hub-warn-strong)}._3XaZHa_uninstallBtn{color:var(--hub-danger);background:var(--hub-danger-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_uninstallBtn:hover{color:#fff;background:var(--hub-danger-hover)}body[data-ds-dark-theme] ._3XaZHa_uninstallBtn{color:#fff;background:var(--hub-danger)}body[data-ds-dark-theme] ._3XaZHa_uninstallBtn:hover{background:var(--hub-danger-hover)}._3XaZHa_installBtn{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtn:hover{background:var(--hub-btn-hover)}._3XaZHa_detailBtn{color:var(--hub-text-secondary);-webkit-user-select:none;user-select:none;background:0 0;border:none;align-items:center;text-decoration:none;display:inline-flex}._3XaZHa_detailBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_actions{align-items:center;gap:6px;display:flex}._3XaZHa_installBtnCopied{color:var(--hub-success);background:var(--hub-success-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_state{text-align:center;min-height:160px;color:var(--hub-text-tertiary);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}._3XaZHa_stateTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600}._3XaZHa_stateDesc{max-width:420px}._3XaZHa_retryBtn{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_retryBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_stateActions{align-items:center;gap:8px;margin-top:4px;display:flex}._3XaZHa_diagBtn{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_diagBtn:hover{background:var(--hub-brand-hover)}._3XaZHa_footer{border-top:1px solid var(--hub-border-1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}._3XaZHa_footLink{color:var(--hub-brand);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}._3XaZHa_footLink:hover{text-decoration:underline}";
+		const css$9 = "._3XaZHa_body{flex-direction:column;flex:1;min-height:0;display:flex}._3XaZHa_list{flex-direction:column;flex:1;gap:6px;min-height:0;padding:2px 4px 4px 2px;display:flex;overflow-y:auto}._3XaZHa_moreSentinel{flex-shrink:0;height:1px}._3XaZHa_card{border:1px solid var(--hub-border-2);background:var(--hub-bg-1);border-radius:8px;justify-content:space-between;align-items:stretch;gap:12px;padding:9px 12px;transition:border-color .12s,background .12s;display:flex}._3XaZHa_card:hover{border-color:var(--hub-brand);background:var(--hub-bg-2)}._3XaZHa_cardMain{flex-direction:column;gap:4px;min-width:0;display:flex}._3XaZHa_cardTitleRow{align-items:center;gap:6px;min-width:0;display:flex}._3XaZHa_cardTitle{white-space:nowrap;text-overflow:ellipsis;min-width:0;color:inherit;flex:0 auto;font-size:13px;font-weight:600;line-height:18px;text-decoration:none;transition:color .12s;overflow:hidden}a._3XaZHa_cardTitle:hover{color:var(--hub-brand);text-decoration:underline}._3XaZHa_cardBadgeRow{flex-wrap:wrap;align-items:center;gap:6px;display:flex}._3XaZHa_categoryBadge,._3XaZHa_verified,._3XaZHa_authorBadge,._3XaZHa_versionBadge,._3XaZHa_updateBadge{border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 5px;font-size:10px;line-height:14px}._3XaZHa_authorBadge{color:var(--hub-text-tertiary);border-color:var(--hub-border-ghost);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}._3XaZHa_categoryBadge{color:var(--hub-brand);border-color:var(--hub-border-ghost)}._3XaZHa_verified{color:var(--hub-success);border-color:var(--hub-success-border)}._3XaZHa_versionBadge{color:var(--hub-text-secondary);border-color:var(--hub-border-input)}._3XaZHa_updateBadge{color:var(--hub-warn);border-color:var(--hub-warn-border);background:var(--hub-warn-tint)}._3XaZHa_desc{color:var(--hub-text-secondary);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin:0;font-size:12px;line-height:18px;display:-webkit-box;overflow:hidden}._3XaZHa_topics{flex-wrap:wrap;align-items:center;gap:4px;min-width:0;display:flex}._3XaZHa_topic{color:var(--hub-text-tertiary);background:var(--hub-bg-3);white-space:nowrap;border-radius:4px;flex-shrink:0;padding:0 6px;font-size:10px;line-height:16px}._3XaZHa_cardSide{flex-direction:column;flex-shrink:0;justify-content:space-between;align-items:flex-end;gap:6px;display:flex}._3XaZHa_stats{flex-direction:column;align-items:flex-end;gap:1px;display:flex}._3XaZHa_star{color:var(--hub-warn);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_fork{color:var(--hub-text-tertiary);white-space:nowrap;font-size:11px;line-height:16px}._3XaZHa_date{color:var(--hub-text-tertiary);white-space:nowrap;font-size:10px;line-height:14px}._3XaZHa_installBtn,._3XaZHa_installBtnCopied,._3XaZHa_installBtnInstalled,._3XaZHa_installBtnUpdate,._3XaZHa_uninstallBtn,._3XaZHa_detailBtn{cursor:pointer;border-radius:6px;padding:2px 10px;font-size:11px;line-height:18px;transition:color .12s,border-color .12s,background .12s}._3XaZHa_installBtnInstalled{color:var(--hub-success);background:var(--hub-success-tint);cursor:default;-webkit-user-select:none;user-select:none;border:none}._3XaZHa_installBtnUpdate{color:#fff;background:var(--hub-warn);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtnUpdate:hover{background:var(--hub-warn-strong)}._3XaZHa_uninstallBtn{color:var(--hub-danger);background:var(--hub-danger-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_uninstallBtn:hover{color:#fff;background:var(--hub-danger-hover)}body[data-ds-dark-theme] ._3XaZHa_uninstallBtn{color:#fff;background:var(--hub-danger)}body[data-ds-dark-theme] ._3XaZHa_uninstallBtn:hover{background:var(--hub-danger-hover)}._3XaZHa_installBtn{color:var(--hub-text-on-fill);background:var(--hub-btn-fill);-webkit-user-select:none;user-select:none;border:none;font-weight:500}._3XaZHa_installBtn:hover{background:var(--hub-btn-hover)}._3XaZHa_detailBtn{color:var(--hub-text-secondary);-webkit-user-select:none;user-select:none;background:0 0;border:none;align-items:center;text-decoration:none;display:inline-flex}._3XaZHa_detailBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_actions{align-items:center;gap:6px;display:flex}._3XaZHa_installBtnCopied{color:var(--hub-success);background:var(--hub-success-tint);-webkit-user-select:none;user-select:none;border:none}._3XaZHa_state{text-align:center;min-height:160px;color:var(--hub-text-tertiary);flex-direction:column;flex:1;justify-content:center;align-items:center;gap:8px;padding:24px;font-size:12px;line-height:18px;display:flex}._3XaZHa_stateTitle{color:var(--hub-text-primary);font-size:13px;font-weight:600}._3XaZHa_stateDesc{max-width:420px}._3XaZHa_retryBtn{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:none;border-radius:6px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_retryBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._3XaZHa_stateActions{align-items:center;gap:8px;margin-top:4px;display:flex}._3XaZHa_diagBtn{color:#fff;background:var(--hub-brand);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:4px 12px;font-size:12px;line-height:18px}._3XaZHa_diagBtn:hover{background:var(--hub-brand-hover)}._3XaZHa_footer{border-top:1px solid var(--hub-border-1);flex-shrink:0;justify-content:flex-end;align-items:center;gap:8px;padding:6px 4px 0;display:flex}._3XaZHa_footLink{color:var(--hub-brand);white-space:nowrap;-webkit-user-select:none;user-select:none;font-size:11px;line-height:16px;text-decoration:none}._3XaZHa_footLink:hover{text-decoration:underline}";
 		const tagId$9 = "dsh-plugin/List.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$9) + "]") === null) {
 			const tag = document.createElement("style");
@@ -5205,40 +5209,42 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$9
 		});
 		var List_module_css_default = {
+			"categoryBadge": "_3XaZHa_categoryBadge",
+			"cardTitleRow": "_3XaZHa_cardTitleRow",
+			"topics": "_3XaZHa_topics",
+			"actions": "_3XaZHa_actions",
 			"moreSentinel": "_3XaZHa_moreSentinel",
-			"installBtnUpdate": "_3XaZHa_installBtnUpdate",
-			"verified": "_3XaZHa_verified",
+			"authorBadge": "_3XaZHa_authorBadge",
+			"installBtn": "_3XaZHa_installBtn",
+			"state": "_3XaZHa_state",
+			"stateDesc": "_3XaZHa_stateDesc",
+			"installBtnCopied": "_3XaZHa_installBtnCopied",
+			"footLink": "_3XaZHa_footLink",
+			"cardTitle": "_3XaZHa_cardTitle",
+			"date": "_3XaZHa_date",
+			"cardBadgeRow": "_3XaZHa_cardBadgeRow",
+			"cardMain": "_3XaZHa_cardMain",
+			"versionBadge": "_3XaZHa_versionBadge",
+			"retryBtn": "_3XaZHa_retryBtn",
+			"stats": "_3XaZHa_stats",
 			"topic": "_3XaZHa_topic",
 			"cardSide": "_3XaZHa_cardSide",
-			"cardHead": "_3XaZHa_cardHead",
+			"updateBadge": "_3XaZHa_updateBadge",
+			"star": "_3XaZHa_star",
 			"fork": "_3XaZHa_fork",
 			"footer": "_3XaZHa_footer",
-			"date": "_3XaZHa_date",
-			"uninstallBtn": "_3XaZHa_uninstallBtn",
-			"card": "_3XaZHa_card",
-			"footLink": "_3XaZHa_footLink",
-			"diagBtn": "_3XaZHa_diagBtn",
-			"topics": "_3XaZHa_topics",
 			"installBtnInstalled": "_3XaZHa_installBtnInstalled",
-			"stateTitle": "_3XaZHa_stateTitle",
-			"versionBadge": "_3XaZHa_versionBadge",
-			"cardTitle": "_3XaZHa_cardTitle",
-			"stateDesc": "_3XaZHa_stateDesc",
-			"body": "_3XaZHa_body",
-			"categoryBadge": "_3XaZHa_categoryBadge",
-			"stats": "_3XaZHa_stats",
-			"updateBadge": "_3XaZHa_updateBadge",
-			"installBtn": "_3XaZHa_installBtn",
-			"detailBtn": "_3XaZHa_detailBtn",
-			"star": "_3XaZHa_star",
-			"state": "_3XaZHa_state",
-			"retryBtn": "_3XaZHa_retryBtn",
-			"installBtnCopied": "_3XaZHa_installBtnCopied",
-			"cardMain": "_3XaZHa_cardMain",
 			"desc": "_3XaZHa_desc",
+			"detailBtn": "_3XaZHa_detailBtn",
+			"diagBtn": "_3XaZHa_diagBtn",
+			"verified": "_3XaZHa_verified",
+			"stateTitle": "_3XaZHa_stateTitle",
+			"card": "_3XaZHa_card",
+			"stateActions": "_3XaZHa_stateActions",
 			"list": "_3XaZHa_list",
-			"actions": "_3XaZHa_actions",
-			"stateActions": "_3XaZHa_stateActions"
+			"uninstallBtn": "_3XaZHa_uninstallBtn",
+			"body": "_3XaZHa_body",
+			"installBtnUpdate": "_3XaZHa_installBtnUpdate"
 		};
 		//#endregion
 		//#region src/client/hooks/useIncrementalList.ts
@@ -5293,7 +5299,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			const update = hasUpdate(p);
 			const pendingUntil = isInstalled && !update ? updatePendingUntil(p) : null;
 			const versionShown = isInstalled ? installedVersion(p) : p.version;
-			return (0, react.createElement)("div", { className: List_module_css_default.card }, (0, react.createElement)("div", { className: List_module_css_default.cardMain }, (0, react.createElement)("div", { className: List_module_css_default.cardHead }, (0, react.createElement)("div", {
+			const author = p.ownerSlug ?? repo.split("/")[0]?.toLowerCase() ?? "";
+			return (0, react.createElement)("div", { className: List_module_css_default.card }, (0, react.createElement)("div", { className: List_module_css_default.cardMain }, (0, react.createElement)("div", { className: List_module_css_default.cardTitleRow }, repo ? (0, react.createElement)("a", {
+				className: List_module_css_default.cardTitle,
+				href: pluginDetailUrl(p, langPath),
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: p.description ?? ""
+			}, p.displayName ?? p.slug) : (0, react.createElement)("div", {
 				className: List_module_css_default.cardTitle,
 				title: p.description ?? ""
 			}, p.displayName ?? p.slug), versionShown ? (0, react.createElement)("span", {
@@ -5305,7 +5318,10 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("updateAvailable")) : null, pendingUntil !== null ? (0, react.createElement)("span", {
 				className: List_module_css_default.updateBadge,
 				title: t("updatePendingHint")
-			}, t("updatePending", { time: clockTime(pendingUntil) })) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null), p.description ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
+			}, t("updatePending", { time: clockTime(pendingUntil) })) : null), author || p.category || p.compatibility?.status === "verified" ? (0, react.createElement)("div", { className: List_module_css_default.cardBadgeRow }, author ? (0, react.createElement)("span", {
+				className: List_module_css_default.authorBadge,
+				title: t("author")
+			}, `@${author}`) : null, p.category ? (0, react.createElement)("span", { className: List_module_css_default.categoryBadge }, categoryLabel(CATEGORY_LABELS, p.category, langKey)) : null, p.compatibility?.status === "verified" ? (0, react.createElement)("span", { className: List_module_css_default.verified }, t("verified")) : null) : null, p.description ? (0, react.createElement)("p", { className: List_module_css_default.desc }, p.description) : null, (p.topics?.length ?? 0) > 0 ? (0, react.createElement)("div", { className: List_module_css_default.topics }, p.topics.slice(0, 3).map((topic) => (0, react.createElement)("span", {
 				key: topic,
 				className: List_module_css_default.topic
 			}, topic))) : null), (0, react.createElement)("div", { className: List_module_css_default.cardSide }, (0, react.createElement)("div", { className: List_module_css_default.stats }, (0, react.createElement)("span", { className: List_module_css_default.star }, "★ ", fmtStars(p.stats?.stargazers_count)), (0, react.createElement)("span", { className: List_module_css_default.fork }, t("fork"), " ", fmtStars(p.stats?.forks_count)), (0, react.createElement)("span", { className: List_module_css_default.date }, relTime(p.dates?.repoUpdatedAt, t))), repo ? (0, react.createElement)("div", { className: List_module_css_default.actions }, (0, react.createElement)("a", {
@@ -5449,16 +5465,16 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$8
 		});
 		var SectionTabs_module_css_default = {
-			"noticeIcon": "_7tvizq_noticeIcon",
-			"tabIcon": "_7tvizq_tabIcon",
 			"tabCount": "_7tvizq_tabCount",
-			"tab": "_7tvizq_tab",
-			"noticeBtn": "_7tvizq_noticeBtn",
-			"tabCountActive": "_7tvizq_tabCountActive",
 			"noticeCount": "_7tvizq_noticeCount",
-			"root": "_7tvizq_root",
 			"tabActive": "_7tvizq_tabActive",
-			"tabLabel": "_7tvizq_tabLabel"
+			"noticeIcon": "_7tvizq_noticeIcon",
+			"noticeBtn": "_7tvizq_noticeBtn",
+			"tab": "_7tvizq_tab",
+			"tabLabel": "_7tvizq_tabLabel",
+			"tabIcon": "_7tvizq_tabIcon",
+			"tabCountActive": "_7tvizq_tabCountActive",
+			"root": "_7tvizq_root"
 		};
 		//#endregion
 		//#region src/client/components/layout/SectionTabs.tsx
@@ -5519,7 +5535,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 		}
 		//#endregion
 		//#region \0dsh-css:src/client/styles/InstalledView.module.css.mjs
-		const css$7 = "._1nXeGW_root{flex-direction:column;gap:8px;min-width:0;display:flex}._1nXeGW_toolbar{border-bottom:1px solid var(--hub-border-1);flex-direction:column;flex-shrink:0;gap:8px;padding:0 2px 10px;display:flex}._1nXeGW_searchWrap{width:100%;min-width:0;height:28px}._1nXeGW_searchInput{width:100%;height:28px;color:var(--hub-text-primary);border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}._1nXeGW_searchInput::placeholder{color:var(--hub-text-tertiary)}._1nXeGW_searchInput:focus{border-color:var(--hub-brand)}._1nXeGW_segRow{align-items:center;gap:8px;min-width:0;display:flex}._1nXeGW_segLabel{color:var(--hub-text-tertiary);flex-shrink:0;font-size:11px;line-height:16px}._1nXeGW_segGroup{border:1px solid var(--hub-border-2);border-radius:6px;flex-shrink:0;align-items:center;display:inline-flex;overflow:hidden}._1nXeGW_segBtn{height:24px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;justify-content:center;align-items:center;gap:4px;padding:0 10px;font-family:inherit;font-size:12px;line-height:24px;transition:color .12s,background .12s;display:inline-flex}._1nXeGW_segBtn svg{flex-shrink:0;display:block}._1nXeGW_segBtn+._1nXeGW_segBtn{border-left:1px solid var(--hub-border-2)}._1nXeGW_segBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._1nXeGW_segBtnActive,._1nXeGW_segBtnActive:hover{color:#fff;background:var(--hub-brand)}._1nXeGW_empty{color:var(--hub-text-tertiary);text-align:center;border:1px dashed var(--hub-border-2);border-radius:8px;flex-direction:column;align-items:center;gap:4px;padding:36px 12px;font-size:12px;line-height:18px;display:flex}._1nXeGW_emptyTitle{color:var(--hub-text-secondary);font-size:13px;font-weight:600}._1nXeGW_emptyDesc{color:var(--hub-text-tertiary)}._1nXeGW_list{border:1px solid var(--hub-border-1);border-radius:8px;flex-direction:column;margin:0;padding:0;list-style:none;display:flex;overflow:hidden}._1nXeGW_row{background:var(--hub-bg-1);cursor:pointer;-webkit-user-select:none;user-select:none;flex-direction:column;gap:4px;padding:8px 10px;transition:background .12s;display:flex}._1nXeGW_row+._1nXeGW_row{border-top:1px solid var(--hub-border-1)}._1nXeGW_row:hover{background:var(--hub-bg-2)}._1nXeGW_rowTitleLine{align-items:center;gap:8px;min-width:0;display:flex}._1nXeGW_rowDesc{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;padding-left:16px;font-size:11px;line-height:16px;overflow:hidden}._1nXeGW_statusDot{background:var(--hub-success);border-radius:50%;flex-shrink:0;width:8px;height:8px}._1nXeGW_statusDot._1nXeGW_statusPending{background:var(--hub-warning)}._1nXeGW_statusDot._1nXeGW_statusInactive{background:var(--hub-text-tertiary)}._1nXeGW_rowMain{flex:auto;align-items:baseline;gap:6px;min-width:0;display:flex}._1nXeGW_rowTitle{color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-size:12px;font-weight:600;line-height:18px;overflow:hidden}._1nXeGW_versionBadge{color:var(--hub-text-tertiary);background:var(--hub-bg-hover);border-radius:4px;flex-shrink:0;padding:0 5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px}._1nXeGW_updateBadge{color:var(--hub-warn);background:var(--hub-warn-tint);border:1px solid var(--hub-warn-border);border-radius:4px;flex-shrink:0;padding:0 5px;font-size:11px;font-weight:500;line-height:16px}._1nXeGW_rowSourceTag{box-sizing:border-box;text-align:center;white-space:nowrap;text-overflow:ellipsis;border-radius:4px;flex-shrink:0;width:60px;padding:0 4px;font-size:11px;font-weight:500;line-height:16px;overflow:hidden}._1nXeGW_rowSourceTagHub{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft)}._1nXeGW_rowSourceTagManual{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border)}._1nXeGW_exampleBadge{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:4px;flex-shrink:0;padding:0 5px;font-size:11px;font-weight:500;line-height:16px}._1nXeGW_exampleRow{align-items:center;min-width:0;padding-left:16px;display:flex}._1nXeGW_rowMeta{align-items:center;gap:8px;min-width:0;padding-left:16px;display:flex;overflow:hidden}._1nXeGW_rowRepo{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;overflow:hidden}._1nXeGW_rowCategory{color:var(--hub-text-tertiary);background:var(--hub-bg-hover);border-radius:4px;flex-shrink:0;padding:0 6px;font-size:11px;line-height:16px}._1nXeGW_rowActions{flex-shrink:0;align-items:center;gap:4px;display:flex}._1nXeGW_rowDetail{color:var(--hub-text-secondary);border:1px solid var(--hub-border-2);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowDetail:hover{color:var(--hub-text-primary);border-color:var(--hub-border-ghost);background:var(--hub-bg-hover)}._1nXeGW_rowRestart{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowRestart:hover{color:#fff;background:var(--hub-warning);border-color:var(--hub-warning)}._1nXeGW_rowUpdate{color:#fff;background:var(--hub-warn);cursor:pointer;-webkit-user-select:none;user-select:none;border:none;border-radius:6px;padding:3px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s}._1nXeGW_rowUpdate:hover{background:var(--hub-warn-strong)}._1nXeGW_rowUninstall{color:var(--hub-danger);border:1px solid var(--hub-danger-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowUninstall:hover,body[data-ds-dark-theme] ._1nXeGW_rowUninstall{color:#fff;background:var(--hub-danger);border-color:var(--hub-danger)}body[data-ds-dark-theme] ._1nXeGW_rowUninstall:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover)}";
+		const css$7 = "._1nXeGW_root{flex-direction:column;gap:8px;min-width:0;display:flex}._1nXeGW_toolbar{border-bottom:1px solid var(--hub-border-1);flex-direction:column;flex-shrink:0;gap:8px;padding:0 2px 10px;display:flex}._1nXeGW_searchWrap{width:100%;min-width:0;height:28px}._1nXeGW_searchInput{width:100%;height:28px;color:var(--hub-text-primary);border:1px solid var(--hub-border-2);background:0 0;border-radius:6px;outline:none;padding:0 9px;font-size:12px;line-height:26px;transition:border-color .12s}._1nXeGW_searchInput::placeholder{color:var(--hub-text-tertiary)}._1nXeGW_searchInput:focus{border-color:var(--hub-brand)}._1nXeGW_segRow{align-items:center;gap:8px;min-width:0;display:flex}._1nXeGW_segLabel{color:var(--hub-text-tertiary);flex-shrink:0;font-size:11px;line-height:16px}._1nXeGW_segGroup{border:1px solid var(--hub-border-2);border-radius:6px;flex-shrink:0;align-items:center;display:inline-flex;overflow:hidden}._1nXeGW_segBtn{height:24px;color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;white-space:nowrap;background:0 0;border:none;justify-content:center;align-items:center;gap:4px;padding:0 10px;font-family:inherit;font-size:12px;line-height:24px;transition:color .12s,background .12s;display:inline-flex}._1nXeGW_segBtn svg{flex-shrink:0;display:block}._1nXeGW_segBtn+._1nXeGW_segBtn{border-left:1px solid var(--hub-border-2)}._1nXeGW_segBtn:hover{color:var(--hub-text-primary);background:var(--hub-bg-hover)}._1nXeGW_segBtnActive,._1nXeGW_segBtnActive:hover{color:#fff;background:var(--hub-brand)}._1nXeGW_empty{color:var(--hub-text-tertiary);text-align:center;border:1px dashed var(--hub-border-2);border-radius:8px;flex-direction:column;align-items:center;gap:4px;padding:36px 12px;font-size:12px;line-height:18px;display:flex}._1nXeGW_emptyTitle{color:var(--hub-text-secondary);font-size:13px;font-weight:600}._1nXeGW_emptyDesc{color:var(--hub-text-tertiary)}._1nXeGW_list{border:1px solid var(--hub-border-1);border-radius:8px;flex-direction:column;margin:0;padding:0;list-style:none;display:flex;overflow:hidden}._1nXeGW_row{background:var(--hub-bg-1);cursor:pointer;-webkit-user-select:none;user-select:none;flex-direction:column;gap:4px;padding:8px 10px;transition:background .12s;display:flex}._1nXeGW_row+._1nXeGW_row{border-top:1px solid var(--hub-border-1)}._1nXeGW_row:hover{background:var(--hub-bg-2)}._1nXeGW_rowTitleLine{align-items:center;gap:8px;min-width:0;display:flex}._1nXeGW_rowDesc{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;padding-left:16px;font-size:11px;line-height:16px;overflow:hidden}._1nXeGW_statusDot{background:var(--hub-success);border-radius:50%;flex-shrink:0;width:8px;height:8px}._1nXeGW_statusDot._1nXeGW_statusPending{background:var(--hub-warning)}._1nXeGW_statusDot._1nXeGW_statusInactive{background:var(--hub-text-tertiary)}._1nXeGW_rowMain{flex:auto;align-items:baseline;gap:6px;min-width:0;display:flex}._1nXeGW_rowStats{white-space:nowrap;flex-shrink:0;align-items:center;gap:10px;margin-left:auto;display:flex}._1nXeGW_rowStar{color:var(--hub-warn);font-size:11px;line-height:16px}._1nXeGW_rowFork{color:var(--hub-text-tertiary);font-size:11px;line-height:16px}._1nXeGW_rowTitle{color:var(--hub-text-primary);white-space:nowrap;text-overflow:ellipsis;flex:0 auto;min-width:0;font-size:12px;font-weight:600;line-height:18px;text-decoration:none;overflow:hidden}a._1nXeGW_rowTitle:hover{color:var(--hub-brand);text-decoration:underline}._1nXeGW_versionBadge{color:var(--hub-text-tertiary);background:var(--hub-bg-hover);border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;line-height:14px}._1nXeGW_updateBadge{color:var(--hub-warn);background:var(--hub-warn-tint);border:1px solid var(--hub-warn-border);border-radius:4px;flex-shrink:0;padding:0 5px;font-size:10px;font-weight:500;line-height:14px}._1nXeGW_rowSourceTag{box-sizing:border-box;text-align:center;white-space:nowrap;text-overflow:ellipsis;border-radius:4px;flex-shrink:0;width:60px;padding:0 4px;font-size:10px;font-weight:500;line-height:14px;overflow:hidden}._1nXeGW_rowSourceTagHub{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft)}._1nXeGW_rowSourceTagManual{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border)}._1nXeGW_exampleBadge{color:var(--hub-brand);background:var(--hub-brand-tint);border:1px solid var(--hub-brand-border-soft);border-radius:4px;flex-shrink:0;padding:0 5px;font-size:10px;font-weight:500;line-height:14px}._1nXeGW_exampleRow{align-items:center;min-width:0;padding-left:16px;display:flex}._1nXeGW_rowMeta{align-items:center;gap:8px;min-width:0;padding-left:16px;display:flex;overflow:hidden}._1nXeGW_rowRepo{color:var(--hub-text-tertiary);white-space:nowrap;text-overflow:ellipsis;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:16px;text-decoration:none;overflow:hidden}a._1nXeGW_rowRepo:hover{color:var(--hub-brand);text-decoration:underline}._1nXeGW_rowCategory{color:var(--hub-text-tertiary);background:var(--hub-bg-hover);border:1px solid #0000;border-radius:4px;flex-shrink:0;padding:0 5px;font-size:10px;line-height:14px}._1nXeGW_rowActionLine{justify-content:flex-end;align-items:center;gap:8px;min-width:0;padding-left:16px;display:flex}._1nXeGW_rowActions{flex-shrink:0;align-items:center;gap:4px;display:flex}._1nXeGW_rowDetail{color:var(--hub-text-secondary);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border:1px solid #0000;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowDetail:hover{color:var(--hub-text-primary);border-color:var(--hub-border-2);background:var(--hub-bg-hover)}._1nXeGW_rowRestart{color:var(--hub-warning);background:var(--hub-warning-tint);border:1px solid var(--hub-warning-border);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowRestart:hover{color:#fff;background:var(--hub-warning);border-color:var(--hub-warning)}._1nXeGW_rowUpdate{color:#fff;background:var(--hub-warn);border:1px solid var(--hub-warn);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:background .12s}._1nXeGW_rowUpdate:hover{background:var(--hub-warn-strong)}._1nXeGW_rowUninstall{color:var(--hub-danger);border:1px solid var(--hub-danger-border-soft);cursor:pointer;-webkit-user-select:none;user-select:none;background:0 0;border-radius:6px;padding:2px 10px;font-family:inherit;font-size:12px;font-weight:500;line-height:18px;transition:color .12s,background .12s,border-color .12s}._1nXeGW_rowUninstall:hover,body[data-ds-dark-theme] ._1nXeGW_rowUninstall{color:#fff;background:var(--hub-danger);border-color:var(--hub-danger)}body[data-ds-dark-theme] ._1nXeGW_rowUninstall:hover{background:var(--hub-danger-hover);border-color:var(--hub-danger-hover)}";
 		const tagId$7 = "dsh-plugin/InstalledView.module.css";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId$7) + "]") === null) {
 			const tag = document.createElement("style");
@@ -5534,42 +5550,46 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$7
 		});
 		var InstalledView_module_css_default = {
-			"searchInput": "_1nXeGW_searchInput",
-			"segLabel": "_1nXeGW_segLabel",
-			"segGroup": "_1nXeGW_segGroup",
-			"statusInactive": "_1nXeGW_statusInactive",
-			"emptyTitle": "_1nXeGW_emptyTitle",
-			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
-			"segBtn": "_1nXeGW_segBtn",
-			"rowTitle": "_1nXeGW_rowTitle",
-			"rowSourceTag": "_1nXeGW_rowSourceTag",
-			"rowRestart": "_1nXeGW_rowRestart",
-			"rowMain": "_1nXeGW_rowMain",
-			"rowMeta": "_1nXeGW_rowMeta",
-			"rowRepo": "_1nXeGW_rowRepo",
-			"rowCategory": "_1nXeGW_rowCategory",
-			"rowDetail": "_1nXeGW_rowDetail",
-			"exampleBadge": "_1nXeGW_exampleBadge",
-			"rowUninstall": "_1nXeGW_rowUninstall",
-			"statusDot": "_1nXeGW_statusDot",
-			"segRow": "_1nXeGW_segRow",
-			"row": "_1nXeGW_row",
-			"searchWrap": "_1nXeGW_searchWrap",
-			"rowDesc": "_1nXeGW_rowDesc",
-			"exampleRow": "_1nXeGW_exampleRow",
-			"list": "_1nXeGW_list",
-			"emptyDesc": "_1nXeGW_emptyDesc",
-			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
-			"toolbar": "_1nXeGW_toolbar",
-			"versionBadge": "_1nXeGW_versionBadge",
-			"rowUpdate": "_1nXeGW_rowUpdate",
-			"statusPending": "_1nXeGW_statusPending",
 			"segBtnActive": "_1nXeGW_segBtnActive",
-			"updateBadge": "_1nXeGW_updateBadge",
-			"root": "_1nXeGW_root",
-			"empty": "_1nXeGW_empty",
 			"rowTitleLine": "_1nXeGW_rowTitleLine",
-			"rowActions": "_1nXeGW_rowActions"
+			"rowSourceTagHub": "_1nXeGW_rowSourceTagHub",
+			"rowDetail": "_1nXeGW_rowDetail",
+			"rowUpdate": "_1nXeGW_rowUpdate",
+			"statusDot": "_1nXeGW_statusDot",
+			"statusInactive": "_1nXeGW_statusInactive",
+			"list": "_1nXeGW_list",
+			"rowActionLine": "_1nXeGW_rowActionLine",
+			"rowActions": "_1nXeGW_rowActions",
+			"updateBadge": "_1nXeGW_updateBadge",
+			"toolbar": "_1nXeGW_toolbar",
+			"rowSourceTag": "_1nXeGW_rowSourceTag",
+			"rowTitle": "_1nXeGW_rowTitle",
+			"searchWrap": "_1nXeGW_searchWrap",
+			"rowSourceTagManual": "_1nXeGW_rowSourceTagManual",
+			"rowRepo": "_1nXeGW_rowRepo",
+			"rowUninstall": "_1nXeGW_rowUninstall",
+			"versionBadge": "_1nXeGW_versionBadge",
+			"emptyDesc": "_1nXeGW_emptyDesc",
+			"rowRestart": "_1nXeGW_rowRestart",
+			"segBtn": "_1nXeGW_segBtn",
+			"searchInput": "_1nXeGW_searchInput",
+			"exampleBadge": "_1nXeGW_exampleBadge",
+			"rowCategory": "_1nXeGW_rowCategory",
+			"exampleRow": "_1nXeGW_exampleRow",
+			"rowMeta": "_1nXeGW_rowMeta",
+			"rowDesc": "_1nXeGW_rowDesc",
+			"segLabel": "_1nXeGW_segLabel",
+			"empty": "_1nXeGW_empty",
+			"rowMain": "_1nXeGW_rowMain",
+			"statusPending": "_1nXeGW_statusPending",
+			"segRow": "_1nXeGW_segRow",
+			"rowStar": "_1nXeGW_rowStar",
+			"segGroup": "_1nXeGW_segGroup",
+			"rowStats": "_1nXeGW_rowStats",
+			"rowFork": "_1nXeGW_rowFork",
+			"row": "_1nXeGW_row",
+			"root": "_1nXeGW_root",
+			"emptyTitle": "_1nXeGW_emptyTitle"
 		};
 		//#endregion
 		//#region src/client/components/views/InstalledView.tsx
@@ -5631,7 +5651,14 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				className: item.loaded ? InstalledView_module_css_default.statusDot : item.dshCapable && pendingRestart ? `${InstalledView_module_css_default.statusDot} ${InstalledView_module_css_default.statusPending}` : `${InstalledView_module_css_default.statusDot} ${InstalledView_module_css_default.statusInactive}`,
 				title: item.loaded ? t("statusRunning") : item.dshCapable && pendingRestart ? t("statusPending") : item.dshCapable ? t("statusInactive") : t("exampleHint"),
 				"aria-label": item.loaded ? t("statusRunning") : item.dshCapable && pendingRestart ? t("statusPending") : item.dshCapable ? t("statusInactive") : t("exampleHint")
-			}), (0, react.createElement)("div", { className: InstalledView_module_css_default.rowMain }, (0, react.createElement)("span", { className: InstalledView_module_css_default.rowTitle }, name), item.installedVersion ? (0, react.createElement)("span", {
+			}), (0, react.createElement)("div", { className: InstalledView_module_css_default.rowMain }, repo ? (0, react.createElement)("a", {
+				className: InstalledView_module_css_default.rowTitle,
+				href: pluginSiteUrl(repo),
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: t("detail"),
+				onClick: (e) => e.stopPropagation()
+			}, name) : (0, react.createElement)("span", { className: InstalledView_module_css_default.rowTitle }, name), item.installedVersion ? (0, react.createElement)("span", {
 				className: InstalledView_module_css_default.versionBadge,
 				title: t("installedVersionLabel")
 			}, item.installedVersion) : null, item.hasUpdate ? (0, react.createElement)("span", {
@@ -5640,10 +5667,23 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			}, t("updateAvailable")) : item.pendingUntil != null ? (0, react.createElement)("span", {
 				className: InstalledView_module_css_default.updateBadge,
 				title: t("updatePendingHint")
-			}, t("updatePending", { time: clockTime(item.pendingUntil) })) : null), (0, react.createElement)("span", {
+			}, t("updatePending", { time: clockTime(item.pendingUntil) })) : null), item.plugin ? (0, react.createElement)("div", { className: InstalledView_module_css_default.rowStats }, (0, react.createElement)("span", { className: InstalledView_module_css_default.rowStar }, "★ ", fmtStars(item.plugin.stats?.stargazers_count)), (0, react.createElement)("span", { className: InstalledView_module_css_default.rowFork }, t("fork"), " ", fmtStars(item.plugin.stats?.forks_count))) : null), !item.dshCapable ? (0, react.createElement)("div", { className: InstalledView_module_css_default.exampleRow }, (0, react.createElement)("span", {
+				className: InstalledView_module_css_default.exampleBadge,
+				title: t("exampleHint")
+			}, t("exampleLabel"))) : null, (0, react.createElement)("div", { className: InstalledView_module_css_default.rowMeta }, item.repo ? (0, react.createElement)("a", {
+				className: InstalledView_module_css_default.rowRepo,
+				href: pluginSiteUrl(item.repo),
+				target: "_blank",
+				rel: "noopener noreferrer",
+				title: t("detail"),
+				onClick: (e) => e.stopPropagation()
+			}, item.repo) : null, category ? (0, react.createElement)("span", { className: InstalledView_module_css_default.rowCategory }, categoryLabel(CATEGORY_LABELS, category, langKey)) : null, (0, react.createElement)("span", {
 				className: isCustom ? `${InstalledView_module_css_default.rowSourceTag} ${InstalledView_module_css_default.rowSourceTagManual}` : `${InstalledView_module_css_default.rowSourceTag} ${InstalledView_module_css_default.rowSourceTagHub}`,
 				title: isCustom ? t("manualInstallHint") : t("hubInstallHint")
-			}, isCustom ? t("manualInstall") : t("hubInstall")), (0, react.createElement)("div", { className: InstalledView_module_css_default.rowActions }, !item.loaded && item.dshCapable && pendingRestart ? (0, react.createElement)("button", {
+			}, isCustom ? t("manualInstall") : t("hubInstall"))), desc ? (0, react.createElement)("div", {
+				className: InstalledView_module_css_default.rowDesc,
+				title: desc
+			}, desc) : null, (0, react.createElement)("div", { className: InstalledView_module_css_default.rowActionLine }, (0, react.createElement)("div", { className: InstalledView_module_css_default.rowActions }, !item.loaded && item.dshCapable && pendingRestart ? (0, react.createElement)("button", {
 				className: InstalledView_module_css_default.rowRestart,
 				type: "button",
 				title: t("restartPendingHint"),
@@ -5658,7 +5698,15 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					e.stopPropagation();
 					onReveal(item);
 				}
-			}, revealLabel) : null, item.hasUpdate && item.plugin ? (0, react.createElement)("button", {
+			}, revealLabel) : null, (0, react.createElement)("button", {
+				className: InstalledView_module_css_default.rowDetail,
+				type: "button",
+				title: t("detail"),
+				onClick: (e) => {
+					e.stopPropagation();
+					onOpenDetail(item);
+				}
+			}, t("installDetail")), item.hasUpdate && item.plugin ? (0, react.createElement)("button", {
 				className: InstalledView_module_css_default.rowUpdate,
 				type: "button",
 				title: t("updateAvailableHint"),
@@ -5673,13 +5721,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 					e.stopPropagation();
 					onUninstall(item);
 				}
-			}, t("uninstall")))), !item.dshCapable ? (0, react.createElement)("div", { className: InstalledView_module_css_default.exampleRow }, (0, react.createElement)("span", {
-				className: InstalledView_module_css_default.exampleBadge,
-				title: t("exampleHint")
-			}, t("exampleLabel"))) : null, repo || category ? (0, react.createElement)("div", { className: InstalledView_module_css_default.rowMeta }, item.repo ? (0, react.createElement)("span", { className: InstalledView_module_css_default.rowRepo }, item.repo) : null, category ? (0, react.createElement)("span", { className: InstalledView_module_css_default.rowCategory }, categoryLabel(CATEGORY_LABELS, category, langKey)) : null) : null, desc ? (0, react.createElement)("div", {
-				className: InstalledView_module_css_default.rowDesc,
-				title: desc
-			}, desc) : null);
+			}, t("uninstall")))));
 		}
 		/** 行列表：单个已安装列表（自定义安装与目录插件混排，靠徽标区分）。 */
 		function RowList({ items, t, langKey, canReveal, revealLabel, pendingRestarts, onOpenDetail, onReveal, onUpdate, onUninstall, onRestart }) {
@@ -5816,27 +5858,27 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$6
 		});
 		var CustomInstallView_module_css_default = {
-			"channelOffBtn": "zISxCG_channelOffBtn",
-			"installCardHead": "zISxCG_installCardHead",
-			"installError": "zISxCG_installError",
-			"channelOff": "zISxCG_channelOff",
-			"installRow": "zISxCG_installRow",
-			"helpNote": "zISxCG_helpNote",
-			"helpCmd": "zISxCG_helpCmd",
-			"helpLine": "zISxCG_helpLine",
-			"installLabel": "zISxCG_installLabel",
-			"installCardDisabled": "zISxCG_installCardDisabled",
-			"desc": "zISxCG_desc",
-			"installCard": "zISxCG_installCard",
 			"helpBody": "zISxCG_helpBody",
+			"installExample": "zISxCG_installExample",
+			"installCardDisabled": "zISxCG_installCardDisabled",
 			"installCards": "zISxCG_installCards",
+			"installRow": "zISxCG_installRow",
 			"installHelpBtn": "zISxCG_installHelpBtn",
-			"channelOffText": "zISxCG_channelOffText",
+			"desc": "zISxCG_desc",
+			"helpCmd": "zISxCG_helpCmd",
+			"installError": "zISxCG_installError",
+			"helpNote": "zISxCG_helpNote",
 			"installInputError": "zISxCG_installInputError",
-			"installInput": "zISxCG_installInput",
-			"installBtn": "zISxCG_installBtn",
+			"helpLine": "zISxCG_helpLine",
+			"installCardHead": "zISxCG_installCardHead",
+			"channelOffText": "zISxCG_channelOffText",
+			"channelOff": "zISxCG_channelOff",
+			"channelOffBtn": "zISxCG_channelOffBtn",
+			"installCard": "zISxCG_installCard",
 			"root": "zISxCG_root",
-			"installExample": "zISxCG_installExample"
+			"installInput": "zISxCG_installInput",
+			"installLabel": "zISxCG_installLabel",
+			"installBtn": "zISxCG_installBtn"
 		};
 		//#endregion
 		//#region src/client/components/views/CustomInstallView.tsx
@@ -5992,30 +6034,30 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$5
 		});
 		var SettingsView_module_css_default = {
-			"proxyHintOk": "_506LLG_proxyHintOk",
-			"navItemActive": "_506LLG_navItemActive",
-			"settingLabel": "_506LLG_settingLabel",
-			"card": "_506LLG_card",
-			"proxyHint": "_506LLG_proxyHint",
 			"controlDropdown": "_506LLG_controlDropdown",
-			"proxyHintFail": "_506LLG_proxyHintFail",
-			"content": "_506LLG_content",
-			"settingRowStack": "_506LLG_settingRowStack",
 			"settingDesc": "_506LLG_settingDesc",
-			"settingTitle": "_506LLG_settingTitle",
+			"proxyHintFail": "_506LLG_proxyHintFail",
 			"navItem": "_506LLG_navItem",
-			"navIcon": "_506LLG_navIcon",
-			"sidebar": "_506LLG_sidebar",
-			"textInput": "_506LLG_textInput",
 			"pageTitle": "_506LLG_pageTitle",
-			"settingRow": "_506LLG_settingRow",
-			"settingControlStack": "_506LLG_settingControlStack",
+			"settingLabel": "_506LLG_settingLabel",
+			"settingTitle": "_506LLG_settingTitle",
 			"root": "_506LLG_root",
-			"resetBtn": "_506LLG_resetBtn",
-			"pageDesc": "_506LLG_pageDesc",
 			"settingControl": "_506LLG_settingControl",
 			"pageHeader": "_506LLG_pageHeader",
-			"proxyControl": "_506LLG_proxyControl"
+			"pageDesc": "_506LLG_pageDesc",
+			"settingRow": "_506LLG_settingRow",
+			"navIcon": "_506LLG_navIcon",
+			"card": "_506LLG_card",
+			"proxyHint": "_506LLG_proxyHint",
+			"settingControlStack": "_506LLG_settingControlStack",
+			"settingRowStack": "_506LLG_settingRowStack",
+			"textInput": "_506LLG_textInput",
+			"sidebar": "_506LLG_sidebar",
+			"content": "_506LLG_content",
+			"proxyControl": "_506LLG_proxyControl",
+			"resetBtn": "_506LLG_resetBtn",
+			"proxyHintOk": "_506LLG_proxyHintOk",
+			"navItemActive": "_506LLG_navItemActive"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Dropdown.module.css.mjs
@@ -6034,18 +6076,18 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$4
 		});
 		var Dropdown_module_css_default = {
+			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
 			"dropdownArrow": "B_Gxsq_dropdownArrow",
 			"dropdownItemLabel": "B_Gxsq_dropdownItemLabel",
-			"dropdownPanel": "B_Gxsq_dropdownPanel",
-			"dropdownCount": "B_Gxsq_dropdownCount",
-			"dropdown": "B_Gxsq_dropdown",
-			"dropdownFill": "B_Gxsq_dropdownFill",
-			"dropdownLabel": "B_Gxsq_dropdownLabel",
 			"dropdownItem": "B_Gxsq_dropdownItem",
-			"dropdownCountActive": "B_Gxsq_dropdownCountActive",
+			"dropdownCount": "B_Gxsq_dropdownCount",
+			"dropdownFill": "B_Gxsq_dropdownFill",
 			"dropdownBtn": "B_Gxsq_dropdownBtn",
+			"dropdown": "B_Gxsq_dropdown",
+			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen",
+			"dropdownPanel": "B_Gxsq_dropdownPanel",
 			"dropdownItemActive": "B_Gxsq_dropdownItemActive",
-			"dropdownArrowOpen": "B_Gxsq_dropdownArrowOpen"
+			"dropdownLabel": "B_Gxsq_dropdownLabel"
 		};
 		//#endregion
 		//#region \0dsh-css:src/client/styles/Toggle.module.css.mjs
@@ -6064,9 +6106,9 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$3
 		});
 		var Toggle_module_css_default = {
+			"toggleOn": "k-cD4G_toggleOn",
 			"knob": "k-cD4G_knob",
-			"toggle": "k-cD4G_toggle",
-			"toggleOn": "k-cD4G_toggleOn"
+			"toggle": "k-cD4G_toggle"
 		};
 		//#endregion
 		//#region src/client/components/ui/Toggle.tsx
@@ -6163,29 +6205,29 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$2
 		});
 		var DiagnosticsView_module_css_default = {
-			"envTitle": "k9eRya_envTitle",
-			"envCopyBtn": "k9eRya_envCopyBtn",
-			"display": "k9eRya_display",
-			"badge": "k9eRya_badge",
-			"panel": "k9eRya_panel",
-			"badgeRunning": "k9eRya_badgeRunning",
 			"summaryOk": "k9eRya_summaryOk",
-			"summaryFail": "k9eRya_summaryFail",
-			"envLabel": "k9eRya_envLabel",
-			"badgeOk": "k9eRya_badgeOk",
-			"headHint": "k9eRya_headHint",
-			"name": "k9eRya_name",
-			"badgeIdle": "k9eRya_badgeIdle",
-			"meta": "k9eRya_meta",
-			"runBtn": "k9eRya_runBtn",
-			"row": "k9eRya_row",
-			"envRow": "k9eRya_envRow",
-			"badgeFail": "k9eRya_badgeFail",
 			"diagPulse": "k9eRya_diagPulse",
+			"meta": "k9eRya_meta",
+			"badge": "k9eRya_badge",
+			"envCopyBtn": "k9eRya_envCopyBtn",
+			"panel": "k9eRya_panel",
+			"display": "k9eRya_display",
+			"row": "k9eRya_row",
+			"badgeRunning": "k9eRya_badgeRunning",
+			"runBtn": "k9eRya_runBtn",
+			"name": "k9eRya_name",
 			"summaryRunning": "k9eRya_summaryRunning",
-			"summary": "k9eRya_summary",
 			"head": "k9eRya_head",
-			"envDesc": "k9eRya_envDesc"
+			"summary": "k9eRya_summary",
+			"summaryFail": "k9eRya_summaryFail",
+			"envTitle": "k9eRya_envTitle",
+			"badgeOk": "k9eRya_badgeOk",
+			"badgeFail": "k9eRya_badgeFail",
+			"headHint": "k9eRya_headHint",
+			"badgeIdle": "k9eRya_badgeIdle",
+			"envDesc": "k9eRya_envDesc",
+			"envRow": "k9eRya_envRow",
+			"envLabel": "k9eRya_envLabel"
 		};
 		//#endregion
 		//#region src/client/components/views/DiagnosticsView.tsx
@@ -6360,57 +6402,57 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 			css: css$1
 		});
 		var LogsView_module_css_default = {
-			"pathDialogReset": "_3j77BW_pathDialogReset",
-			"catUninstall": "_3j77BW_catUninstall",
-			"pathDialogFoot": "_3j77BW_pathDialogFoot",
-			"filterChip": "_3j77BW_filterChip",
-			"catUpdate": "_3j77BW_catUpdate",
-			"catSettings": "_3j77BW_catSettings",
-			"badgeSuccess": "_3j77BW_badgeSuccess",
-			"badgeInfo": "_3j77BW_badgeInfo",
 			"btn": "_3j77BW_btn",
-			"badge": "_3j77BW_badge",
-			"entry": "_3j77BW_entry",
-			"catDiagnostics": "_3j77BW_catDiagnostics",
-			"panel": "_3j77BW_panel",
-			"headActions": "_3j77BW_headActions",
-			"moreEnd": "_3j77BW_moreEnd",
-			"footActions": "_3j77BW_footActions",
-			"pathDialog": "_3j77BW_pathDialog",
-			"empty": "_3j77BW_empty",
-			"head": "_3j77BW_head",
-			"catInstall": "_3j77BW_catInstall",
 			"message": "_3j77BW_message",
-			"logList": "_3j77BW_logList",
-			"footPath": "_3j77BW_footPath",
-			"catBadge": "_3j77BW_catBadge",
-			"list": "_3j77BW_list",
-			"footFail": "_3j77BW_footFail",
-			"catSystem": "_3j77BW_catSystem",
-			"badgeDebug": "_3j77BW_badgeDebug",
-			"pathDialogHint": "_3j77BW_pathDialogHint",
-			"filterBar": "_3j77BW_filterBar",
-			"event": "_3j77BW_event",
-			"pathRow": "_3j77BW_pathRow",
-			"pathLabel": "_3j77BW_pathLabel",
-			"time": "_3j77BW_time",
-			"pathDraft": "_3j77BW_pathDraft",
-			"clearBtn": "_3j77BW_clearBtn",
-			"pathDialogRow": "_3j77BW_pathDialogRow",
-			"previewRow": "_3j77BW_previewRow",
-			"filterChipActive": "_3j77BW_filterChipActive",
-			"search": "_3j77BW_search",
-			"searchInput": "_3j77BW_searchInput",
-			"pathText": "_3j77BW_pathText",
 			"more": "_3j77BW_more",
+			"filterBar": "_3j77BW_filterBar",
+			"head": "_3j77BW_head",
+			"time": "_3j77BW_time",
+			"previewRow": "_3j77BW_previewRow",
+			"headHint": "_3j77BW_headHint",
+			"badge": "_3j77BW_badge",
+			"badgeDebug": "_3j77BW_badgeDebug",
+			"event": "_3j77BW_event",
+			"linkBtn": "_3j77BW_linkBtn",
+			"search": "_3j77BW_search",
+			"logList": "_3j77BW_logList",
+			"pathLabel": "_3j77BW_pathLabel",
+			"pathDialogHint": "_3j77BW_pathDialogHint",
+			"badgeWarn": "_3j77BW_badgeWarn",
+			"catUpdate": "_3j77BW_catUpdate",
+			"catSystem": "_3j77BW_catSystem",
+			"actions": "_3j77BW_actions",
+			"filterChipActive": "_3j77BW_filterChipActive",
+			"footFail": "_3j77BW_footFail",
+			"footCount": "_3j77BW_footCount",
+			"catSettings": "_3j77BW_catSettings",
+			"catDiagnostics": "_3j77BW_catDiagnostics",
+			"pathRow": "_3j77BW_pathRow",
+			"entry": "_3j77BW_entry",
+			"list": "_3j77BW_list",
+			"pathText": "_3j77BW_pathText",
+			"pathDialog": "_3j77BW_pathDialog",
+			"pathDraft": "_3j77BW_pathDraft",
+			"moreEnd": "_3j77BW_moreEnd",
+			"pathDialogFoot": "_3j77BW_pathDialogFoot",
+			"headActions": "_3j77BW_headActions",
+			"footPath": "_3j77BW_footPath",
+			"badgeError": "_3j77BW_badgeError",
+			"empty": "_3j77BW_empty",
+			"pathDialogRow": "_3j77BW_pathDialogRow",
+			"pathDialogReset": "_3j77BW_pathDialogReset",
 			"pathDialogDesc": "_3j77BW_pathDialogDesc",
 			"foot": "_3j77BW_foot",
-			"footCount": "_3j77BW_footCount",
-			"badgeError": "_3j77BW_badgeError",
-			"badgeWarn": "_3j77BW_badgeWarn",
-			"actions": "_3j77BW_actions",
-			"linkBtn": "_3j77BW_linkBtn",
-			"headHint": "_3j77BW_headHint"
+			"panel": "_3j77BW_panel",
+			"badgeInfo": "_3j77BW_badgeInfo",
+			"catInstall": "_3j77BW_catInstall",
+			"footActions": "_3j77BW_footActions",
+			"catUninstall": "_3j77BW_catUninstall",
+			"searchInput": "_3j77BW_searchInput",
+			"badgeSuccess": "_3j77BW_badgeSuccess",
+			"filterChip": "_3j77BW_filterChip",
+			"clearBtn": "_3j77BW_clearBtn",
+			"catBadge": "_3j77BW_catBadge"
 		};
 		//#endregion
 		//#region src/client/components/modals/LogsModal.tsx
@@ -7684,7 +7726,7 @@ window.__ModuleLoader__.load({ id: "dsh-plugin", factory: (require) => {
 				openSection: settingsSection,
 				onConsumedOpenSection: () => setSettingsSection(null)
 			}), showHubUpdate && (0, react.createElement)(HubUpdateModal, {
-				info: catalog.hubUpdateTarget ?? catalog.hubUpdateInfo ?? { version: "2.3.0" },
+				info: catalog.hubUpdateTarget ?? catalog.hubUpdateInfo ?? { version: "2.3.1" },
 				state: catalog.hubUpdateState,
 				currentVersion: catalog.hubCurrentVersion,
 				lang,
