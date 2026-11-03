@@ -17,7 +17,7 @@ export interface NpmRelease {
   publishedAt: string
 }
 
-/** 最新版 + 可钉住的安装版本：安装时钉住后者，pnpm 才不会把「发布未满门禁」的最新版回退成很旧的版本。 */
+/** 最新版 + 可钉住的安装版本：安装钉住后者，pnpm 才不会被门禁回退到旧版。 */
 export interface NpmReleaseWithInstallable extends NpmRelease {
   /** 已过供应链门禁的最高稳定版；时间表缺失或没有满足项时为 null（调用方退回不钉版本）。 */
   installable: NpmRelease | null
@@ -54,7 +54,7 @@ export function latestReleaseOf(packument: unknown): NpmRelease | null {
 }
 
 /**
- * 已过供应链门禁的最高稳定版本：安装时钉住它，pnpm 就不会把最新版静默回退成很旧的版本。
+ * 已过供应链门禁的最高稳定版本：安装钉住它，pnpm 不会因门禁回退到旧版。
  * 只看纯 x.y.z（预发布版不参与，避免把用户带到不兼容预览版）；时间表缺失或无满足项返回 null。
  */
 export function installableReleaseOf(packument: unknown, now = Date.now()): NpmRelease | null {

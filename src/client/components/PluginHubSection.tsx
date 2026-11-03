@@ -76,8 +76,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
   const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
-  /** 安装要钉住的精确版本：Hub 连续发版时提示的旧一版、以及新安装的「已过供应链门禁」版本，
-   *  都必须钉住，否则 @latest 会被 pnpm 门禁带回门禁内的版本或静默回退到很旧的版本。 */
+  /** 安装要钉住的精确版本：自我更新提示的版本、新安装的门禁版本都要钉住，
+   *  否则 @latest 会被 pnpm 门禁带回门禁内的旧版。 */
   const [confirmPinVersion, setConfirmPinVersion] = useState<string | null>(null)
   /** 门禁版本查询的在途序号：只采用最后一次弹窗的查询结果，避免切换插件后旧结果覆盖 */
   const installPinSeq = useRef(0)
