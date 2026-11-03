@@ -72,7 +72,7 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
   <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-custom-install-zh.png?v=2.3.1" alt="自定义安装" width="400">
 </p>
 
-集中管理当前环境已装的全部插件，支持搜索、来源筛选与排序，行尾提供更新、卸载与「在 Finder 中显示」 · 手动安装目录外的任意插件，支持 NPM 包、GitHub 源码与 DSH 命令行三种通道
+集中管理当前环境已装的全部插件，支持搜索、来源筛选与排序，行尾提供更新、卸载与「在 Finder 中显示」 · 手动安装目录外的插件：只接受 NPM 包名或 npm / pnpm 安装命令，不再提供 GitHub 源码与 git 安装
 
 **设置 · 系统日志**
 
@@ -132,7 +132,7 @@ DSH Plugin 插件市场收录 **5,000+** 个可一键安装的 NPM 插件（主�
 
 ## 安装 DSH Plugin Hub
 
-从 npm 安装（推荐）：
+从 npm 安装：
 
 ```bash
 dsh plugin --profile web add dsh-plugin
@@ -140,13 +140,7 @@ dsh plugin --profile web add dsh-plugin
 
 插件已发布到 npm registry（包名 `dsh-plugin`），一条命令即可安装使用，无需任何构建。
 
-从 GitHub 安装：
-
-```bash
-dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
-```
-
-> **提示**：插件已内置浏览器端 bundle，从 GitHub 安装无需任何构建与授权；装完重启 `dsh web`，在「设置 → 插件市场」即可使用。
+> **只提供 npm 安装**：源码 / git 安装要依赖各仓库自己的构建脚本，写法不统一、失败率高（git 包常被 pnpm 的构建门禁直接拦下），装出来的行为也不一致，因此不再提供。插件已内置浏览器端 bundle，npm 安装无需构建；装完重启 `dsh web`，在「设置 → 插件市场」即可使用。
 
 ## 更新 DSH Plugin Hub
 

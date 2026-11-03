@@ -72,7 +72,7 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
   <img src="https://api.dsh-plugin.org/images/releases/2-3-1/dsh-plugin-hub-custom-install-en.png?v=2.3.1" alt="Custom install" width="400">
 </p>
 
-Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row · Installs any plugin outside the catalog via an npm package, GitHub source or a DSH command
+Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row · Installs a plugin outside the catalog by npm package name or an npm / pnpm install command; GitHub-source and git installs are no longer offered
 
 **Settings · System logs**
 
@@ -132,7 +132,7 @@ Every DSH plugin links back to its GitHub source repository with stars, forks an
 
 ## Install DSH Plugin Hub
 
-Install from npm (recommended):
+Install from npm:
 
 ```bash
 dsh plugin --profile web add dsh-plugin
@@ -140,13 +140,7 @@ dsh plugin --profile web add dsh-plugin
 
 The plugin is published to the npm registry as `dsh-plugin` — one command installs and it just works, no build step required.
 
-Install from GitHub:
-
-```bash
-dsh plugin --profile web add git+https://github.com/dshplugin/dsh-plugin-hub.git
-```
-
-> **Note**: the browser bundle ships with the package, so installing from GitHub needs no build step or authorization — just restart `dsh web` and open Settings → Plugin Hub.
+> **npm installs only**: source and git installs depend on each repository's own build scripts, which are written inconsistently and fail often (git packages are routinely rejected by pnpm's build gate), and the resulting behaviour varies — so they are no longer offered. The browser bundle ships with the package, so an npm install needs no build step; restart `dsh web` and open Settings → Plugin Hub.
 
 ## Update DSH Plugin Hub
 
