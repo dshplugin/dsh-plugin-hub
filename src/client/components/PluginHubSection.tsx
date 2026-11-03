@@ -76,10 +76,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
   const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
-  /** 安装要钉住的精确版本：自我更新提示的版本、新安装的门禁版本都要钉住，
-   *  否则 @latest 会被 pnpm 门禁带回门禁内的旧版。 */
+  /** 安装要钉住的精确版本：自我更新提示的版本、新安装的已过冷却期版本都要钉住，
+   *  否则 @latest 会被 pnpm 带回冷却期内的旧版。 */
   const [confirmPinVersion, setConfirmPinVersion] = useState<string | null>(null)
-  /** 门禁版本查询的在途序号：只采用最后一次弹窗的查询结果，避免切换插件后旧结果覆盖 */
+  /** 冷却期查询的在途序号：只采用最后一次弹窗的查询结果，避免切换插件后旧结果覆盖 */
   const installPinSeq = useRef(0)
   /** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名）——
    *  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
@@ -239,7 +239,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   useEffect(() => {
     if (startupCheckedRef.current) return
     if (!settingsReady || catalog.plugins === null || catalog.failed) return
-    // 供应链门禁结果未就绪时先等：否则刚发布的插件会先写进通知中心，冒出装不上的更新提醒
+    // 发布冷却期结果未就绪时先等：否则刚发布的插件会先写进通知中心，冒出装不上的更新提醒
     if (!catalog.releaseAgeReady) return
     startupCheckedRef.current = true
     if (!hubSettings.checkUpdatesOnStart) return
@@ -334,7 +334,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     setConfirmPlugin(null)
   }
 
-  /** 新安装先查「已过 pnpm 供应链门禁」的版本：命令条与执行都钉住它，
+  /** 新安装先查「已过 pnpm 发布冷却期」的版本：命令条与执行都钉住它，
    *  否则 pnpm 会把发布未满 24h 的最新版静默回退成很旧的版本。查不到则不钉，由服务端兜底解析。 */
   const resolveInstallPin = (p: HubPlugin) => {
     // 目录下发了官方安装命令的条目（CLI-only / 人工干预）只展示该命令，追加版本会改坏它
@@ -448,7 +448,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         noticeCount: notifications.length + queue.queue.length + queue.pendingRestarts.length,
         onOpenNotifications: () => {
           // 打开弹窗时补齐更新提醒（受「启动时检查更新」开关约束）：同一版本只一条，
-          // 清空/删除后重开仍恢复，直到插件更新完成才消失；门禁结果未就绪时先不写，避免提示装不上的更新
+          // 清空/删除后重开仍恢复，直到插件更新完成才消失；冷却期查询结果未就绪时先不写，避免提示装不上的更新
           if (hubSettings.checkUpdatesOnStart && catalog.releaseAgeReady) syncUpdateNotices()
           setShowNotifications(true)
         },
@@ -472,12 +472,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
             setInstallDone(false)
             setConfirmIsUpdate(update)
             setConfirmPinVersion(null)
-            // 本次弹窗重新开始：作废上一次仍在途的门禁版本查询
+            // 本次弹窗重新开始：作废上一次仍在途的冷却期查询
             ++installPinSeq.current
             // 与卸载一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务而禁用安装按钮
             queue.clearModalTask()
             setConfirmPlugin(p)
-            // 更新走 @latest 语义（客户端已按门禁筛选），只有新安装需要钉住门禁内可用的版本
+            // 更新走 @latest 语义（客户端已按冷却期筛选），只有新安装需要钉住冷却期内可用的版本
             if (!update) resolveInstallPin(p)
           },
           onUninstall: (p) => {
@@ -511,7 +511,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               setInstallDone(false)
               setConfirmIsUpdate(true)
               setConfirmPinVersion(null)
-              // 更新不钉版本：作废可能仍在途的新安装门禁查询
+              // 更新不钉版本：作废可能仍在途的新安装冷却期查询
               ++installPinSeq.current
               queue.clearModalTask()
               setConfirmPlugin(item.plugin)
@@ -576,7 +576,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     // 暂缓提示显示同一标题但只给「稍后再说」，无更新显示当前版本 + 记录 + 「已是最新」。
     // 版本号与本机版本一律由 hubUpdateState / hubCurrentVersion 决定，不用远端版号冒充本机。
     showHubUpdate && h(HubUpdateModal, {
-      // 提示目标是「已过供应链门禁」的版本，可能不是 latest —— 展示它与它的变更记录
+      // 提示目标是「已过发布冷却期」的版本，可能不是 latest —— 展示它与它的变更记录
       info: catalog.hubUpdateTarget ?? catalog.hubUpdateInfo ?? { version: PLUGIN_VERSION },
       state: catalog.hubUpdateState,
       currentVersion: catalog.hubCurrentVersion,
@@ -589,9 +589,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         if (hubEntry) {
           setInstallDone(false)
           setConfirmIsUpdate(true)
-          // 钉住本次提示的版本：最新版可能仍在门禁内，@latest 会被 pnpm 拒绝
+          // 钉住本次提示的版本：最新版可能仍在冷却期内，@latest 会被 pnpm 拒绝
           setConfirmPinVersion(catalog.hubUpdateTarget?.version ?? null)
-          // 作废可能仍在途的新安装门禁查询，避免它覆盖本次钉住的版本
+          // 作废可能仍在途的新安装冷却期查询，避免它覆盖本次钉住的版本
           ++installPinSeq.current
           queue.clearModalTask()
           setConfirmPlugin(hubEntry)
@@ -711,7 +711,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onCopy: () => copyCommand(confirmPlugin, confirmPinVersion ?? undefined),
       onInstall: () => queue.installNow(confirmPlugin, {
         update: confirmIsUpdate,
-        // 新安装钉住门禁版本：查询尚未回来时为空，服务端会自行解析
+        // 新安装钉住已过冷却期的版本：查询尚未回来时为空，服务端会自行解析
         pinVersion: confirmPinVersion ?? undefined,
       }),
       // 重启：结果视图「立即重启」也会中断进行中的任务 → 先弹重启确认弹窗

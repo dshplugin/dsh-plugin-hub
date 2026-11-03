@@ -70,7 +70,7 @@ export function InstalledDetailModal({ item, t, lang, langPath, onClose, onUpdat
               ? t('versionUpHint', { from: item.installedVersion, to: item.catalogVersion })
               : t('updateAvailableHint'))
           : item.pendingUntil != null
-            // 门禁暂缓：给确切可重试时刻，而不是让「有更新」静默消失
+            // 冷却期未到：给确切可重试时刻，而不是让「有更新」静默消失
             ? h('div', { className: styles.detailUpdateHint }, t('updatePending', { time: clockTime(item.pendingUntil) }))
             : null,
         // 详情信息网格：分类 / 状态 / 版本 / 收录入口 / 包名 / 统计 / 安装路径 / 安装时间 / 最后更新

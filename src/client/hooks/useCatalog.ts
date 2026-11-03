@@ -244,7 +244,7 @@ export function useCatalog(lang: LocaleId) {
 
   /**
    * 不能提示更新的包：
-   *  - npm 上最新版还没过供应链门禁（发布不满 24h，pnpm 会静默回退，点了也装不上）；
+   *  - npm 上最新版还没过发布冷却期（发布不满 24h，pnpm 会静默回退，点了也装不上）；
    *  - npm 上最新版并不高于已装版本 —— 更新走的是 `pkg@latest`，此时无论目录标到哪个 tag，
    *    都不可能装上（作者可能只打了 GitHub release 没发 npm），提示只会变成永远点不掉的循环。
    */
@@ -280,7 +280,7 @@ export function useCatalog(lang: LocaleId) {
     return releaseAgeReady && !updateBlocked.has(pkg)
   }
 
-  /** 更新被门禁暂缓时的可重试时刻（毫秒）；未安装/无更新/非门禁原因 → null。 */
+  /** 更新被冷却期未到时的可重试时刻（毫秒）；未安装/无更新/非冷却期原因 → null。 */
   const updatePendingUntil = (p: HubPlugin): number | null => {
     if (!hasUpdateOf(p, installed, versions)) return null
     const pkg = npmPackageOf(p, versions)
@@ -289,7 +289,7 @@ export function useCatalog(lang: LocaleId) {
   }
 
   /** 已安装项统一列表（目录元数据 + 运行时信息合并）：校验未就绪/被拦下的去掉更新标记、
-   *  门禁暂缓的带上可重试时刻，驱动「已安装」tab。 */
+   *  冷却期未到的带上可重试时刻，驱动「已安装」tab。 */
   const installedItems = useMemo<InstalledItem[]>(() => {
     return rawInstalledItems.map((item) => {
       if (!item.hasUpdate || !item.plugin) return item
@@ -309,13 +309,13 @@ export function useCatalog(lang: LocaleId) {
    * 构建时注入的 PLUGIN_VERSION 是运行 bundle 的真实版本；测试/异常场景缺失时
    * 回退到安装时记录的版本。版本号不等即新版（版本号只在发版时变更，绝无降级场景）。
    *
-   * 另加 pnpm 供应链安全门槛：新版本发布还不满 24 小时（+30 分钟缓冲）时，pnpm 会静默
+   * 另加 pnpm 发布冷却期：新版本发布还不满 24 小时（+30 分钟缓冲）时，pnpm 会静默
    * 回退到旧版本，此时若提示「可更新」用户点了也更新不到。publishedAt 由接口中心按 npm
-   * registry 真实发布时间下发（同源），据此判断最准。门槛命中要单列成 `pending` 而不是
+   * registry 真实发布时间下发（同源），据此判断最准。冷却期命中要单列成 `pending` 而不是
    * 落回「无更新」——回落会让弹窗在本机版本落后时谎称「已是最新」。
    */
   const hubCurrentVersion = PLUGIN_VERSION || versions[HUB_REPO]?.version || ''
-  // 候选含 recentVersions：最新版还在门禁内时回退到「更早、但已过门禁」的版本，
+  // 候选含 recentVersions：最新版还在冷却期内时回退到「更早、但已过冷却期」的版本，
   // 避免连续快速发版把所有提示窗口都吞掉（见 pickHubUpdate）。
   const hubUpdateResult = hubUpdateInfo === null
     ? { state: 'none' as HubUpdateState, target: null }

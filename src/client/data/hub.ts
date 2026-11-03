@@ -19,7 +19,7 @@ function busted(url: string): string {
 }
 
 /** 归一化接口下发的 recentVersions：只保留带版本号的条目，其余字段按类型补。
- *  这条数据是「最新版还在 24.5h 门禁内时回退到更早的已过门槛版本」的唯一依据；
+ *  这条数据是「最新版还在 24.5h 冷却期内时回退到更早的已过冷却期版本」的唯一依据；
  *  入口处漏传会让候选只剩最新版，整体变成 pending —— 用户就永远看不到更新入口。 */
 function recentVersionsOf(value: unknown): HubUpdateVersion[] {
   if (!Array.isArray(value)) return []
@@ -37,7 +37,7 @@ function recentVersionsOf(value: unknown): HubUpdateVersion[] {
   return list
 }
 
-/** 版本控制中心：最新版本 + Markdown 变更记录 + 最近发版（门禁回退用）；不可用返回 null。 */
+/** 版本控制中心：最新版本 + Markdown 变更记录 + 最近发版（冷却期回退用）；不可用返回 null。 */
 export async function fetchHubUpdate(): Promise<HubUpdateInfo | null> {
   try {
     const res = await fetch(busted(HUB_UPDATE_URL), { cache: 'no-store' })

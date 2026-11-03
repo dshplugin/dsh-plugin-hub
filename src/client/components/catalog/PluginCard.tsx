@@ -19,9 +19,9 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
   installedName: (p: HubPlugin) => string | null
   /** 已安装版本号（安装时从目录信号记录；无 release 的仓库为空，无版本号可展示） */
   installedVersion: (p: HubPlugin) => string | null
-  /** 已安装且目录有更新（有版本比版本、无版本比仓库更新时间）；门禁复核未就绪时为 false */
+  /** 已安装且目录有更新（有版本比版本、无版本比仓库更新时间）；冷却期复核未就绪时为 false */
   hasUpdate: (p: HubPlugin) => boolean
-  /** 更新被供应链门禁暂缓时的可重试时刻（毫秒）；无则 null */
+  /** 更新暂缓（新版本还没过冷却期）的可重试时刻（毫秒）；无则 null */
   updatePendingUntil: (p: HubPlugin) => number | null
   t: Translate
   langKey: LocaleId
@@ -35,7 +35,7 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
   const pkg = installedName(p)
   const isInstalled = pkg !== null
   const update = hasUpdate(p)
-  // 门禁暂缓：更新确实存在但现在装不上，给确切时刻而不是让徽标静默消失
+  // 冷却期未到：更新确实存在但现在装不上，给确切时刻而不是让徽标静默消失
   const pendingUntil = isInstalled && !update ? updatePendingUntil(p) : null
   // 版本号展示：已安装 → 当前已装版本（最能反映用户状态）；未安装 → 目录最新版本
   const versionShown = isInstalled ? installedVersion(p) : p.version

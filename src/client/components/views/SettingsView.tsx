@@ -8,7 +8,7 @@
  *
  * 各分组对应本地服务端实际强制的行为：
  *   更新与源 —— 启动检查更新 / npm 镜像 / HTTP 代理（都接进安装命令链路）
- *   安全与信任 —— 受限的自定义安装（服务端 403 门禁）
+ *   安全与信任 —— 受限的自定义安装（服务端 403 拦截）
  *   诊断 —— 实时连通性探测 + 环境快照
  *   日志 —— 系统日志查看器 + 存放位置
  */
@@ -214,7 +214,7 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
   )
 
   const securityCard = h('div', { className: styles.card },
-    // 安全与信任：命令行安装的开关（仅 NPM 包）—— 服务端按通道门禁 403 拦截
+    // 安全与信任：命令行安装的开关（仅 NPM 包）—— 服务端按通道校验 403 拦截
     //（npm 目标吃 enableNpmInstall）；目录内收录的插件安装不受影响（默认开启）
     h(SettingRow, {
       title: t('settingsEnableNpm'),

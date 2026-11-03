@@ -3,15 +3,15 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 供应链门禁的时间判定（纯函数）：pnpm 会静默回退发布未满门槛的版本，
- * 故发布太新的版本不该提示更新。Hub 自身更新与插件更新共用同一门槛。
+ * 发布冷却期的时间判定（纯函数）：pnpm 会静默回退发布还不满 24 小时的版本，
+ * 故发布太新的版本不该提示更新。Hub 自身更新与插件更新共用同一规则。
  */
 import type { HubUpdateInfo, HubUpdateState, HubUpdateVersion } from '../types.ts'
 
-/** pnpm 供应链门禁：dsh profile 默认 minimumReleaseAge=1440（分钟）；+30 分钟缓冲抵消网络/CDN 边缘时间偏差。 */
+/** pnpm 发布冷却期：dsh profile 默认 minimumReleaseAge=1440（分钟）；+30 分钟缓冲抵消网络/CDN 边缘时间偏差。 */
 export const MIN_RELEASE_AGE_MS = 24 * 60 * 60 * 1000 + 30 * 60 * 1000
 
-/** 发布时间是否仍在门禁窗口内（太新 → 暂缓提示）；无值/解析不出返回 false（不拦真实更新）。 */
+/** 发布时间是否仍在冷却期内（太新 → 暂缓提示）；无值/解析不出返回 false（不拦真实更新）。 */
 export function isReleaseTooFresh(publishedAt: string | null | undefined, now: number): boolean {
   if (typeof publishedAt !== 'string' || publishedAt === '') return false
   const ms = Date.parse(publishedAt)
@@ -61,15 +61,15 @@ export function compareVersions(a: string | null | undefined, b: string | null |
   return 0
 }
 
-/** 「可更新」判定结果：是否提示，以及被供应链门禁拦下时的到期时刻。 */
+/** 「可更新」判定结果：是否提示，以及还没过冷却期时的可重试时刻。 */
 export interface UpdateDecision {
   offered: boolean
-  /** 发布未满门槛 → 可重试时刻（毫秒）；非门禁原因（npm 上没有更高版本）→ null */
+  /** 发布还不满冷却期 → 可重试时刻（毫秒）；非冷却期原因（npm 上没有更高版本）→ null */
   pendingUntil: number | null
 }
 
 /**
- * 是否值得提示「可更新」：npm 上最新可安装版本确实比已装版本新，且已过供应链门禁。
+ * 是否值得提示「可更新」：npm 上最新可安装版本确实比已装版本新，且已过发布冷却期。
  *
  * 更新命令执行的是 `pkg@latest`，所以「目录里标的版本」不是最终能装上的版本：
  * 作者可能只打了 GitHub release 没发 npm —— 此时提示会变成永远点不掉的循环。
@@ -104,8 +104,8 @@ export function isUpdateOffered(
 /**
  * 选出本次真正该提示的更新版本。
  *
- * 只看最新版会漏更新：连续发版时间隔小于供应链门禁时，最新版永远「太新」，
- * 提示被整体跳过。这里把最新版与 recentVersions 一起当候选，取「高于当前版本且已过门禁」
+ * 只看最新版会漏更新：连续发版时间隔小于发布冷却期时，最新版永远「太新」，
+ * 提示被整体跳过。这里把最新版与 recentVersions 一起当候选，取「高于当前版本且已过冷却期」
  * 的最高版本；一个都没有但仍存在更高版本 → pending（暂缓，不谎称已是最新）。
  */
 export function pickHubUpdate(info: HubUpdateInfo, currentVersion: string, now: number): { state: HubUpdateState; target: HubUpdateVersion | null } {

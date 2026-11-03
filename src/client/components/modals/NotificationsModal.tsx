@@ -376,7 +376,7 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       ])
                     }
                     if (kind === 'hostIncompatible') {
-                      // 宿主版本门禁：插件声明的兼容范围不含当前 dsh 版本，安装前就被拒绝。
+                      // 宿主版本要求：插件声明的兼容范围不含当前 dsh 版本，安装前就被拒绝。
                       // 作者能修（把该版本加进兼容清单），故引导到作者仓库；同时说明本地可临时授权
                       const version = /incompatible with dsh\s+([^\s:;,]+)/i.exec(r.message ?? '')?.[1] ?? ''
                       return h('div', null, [

@@ -1,7 +1,7 @@
 /**
  * 单测：Hub 自我更新的数据入口。
  *
- * 接口下发的 `recentVersions` 是「最新版还在 24.5h 供应链门禁内时，回退到更早的已过门槛版本」
+ * 接口下发的 `recentVersions` 是「最新版还在 24.5h 发布冷却期内时，回退到更早的已过冷却期版本」
  * 的唯一依据。`fetchHubUpdate` 归一化时漏传它，#350 的修复就永远不生效（#465）。
  */
 import { test } from 'node:test'
@@ -46,7 +46,7 @@ test('pickHubUpdate: falls back to a matured version when the newest is too fres
   await withFetch(payload, async () => {
     const info = await fetchHubUpdate()
     assert.ok(info)
-    // 复现 #465 的观测时刻：2.2.2 只发了 16.7h（未过门禁），2.2.1 已过
+    // 复现 #465 的观测时刻：2.2.2 只发了 16.7h（未过冷却期），2.2.1 已过
     const picked = pickHubUpdate(info!, '2.1.0', Date.parse('2026-10-27T02:43:00Z'))
     assert.equal(picked.state, 'available')
     assert.equal(picked.target?.version, '2.2.1')

@@ -63,7 +63,7 @@ test('installTargetOf: 目录条目直接用 npm 包名作为安装目标', () =
   assert.equal(installCommandOf(p), 'dsh plugin --profile web add x-pkg')
 })
 
-test('installCommandOf: 钉住门禁版本时命令带版本，目录权威命令保持不变', () => {
+test('installCommandOf: 钉住已过冷却期的版本时命令带版本，目录权威命令保持不变', () => {
   const p = { slug: 'x', source: { repo: 'a/x', npmPackage: 'x-pkg' } } as HubPlugin
   assert.equal(installCommandOf(p), 'dsh plugin add x-pkg')
   assert.equal(installCommandOf(p, false, '1.2.3'), 'dsh plugin add x-pkg@1.2.3')

@@ -28,7 +28,7 @@ export function CatalogList({ plugins, failed, visible, total, t, langPath, relo
   installedName: (p: HubPlugin) => string | null
   installedVersion: (p: HubPlugin) => string | null
   hasUpdate: (p: HubPlugin) => boolean
-  /** 更新被供应链门禁暂缓时的可重试时刻（毫秒）；无则 null */
+  /** 更新暂缓（新版本还没过冷却期）的可重试时刻（毫秒）；无则 null */
   updatePendingUntil: (p: HubPlugin) => number | null
   langKey: LocaleId
   onInstall: (p: HubPlugin, opts?: { update?: boolean }) => void

@@ -231,7 +231,7 @@ export function pnpmPolicyHintParams(message: string): Record<string, string> {
  * （只影响这个插件 → 才引导提 Issue）。各分支判定顺序有依赖，见函数内注释。
  */
 export function classifyFailure(message: string): FailureKind {
-  // 宿主版本门禁：插件声明的兼容范围不含当前 dsh 版本，宿主在安装前直接拒绝。
+  // 宿主版本要求：插件声明的兼容范围不含当前 dsh 版本，宿主在安装前直接拒绝。
   // 必须最先判 —— 这是宿主自己给的结论，不是 pnpm 的安装失败
   if (/installation rejected:.*incompatible with dsh/i.test(message)) return 'hostIncompatible'
   // desktop profile 由桌面应用独占：外部 dsh CLI 无权管理，宿主在安装前直接拒绝。
@@ -386,7 +386,7 @@ export const MAX_CORE_CHARS = 5000
 const MAX_LINE_CHARS = 400
 
 /**
- * 展示用格式化：宿主门禁消息里的 peerDependencies 是压缩成一行的 JSON，
+ * 展示用格式化：宿主兼容性提示里的 peerDependencies 是压缩成一行的 JSON，
  * 直接展示像一团乱码；展开成缩进格式，解析失败则原样返回。
  */
 export function formatFailureMessage(message: string): string {

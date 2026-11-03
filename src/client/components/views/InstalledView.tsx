@@ -122,7 +122,7 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
         item.hasUpdate
           ? h('span', { className: styles.updateBadge, title: t('updateAvailableHint') }, t('updateAvailable'))
           : item.pendingUntil != null
-            // 门禁暂缓：更新存在但还装不上，给确切时刻，避免看起来「已是最新」
+            // 冷却期未到：更新存在但还装不上，给确切时刻，避免看起来「已是最新」
             ? h('span', { className: styles.updateBadge, title: t('updatePendingHint') }, t('updatePending', { time: clockTime(item.pendingUntil) }))
             : null,
       ),

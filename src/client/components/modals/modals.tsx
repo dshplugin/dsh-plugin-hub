@@ -90,7 +90,7 @@ export interface InstallModalProps {
   restarting: boolean
   /** 已安装插件的覆盖更新（走同一条 add 命令原位重装，文案区分安装/更新） */
   update: boolean
-  /** 已过供应链门禁的安装版本：命令条带上它，手抄执行与一键安装结果一致（未查到时不传） */
+  /** 已过发布冷却期的安装版本：命令条带上它，手抄执行与一键安装结果一致（未查到时不传） */
   pinVersion?: string
   /** 仅命令行插件（webInstallable=false）：不提供一键安装，只展示命令供复制到 dsh 终端 */
   cliOnly: boolean
@@ -367,7 +367,7 @@ export function ErrorModal({ message, repo, action, command, attempts, t, env, o
   // 复制完整错误：实际执行/尝试过的安装命令（如有）+ 完整错误正文。
   // 只复制 message 会丢上下文 —— 命令行安装输入的目标、执行过的命令都在 command/attempts 里，
   // 光拷一句「unsupported install target」出去没人看得懂
-  // 展示与复制都用展开后的文本：宿主门禁消息里的 peerDependencies 是压缩 JSON，
+  // 展示与复制都用展开后的文本：宿主兼容性提示里的 peerDependencies 是压缩 JSON，
   // 原样展示会挤成一整行；格式化只影响可读性，不改变归类与上报逻辑
   const displayMessage = formatFailureMessage(message)
   const copyText = [
@@ -511,7 +511,7 @@ export function ErrorModal({ message, repo, action, command, attempts, t, env, o
                 }, t('failIssueBig')) : null,
               ])
               : failureKind === 'hostIncompatible'
-              // 宿主版本门禁：插件声明的兼容范围不含当前 dsh 版本，安装前就被宿主拒绝。
+              // 宿主版本要求：插件声明的兼容范围不含当前 dsh 版本，安装前就被宿主拒绝。
               // 这是作者能修的（把该版本加进兼容清单），故直接引导到作者仓库；同时说明本地可临时授权
               ? h('div', null, [
                 (() => {

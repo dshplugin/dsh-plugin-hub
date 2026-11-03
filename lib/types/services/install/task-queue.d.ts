@@ -39,7 +39,7 @@ export declare function cancelTask(id: number): boolean;
  */
 export declare function desktopCliBootstrap(entry: string): string | null;
 /**
- * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过供应链门禁的版本），
+ * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过发布冷却期的版本），
  * 其次 npm 的 add/update 都显式 `@latest`；git 源、全局安装、已带版本/tag 的 spec 保持原样。
  */
 export declare function npmInstallTargetOf(target: string, opts: {
@@ -74,8 +74,8 @@ export declare function startPluginMutation(options: {
     installChannel?: 'npm';
     /** npm 源候选（首选在前）：传输层失败时按顺序换源重试，空/单个表示不降级 */
     registries?: string[];
-    /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：Hub 自我更新提示的是已过供应链门禁的版本，
-     *  必须钉住安装，不能再用 @latest 被带回门禁内的最新版 */
+    /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：Hub 自我更新提示的是已过发布冷却期的版本，
+     *  必须钉住安装，不能再用 @latest 被带回冷却期内的最新版 */
     installSpec?: string;
 }): InstallTask;
 /**
@@ -102,7 +102,7 @@ export declare function verifyInstalledEntry(profile: string, target: string): {
  */
 export declare function hostSpawnMarker(invocation: Invocation, error: unknown): string | null;
 /**
- * 执行插件变更，带一条恢复路径：当 `add` 因 pnpm 的 allowBuilds 门禁拦下构建脚本而失败 ——
+ * 执行插件变更，带一条恢复路径：当 `add` 因 pnpm 的 allowBuilds 限制拦下构建脚本而失败 ——
  * 或是 git 源包自己的 `prepare`（`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`，key 取自打印的
  * key@url 提示），或是某依赖的原生构建（`ERR_PNPM_IGNORED_BUILDS`，key = 列出的 name@version）——
  * 就把确切的 key 写进 profile 的 pnpm-workspace.yaml 并重试一次。

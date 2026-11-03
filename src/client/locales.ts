@@ -491,10 +491,10 @@ export const zh = {
   update: '可更新',
   updateAvailable: '有更新',
   updateAvailableHint: '检测到更新：有版本号的仓库比对版本号，无版本号的仓库比对仓库最近更新时间',
-  // 门禁暂缓：新版本发布未满 24 小时，此时安装会被 pnpm 静默回退（或直接拒绝），
+  // 冷却期未到：新版本发布未满 24 小时，此时安装会被 pnpm 静默回退（或直接拒绝），
   // 给出确切可重试时刻，而不是让徽标静默消失、让用户以为已经是最新
   updatePending: '暂缓到 {time} 后可更新',
-  updatePendingHint: '新版本发布未满 24 小时，pnpm 供应链门禁会拦下；到时间后再更新即可',
+  updatePendingHint: '新版本发布还不满 24 小时，pnpm 暂时不让安装；到时间后再更新即可',
   hubUpdateHint: '检测到 DSH Plugin Hub 新版本，点击查看更新内容并更新',
   hubUpdateTitle: 'DSH Plugin Hub 有新版本',
   hubUpdateDesc: '点击下方按钮即可更新，完成后需重启宿主生效。',
@@ -508,7 +508,7 @@ export const zh = {
   hubVersionStateAvailable: '可更新',
   hubVersionStatePending: '暂缓提示',
   close: '关闭',
-  // 暂缓提示：远端确有新版本，但发布未满 24 小时（pnpm 供应链安全门槛），与「已是最新」严格区分
+  // 暂缓提示：远端确有新版本，但发布未满 24 小时（pnpm 发布冷却期），与「已是最新」严格区分
   hubPendingDesc: '最新版已发布，但发布尚未满 24 小时：此时更新会被 pnpm 静默回退到旧版本，因此暂不提示。稍后这里会自动出现更新入口。',
   // 头部「关注我们」弹窗：平台介绍（内容由 Worker /about Markdown 推送，非写死）
   followUs: '关注我们',
@@ -1017,7 +1017,7 @@ export const en = {
   hubVersionStateAvailable: 'Update available',
   hubVersionStatePending: 'Held for 24h',
   close: 'Close',
-  // 暂缓提示：确有新版本，但仍在 pnpm 24h 供应链门禁窗口内
+  // 暂缓提示：确有新版本，但仍在 pnpm 24h 发布冷却期内
   hubPendingDesc: 'The latest version has been released, but it is still within the 24-hour window where pnpm silently falls back to the older version, so the update is not offered yet. The update entry will appear here shortly.',
   // 头部「关注我们」弹窗：平台介绍（内容由 Worker /about 以 Markdown 推送）
   followUs: 'Follow us',

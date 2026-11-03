@@ -90,7 +90,7 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
               sendJson(response, 400, { error: 'unsupported install target' })
               return
             }
-            // 通道门禁与安装通道同构：全局安装本质是 npm 操作，吃「启用 NPM 安装」开关
+            // 通道校验与安装通道同构：全局安装本质是 npm 操作，吃「启用 NPM 安装」开关
             if (source !== 'catalog' && !settings.enableNpmInstall) {
               sendJson(response, 403, { error: 'npm installs are disabled by the security settings' })
               return
@@ -123,8 +123,8 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
             return
           }
           const target = rawRepo
-          // 钉住精确版本（Hub 自我更新）：最新版可能仍在 pnpm 供应链门禁内，
-          // 客户端提示的是「已过门禁」的版本，服务端必须按该版本安装而不是 @latest。
+          // 钉住精确版本（Hub 自我更新）：最新版可能仍在 pnpm 发布冷却期内，
+          // 客户端提示的是「已过冷却期」的版本，服务端必须按该版本安装而不是 @latest。
           const pinVersion = typeof (body as { version?: unknown }).version === 'string'
             ? (body as { version: string }).version.trim()
             : ''
@@ -182,8 +182,8 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
             }
             ordered = [chosen, ...registries.filter((r) => r !== chosen)]
           }
-          // 新安装钉住「已过供应链门禁」的最高稳定版：pnpm 对发布未满 24h 的版本会静默回退，
-          // 钉住后装到的就是预期版本。更新已有目标时客户端已按门禁筛选，继续走 @latest。
+          // 新安装钉住「已过发布冷却期」的最高稳定版：pnpm 对发布还不满 24 小时的版本会静默回退，
+          // 钉住后装到的就是预期版本。更新已有目标时客户端已按冷却期筛选，继续走 @latest。
           let installSpec = pinVersion !== '' ? `${target}@${pinVersion}` : undefined
           if (installSpec === undefined && already === null) {
             // 解析源与安装首选源一致，钉住的版本一定存在于真正会用的那个源；解析失败则不钉，不阻断安装。

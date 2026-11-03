@@ -3,7 +3,7 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 供应链门禁判定（src/client/logic/release-age.ts）单测：注入 now，不依赖真实时间。
+ * 发布冷却期判定（src/client/logic/release-age.ts）单测：注入 now，不依赖真实时间。
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
@@ -11,13 +11,13 @@ import { MIN_RELEASE_AGE_MS, compareVersions, isReleaseTooFresh, pickHubUpdate }
 
 const NOW = Date.parse('2026-10-16T12:00:00.000Z')
 
-test('isReleaseTooFresh: 发布未满门槛窗口视为太新', () => {
-  // 刚发布（0 分钟）与门槛内（门槛 - 1ms）都判太新
+test('isReleaseTooFresh: 发布还不满冷却期视为太新', () => {
+  // 刚发布（0 分钟）与冷却期内（冷却期 - 1ms）都判太新
   assert.equal(isReleaseTooFresh(new Date(NOW).toISOString(), NOW), true)
   assert.equal(isReleaseTooFresh(new Date(NOW - (MIN_RELEASE_AGE_MS - 1)).toISOString(), NOW), true)
 })
 
-test('isReleaseTooFresh: 门槛窗口外（>= 门槛）不再是太新', () => {
+test('isReleaseTooFresh: 冷却期外（>= 冷却期）不再是太新', () => {
   assert.equal(isReleaseTooFresh(new Date(NOW - MIN_RELEASE_AGE_MS).toISOString(), NOW), false)
   assert.equal(isReleaseTooFresh(new Date(NOW - 48 * 60 * 60 * 1000).toISOString(), NOW), false)
 })
@@ -38,8 +38,8 @@ test('compareVersions: 数字段逐段比较，不是字典序', () => {
   assert.ok(compareVersions('2.1', '2.0.9') > 0)
 })
 
-test('pickHubUpdate: 连续快速发版时回退到「已过门禁」的更早版本', () => {
-  // 现场：本机 2.0.4；2.0.5 已发布 30h（过门禁）；2.0.6 刚发布 5h（门禁内）
+test('pickHubUpdate: 连续快速发版时回退到「已过冷却期」的更早版本', () => {
+  // 现场：本机 2.0.4；2.0.5 已发布 30h（过冷却期）；2.0.6 刚发布 5h（冷却期内）
   const info = {
     version: '2.0.6',
     publishedAt: hoursAgo(5),
@@ -55,7 +55,7 @@ test('pickHubUpdate: 连续快速发版时回退到「已过门禁」的更早�
   assert.equal(result.target?.notes, 'older notes')
 })
 
-test('pickHubUpdate: 所有更高版本都还在门禁内 → pending，不谎称已最新', () => {
+test('pickHubUpdate: 所有更高版本都还在冷却期内 → pending，不谎称已最新', () => {
   const info = {
     version: '2.0.6',
     publishedAt: hoursAgo(5),
@@ -74,14 +74,14 @@ test('pickHubUpdate: 本机已是最新 / 只有更低版本 → latest', () => 
 })
 
 test('pickHubUpdate: 老接口没有 recentVersions 时保持原行为', () => {
-  // 最新版已过门禁 → available
+  // 最新版已过冷却期 → available
   assert.equal(pickHubUpdate({ version: '2.0.6', publishedAt: hoursAgo(30) }, '2.0.4', NOW).state, 'available')
-  // 最新版还在门禁内 → pending
+  // 最新版还在冷却期内 → pending
   assert.equal(pickHubUpdate({ version: '2.0.6', publishedAt: hoursAgo(1) }, '2.0.4', NOW).state, 'pending')
 })
 
 test('pickHubUpdate: recentVersions 里高于当前版本但低于 latest 的版本也能选为提示目标', () => {
-  // latest 太新；2.0.5 已过门禁；2.0.4 是当前版本（不能被选中）
+  // latest 太新；2.0.5 已过冷却期；2.0.4 是当前版本（不能被选中）
   const info = {
     version: '2.0.6',
     publishedAt: hoursAgo(2),

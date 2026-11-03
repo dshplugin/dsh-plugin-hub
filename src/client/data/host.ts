@@ -48,11 +48,11 @@ export async function fetchInstalled(): Promise<HostInstalled | null> {
 export interface NpmReleaseInfo {
   version: string
   publishedAt: string
-  /** 已过 pnpm 供应链门禁的最高稳定版：安装/展示命令钉住它；无可钉版本时为 null。 */
+  /** 已过 pnpm 发布冷却期的最高稳定版：安装/展示命令钉住它；无可钉版本时为 null。 */
   installable?: NpmReleaseInfo | null
 }
 
-/** 批量查询已安装插件 npm 包的最新版本发布时间（供应链门禁用）；失败返回 null（调用方按原逻辑照常提示）。 */
+/** 批量查询已安装插件 npm 包的最新版本发布时间（发布冷却期用）；失败返回 null（调用方按原逻辑照常提示）。 */
 export async function fetchNpmReleaseAge(packages: string[]): Promise<Record<string, NpmReleaseInfo | null> | null> {
   if (packages.length === 0) return {}
   try {

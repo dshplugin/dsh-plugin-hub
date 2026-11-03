@@ -455,8 +455,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     source: 'catalog' | 'custom'
     /** 更新已安装目标（放行 add 覆盖重装） */
     update?: boolean
-    /** 钉住精确版本（Hub 自我更新用）：最新版可能仍在 pnpm 供应链门禁内，
-     *  必须安装「已过门禁」的那个版本，不能再用 @latest。 */
+    /** 钉住精确版本（Hub 自我更新用）：最新版可能仍在 pnpm 发布冷却期内，
+     *  必须安装「已过冷却期」的那个版本，不能再用 @latest。 */
     pinVersion?: string
     /** 全局 npm 安装包列表（`npm install -g <pkgs>`）：非空时服务端执行全局安装，不进任何 profile */
     globalNpm?: string[]

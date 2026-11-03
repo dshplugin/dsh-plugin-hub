@@ -3,9 +3,9 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * npm 包最新版本的发布时间查询：为「已安装插件是否有更新」提供供应链门禁依据。
+ * npm 包最新版本的发布时间查询：为「已安装插件是否有更新」提供发布冷却期依据。
  * pnpm 对发布不满 24h（dsh profile minimumReleaseAge=1440）的版本会静默回退到旧版本，
- * 因此发布未满门槛的版本不该提示更新（否则用户点了也装不上）。
+ * 因此发布还不满 24 小时的版本不该提示更新（否则用户点了也装不上）。
  * 结果按包名内存缓存，同一次会话内不重复请求；失败/超时/响应过大一律返回 null，绝不抛错、绝不阻塞。
  */
 import { get as httpsGet } from 'node:https'
@@ -17,9 +17,9 @@ export interface NpmRelease {
   publishedAt: string
 }
 
-/** 最新版 + 可钉住的安装版本：安装钉住后者，pnpm 才不会被门禁回退到旧版。 */
+/** 最新版 + 可钉住的安装版本：安装钉住后者，pnpm 才不会回退到旧版本。 */
 export interface NpmReleaseWithInstallable extends NpmRelease {
-  /** 已过供应链门禁的最高稳定版；时间表缺失或没有满足项时为 null（调用方退回不钉版本）。 */
+  /** 已过发布冷却期的最高稳定版；时间表缺失或没有满足项时为 null（调用方退回不钉版本）。 */
   installable: NpmRelease | null
 }
 
@@ -36,7 +36,7 @@ export const DEFAULT_NPM_REGISTRY = 'https://registry.npmjs.org'
 
 /** 会话内缓存（源 + 包名 → 结果）：只存成功结果，一次网络抖动不会把判断永久粘住。
  *  必须带过期时间 —— 插件中心可能连续开着几小时，作者发了新版本后不能一直沿用旧结果；
- *  也必须把源算进键 —— 同一个包在官方源与镜像上的 latest / 发布时间不同，混用会算错门禁。 */
+ *  也必须把源算进键 —— 同一个包在官方源与镜像上的 latest / 发布时间不同，混用会算错冷却期。 */
 const CACHE_TTL_MS = 10 * 60 * 1000
 const releaseCache = new Map<string, { at: number; release: NpmReleaseWithInstallable }>()
 
@@ -54,7 +54,7 @@ export function latestReleaseOf(packument: unknown): NpmRelease | null {
 }
 
 /**
- * 已过供应链门禁的最高稳定版本：安装钉住它，pnpm 不会因门禁回退到旧版。
+ * 已过发布冷却期的最高稳定版本：安装钉住它，pnpm 不会回退到旧版本。
  * 只看纯 x.y.z（预发布版不参与，避免把用户带到不兼容预览版）；时间表缺失或无满足项返回 null。
  */
 export function installableReleaseOf(packument: unknown, now = Date.now()): NpmRelease | null {

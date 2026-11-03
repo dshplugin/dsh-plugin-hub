@@ -89,7 +89,7 @@ test('isUpdateOffered: only offer an update npm can actually install', () => {
   const fresh = new Date(now - 60_000).toISOString()
   // 目录标到 1.2.0，但 npm 上只有 1.1.0（作者只打了 release 没发 npm）→ 不提示，否则永远点不掉
   assert.equal(isUpdateOffered({ version: '1.1.0', publishedAt: matured }, '1.1.0', now), false)
-  // npm 上确实更高且已过门禁 → 提示
+  // npm 上确实更高且已过冷却期 → 提示
   assert.equal(isUpdateOffered({ version: '1.2.0', publishedAt: matured }, '1.1.0', now), true)
   // 发布不满 24h → 暂缓（pnpm 会静默回退，点了也装不上）
   assert.equal(isUpdateOffered({ version: '1.2.0', publishedAt: fresh }, '1.1.0', now), false)
@@ -98,16 +98,16 @@ test('isUpdateOffered: only offer an update npm can actually install', () => {
   assert.equal(isUpdateOffered({ version: '1.2.0', publishedAt: matured }, null, now), true)
 })
 
-test('updateDecision: 只有门禁命中才给可重试时刻', () => {
+test('updateDecision: 只有冷却期命中才给可重试时刻', () => {
   const now = Date.parse('2026-10-25T00:00:00Z')
   const fresh = new Date(now - 60_000).toISOString()
   const matured = new Date(now - MIN_RELEASE_AGE_MS - 60_000).toISOString()
-  // 发布不满门禁：不提示，但给出确切可重试时刻（前端据此显示「暂缓到 xx:xx」）
+  // 发布不满冷却期：不提示，但给出确切可重试时刻（前端据此显示「暂缓到 xx:xx」）
   assert.deepEqual(updateDecision({ version: '1.2.0', publishedAt: fresh }, '1.1.0', now), {
     offered: false,
     pendingUntil: Date.parse(fresh) + MIN_RELEASE_AGE_MS,
   })
-  // 已过门禁且确实更高：正常提示
+  // 已过冷却期且确实更高：正常提示
   assert.deepEqual(updateDecision({ version: '1.2.0', publishedAt: matured }, '1.1.0', now), { offered: true, pendingUntil: null })
   // npm 上没有更高版本（作者只打了 release）：拦下但没有可等待的时刻
   assert.deepEqual(updateDecision({ version: '1.1.0', publishedAt: matured }, '1.1.0', now), { offered: false, pendingUntil: null })

@@ -45,7 +45,7 @@ test('githubRepoOf: recognizes canonical and legacy GitHub targets', () => {
 })
 
 test('npmInstallTargetOf: 钉住版本优先，其次 @latest，git/全局安装原样', () => {
-  // Hub 自我更新：提示的是已过供应链门禁的版本，必须钉住安装
+  // Hub 自我更新：提示的是已过发布冷却期的版本，必须钉住安装
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: true, global: false, pinned: 'dsh-plugin@2.0.5' }), 'dsh-plugin@2.0.5')
   // 普通更新没钉版本 → @latest（pnpm 对已存在依赖才真正升级）
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: true, global: false }), 'dsh-plugin@latest')

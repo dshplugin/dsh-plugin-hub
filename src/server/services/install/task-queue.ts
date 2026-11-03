@@ -220,7 +220,7 @@ export function desktopCliBootstrap(entry: string): string | null {
 }
 
 /**
- * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过供应链门禁的版本），
+ * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过发布冷却期的版本），
  * 其次 npm 的 add/update 都显式 `@latest`；git 源、全局安装、已带版本/tag 的 spec 保持原样。
  */
 export function npmInstallTargetOf(target: string, opts: { update: boolean; global: boolean; pinned?: string; add?: boolean }): string {
@@ -292,8 +292,8 @@ export function startPluginMutation(options: {
   installChannel?: 'npm'
   /** npm 源候选（首选在前）：传输层失败时按顺序换源重试，空/单个表示不降级 */
   registries?: string[]
-  /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：Hub 自我更新提示的是已过供应链门禁的版本，
-   *  必须钉住安装，不能再用 @latest 被带回门禁内的最新版 */
+  /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：Hub 自我更新提示的是已过发布冷却期的版本，
+   *  必须钉住安装，不能再用 @latest 被带回冷却期内的最新版 */
   installSpec?: string
 }): InstallTask {
   // 卸载入队时先快照「该包是否带客户端 UI」：卸载完成后包已从磁盘删除，读不到 package.json，
@@ -442,7 +442,7 @@ function spawnMutation(options: {
   // update 动作同样执行 `add <target>@latest`，CLI 动词透传 add，不与官方 update 动词分叉。
   const isUpdate = action === 'update' || updateNpm === true
   const cliAction = action === 'update' ? 'add' : action
-  // 钉住版本优先于 @latest：提示的是「已过门禁」的版本，装 latest 会被 pnpm 拒绝
+  // 钉住版本优先于 @latest：提示的是「已过冷却期」的版本，装 latest 会被 pnpm 拒绝
   const npmUpdateTarget = npmInstallTargetOf(target, { update: isUpdate, global: isGlobalNpm, pinned: installSpec, add: cliAction === 'add' })
   const args = isGlobalNpm
     ? ['install', '-g', ...(globalNpm ?? [])]
@@ -873,7 +873,7 @@ export function hostSpawnMarker(invocation: Invocation, error: unknown): string 
 }
 
 /**
- * 执行插件变更，带一条恢复路径：当 `add` 因 pnpm 的 allowBuilds 门禁拦下构建脚本而失败 ——
+ * 执行插件变更，带一条恢复路径：当 `add` 因 pnpm 的 allowBuilds 限制拦下构建脚本而失败 ——
  * 或是 git 源包自己的 `prepare`（`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`，key 取自打印的
  * key@url 提示），或是某依赖的原生构建（`ERR_PNPM_IGNORED_BUILDS`，key = 列出的 name@version）——
  * 就把确切的 key 写进 profile 的 pnpm-workspace.yaml 并重试一次。
