@@ -29,12 +29,15 @@ export function installTargetOf(p: HubPlugin): string {
 
 /** 展示用安装命令（复制/弹窗）：目录下发的权威命令优先（CLI-only 插件如 dsh-tui
  *  需专属 profile（--profile dsh-tui），无法从 npm 包名推断，必须用官方命令）；
- *  常规插件无目录命令时用 npm 包名回退生成。 */
-export function installCommandOf(p: HubPlugin, withProfile = false): string {
+ *  常规插件无目录命令时用 npm 包名回退生成。
+ *  version 为已过供应链门禁的版本：带上它，手抄命令与原位安装的执行结果一致，
+ *  不会因 pnpm 门禁静默回退到很旧的版本。 */
+export function installCommandOf(p: HubPlugin, withProfile = false, version?: string): string {
   const cmd = p.install?.command
   if (cmd) return cmd
   const prefix = `dsh plugin${withProfile ? ' --profile web' : ''} add `
-  return `${prefix}${installTargetOf(p)}`
+  const target = installTargetOf(p)
+  return `${prefix}${version === undefined || version === '' ? target : `${target}@${version}`}`
 }
 
 /** 把任务/安装目标归一化为 owner/repo 展示身份。 */

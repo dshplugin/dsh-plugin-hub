@@ -90,6 +90,8 @@ export interface InstallModalProps {
   restarting: boolean
   /** 已安装插件的覆盖更新（走同一条 add 命令原位重装，文案区分安装/更新） */
   update: boolean
+  /** 已过供应链门禁的安装版本：命令条带上它，手抄执行与一键安装结果一致（未查到时不传） */
+  pinVersion?: string
   /** 仅命令行插件（webInstallable=false）：不提供一键安装，只展示命令供复制到 dsh 终端 */
   cliOnly: boolean
   /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
@@ -112,7 +114,7 @@ export interface InstallModalProps {
  * 目录插件与命令行安装（customTarget 模式）共用同一套确认/进度/结果流程。
  */
 export function InstallModal(props: InstallModalProps) {
-  const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, cliOnly, needsRestart, needsReload, bundleDeselected, onClose, onCopy, onInstall, onRestart } = props
+  const { plugin, customTarget, globalNpm, done, task, t, langPath, restarting, submitting, update, pinVersion, cliOnly, needsRestart, needsReload, bundleDeselected, onClose, onCopy, onInstall, onRestart } = props
   const busy = submitting || (task !== null && (task.status === 'pending' || task.status === 'running'))
   // 进行中标题带上插件名（中文「XX 插件安装中」；英文状态词在前更自然），并用状态色区分；
   // 命令行安装无插件元数据 → 直接用输入的目标展示；全局 npm 安装 → 包列表空格拼接
@@ -191,7 +193,7 @@ export function InstallModal(props: InstallModalProps) {
             h('span', { className: styles.modalCmdText },
               globalNpm !== undefined && globalNpm.length > 0
                 ? `npm install -g ${globalNpm.join(' ')}`
-                : customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin!)),
+                : customTarget ? `pnpm add ${customTarget}` : installCommandOf(plugin!, false, pinVersion)),
             h('span', { className: styles.modalCmdCopy }, h(CopyIcon), t('copyCmdLabel')),
           ),
           // 全局 npm 安装说明：装的是系统级 CLI 工具，不进插件列表、无需重启宿主

@@ -17,6 +17,15 @@ export interface NpmRelease {
   publishedAt: string
 }
 
+/** 最新版 + 可钉住的安装版本：安装时钉住后者，pnpm 才不会把「发布未满门禁」的最新版回退成很旧的版本。 */
+export interface NpmReleaseWithInstallable extends NpmRelease {
+  /** 已过供应链门禁的最高稳定版；时间表缺失或没有满足项时为 null（调用方退回不钉版本）。 */
+  installable: NpmRelease | null
+}
+
+/** pnpm profile 默认 minimumReleaseAge=1440 分钟；+30 分钟缓冲与客户端 release-age 判定同口径。 */
+export const MIN_RELEASE_AGE_MS = 24 * 60 * 60 * 1000 + 30 * 60 * 1000
+
 /** 请求体包名数量上限：只为已安装插件按需查询，几十个足矣，封顶防滥用。 */
 export const MAX_RELEASE_AGE_PACKAGES = 50
 /** 单包查询超时（ms）：慢网络下失败即返回 null，不拖住整个响应。 */
@@ -29,7 +38,7 @@ export const DEFAULT_NPM_REGISTRY = 'https://registry.npmjs.org'
  *  必须带过期时间 —— 插件中心可能连续开着几小时，作者发了新版本后不能一直沿用旧结果；
  *  也必须把源算进键 —— 同一个包在官方源与镜像上的 latest / 发布时间不同，混用会算错门禁。 */
 const CACHE_TTL_MS = 10 * 60 * 1000
-const releaseCache = new Map<string, { at: number; release: NpmRelease }>()
+const releaseCache = new Map<string, { at: number; release: NpmReleaseWithInstallable }>()
 
 /** 从完整 packument 取 dist-tags.latest 对应版本及其发布时间；缺任一字段返回 null。 */
 export function latestReleaseOf(packument: unknown): NpmRelease | null {
@@ -42,6 +51,35 @@ export function latestReleaseOf(packument: unknown): NpmRelease | null {
   const publishedAt = time !== null && typeof time === 'object' ? (time as Record<string, unknown>)[version] : undefined
   if (typeof publishedAt !== 'string' || publishedAt === '') return null
   return { version, publishedAt }
+}
+
+/**
+ * 已过供应链门禁的最高稳定版本：安装时钉住它，pnpm 就不会把最新版静默回退成很旧的版本。
+ * 只看纯 x.y.z（预发布版不参与，避免把用户带到不兼容预览版）；时间表缺失或无满足项返回 null。
+ */
+export function installableReleaseOf(packument: unknown, now = Date.now()): NpmRelease | null {
+  if (packument === null || typeof packument !== 'object') return null
+  const time = (packument as { time?: unknown }).time
+  if (time === null || typeof time !== 'object') return null
+  let best: NpmRelease | null = null
+  for (const [version, published] of Object.entries(time as Record<string, unknown>)) {
+    if (!/^\d+\.\d+\.\d+$/.test(version) || typeof published !== 'string') continue
+    const at = Date.parse(published)
+    if (Number.isNaN(at) || now - at < MIN_RELEASE_AGE_MS) continue
+    if (best === null || compareVersion(version, best.version) > 0) best = { version, publishedAt: published }
+  }
+  return best
+}
+
+/** 纯数字段版本比较（installableReleaseOf 只在 x.y.z 里用）。 */
+function compareVersion(a: string, b: string): number {
+  const pa = a.split('.')
+  const pb = b.split('.')
+  for (let i = 0; i < 3; i++) {
+    const d = Number.parseInt(pa[i] ?? '0', 10) - Number.parseInt(pb[i] ?? '0', 10)
+    if (d !== 0) return d
+  }
+  return 0
 }
 
 /** 请求体 → 去重后的合法包名列表；非数组 / 超量 / 含非法包名一律 null（拒绝非法输入）。 */
@@ -90,13 +128,13 @@ async function fetchPackument(url: string, proxy: string, timeoutMs: number): Pr
   return getJson(url, timeoutMs)
 }
 
-/** 查询一个包的最新版本与发布时间（成功结果按源缓存 10 分钟）；registry 为空回退官方源，失败返回 null。 */
+/** 查询一个包的最新版本、发布时间与可钉住的安装版本（成功结果按源缓存 10 分钟）；registry 为空回退官方源，失败返回 null。 */
 export async function lookupReleaseAge(
   packageName: string,
   registry: string,
   proxy: string,
   timeoutMs = RELEASE_AGE_TIMEOUT_MS,
-): Promise<NpmRelease | null> {
+): Promise<NpmReleaseWithInstallable | null> {
   const base = registry.replace(/\/+$/, '') || DEFAULT_NPM_REGISTRY
   const key = `${base}\n${packageName}`
   const cached = releaseCache.get(key)
@@ -105,7 +143,9 @@ export async function lookupReleaseAge(
   if (body === null) return null
   let parsed: unknown
   try { parsed = JSON.parse(body) } catch { return null }
-  const release = latestReleaseOf(parsed)
-  if (release !== null) releaseCache.set(key, { at: Date.now(), release })
+  const latest = latestReleaseOf(parsed)
+  if (latest === null) return null
+  const release: NpmReleaseWithInstallable = { ...latest, installable: installableReleaseOf(parsed) }
+  releaseCache.set(key, { at: Date.now(), release })
   return release
 }

@@ -562,7 +562,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       desc: p.description,
       version: p.version,
       updatedAt: p.dates?.repoUpdatedAt,
-      command: installCommandOf(p, true),
+      command: installCommandOf(p, true, opts?.pinVersion),
       source: 'catalog',
       update: opts?.update,
       pinVersion: opts?.pinVersion,

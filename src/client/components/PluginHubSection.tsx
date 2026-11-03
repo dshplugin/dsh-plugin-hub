@@ -11,10 +11,10 @@ import type { MouseEvent } from 'react'
 import styles from '../styles/Header.module.css'
 import modalStyles from '../styles/Modal.module.css'
 import type { EnvInfo, HubPlugin, InstallChannel, SectionProps, ToastState } from '../types.ts'
-import { installCommandOf, repoFromInstallTarget } from '../logic/install-command.ts'
+import { installCommandOf, installTargetOf, repoFromInstallTarget } from '../logic/install-command.ts'
 import { PLUGIN_VERSION } from '../logic/constants.ts'
 import { ensurePluginCss } from '../logic/ensure-plugin-css.ts'
-import { getEnv, revealInstallFolder } from '../data/host.ts'
+import { fetchNpmReleaseAge, getEnv, revealInstallFolder } from '../data/host.ts'
 import { useCatalog } from '../hooks/useCatalog.ts'
 import { useLanguage } from '../hooks/useLanguage.ts'
 import { useSettings } from '../hooks/useSettings.ts'
@@ -76,9 +76,11 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
   const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
-  /** Hub 自我更新指定的精确版本：连续发版时提示的是「已过供应链门禁」的旧一版，
-   *  安装必须钉在该版本上，否则又会被 @latest 带回门禁内的最新版。 */
+  /** 安装要钉住的精确版本：Hub 连续发版时提示的旧一版、以及新安装的「已过供应链门禁」版本，
+   *  都必须钉住，否则 @latest 会被 pnpm 门禁带回门禁内的版本或静默回退到很旧的版本。 */
   const [confirmPinVersion, setConfirmPinVersion] = useState<string | null>(null)
+  /** 门禁版本查询的在途序号：只采用最后一次弹窗的查询结果，避免切换插件后旧结果覆盖 */
+  const installPinSeq = useRef(0)
   /** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名）——
    *  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
   const [confirmCustomTarget, setConfirmCustomTarget] = useState<string | null>(null)
@@ -321,15 +323,30 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   }
 
   /** 弹窗动作一：复制安装命令到剪贴板，引导去终端粘贴执行（npm 安装显示包名命令）。 */
-  const copyCommand = async (p: HubPlugin) => {
+  const copyCommand = async (p: HubPlugin, version?: string) => {
     const repo = p.source?.repo ?? ''
-    const ok = await doCopy(installCommandOf(p))
+    const ok = await doCopy(installCommandOf(p, false, version))
     if (ok) {
       setCopied(repo)
       setToast({ id: Date.now(), kind: 'copied' })
       window.setTimeout(() => setCopied((cur) => (cur === repo ? null : cur)), 1600)
     }
     setConfirmPlugin(null)
+  }
+
+  /** 新安装先查「已过 pnpm 供应链门禁」的版本：命令条与执行都钉住它，
+   *  否则 pnpm 会把发布未满 24h 的最新版静默回退成很旧的版本。查不到则不钉，由服务端兜底解析。 */
+  const resolveInstallPin = (p: HubPlugin) => {
+    // 目录下发了官方安装命令的条目（CLI-only / 人工干预）只展示该命令，追加版本会改坏它
+    if (p.install?.command !== undefined && p.install.command !== '') return
+    const pkg = installTargetOf(p)
+    if (!pkg) return
+    const seq = ++installPinSeq.current
+    void fetchNpmReleaseAge([pkg]).then((res) => {
+      if (installPinSeq.current !== seq) return
+      const version = res?.[pkg]?.installable?.version
+      if (version !== undefined && version !== '') setConfirmPinVersion(version)
+    })
   }
 
   /** 卸载弹窗动作：复制卸载命令，万一直接卸载失败可去终端手动执行。
@@ -451,12 +468,17 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               ? t('pluginsTotal', { n: count })
               : t('filterResults', { n: count }),
           onInstall: (p, opts) => {
+            const update = opts?.update ?? false
             setInstallDone(false)
-            setConfirmIsUpdate(opts?.update ?? false)
+            setConfirmIsUpdate(update)
             setConfirmPinVersion(null)
+            // 本次弹窗重新开始：作废上一次仍在途的门禁版本查询
+            ++installPinSeq.current
             // 与卸载一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务而禁用安装按钮
             queue.clearModalTask()
             setConfirmPlugin(p)
+            // 更新走 @latest 语义（客户端已按门禁筛选），只有新安装需要钉住门禁内可用的版本
+            if (!update) resolveInstallPin(p)
           },
           onUninstall: (p) => {
             setUninstallDone(false)
@@ -489,6 +511,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               setInstallDone(false)
               setConfirmIsUpdate(true)
               setConfirmPinVersion(null)
+              // 更新不钉版本：作废可能仍在途的新安装门禁查询
+              ++installPinSeq.current
               queue.clearModalTask()
               setConfirmPlugin(item.plugin)
             },
@@ -567,6 +591,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
           setConfirmIsUpdate(true)
           // 钉住本次提示的版本：最新版可能仍在门禁内，@latest 会被 pnpm 拒绝
           setConfirmPinVersion(catalog.hubUpdateTarget?.version ?? null)
+          // 作废可能仍在途的新安装门禁查询，避免它覆盖本次钉住的版本
+          ++installPinSeq.current
           queue.clearModalTask()
           setConfirmPlugin(hubEntry)
         }
@@ -668,6 +694,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       langPath,
       restarting,
       update: confirmIsUpdate,
+      pinVersion: confirmPinVersion ?? undefined,
       // 仅命令行插件（webInstallable=false / 人工干预 manualInstall）：弹窗只展示命令供复制，不提供一键安装
       cliOnly: confirmPlugin.install?.webInstallable === false || confirmPlugin.install?.manualInstall === true,
       submitting: queue.submitting,
@@ -681,8 +708,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         setInstallBundleDeselected(false)
         if (reload) window.location.reload()
       },
-      onCopy: () => copyCommand(confirmPlugin),
-      onInstall: () => queue.installNow(confirmPlugin, confirmIsUpdate ? { update: true, pinVersion: confirmPinVersion ?? undefined } : undefined),
+      onCopy: () => copyCommand(confirmPlugin, confirmPinVersion ?? undefined),
+      onInstall: () => queue.installNow(confirmPlugin, {
+        update: confirmIsUpdate,
+        // 新安装钉住门禁版本：查询尚未回来时为空，服务端会自行解析
+        pinVersion: confirmPinVersion ?? undefined,
+      }),
       // 重启：结果视图「立即重启」也会中断进行中的任务 → 先弹重启确认弹窗
       onRestart: () => setShowRestartConfirm(true),
     }),

@@ -63,6 +63,19 @@ test('installTargetOf: 目录条目直接用 npm 包名作为安装目标', () =
   assert.equal(installCommandOf(p), 'dsh plugin --profile web add x-pkg')
 })
 
+test('installCommandOf: 钉住门禁版本时命令带版本，目录权威命令保持不变', () => {
+  const p = { slug: 'x', source: { repo: 'a/x', npmPackage: 'x-pkg' } } as HubPlugin
+  assert.equal(installCommandOf(p), 'dsh plugin add x-pkg')
+  assert.equal(installCommandOf(p, false, '1.2.3'), 'dsh plugin add x-pkg@1.2.3')
+  assert.equal(installCommandOf(p, true, '1.2.3'), 'dsh plugin --profile web add x-pkg@1.2.3')
+  // 目录下发命令（CLI-only 插件专属 profile）不追加版本，避免改坏官方命令
+  const withCommand = {
+    ...p,
+    install: { command: 'dsh plugin --profile dsh-tui add dsh-tui' },
+  } as HubPlugin
+  assert.equal(installCommandOf(withCommand, false, '1.2.3'), 'dsh plugin --profile dsh-tui add dsh-tui')
+})
+
 test('repoFromInstallTarget: release 装完仍能认回目录身份（读回 / 更新 / 卸载）', () => {
   const plugin = normalize({ s: 'widget', r: 'acme/widget', vr: 'v1.2.3' })
   // 宿主记录的依赖 spec 就是当初安装的 release 直链（旧 pin 版本）

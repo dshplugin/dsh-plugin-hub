@@ -8,6 +8,8 @@
  */
 import { systemProxy } from '../services/probe.ts'
 import { lookupReleaseAge, parseReleaseAgeRequest } from '../services/npm-release-age.ts'
+import { userNpmRegistry } from '../services/install/registry-fallback.ts'
+import { profileDirectory } from '../services/profile/profile.ts'
 import { loadSettings } from '../services/settings.ts'
 import { readJsonBody, requireTrustedPost, sendJson, type WebRoute, type WebServerService } from './shared.ts'
 
@@ -30,8 +32,12 @@ export function registerNpmReleaseAgeRoutes(webServer: WebServerService, profile
             ? settings.proxy
             : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
           // 并发查询：单包各自带超时且失败即 null，整体不因任一包失败而失败
+          // 查询源与安装首选源同口径（设置 → 本机 npm 配置）：安装钉住的版本必须来自真正要用的那个源
+          const registry = settings.npmRegistry !== ''
+            ? settings.npmRegistry
+            : userNpmRegistry(profileDirectory(profile))
           const results = await Promise.all(packages.map(async (name) =>
-            [name, await lookupReleaseAge(name, settings.npmRegistry, proxy)] as const))
+            [name, await lookupReleaseAge(name, registry, proxy)] as const))
           sendJson(response, 200, { packages: Object.fromEntries(results) })
         } catch (error) {
           sendJson(response, 500, { error: error instanceof Error ? error.message : String(error) })
