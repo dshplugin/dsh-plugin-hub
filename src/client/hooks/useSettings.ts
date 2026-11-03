@@ -60,7 +60,7 @@ export function useSettings() {
     return () => { alive = false }
   }, [])
 
-  /** 部分更新：本地立即生效（乐观），同时 POST 持久化；持久化失败静默（本次会话仍生效）。 */
+  /** 部分更新：本地立即生效（乐观），同时 POST 持久化；持久化失败不影响本次会话。 */
   const update = useCallback((patch: Partial<HubSettings>) => {
     setSettings((prev) => ({ ...prev, ...patch }))
     void fetch('/dsh-plugin-hub/settings', {
@@ -71,7 +71,7 @@ export function useSettings() {
     }).catch(() => { /* 宿主未挂路由：仅本次会话生效 */ })
   }, [])
 
-  /** 重置为默认设置：本地立即回默认，同时通知服务端删除设置文件；失败静默。 */
+  /** 重置为默认设置：本地立即回默认，同时通知服务端删除设置文件；失败不影响本地已重置的设置。 */
   const reset = useCallback(() => {
     setSettings({ ...DEFAULT_SETTINGS })
     void fetch('/dsh-plugin-hub/settings/reset', {

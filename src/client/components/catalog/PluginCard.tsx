@@ -35,7 +35,7 @@ export function PluginCard({ plugin: p, copied, installedName, installedVersion,
   const pkg = installedName(p)
   const isInstalled = pkg !== null
   const update = hasUpdate(p)
-  // 冷却期未到：更新确实存在但现在装不上，给确切时刻而不是让徽标静默消失
+  // 冷却期未到：更新确实存在但现在装不上，给确切时刻而不是让徽标悄悄消失
   const pendingUntil = isInstalled && !update ? updatePendingUntil(p) : null
   // 版本号展示：已安装 → 当前已装版本（最能反映用户状态）；未安装 → 目录最新版本
   const versionShown = isInstalled ? installedVersion(p) : p.version

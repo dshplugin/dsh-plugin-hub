@@ -4,7 +4,7 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * 失败回捞（src/server/services/install/operation-log.ts）的单元测试：
- * 从 DSH 输出里解析 operation 日志路径、只读白名单内的 DSH 日志、读不到时静默降级，
+ * 从 DSH 输出里解析 operation 日志路径、只读白名单内的 DSH 日志、读不到时降级，
  * 以及回捞内容能被 classifyFailure 正确归类。
  *
  * Run with the Node built-in test runner: `npm test`.
@@ -39,7 +39,7 @@ test('operationLogPathOf: extracts any pnpm.log path; reading still enforces the
   assert.equal(operationLogPathOf('diagnostics: /tmp/somewhere/pnpm.log'), '/tmp/somewhere/pnpm.log')
   assert.equal(operationLogPathOf('diagnostics: ~/.dsh/profiles/desktop/hub.log'), null)
   assert.equal(operationLogPathOf('some failure without the diagnostics line'), null)
-  // 未提供 profileDir 时退回旧口径：只读 .plugin-manager 下的日志
+  // 未提供 profileDir 时退回旧规则：只读 .plugin-manager 下的日志
   assert.equal(backfillOperationLog('diagnostics: /tmp/somewhere/pnpm.log'), null)
 })
 

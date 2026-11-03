@@ -23,9 +23,9 @@ export function ConfirmDialog({ type, title, desc, confirmLabel, cancelLabel, bu
   desc?: string
   confirmLabel: string
   cancelLabel?: string
-  /** 确认动作在途：禁用按钮防止二次点击 */
+  /** 确认动作进行中：禁用按钮防止二次点击 */
   busy?: boolean
-  /** 在途时确认按钮文案（如「清空中…」）；缺省沿用 confirmLabel */
+  /** 进行中时确认按钮文案（如「清空中…」）；缺省沿用 confirmLabel */
   busyLabel?: string
   t: Translate
   onConfirm: () => void

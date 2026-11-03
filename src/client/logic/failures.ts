@@ -16,7 +16,7 @@ export interface NotificationRecord {
   /** owner/repo（可能为空：请求层失败但拿不到仓库时） */
   repo: string
   /** 实际动作（install/update/uninstall）：成功/失败通知据此区分「安装成功」与「更新成功」。
-   *  缺省按 kind 兜底（历史记录可能没有该字段）。更新提醒（kind='update'）不用此字段。 */
+   *  缺省按 kind 归类（历史记录可能没有该字段）。更新提醒（kind='update'）不用此字段。 */
   action?: 'install' | 'update' | 'uninstall'
   /** 失败时的完整错误日志；成功记录为空串 */
   message: string
@@ -150,7 +150,7 @@ export function removeNotification(id: number): NotificationRecord[] {
 
 export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileLocalBuild' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
 
-/** 失败动作口径：标题、上报正文与提示文案按安装/更新/卸载取词，不写死「安装」。 */
+/** 失败动作规则：标题、上报正文与提示文案按安装/更新/卸载取词，不写死「安装」。 */
 export type FailureAction = 'install' | 'update' | 'uninstall'
 
 /** 动作词（英文）：名词短语，标题与句子里都成立。 */
@@ -163,7 +163,7 @@ export function actionWordZh(action: FailureAction): string {
   return action === 'uninstall' ? '卸载' : action === 'update' ? '更新' : '安装'
 }
 
-/** 记录的动作：老记录只有 kind，按 kind 兜底。 */
+/** 记录的动作：老记录只有 kind，按 kind 归类。 */
 export function actionOfRecord(rec: { kind: NotificationRecord['kind']; action?: FailureAction }): FailureAction {
   if (rec.action !== undefined) return rec.action
   return rec.kind === 'uninstall' ? 'uninstall' : rec.kind === 'update' ? 'update' : 'install'
@@ -266,7 +266,7 @@ export function classifyFailure(message: string): FailureKind {
   // pnpm 供应链策略拦截（缺 tarball integrity / 校验和不匹配 / minimumReleaseAge / untrusted origin）。
   // 必须在 pnpmIgnoredBuild 之前
   if (missingTarballIntegrity(message) || mismatchedTarballIntegrity(message) || /ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION|ERR_PNPM_NO_MATURE_MATCHING_VERSION|Minimum release age|minimumReleaseAge|untrusted origin/i.test(message)) return 'pnpmPolicy'
-  // profile 残留旧版本 patch 声明，pnpm 中止安装。必须在兜底之前
+  // profile 残留旧版本 patch 声明，pnpm 中止安装。必须排在默认归类之前
   if (/ERR_PNPM_UNUSED_PATCH|patches were not used/i.test(message)) return 'pnpmUnusedPatch'
   // profile 里的 YAML 配置解析失败（pnpm-workspace.yaml / pnpm-lock.yaml 有重复键、缩进坏了）：
   // pnpm 在依赖解析之前就退出，装任何插件都会同样失败，属本机 profile 配置问题。
@@ -334,7 +334,7 @@ export function classifyFailure(message: string): FailureKind {
   if (/git-hosted plugins build on install via their prepare script|add the exact key pnpm printed above under allowBuilds/i.test(message)) return 'pnpmIgnoredBuild'
   // 宿主启动插件管理时找不到某个 profile bundle（`cannot resolve profile bundle "<pkg>"`）：
   // 该 profile 声明的依赖没装全（node_modules 被删过 / 上次安装中断 / 桌面端更新不完整），
-  // 与本次要装的插件无关 —— 必须在 hub 兜底之前，否则又会被当成未知错误丢给我们
+  // 与本次要装的插件无关 —— 必须排在 hub 的默认归类之前，否则又会被当成未知错误丢给我们
   if (/cannot resolve profile bundle/i.test(message)) return 'profileBundleMissing'
   // 宿主自身入口起不来（服务端 [host-spawn] 标记）：环境问题，给提示、不引导提 Issue。
   // 不匹配 `spawn … ENOENT` 文本 —— 那个形态任何 spawn（curl/git/taskkill…）都会产出
@@ -354,7 +354,7 @@ export function classifyFailure(message: string): FailureKind {
   return 'hub'
 }
 
-/** 「特征指向本机环境但说不清具体哪一类」的兜底判据：系统调用错误码（权限/路径过长/设备异常）、
+/** 「特征指向本机环境但说不清具体哪一类」的最后的判断规则：系统调用错误码（权限/路径过长/设备异常）、
  *  证书与代理校验失败、本地配置文件（~/.npmrc、profile 的 package.json）损坏。
  *  只做排除用：命中它表示「不是插件侧问题」，不代表我们已经定位到原因。 */
 const LOCAL_ENV_RE = /os error \d{1,3}\b|ERROR_[A-Z_]{4,}|\bE(?:ACCES|PERM|NOENT|NAMETOOLONG|INVAL|PROTO|ISDIR|NOTDIR|EXIST|BADF|NOTEMPTY|JSONPARSE|NOMEM)\b|JavaScript heap out of memory|Unexpected token .{0,60}in JSON|SELF_SIGNED_CERT_IN_CHAIN|UNABLE_TO_VERIFY_LEAF_SIGNATURE|ERR_TLS_CERT_ALTNAME_INVALID|unable to verify the first certificate|self[- ]signed certificate|ERR_INVALID_URL|invalid registry|proxy authentication|407 Proxy/i
@@ -420,7 +420,7 @@ export function summarizeError(message: string, maxChars: number = MAX_CORE_CHAR
   }
   let out: string
   if (core.length === 0) {
-    // 整段本来就是短消息时直接给全量：head+tail 兜底会把同一段重复两遍，正文反而更难读
+    // 整段本来就是短消息时直接给全量：head+tail 的截断方式会把同一段重复两遍，正文反而更难读
     const whole = message.trim()
     if (whole.length <= maxChars) return whole
     // 无关键行时退化为「头部 + 尾部」快照：优先保尾部完整，头部按预算压缩，总长不超上限

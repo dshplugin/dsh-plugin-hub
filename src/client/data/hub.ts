@@ -4,7 +4,7 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * Hub 元数据仓库：自我更新检查与「关注我们」内容背后的 Cloudflare Worker 接口。
- * 失败降级为 null —— 由调用方决定如何兜底（不显示徽标、占位文案），绝不抛错。
+ * 失败降级为 null —— 由调用方决定失败时如何显示（不显示徽标、占位文案），绝不抛错。
  */
 import type { HubAboutInfo, HubUpdateInfo, HubUpdateVersion } from '../types.ts'
 import { HUB_ABOUT_URL, HUB_UPDATE_URL } from '../logic/constants.ts'

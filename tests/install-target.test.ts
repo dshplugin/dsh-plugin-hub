@@ -44,24 +44,24 @@ test('githubRepoOf: recognizes canonical and legacy GitHub targets', () => {
   assert.equal(githubRepoOf('https://example.com/owner/repo.git'), null)
 })
 
-test('npmInstallTargetOf: 钉住版本优先，其次 @latest，git/全局安装原样', () => {
-  // Hub 自我更新：提示的是已过发布冷却期的版本，必须钉住安装
+test('npmInstallTargetOf: 锁定版本优先，其次 @latest，git/全局安装原样', () => {
+  // Hub 自我更新：提示的是已过发布冷却期的版本，必须锁定安装
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: true, global: false, pinned: 'dsh-plugin@2.0.5' }), 'dsh-plugin@2.0.5')
-  // 普通更新没钉版本 → @latest（pnpm 对已存在依赖才真正升级）
+  // 普通更新没锁定版本 → @latest（pnpm 对已存在依赖才真正升级）
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: true, global: false }), 'dsh-plugin@latest')
   // 未声明 add 意图（非安装动作）原样
   assert.equal(npmInstallTargetOf('dsh-plugin', { update: false, global: false }), 'dsh-plugin')
-  // 钉版本对 git 源与全局 npm 不生效
+  // 锁定版本对 git 源与全局 npm 不生效
   assert.equal(npmInstallTargetOf('owner/repo', { update: true, global: false, pinned: 'owner/repo@2.0.5' }), 'owner/repo')
   assert.equal(npmInstallTargetOf('dsh-tui', { update: true, global: true, pinned: 'dsh-tui@1.0.0' }), 'dsh-tui')
 })
 
 test('npmInstallTargetOf: add 也显式 @latest，其余 spec 原样', () => {
-  // 普通安装不再原样透传：pnpm 会留用 profile 里遗留的精确旧依赖
+  // 普通安装不再原样传递：pnpm 会留用 profile 里遗留的精确旧依赖
   const add = { update: false, global: false, add: true }
   assert.equal(npmInstallTargetOf('dsh-openwrite', add), 'dsh-openwrite@latest')
   assert.equal(npmInstallTargetOf('@scope/plugin', add), '@scope/plugin@latest')
-  // 钉版本、已带版本/tag、tarball、git 源、全局安装都不补 @latest
+  // 锁定版本、已带版本/tag、tarball、git 源、全局安装都不补 @latest
   assert.equal(npmInstallTargetOf('dsh-plugin', { ...add, pinned: 'dsh-plugin@2.2.3' }), 'dsh-plugin@2.2.3')
   assert.equal(npmInstallTargetOf('dsh-openwrite@0.2.28', add), 'dsh-openwrite@0.2.28')
   assert.equal(npmInstallTargetOf('@scope/plugin@next', add), '@scope/plugin@next')

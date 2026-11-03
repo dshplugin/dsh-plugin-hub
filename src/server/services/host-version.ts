@@ -4,7 +4,7 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * 宿主与命令行工具的版本探测：dsh 版本同时用于诊断快照和「插件要求更高 DSH」判定，
- * pnpm/npm/git 只用于诊断快照。同步探测 + 1500ms 超时兜底，拿不到一律 null，绝不挂起。
+ * pnpm/npm/git 只用于诊断快照。同步探测 + 1500ms 超时保护，拿不到一律 null，绝不挂起。
  */
 import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -39,7 +39,7 @@ export function toolVersion(cmd: string, args: string[]): string | null {
 let cachedDshVersion: string | null = null
 
 /** 宿主 dsh 版本：优先 `dsh --version`；拿不到再从入口 `process.argv[1]` 向上找 package.json
- *  （dsh 不在 PATH 时兜底）。探测成功即缓存，失败不缓存以便下次重试。 */
+ *  （dsh 不在 PATH 时使用）。探测成功即缓存，失败不缓存以便下次重试。 */
 export function hostDshVersion(): string | null {
   if (cachedDshVersion !== null) return cachedDshVersion
   const viaCli = toolVersion('dsh', ['--version'])

@@ -4,7 +4,7 @@ export declare function normalizeRegistry(value: string): string;
 export declare function isPublicRegistry(value: string): boolean;
 /**
  * 依次尝试的源：显式配置 → 本机 npm 配置 → 官方源。
- * 只有公共源才追加后备（最多 3 个）；关闭降级或源不在白名单时只返回它自己。
+ * 只有公共源才追加后备（最多 3 个）；关闭换源或源不在白名单时只返回它自己。
  */
 export declare function registryCandidates(configured: string, userRegistry: string, enabled: boolean): string[];
 /** 本机 npm 实际生效的源（含 profile 目录的 .npmrc）；读不到返回空串。 */

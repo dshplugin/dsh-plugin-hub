@@ -26,7 +26,7 @@ import { CloseIcon, HelpIcon } from '../ui/icons.tsx'
 const NPM_PACKAGE_RE = /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/
 
 /** npm 全局安装命令（官方 README 格式，如 `npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui`）——
- * 提取 -g 之后的包列表；任一包名非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 口径一致。 */
+ * 提取 -g 之后的包列表；任一包名非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 规则一致。 */
 const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i
 
 /** 常规 npm/pnpm 安装命令（装进当前 profile，如 `npm install lodash`、`pnpm add @scope/pkg`）——
@@ -34,7 +34,7 @@ const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i
 const NPM_INSTALL_CMD_RE = /^(?:npm\s+(?:install|i)|pnpm\s+(?:add|i|install))\s+(.+)$/i
 
 /** 空格分隔的包列表：逐个按 npm 包名语法校验 + 拒绝以 - 开头的 token（npm 会把 --xxx 当参数而非包名），
- * 任一非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 同口径。 */
+ * 任一非法返回 null（交给格式错误提示）。与 server 端 globalNpmPackagesOf 同一套规则。 */
 function splitPackages(raw: string): string[] | null {
   const packages = raw.trim().split(/\s+/).filter((p) => p !== '')
   if (packages.length === 0 || packages.some((p) => !NPM_PACKAGE_RE.test(p) || p.startsWith('-'))) return null

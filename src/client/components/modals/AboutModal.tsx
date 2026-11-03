@@ -35,7 +35,7 @@ export function AboutModal({ info, lang, t, onClose }: {
   t: Translate
   onClose: () => void
 }) {
-  // 内容：字符串直接使用；{zh,en} 对象按界面语言取，缺哪种补哪种，全缺则展示兜底文案。
+  // 内容：字符串直接使用；{zh,en} 对象按界面语言取，缺哪种补哪种，全缺则展示备用文案。
   // Worker 未推送（info 为 null / content 为空）时弹窗仍能打开，显示「暂未发布」而非报错。
   const contentRaw = info
     ? typeof info.content === 'string'
@@ -50,7 +50,7 @@ export function AboutModal({ info, lang, t, onClose }: {
   // 同一次打开内保持稳定，避免父组件重渲染导致图片被反复重载。
   const qrTs = useMemo(() => Date.now(), [])
   const contentHtml = contentRaw.trim() ? renderMarkdown(bustQrCache(contentRaw, qrTs)) : null
-  // 更新时间：ISO 字符串转本地可读格式；非法值静默隐藏
+  // 更新时间：ISO 字符串转本地可读格式；非法值直接隐藏
   let updated: string | null = null
   if (info?.updatedAt) {
     const d = new Date(info.updatedAt)

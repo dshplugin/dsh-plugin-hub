@@ -49,11 +49,11 @@ export interface QueueTask {
   command?: string
   /** 实际执行/重试过的安装命令（按先后顺序）：失败时 issue 预填一并贴给作者 */
   attempts?: string[]
-  /** 完成结果是否需要重启才生效（服务端任务终态带出）。默认 true 保底：数据缺失时不静默视为已生效。
-   *  仅刷新解决不了的兜底场景（热挂载失败 / 非 dsh 插件 / 更新）为 true，结果视图给「立即重启」；
-   *  其余（热挂载成功、卸载已即时停用、全局安装）为 false，结果视图仅「完成」。 */
+  /** 完成结果是否需要重启才生效（服务端任务终态带出）。默认 true：数据缺失时不视为已生效。
+   *  仅刷新解决不了的例外场景（热加载失败 / 非 dsh 插件 / 更新）为 true，结果视图给「立即重启」；
+   *  其余（热加载成功、卸载已即时停用、全局安装）为 false，结果视图仅「完成」。 */
   needsRestart: boolean
-  /** 完成结果是否只需刷新页面即生效（插件已热挂进运行中 loader，或卸载后插件面板仍残留在当前页面）：
+  /** 完成结果是否只需刷新页面即生效（插件已热加载进运行中 loader，或卸载后插件面板仍残留在当前页面）：
    *  true 时关闭结果弹窗 / Toast 消失后由上层自动刷新页面，不给手动刷新按钮。 */
   needsReload?: boolean
   /** 市场自更新成功、但 profile 的 bundle 列表里已不含 dsh-plugin：重启后市场不会出现 */
@@ -78,11 +78,11 @@ export interface TaskQueueOptions {
   refreshInstalled: () => void
   /** 任务成功完成：viaModal 表示任务对应当前打开弹窗（弹窗切结果视图），否则走 Toast；repo 供成功通知记录；
    *  needsRestart 表示该任务完成后是否仍需宿主重启（结果视图据此给「重启 / 仅完成」）；
-   *  needsReload 表示是否只需刷新页面即生效（热挂载成功、或卸载后插件面板仍残留）。
+   *  needsReload 表示是否只需刷新页面即生效（热加载成功、或卸载后插件面板仍残留）。
    *  update 表示实际执行的是更新（覆盖重装）而非首次安装：通知中心据此显示「更新成功」而非「安装成功」。 */
   onInstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean, update?: boolean, needsReload?: boolean, bundleDeselected?: boolean) => void
   onUninstallDone: (viaModal: boolean, repo: string | null, needsRestart: boolean, needsReload?: boolean) => void
-  /** 任务失败：完整输出或兜底文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 实际执行/重试过的安装命令（可缺省）+ 是否更新。 */
+  /** 任务失败：完整输出或备用文案 + 所属插件仓库 + 操作类型（安装/卸载）+ 实际执行的安装命令（issue 预填用，可缺省）+ 实际执行/重试过的安装命令（可缺省）+ 是否更新。 */
   onError: (message: string, repo: string | null, kind: 'install' | 'uninstall', command?: string, attempts?: string[], update?: boolean) => void
   /** 当前打开的安装/卸载弹窗插件：用于在弹窗内匹配进行中的任务。 */
   installPlugin: HubPlugin | null
@@ -114,7 +114,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   /** 待重启列表（服务端内存态 + 本地展示信息补齐）；与 queue 一样以 ref 为唯一事实来源。 */
   const [pendingRestarts, setPendingRestarts] = useState<PendingRestart[]>([])
   const pendingRef = useRef<PendingRestart[]>([])
-  /** 本次会话内安装成功插件的展示信息（目标 → 简介/版本）：轮询合并待重启列表时补齐，刷新后由 resolvePending 兜底。 */
+  /** 本次会话内安装成功插件的展示信息（目标 → 简介/版本）：轮询合并待重启列表时补齐，刷新后由 resolvePending 补上。 */
   const pendingInfoRef = useRef<Map<string, { desc?: string; version?: string }>>(new Map())
   /** 保持最新的 resolvePending：轮询闭包捕获的是调用那一刻的目录状态，目录晚加载时也能补齐。 */
   const resolvePendingRef = useRef(resolvePending)
@@ -125,12 +125,12 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   const settlingRef = useRef<Set<number>>(new Set())
   /** 轮询定时器句柄（队列清空/组件卸载时清理） */
   const pollRef = useRef<number | null>(null)
-  /** 请求在途的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
+  /** 请求还没返回的目标集合（同步防重）：双击安装/卸载时第二击直接忽略。
    *  本地队列任务要等 fetch 返回后才入队，仅靠 queueRef 检查拦不住请求窗口内的重复点击。 */
   const submittingRef = useRef<Set<string>>(new Set())
   /** 乐观入队临时 id 计数器：递减产生唯一负数，与服务端自增正数 id 永不冲突。 */
   const tempIdRef = useRef(0)
-  /** 请求在途标记：弹窗据此禁用确认按钮，避免等待响应期间被再次点击。 */
+  /** 请求进行中标记：弹窗据此禁用确认按钮，避免等待响应期间被再次点击。 */
   const [submitting, setSubmitting] = useState(false)
 
   /** 停止后台任务轮询（任务结束或组件卸载时清理）。 */
@@ -146,7 +146,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     if (queueRef.current.length === 0 && pendingRef.current.length === 0) stopPoll()
   }
 
-  // 组件卸载时兜底清理轮询定时器
+  // 组件卸载时清理轮询定时器
   useEffect(() => stopPoll, [])
 
   /** 更新队列（同步镜像到 ref：queueRef 是唯一事实来源，state 只负责触发渲染，
@@ -200,7 +200,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
         body: JSON.stringify({ repo, version, updatedAt }),
       })
     } catch {
-      // 宿主未挂本地路由：静默忽略，仅本机展示受影响
+      // 宿主未挂本地路由：直接忽略，仅本机展示受影响
     }
   }
 
@@ -274,7 +274,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     }, stepMs)
   }
 
-  /** 任务在 /active 中消失 = 已结束：查 /status 拿终态并收尾（cancelled 静默移除）。 */
+  /** 任务在 /active 中消失 = 已结束：查 /status 拿终态并收尾（cancelled 直接移除）。 */
   const settleTask = async (q: QueueTask) => {
     let status = 'failed'
     let lines: string[] = []
@@ -292,7 +292,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           attempts = Array.isArray(task.attempts) ? task.attempts : undefined
           bundleDeselected = task.bundleDeselected === true ? true : undefined
           installedVersion = typeof task.installedVersion === 'string' && task.installedVersion !== '' ? task.installedVersion : undefined
-          // 终态带出的「是否需要重启 / 是否只需刷新」覆盖本地（服务端 done 时按 loader 热挂/即时移除情况设置）
+          // 终态带出的「是否需要重启 / 是否只需刷新」覆盖本地（服务端 done 时按 loader 热加载/即时移除情况设置）
           const needsRestart = typeof task.needsRestart === 'boolean' ? task.needsRestart : q.needsRestart
           const needsReload = typeof task.needsReload === 'boolean' ? task.needsReload : (q.needsReload ?? false)
           if (status === 'done') {
@@ -383,7 +383,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           try { await settleTask(q) } finally { settlingRef.current.delete(q.id) }
         }
       } catch {
-        // 服务端暂不可达：静默等待下一轮
+        // 服务端暂不可达：等下一轮再试
       }
     }, 600)
   }
@@ -455,7 +455,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
     source: 'catalog' | 'custom'
     /** 更新已安装目标（放行 add 覆盖重装） */
     update?: boolean
-    /** 钉住精确版本（Hub 自我更新用）：最新版可能仍在 pnpm 发布冷却期内，
+    /** 锁定精确版本（Hub 自我更新用）：最新版可能仍在 pnpm 发布冷却期内，
      *  必须安装「已过冷却期」的那个版本，不能再用 @latest。 */
     pinVersion?: string
     /** 全局 npm 安装包列表（`npm install -g <pkgs>`）：非空时服务端执行全局安装，不进任何 profile */
@@ -466,7 +466,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   }) => {
     // 防重复入队：同一目标已在排队/执行中则忽略
     if (queueRef.current.some((q) => q.kind === 'install' && q.target === input.repo)) return
-    // 请求在途防重：任务要等响应回来才进本地队列，这之前再次点击（双击）直接忽略
+    // 请求进行中防重：任务要等响应回来才进本地队列，这之前再次点击（双击）直接忽略
     if (submittingRef.current.has(input.repo)) return
     submittingRef.current.add(input.repo)
     // 乐观入队：点击安装立即显示「正在安装中」，不等 POST 响应。
@@ -498,7 +498,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
           display: input.repo,
           source: input.source,
           mode: input.update ? 'update' : undefined,
-          // 钉住版本（Hub 自我更新）：服务端据此执行 `add <pkg>@<version>` 而不是 @latest
+          // 锁定版本（Hub 自我更新）：服务端据此执行 `add <pkg>@<version>` 而不是 @latest
           ...(input.pinVersion ? { version: input.pinVersion } : {}),
           // 界面语言带给服务端：安装前网络探测等错误消息按用户当前语言返回（中文界面给中文，英文界面给英文）
           ...(langKey ? { lang: langKey } : {}),
@@ -531,7 +531,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       // 摘要条常驻顶部（含实时进度），明细面板保持折叠，想看时再点开
       pollQueue()
     } catch (err) {
-      // 网络异常：移除乐观条目 + 兜底错误弹窗（附上底层原因，避免只剩一句笼统的「安装失败」）
+      // 网络异常：移除乐观条目，并以错误弹窗提示（附上底层原因，避免只剩一句笼统的「安装失败」）
       applyQueue((prev) => prev.filter((x) => x.id !== tempId))
       const aborted = (err as { name?: string } | null)?.name === 'AbortError'
       // [request-timeout]：给分类器一个与界面语言无关的超时标记
@@ -572,8 +572,8 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   /** 命令行安装：用户手输 npm 包名，走 custom 源（受安全开关控制）。
    *  update=true 时对已安装目标放行覆盖重装（与目录插件「更新」同一语义）。
    *  channel=入口渠道（NPM 包卡片）：上报服务端落日志，失败弹窗/通知据此精准溯源。
-   *  队列展示/防重一律用归一化身份：与服务端 /active 合并、弹窗目标匹配同口径，
-   *  npm 包名透传不受影响。 */
+   *  队列展示/防重一律用归一化身份：与服务端 /active 合并、弹窗目标匹配同一套规则，
+   *  npm 包名原样传递不受影响。 */
   const installCustom = async (raw: string, opts?: { update?: boolean; channel?: InstallChannel }) => {
     const target = raw.trim()
     if (!target) return
@@ -589,7 +589,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   }
 
   /** 全局 npm 安装（官方 README 的 `npm install -g <pkgs>`）：不进任何 profile、无需宿主重启。
-   *  队列展示/防重用包列表空格拼接的身份（与服务端 target 同口径）；入口渠道固定为 npm（NPM 包卡片）。 */
+   *  队列展示/防重用包列表空格拼接的身份（与服务端 target 同一套规则）；入口渠道固定为 npm（NPM 包卡片）。 */
   const installGlobalNpm = async (pkgs: string[], opts?: { update?: boolean; channel?: InstallChannel }) => {
     const list = (pkgs ?? []).map((p) => p.trim()).filter((p) => p !== '')
     if (list.length === 0) return
@@ -609,7 +609,7 @@ export function useTaskQueue(opts: TaskQueueOptions) {
   const enqueueUninstall = async (name: string, repo: string | null, desc?: string) => {
     if (!name) return
     if (queueRef.current.some((q) => q.kind === 'uninstall' && q.target === name)) return
-    // 请求在途防重：与安装一致，响应回来前再次点击直接忽略
+    // 请求进行中防重：与安装一致，响应回来前再次点击直接忽略
     if (submittingRef.current.has(name)) return
     submittingRef.current.add(name)
     setSubmitting(true)

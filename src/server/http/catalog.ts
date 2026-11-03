@@ -42,7 +42,7 @@ function fetchCatalogOnce(target: string, proxy: string): ReturnType<typeof fetc
 }
 
 /** 读缓存：文件存在、JSON 合法、未超过 maxAgeMs → 返回原始响应字符串；否则 null（视为 miss）。
- *  maxAgeMs 传 Infinity 即「任意年龄的缓存」，供实时拉取失败时兜底使用。 */
+ *  maxAgeMs 传 Infinity 即「任意年龄的缓存」，供实时拉取失败时使用。 */
 function readCatalogCache(file: string, maxAgeMs: number): string | null {
   try {
     const entry = JSON.parse(readFileSync(file, 'utf8')) as CatalogCacheEntry
@@ -56,7 +56,7 @@ function readCatalogCache(file: string, maxAgeMs: number): string | null {
   return null
 }
 
-/** 写缓存：目录不存在则创建；写失败静默忽略（缓存只是加速，不影响功能）。 */
+/** 写缓存：目录不存在则创建；写失败直接忽略（缓存只是加速，不影响功能）。 */
 function writeCatalogCache(file: string, body: string): void {
   try {
     mkdirSync(dirname(file), { recursive: true })
@@ -108,7 +108,7 @@ export function registerCatalogRoutes(webServer: WebServerService, profile: stri
       handler: async (request, response) => {
         if (!requireMethod(request, response, 'GET')) return
         // 目录/统计数据服务端代理：浏览器不直连 dsh-plugin.org，统一经此路由
-        // 转发（curl 子进程注入代理 env），与 npm / git 安装通道走同一代理口径，
+        // 转发（curl 子进程注入代理 env），与 npm / git 安装通道走同一代理规则，
         // 「npm / git / 目录数据请求统一走该代理」的设置文案因此真实生效。
         const url = new URL(request.url ?? '/', 'http://localhost')
         const settings = loadSettings(profile)
@@ -145,7 +145,7 @@ export function registerCatalogRoutes(webServer: WebServerService, profile: stri
               sendJson(response, 200, JSON.parse(stale))
               return
             } catch {
-              // 兜底缓存也损坏：落到下面的 502
+              // 备用缓存也损坏：落到下面的 502
             }
           }
           // 带上 curl 退出码与 stderr 末行：只回 error 字段时，用户贴出来的响应里

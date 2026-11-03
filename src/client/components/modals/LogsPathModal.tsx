@@ -70,7 +70,7 @@ export function LogsPathModal({ t, defaultPath, currentPath, onSaved, onClose }:
     }
   }
 
-  /** 选择目录：系统对话框从默认位置打开，选中路径回填输入框（仍可手改）。 */
+  /** 选择目录：系统对话框从默认位置打开，选中路径填入输入框（仍可手改）。 */
   const browse = async () => {
     if (browsing) return
     setBrowsing(true)

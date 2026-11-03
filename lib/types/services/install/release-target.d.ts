@@ -6,7 +6,7 @@
  * 预构建 release 直链的仓库身份解析。部分插件（如 loopx）当初以 GitHub release 的 .tgz
  * 安装过，仓库 HEAD 反而是 monorepo 根、走 git 直装会因缺入口文件失败；老安装记录里留的
  * 就是这种 release 直链。这里把「历史安装目标」还原成所属仓库身份，供已装态读回、队列
- * 去重与展示复用（单一事实来源，避免两端口径漂移）。
+ * 去重与展示复用（单一事实来源，避免两端规则漂移）。
  *
  * 只接受固定形态的 HTTPS `github.com/<owner>/<repo>/releases/download/<tag>/<asset>.tgz`：
  * 输入是记录/展示数据、绝非 shell 代码，绝不执行其文本；跨仓跳转、外部主机、凭据、

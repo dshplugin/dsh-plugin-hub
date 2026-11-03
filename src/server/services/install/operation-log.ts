@@ -7,7 +7,7 @@
  * 回显到控制台，真正的 pnpm 报错写进该路径的 operation 日志。这里从输出里解析出该路径
  * 并读取其尾部，补进失败信息 —— 否则前端拿不到任何错误特征，只能把失败归为「未知」。
  * 只允许读 profile 目录下的 pnpm.log（dsh 自己的 operation 日志），
- * 防止插件把任意路径打印进日志造成越权读取；任何异常都静默降级（返回 null），
+ * 防止插件把任意路径打印进日志造成越权读取；任何异常都降级为 null，
  * 不改变原有失败处理。
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -53,7 +53,7 @@ export function operationLogPathOf(output: string): string | null {
 /**
  * 只允许读 profile 目录下的 pnpm.log（dsh 自己的操作日志）：
  * 绝对路径必须落在该目录内，相对路径按该目录解析。
- * 未提供 profileDir 时退回旧口径（路径须含 .plugin-manager），防止插件打印任意路径造成越权读取。
+ * 未提供 profileDir 时退回旧规则（路径须含 .plugin-manager），防止插件打印任意路径造成越权读取。
  */
 function allowedLogPath(raw: string, profileDir?: string): string | null {
   const path = resolve(profileDir ?? '', raw)
@@ -96,7 +96,7 @@ export function hasSubstantiveOutput(output: string): boolean {
 /**
  * 运行期抓取：宿主的 operation 日志只在命令运行期间存在，结束后可能被清理，
  * 退出后再按路径读往往已经拿不到。这里在安装过程中轮询 profile 下最新的
- * `.plugin-manager/logs/<operation>/pnpm.log`，用抓到的内容兜底。
+ * `.plugin-manager/logs/<operation>/pnpm.log`，用抓到的内容补全。
  * 只认本次运行产生的新文件（mtime 晚于启动基线），避免复述上一次安装的日志。
  */
 export function createOperationLogTap(profileDir: string): { stop: () => string } {

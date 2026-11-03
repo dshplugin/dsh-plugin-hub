@@ -216,7 +216,7 @@
   line-height: 18px;
   color: var(--hub-text-tertiary);
   margin: 0;
-  /* 品牌副标题强制单行：中文/英文都不换行，超宽时省略号截断兜底 */
+  /* 品牌副标题强制单行：中文/英文都不换行，超宽时用省略号截断 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

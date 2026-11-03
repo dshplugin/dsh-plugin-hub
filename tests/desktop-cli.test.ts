@@ -64,7 +64,7 @@ test('desktopCliBootstrap: 认 DeepSeek Harness 0.2.x 布局（宿主包同目�
 })
 
 test('desktopCliBootstrap: 布局不认识时返回 null，调用方回退原逻辑', () => {
-  // asar 内没有引导脚本（官方改版）：不猜路径，交给 PATH 上的 dsh 兜底
+  // asar 内没有引导脚本（官方改版）：不猜路径，交给 PATH 上的 dsh
   const asar = makeAsar(['node_modules/@deepseek-ai/dsh-desktop-host/lib/index.js'])
   try {
     assert.equal(desktopCliBootstrap(join(asar, 'node_modules', '@deepseek-ai', 'dsh-desktop-host', 'lib', 'index.js')), null)

@@ -91,7 +91,7 @@ test('isUpdateOffered: only offer an update npm can actually install', () => {
   assert.equal(isUpdateOffered({ version: '1.1.0', publishedAt: matured }, '1.1.0', now), false)
   // npm 上确实更高且已过冷却期 → 提示
   assert.equal(isUpdateOffered({ version: '1.2.0', publishedAt: matured }, '1.1.0', now), true)
-  // 发布不满 24h → 暂缓（pnpm 会静默回退，点了也装不上）
+  // 发布不满 24h → 暂缓（pnpm 会不提示地回退，点了也装不上）
   assert.equal(isUpdateOffered({ version: '1.2.0', publishedAt: fresh }, '1.1.0', now), false)
   // 查询失败 / 没有账本记录 → 交回原有判定，不吞掉真实更新
   assert.equal(isUpdateOffered(null, '1.1.0', now), true)

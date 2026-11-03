@@ -20,9 +20,9 @@ import type { FailureAction } from '../../logic/failures.ts'
 
 /** 完成结果视图：绿色对勾 + 标题/描述；
  *  终态只有两种：
- *  - needsRestart=true（刷新解决不了：热挂载失败 / 非 dsh 插件 / 更新）→ 仅一个「立即重启」
+ *  - needsRestart=true（刷新解决不了：热加载失败 / 非 dsh 插件 / 更新）→ 仅一个「立即重启」
  *    按钮（重启会中断进行中的任务，故仍需用户确认），关闭即放弃；
- *  - 其余（含 needsReload=true 的「已热挂载、仅剩客户端 UI」）→ 仅「完成」按钮：关闭结果弹窗时
+ *  - 其余（含 needsReload=true 的「已热加载、仅剩客户端 UI」）→ 仅「完成」按钮：关闭结果弹窗时
  *    上层自动刷新页面让插件生效，不再给「稍后/立即刷新」手动选择。 */
 function ResultView({
   title, desc, t, restarting, needsRestart, needsReload, bundleDeselected, onRestart, onClose,
@@ -32,7 +32,7 @@ function ResultView({
   t: Translate
   restarting: boolean
   needsRestart: boolean
-  /** 仅刷新页面即生效（插件已热挂载）：给一句自动刷新说明，按钮仍是「完成」 */
+  /** 仅刷新页面即生效（插件已热加载）：给一句自动刷新说明，按钮仍是「完成」 */
   needsReload?: boolean
   /** 市场自更新成功、但 bundle 被取消勾选：重启后市场不会出现，提示重新勾选 */
   bundleDeselected?: boolean
@@ -94,11 +94,11 @@ export interface InstallModalProps {
   pinVersion?: string
   /** 仅命令行插件（webInstallable=false）：不提供一键安装，只展示命令供复制到 dsh 终端 */
   cliOnly: boolean
-  /** 安装请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
+  /** 安装请求进行中（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
   /** 完成结果是否需重启才生效：true → 仅给「立即重启」；false → 仅「完成」（关闭即自动刷新） */
   needsRestart: boolean
-  /** 完成结果是否只需刷新页面即生效（插件已热挂载）：true → 结果视图显示自动刷新说明 */
+  /** 完成结果是否只需刷新页面即生效（插件已热加载）：true → 结果视图显示自动刷新说明 */
   needsReload: boolean
   /** 市场自更新成功、但 profile 的 bundle 列表已不含 dsh-plugin：结果页提示重新勾选 */
   bundleDeselected?: boolean
@@ -238,7 +238,7 @@ export interface UninstallModalProps {
   t: Translate
   langPath: string
   restarting: boolean
-  /** 卸载请求在途（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
+  /** 卸载请求进行中（fetch 等待响应）：此时任务尚未入队，需禁用确认按钮防止二次点击 */
   submitting: boolean
   /** 完成结果是否需重启才生效：true（停用失败等刷新解决不了的场景）→ 仅给「立即重启」；
    *  false（loader 已即时停用）→ 仅「完成」，关闭即自动刷新页面摘除插件面板 */
@@ -272,7 +272,7 @@ export function UninstallModal(props: UninstallModalProps) {
       h('div', { className: styles.modalHead },
         h('div', {
           className: busy
-            // 注意 task 判空：submitting（请求在途）时任务尚未入队，task 为 null，不能直接解引用
+            // 注意 task 判空：submitting（请求进行中）时任务尚未入队，task 为 null，不能直接解引用
             ? `${styles.modalTitle} ${task !== null && task.status === 'pending' ? styles.modalTitleQueued : styles.modalTitleBusy}`
             : styles.modalTitle,
         }, title),

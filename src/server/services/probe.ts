@@ -51,7 +51,7 @@ export function curlRevokeFlagUnsupported(code: number | null, stderr: string): 
   return code === 2 && /ssl-revoke-best-effort/i.test(stderr) && /unknown|unrecognized/i.test(stderr)
 }
 
-/** 彻底关闭证书吊销检查的兜底参数（curl ≥ 7.19），比降级参数覆盖更老的 Windows curl。 */
+/** 彻底关闭证书吊销检查的保底参数（curl ≥ 7.19），比降级参数覆盖更老的 Windows curl。 */
 const NO_REVOKE_ARG = '--ssl-no-revoke'
 
 /** stderr 是否指向 Schannel 取不到证书吊销信息（据此归因为环境 TLS 问题，而非网络不通）。 */
@@ -59,7 +59,7 @@ export function tlsRevocationBlocked(stderr: string): boolean {
   return /CRYPT_E_NO_REVOCATION_CHECK|CRYPT_E_REVOCATION_OFFLINE|0x80092012/i.test(stderr)
 }
 
-/** 探测/安装同一套代理口径：curl 与 git 子进程都读 HTTP(S)_PROXY 环境变量。 */
+/** 探测/安装同一套代理规则：curl 与 git 子进程都读 HTTP(S)_PROXY 环境变量。 */
 function proxyEnv(proxy: string): NodeJS.ProcessEnv {
   if (proxy === '') return { ...process.env }
   return {
@@ -156,12 +156,12 @@ function runCurl(args: string[], env: NodeJS.ProcessEnv, timeoutMs: number): Pro
     child.stderr.on('data', (c: Buffer) => { stderr += c.toString() })
     child.on('error', () => finish(null))
     child.on('close', (code) => finish(code))
-    // 超时兜底：curl --max-time 到点自行退出，此处再设一个进程级超时防止悬挂
+    // 超时保护：curl --max-time 到点自行退出，此处再设一个进程级超时防止悬挂
     const timer = setTimeout(() => { child.kill(); finish(null) }, timeoutMs + 1000)
   })
 }
 
-/** 带 TLS 兜底的 curl 调用：先按平台参数跑（Windows 带吊销检查降级），
+/** 带 TLS 重试的 curl 调用：先按平台参数跑（Windows 带吊销检查降级），
  *  若本机 curl 不认这个参数（curl < 7.70）则去掉参数重跑一次，保证老版本不因此直接失败；
  *  降级后仍被吊销检查拦死（CRYPT_E_NO_REVOCATION_CHECK）时，再用 --ssl-no-revoke
  *  彻底关掉吊销检查跑一次 —— 该参数 curl ≥ 7.19 即存在，覆盖面比降级参数更广，
@@ -175,7 +175,7 @@ async function curlWithTlsFallback(args: string[], env: NodeJS.ProcessEnv, timeo
   }
   if (tlsArgs.length > 0 && tlsRevocationBlocked(run.stderr)) {
     const retry = await runCurl([NO_REVOKE_ARG, ...args], env, timeoutMs)
-    // 只在兜底本身跑起来（非「不认识该参数」）时采用其结果，否则保留原始失败线索
+    // 只在重试本身跑起来（非「不认识该参数」）时采用其结果，否则保留原始失败线索
     if (retry.code !== null && !curlRevokeFlagUnsupported(retry.code, retry.stderr)) run = retry
   }
   return run
@@ -183,7 +183,7 @@ async function curlWithTlsFallback(args: string[], env: NodeJS.ProcessEnv, timeo
 
 /**
  * curl 子进程探测：spawn curl -s -w '%{http_code}' 并注入代理 env。
- * curl 读 HTTP_PROXY/HTTPS_PROXY 是原生行为，与 pnpm/git 安装通道同一套代理口径；
+ * curl 读 HTTP_PROXY/HTTPS_PROXY 是原生行为，与 pnpm/git 安装通道同一套代理规则；
  * 失败（curl 不存在 / 连接失败 / 超时）都归为不可达，全程不抛错。
  * 证书吊销检查受阻（Windows Schannel）另记 reason，供诊断给出对症提示。
  */
@@ -240,7 +240,7 @@ export function gitLsRemote(url: string, proxy: string, timeoutMs: number): Prom
     const child = spawn('git', ['ls-remote', '--exit-code', url, 'HEAD'], { env })
     let out = ''
     child.stdout.on('data', (c: Buffer) => { out += c.toString() })
-    // git 的报错不透传给终端：结果以退出码 + HEAD ref 是否返回为准
+    // git 的报错不原样传递给终端：结果以退出码 + HEAD ref 是否返回为准
     child.stderr.on('data', () => {})
     let done = false
     const finish = (r: ProbeResult) => {
@@ -255,7 +255,7 @@ export function gitLsRemote(url: string, proxy: string, timeoutMs: number): Prom
       // status 复用为 git 退出码（0 = 克隆握手成功）；客户端 git 行不把它显示成 HTTP 码
       finish({ ok, ms: Date.now() - started, status: code })
     })
-    // 超时兜底：与 curlProbe 同口径，防止 git 挂起
+    // 超时保护：与 curlProbe 同一套规则，防止 git 挂起
     const timer = setTimeout(() => { child.kill(); finish(probeFail()) }, timeoutMs + 1000)
   })
 }
@@ -263,7 +263,7 @@ export function gitLsRemote(url: string, proxy: string, timeoutMs: number): Prom
 /**
  * 请求一个 URL 并返回重定向后的最终地址（curl -I -L -w %{url_effective}）。
  * 供 GitHub 仓库改名解析使用：对已改名仓库 GitHub 回 301，跟随跳转后的最终地址
- * 即规范地址。与其它 GitHub 访问同口径 —— curl 子进程注入代理 env（Node 内置
+ * 即规范地址。与其它 GitHub 访问同一套规则 —— curl 子进程注入代理 env（Node 内置
  * http(s) 读不到系统代理，直连在部分网络下不可达）。
  * 未发生跳转（200/404）、网络失败或 curl 不可用都返回 null，调用方保留原始地址。
  */
@@ -279,11 +279,11 @@ export async function finalUrl(url: string, proxy: string, timeoutMs: number): P
 }
 
 /**
- * curl 子进程抓取响应体（与 probeUrl 同一套代理 env 注入与 TLS 参数兜底）。
+ * curl 子进程抓取响应体（与 probeUrl 同一套代理 env 注入与 TLS 参数重试）。
  * 供服务端 /catalog 代理路由使用：目录/统计数据经此拉到服务端再转给浏览器，
- * 使「目录数据请求走设置里的代理」与 npm / git 安装通道口径一致。
+ * 使「目录数据请求走设置里的代理」与 npm / git 安装通道规则一致。
  * 失败（curl 不存在 / 连接失败 / 超时 / 非零退出）时 ok=false，全程不抛错；
- * reason 区分「证书吊销受阻」这类环境 TLS 问题，供调用方决定兜底策略。
+ * reason 区分「证书吊销受阻」这类环境 TLS 问题，供调用方决定备用策略。
  */
 export function fetchViaCurl(
   url: string, proxy: string, timeoutMs: number,

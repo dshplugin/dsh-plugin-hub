@@ -83,7 +83,7 @@ export function isDshNpmPackageForRepo(packageName: string, repo: string, regist
 
 /**
  * 解析仓库改名后的规范 `owner/repo`：GitHub 对已改名仓库返回 301，跟随跳转取最终地址。
- * 与其它 GitHub 访问同口径走 curl + 代理 env（Node 内置 https 读不到系统代理）。
+ * 与其它 GitHub 访问同一套规则走 curl + 代理 env（Node 内置 https 读不到系统代理）。
  * 未改名、仓库不存在、网络失败或 curl 不可用都返回 ''，调用方按原名继续。
  */
 async function canonicalRepo(repo: string, proxy: string): Promise<string> {

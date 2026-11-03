@@ -1,7 +1,7 @@
 /**
- * npm 源降级（services/install/registry-fallback.ts）单测。
+ * npm 换源（services/install/registry-fallback.ts）单测。
  *
- * 钉住三件事：候选源只在公共源之间扩展、自定义/内网源绝不切换、
+ * 锁定三件事：候选源只在公共源之间扩展、自定义/内网源绝不切换、
  * 只有传输层失败才换源（404 / 版本不存在 / 鉴权失败必须保持原样）。
  */
 import { test } from 'node:test'

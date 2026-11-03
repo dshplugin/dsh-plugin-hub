@@ -52,7 +52,7 @@ export function useCatalog(lang: LocaleId) {
    *  界面停在「正在加载插件数据…」假死 —— 超时自动重拉，最多自动重试 2 次后转失败态；
    *  用户手动刷新（reload）时清零重新计数。 */
   const loadRetriesRef = useRef(0)
-  /** 目录加载超时阈值：超过即判定挂起，强制刷新一次（服务端代理 curl 上限 60s，客户端 30s 先兜底） */
+  /** 目录加载超时阈值：超过即判定挂起，强制刷新一次（服务端代理 curl 上限 60s，客户端 30s 先超时） */
   const LOAD_TIMEOUT_MS = 30000
   /** 挂起后最多自动重试次数：避免代理持续不通时无限循环刷新（每次重试仍 30s，2 次后转失败界面可手动重试） */
   const MAX_LOAD_RETRIES = 2
@@ -68,7 +68,7 @@ export function useCatalog(lang: LocaleId) {
    * 强制刷新 Hub 版本与「关注我们」信息：点击头部版本号/徽标时触发。
    * 挂载期的 useEffect 只在进入/reload 时拉一次，发版后已打开的界面点版本号
    * 仍显示旧数据；此处重新拉接口中心，最新版本与变更记录点击即见。
-   * 失败静默为 null（弹窗兜底展示当前版本号），与挂载期拉取口径一致。
+   * 失败时返回 null（弹窗退回展示当前版本号），与挂载期拉取规则一致。
    */
   const refreshHub = async () => {
     // 版本接口已恒带时间戳绕过 CDN，手动/自动拉取都能拿到最新公告
@@ -115,7 +115,7 @@ export function useCatalog(lang: LocaleId) {
         settled = true
         // 插件市场不显示自己：DSH Plugin Hub 从目录里排除自身条目，
         // 防止「自己出现在自己的插件列表里、还能自己安装自己」；统计计数同步减 1 保持与列表一致。
-        // 目录数据已排除自身，此处再兜底过滤一次，防旧快照仍含自身条目。
+        // 目录数据已排除自身，此处再过滤一次，防旧快照仍含自身条目。
         const hadSelf = list.some((p) => p.source?.repo === SELF_REPO)
         // 过滤前单独保留 hub 自身条目：它不进目录列表，但「可更新」徽标的直接更新需要它作为重装目标
         setHubPlugin(list.find((p) => p.source?.repo === SELF_REPO) ?? null)
@@ -131,7 +131,7 @@ export function useCatalog(lang: LocaleId) {
         settled = true
         setFailed(true)
       })
-    // 加载超时兜底：宿主刚重启/代理未就绪时目录请求可能长时间挂起，界面停在「正在加载插件数据…」
+    // 加载超时保护：宿主刚重启/代理未就绪时目录请求可能长时间挂起，界面停在「正在加载插件数据…」
     // 像假死。超过阈值未收尾 → 强制刷新列表（重拉一次，最多 MAX_LOAD_RETRIES 次自动重试），
     // 重试仍失败 → 转失败界面（显示「重试」按钮，手动刷新时计数清零重新开始）。
     const timer = window.setTimeout(() => {
@@ -152,7 +152,7 @@ export function useCatalog(lang: LocaleId) {
     // 否则英文模式仍停留在 plugins.zh.json，描述/名称全是中文
   }, [reloadKey, lang])
 
-  /** 刷新当前 profile 已安装插件表；宿主未挂本地路由时静默降级为空表。 */
+  /** 刷新当前 profile 已安装插件表；宿主未挂本地路由时降级为空表。 */
   const refreshInstalled = async () => {
     const data = await fetchInstalled()
     if (data === null) return
@@ -168,7 +168,7 @@ export function useCatalog(lang: LocaleId) {
 
   // Hub 自身版本检查走独立 Worker（版本控制中心）：发新版后写一次 Worker KV，
   // 所有已装用户立即看到「可更新」+ Markdown 变更记录，不经过主站目录数据管道。
-  // 失败静默降级为 null（徽标不出现，不影响目录本身加载）。
+  // 失败时降级为 null（徽标不出现，不影响目录本身加载）。
   useEffect(() => {
     let cancelled = false
     void fetchHubUpdate().then((info) => { if (!cancelled) setHubUpdateInfo(info) })
@@ -176,7 +176,7 @@ export function useCatalog(lang: LocaleId) {
   }, [reloadKey])
 
   // 「关注我们」内容走同一套 Worker：作者写好 Markdown（平台介绍 + 反馈群二维码）推送 /admin/about，
-  // 客户端下次进入拉 /about 即可看到最新，非写死。失败静默为 null（弹窗展示兜底文案，不阻塞）。
+  // 客户端下次进入拉 /about 即可看到最新，非写死。失败时返回 null（弹窗展示备用文案，不阻塞）。
   useEffect(() => {
     let cancelled = false
     void fetchHubAbout().then((info) => { if (!cancelled) setHubAboutInfo(info) })
@@ -231,7 +231,7 @@ export function useCatalog(lang: LocaleId) {
       return
     }
     let cancelled = false
-    // 批量一次查询；失败/返回 null 时按原逻辑照常提示，网络问题不吃掉真实更新
+    // 批量一次查询；失败/返回 null 时按原逻辑照常提示，网络问题不会漏掉真实更新
     void fetchNpmReleaseAge(releaseAgeCandidates).then((result) => {
       if (cancelled) return
       setReleaseAge({ key: releaseAgeKey, releases: result ?? EMPTY_RELEASES })
@@ -244,7 +244,7 @@ export function useCatalog(lang: LocaleId) {
 
   /**
    * 不能提示更新的包：
-   *  - npm 上最新版还没过发布冷却期（发布不满 24h，pnpm 会静默回退，点了也装不上）；
+   *  - npm 上最新版还没过发布冷却期（发布不满 24h，pnpm 会不提示地回退，点了也装不上）；
    *  - npm 上最新版并不高于已装版本 —— 更新走的是 `pkg@latest`，此时无论目录标到哪个 tag，
    *    都不可能装上（作者可能只打了 GitHub release 没发 npm），提示只会变成永远点不掉的循环。
    */
@@ -309,7 +309,7 @@ export function useCatalog(lang: LocaleId) {
    * 构建时注入的 PLUGIN_VERSION 是运行 bundle 的真实版本；测试/异常场景缺失时
    * 回退到安装时记录的版本。版本号不等即新版（版本号只在发版时变更，绝无降级场景）。
    *
-   * 另加 pnpm 发布冷却期：新版本发布还不满 24 小时（+30 分钟缓冲）时，pnpm 会静默
+   * 另加 pnpm 发布冷却期：新版本发布还不满 24 小时（+30 分钟缓冲）时，pnpm 会不提示地
    * 回退到旧版本，此时若提示「可更新」用户点了也更新不到。publishedAt 由接口中心按 npm
    * registry 真实发布时间下发（同源），据此判断最准。冷却期命中要单列成 `pending` 而不是
    * 落回「无更新」——回落会让弹窗在本机版本落后时谎称「已是最新」。

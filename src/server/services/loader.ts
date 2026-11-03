@@ -3,8 +3,8 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 运行中 loader 的读取、停用与热挂载：卸载成功后对匹配条目做 live-disable、
- * 安装成功后把新插件条目热挂进运行中的 loader，让两类操作都尽量立即生效
+ * 运行中 loader 的读取、停用与热加载：卸载成功后对匹配条目做 live-disable、
+ * 安装成功后把新插件条目热加载进运行中的 loader，让两类操作都尽量立即生效
  * （刷新页面即可，无需重启宿主）。
  */
 import { readFileSync } from 'node:fs'
@@ -12,7 +12,7 @@ import { join } from 'node:path'
 import { profileDirectory } from './profile/profile.ts'
 
 /**
- * 运行中 loader 的最小接口：卸载即时停用 / 安装即时热挂载用。
+ * 运行中 loader 的最小接口：卸载即时停用 / 安装即时热加载用。
  * 对应官方 `ctx.loader`（cordis-plugin-loader 的 Loader 服务）的读取、新建与移除面。
  * 移除方式：对匹配条目 live-disable（`entry.update({ disabled: true })`），
  * 而不是 `loader.remove(id)` —— disable 走 Entry.update 的 disabled 分支，不触发
@@ -32,7 +32,7 @@ export interface LoaderHandle {
    *  `- insert: - name: <pkg>` 行；Loader.write() 为空实现，不会写盘（重启后由
    *  profile 的 bundles 清单重新挂载，不会重复挂载）。返回新条目的 id。 */
   create(options: { id?: string; name: string }): Promise<string>
-  /** 按 id 解析条目：热挂载后确认 fiber 真的起来了（import 失败时条目在、但 fiber 为空）。 */
+  /** 按 id 解析条目：热加载后确认 fiber 真的起来了（import 失败时条目在、但 fiber 为空）。 */
   resolve(id: string): { id: string; options?: { name?: string; disabled?: boolean | null }; fiber?: unknown; subgroup?: unknown }
 }
 
@@ -82,7 +82,7 @@ function nameMatches(entryName: string | undefined, target: string): boolean {
   // 2) 条目是去 scope 的短名（bundle patch 手写短名最常见）
   if (e === tShort) return true
   // 3) 反向变体：目标短名可能就是条目的完整形式（条目 `scope-widget`，
-  //    目标短名 `widget` 是它的尾段）——用「条目名以短名结尾」收口，避免误伤。
+  //    目标短名 `widget` 是它的尾段）——以「条目名以短名结尾」作为匹配条件，避免误伤。
   if (tShort.length >= 2 && e.endsWith(`-${tShort}`)) return true
   // 4) 条目名是目标包内的模块路径（`aegis/extensions/dsh/index.js` 属于包 `aegis`，
   //    `@scope/pkg/dist/x.js` 属于 `@scope/pkg`）：归一化会吞掉路径分隔符，
@@ -102,12 +102,12 @@ function nameMatches(entryName: string | undefined, target: string): boolean {
  *  - `{ ok: true, live: false }`：宿主从未加载过它（磁盘已干净），无需刷新/重启；
  *  - `{ ok: true, live: true }`：曾在 loader 中存活且已 live-disable —— 服务端即时卸载；
  *    带客户端 UI 的插件面板要页面刷新才摘除（由调用方按 `hadClientUi` 决定 needsReload）；
- *  - `{ ok: false, live: true }`：disable 失败 / 超时，需宿主重启兜底清理。
+ *  - `{ ok: false, live: true }`：disable 失败 / 超时，需宿主重启后清理。
  * 宿主关键包（@deepseek-ai/* 与本插件自身）一律跳过。
  */
 export async function removeLoadedEntry(loader: LoaderHandle, name: string): Promise<{ ok: boolean; live: boolean }> {
   if (name === 'dsh-plugin' || name.startsWith('@deepseek-ai/')) return { ok: false, live: true }
-  // 5s 超时兜底：fiber dispose 卡住时不能让卸载任务（乃至整个队列）被拖死
+  // 5s 超时保护：fiber dispose 卡住时不能让卸载任务（乃至整个队列）被拖死
   const removal = (async () => {
     const entries = dumpLoaderEntries(loader)
     const match = entries.find((e) => e.name === name)
@@ -151,7 +151,7 @@ export async function removeLoadedEntry(loader: LoaderHandle, name: string): Pro
 }
 
 /**
- * 安装成功后把新插件热挂进运行中 loader（等价 profile bundle patch 的
+ * 安装成功后把新插件热加载进运行中 loader（等价 profile bundle patch 的
  * `- insert: - name: <pkg>` 行），让插件无需重启宿主即可生效。
  * 做法：在 Loader 根组新建条目并启动 —— Loader.write() 为空实现，不写盘；
  * 重启后由 profile 的 bundles 清单重新挂载，不会重复。
@@ -171,7 +171,7 @@ export async function mountLoadedEntry(loader: LoaderHandle, name: string): Prom
     console.log(`[hub-install] hot mount ${name}: entry ${id} created but not running (import failed?)`)
     return false
   })()
-  // 10s 超时兜底：import 卡住时不能让装完收尾（乃至整个队列）被拖死
+  // 10s 超时保护：import 卡住时不能让装完收尾（乃至整个队列）被拖死
   return Promise.race([
     mounting.catch((error) => {
       console.log(`[hub-install] hot mount ${name} failed: ${error instanceof Error ? error.message : String(error)}`)
@@ -183,7 +183,7 @@ export async function mountLoadedEntry(loader: LoaderHandle, name: string): Prom
 
 /**
  * 已安装包是否带客户端 UI（package.json 的 `dsh.client` 声明）：client-modules 据它把
- * 客户端 bundle 注入宿主页面。带 UI 的插件热挂载后需要页面重新加载才会渲染，
+ * 客户端 bundle 注入宿主页面。带 UI 的插件热加载后需要页面重新加载才会渲染，
  * 网页端与桌面端一致 —— `__DSH_BOOT__` 注入清单由宿主服务端按请求现场拼装，
  * 壳不缓存，所以桌面端刷新页面同样能拿到新清单，无需重开 App。
  */

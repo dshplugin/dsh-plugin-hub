@@ -8,7 +8,7 @@
  *    Markdown 变更记录（renderMarkdown 渲染，双语言按界面语言取 {zh,en} 对象），
  *    按钮「稍后再说 / 直接更新」，确认后进入安装弹窗执行覆盖重装。
  *  - 暂缓提示（state='pending'）：远端确有新版本，但发布还不满冷却期，pnpm 此时会
- *    静默回退到旧版本 —— 仍按「有新版本」展示，只给「稍后再说」，并说明稍后会自动提示。
+ *    不提示地回退到旧版本 —— 仍按「有新版本」展示，只给「稍后再说」，并说明稍后会自动提示。
  *  - 无更新 / 信息缺失（state='latest' / 'none'）：标题「当前版本」，版本号与本机版本取自
  *    currentVersion（构建注入的 PLUGIN_VERSION），**不得**用远端最新版号冒充本机版本。
  * 点击头部版本号（或「可更新」徽标）打开 —— 无论有无更新都能看到更新内容。
@@ -59,7 +59,7 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
   const notesHtml = notesBody.trim() ? renderMarkdown(notesBody) : null
   // 说明只在需要动作或需要解释时出现：已是最新时胶囊已说明状态，不再重复一句话
   const desc = hasUpdate ? t('hubUpdateDesc') : pending ? t('hubPendingDesc') : null
-  // 发布时间：ISO 字符串转本地可读格式；非法值静默隐藏
+  // 发布时间：ISO 字符串转本地可读格式；非法值直接隐藏
   let published: string | null = null
   if (info.publishedAt) {
     const d = new Date(info.publishedAt)

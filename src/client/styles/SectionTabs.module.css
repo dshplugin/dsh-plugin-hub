@@ -105,7 +105,7 @@
 
 /* —— 通知中心入口 —— */
 
-/* 通知铃铛按钮：位于「设置」tab 后边、靠右对齐（margin-left:auto 吃掉 tab 剩余空间），
+/* 通知铃铛按钮：位于「设置」tab 后边、靠右对齐（margin-left:auto 占满 tab 剩余空间），
    在 38px tab 栏里垂直居中；常态透明底只显铃铛轮廓，hover 浅灰，不抢 tab 视觉层级 */
 .noticeBtn {
   position: relative;

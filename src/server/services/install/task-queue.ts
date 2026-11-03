@@ -148,7 +148,7 @@ function pushLine(task: InstallTask, line: string): void {
   if (estimate > 0) {
     task.progress = Math.max(task.progress, estimate)
   } else if (task.status === 'running' && task.progress < 85) {
-    // 兜底：行无解析格式也随输出量推进，保证进度条始终在动（不会卡在 0）
+    // 补充：行无解析格式也随输出量推进，保证进度条始终在动（不会卡在 0）
     task.progress = Math.max(task.progress, 6 + Math.min(79, task.lines.length * 2))
   }
 }
@@ -220,7 +220,7 @@ export function desktopCliBootstrap(entry: string): string | null {
 }
 
 /**
- * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过发布冷却期的版本），
+ * 传给 CLI 的安装目标：锁定版本优先（Hub 自我更新提示的是已过发布冷却期的版本），
  * 其次 npm 的 add/update 都显式 `@latest`；git 源、全局安装、已带版本/tag 的 spec 保持原样。
  */
 export function npmInstallTargetOf(target: string, opts: { update: boolean; global: boolean; pinned?: string; add?: boolean }): string {
@@ -280,7 +280,7 @@ export function startPluginMutation(options: {
   globalNpm?: string[]
   /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
   displayTarget?: string
-  /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目，两类操作都尽量立即生效
+  /** 运行中 loader：安装成功后热加载新条目、卸载成功后停用旧条目，两类操作都尽量立即生效
    *  （缺失时安装/卸载仍需重启） */
   loader?: LoaderHandle
   /** 入队前已尝试的安装方式：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
@@ -290,10 +290,10 @@ export function startPluginMutation(options: {
   /** 自定义安装入口渠道（NPM 包卡片）：任务输出行与系统日志据此溯源「从哪个入口发起」；
    *  目录插件安装不传 */
   installChannel?: 'npm'
-  /** npm 源候选（首选在前）：传输层失败时按顺序换源重试，空/单个表示不降级 */
+  /** npm 源候选（首选在前）：传输层失败时按顺序换源重试，空/单个表示不换源 */
   registries?: string[]
   /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：Hub 自我更新提示的是已过发布冷却期的版本，
-   *  必须钉住安装，不能再用 @latest 被带回冷却期内的最新版 */
+   *  必须锁定安装，不能再用 @latest 被带回冷却期内的最新版 */
   installSpec?: string
 }): InstallTask {
   // 卸载入队时先快照「该包是否带客户端 UI」：卸载完成后包已从磁盘删除，读不到 package.json，
@@ -414,7 +414,7 @@ function spawnMutation(options: {
   task?: InstallTask
   /** 待重启行的展示目标（owner/repo）：与 mutation 目标解耦——卸载的 mutation 目标是 npm 包名，展示要回退到仓库名 */
   displayTarget?: string
-  /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目（缺失时仍需重启） */
+  /** 运行中 loader：安装成功后热加载新条目、卸载成功后停用旧条目（缺失时仍需重启） */
   loader?: LoaderHandle
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
   globalNpm?: string[]
@@ -439,10 +439,10 @@ function spawnMutation(options: {
   }
   // 安装/更新 npm 包都显式 @latest：pnpm add <pkg>（无版本）对已存在的精确 spec 是幂等的，
   // 会原样留用旧版本（更新不生效，普通安装也可能装回不支持当前宿主的旧包）。
-  // update 动作同样执行 `add <target>@latest`，CLI 动词透传 add，不与官方 update 动词分叉。
+  // update 动作同样执行 `add <target>@latest`，CLI 动词原样传递 add，不与官方 update 动词分叉。
   const isUpdate = action === 'update' || updateNpm === true
   const cliAction = action === 'update' ? 'add' : action
-  // 钉住版本优先于 @latest：提示的是「已过冷却期」的版本，装 latest 会被 pnpm 拒绝
+  // 锁定版本优先于 @latest：提示的是「已过冷却期」的版本，装 latest 会被 pnpm 拒绝
   const npmUpdateTarget = npmInstallTargetOf(target, { update: isUpdate, global: isGlobalNpm, pinned: installSpec, add: cliAction === 'add' })
   const args = isGlobalNpm
     ? ['install', '-g', ...(globalNpm ?? [])]
@@ -454,7 +454,7 @@ function spawnMutation(options: {
   if (task && !task.attempts.includes(executed)) {
     task.attempts.push(executed)
   }
-  // 单次 spawn 并捕获结果：流式输出打日志 + 超时/取消兜底，close 后 resolve。
+  // 单次 spawn 并捕获结果：流式输出打日志 + 超时、取消时收尾，close 后 resolve。
   // 不做任何终态后处理（exitCode/status/needsRestart 由下方统一收尾），
   // 这样全局 npm 首次失败后可以干净地换参数重试一次。
   const spawnOnce = (attemptArgs: string[], registry?: string): Promise<InstallResult> => new Promise((resolveOnce) => {
@@ -497,7 +497,7 @@ function spawnMutation(options: {
         }
       }
       // invocation.env 是「必须叠加」的变量（打包桌面端的 ELECTRON_RUN_AS_NODE）：
-      // 没有它时保持 env 原样透传，有它时必须基于完整环境叠加，否则子进程会丢掉 PATH。
+      // 没有它时保持 env 原样传递，有它时必须基于完整环境叠加，否则子进程会丢掉 PATH。
       // registry 最后写入：换源重试只改这一层，pnpm/npm 都认 npm_config_registry。
       const childEnv: NodeJS.ProcessEnv = { ...(env ?? process.env), ...(invocation.env ?? {}) }
       if (registry !== undefined) {
@@ -534,13 +534,13 @@ function spawnMutation(options: {
     }
     if (task) runningChildren.set(task.id, child)
 
-    // 兜底定时器句柄：整段超时 / exit 后 close 宽限 / 强制收尾
+    // 最终超时定时器句柄：整段超时 / exit 后 close 宽限 / 强制收尾
     let timer: ReturnType<typeof setTimeout> | undefined
     let progressTimer: ReturnType<typeof setInterval> | undefined
     let exitWatch: ReturnType<typeof setTimeout> | undefined
     let forceSettle: ReturnType<typeof setTimeout> | undefined
 
-    // 唯一收尾入口：close / error / 兜底超时 三者只放行一次，确保任务持续推进
+    // 唯一收尾入口：close / error / 最终超时 三者只放行一次，确保任务持续推进
     const settleOnce = (result: InstallResult): void => {
       if (settled) return
       settled = true
@@ -556,7 +556,7 @@ function spawnMutation(options: {
       timedOut = true
       stopChild(child)
     }, timeoutMs)
-    // 时间兜底：即使 CLI 静默不吐进度行，进度条也单调推进，不会卡在 0
+    // 时间补充：即使 CLI 悄悄不吐进度行，进度条也单调推进，不会卡在 0
     progressTimer = setInterval(() => {
       if (task && task.status === 'running' && task.progress < 85) task.progress += 1
     }, 500)
@@ -565,7 +565,7 @@ function spawnMutation(options: {
       if (kind === 'stdout') stdout = (stdout + text).slice(-CAPTURE_LIMIT_BYTES)
       else stderr = (stderr + text).slice(-CAPTURE_LIMIT_BYTES)
       if (task) {
-        // 原生透传 pnpm/npm 输出：stdout/stderr 原样入日志，不做格式化，保证报错信息完整可见
+        // 原生原样传递 pnpm/npm 输出：stdout/stderr 原样入日志，不做格式化，保证报错信息完整可见
         for (const line of text.split(/\r?\n|\r/)) {
           if (line.trim() !== '') pushLine(task, line.trimEnd())
         }
@@ -582,7 +582,7 @@ function spawnMutation(options: {
         if (settled) return
         if (task && task.status !== 'cancelled') pushLine(task, '[stale pipe] force closing child')
         stopChild(child)
-        // 清理后极端情况下 close 仍未触发（kill 失败）：再兜底强制收尾
+        // 清理后极端情况下 close 仍未触发（kill 失败）：再强制收尾一次
         forceSettle = setTimeout(() => {
           if (settled) return
           if (task && task.status !== 'cancelled') {
@@ -642,7 +642,7 @@ function spawnMutation(options: {
       if (task) pushLine(task, '[npm] peer-set resolution crashed npm (known npm bug) — retrying with --legacy-peer-deps')
       result = await spawnOnce(retryArgs, activeRegistry)
     }
-    // 超时被强杀 ≠ 没装上：命中的安装可能已经落盘（日志里 pnpm 已打印 Done，只是 dsh 进程迟迟不退出
+    // 超时被强杀 ≠ 没装上：命中的安装可能已经写入磁盘（日志里 pnpm 已打印 Done，只是 dsh 进程迟迟不退出
     // 而被我们超时掐掉）。判失败之前先复核 profile —— 目标已在依赖里、且声明分发的入口文件都在，
     // 就按成功收尾，避免「其实装好了却报安装失败」并被自动归档成未知失败。
     if (result.timedOut && !wasInstalled && action !== 'remove' && !isGlobalNpm && task?.status !== 'cancelled') {
@@ -676,17 +676,17 @@ function spawnMutation(options: {
           } else if (action === 'remove' && loader) {
             // 卸载成功 → 主动从运行中 loader 停用该包条目：
             //  - 停用成功：服务端即时卸载；带客户端 UI 的插件面板要页面刷新才摘除（无需重启宿主）
-            //  - 停用失败 / 超时：回退「待重启」兜底清理（刷新解决不了，登记常驻提醒）
+            //  - 停用失败 / 超时：回退「待重启」提醒（刷新解决不了，登记常驻提醒）
             const removal = await removeLoadedEntry(loader, target)
             task.needsRestart = !removal.ok
             task.needsReload = removal.ok && removal.live && task.hadClientUi === true
             if (task.needsRestart) addPendingRestart(displayTarget ?? target, 'uninstall')
             else clearPendingRestart(displayTarget ?? target)
           } else if (action !== 'remove' && !isUpdate && loader) {
-            // 安装成功 → 尝试把新插件热挂进运行中 loader，让插件无需重启宿主即生效。
+            // 安装成功 → 尝试把新插件热加载进运行中 loader，让插件无需重启宿主即生效。
             // 挂上了：服务端即时生效；带客户端 UI 的插件还需页面重新加载（宿主按请求现场
             //   拼装 __DSH_BOOT__ 注入清单，网页端与桌面端一致，刷新即可）。
-            // 挂不上 / 非 dsh 插件 / 无法定位包名：回退「待重启」提醒（保证不静默失效）。
+            // 挂不上 / 非 dsh 插件 / 无法定位包名：回退「待重启」提醒（保证不会无声失效）。
             const { name } = verifyInstalledEntry(profile, target)
             if (name !== null && isDshPlugin(profile, name) && await mountLoadedEntry(loader, name)) {
               task.needsReload = hasClientUi(profile, name)
@@ -696,7 +696,7 @@ function spawnMutation(options: {
               addPendingRestart(displayTarget ?? target, 'install')
             }
           } else {
-            // 更新（ESM 缓存下热挂取不到新代码）/ 无 loader 的安装或卸载 → 登记待重启：
+            // 更新（ESM 缓存下热加载取不到新代码）/ 无 loader 的安装或卸载 → 登记待重启：
             // 插件要宿主重启才会挂载/卸载干净，重启前一直提醒；展示目标用 displayTarget（owner/repo）
             task.needsRestart = true
             addPendingRestart(displayTarget ?? target, action === 'remove' ? 'uninstall' : 'install')
@@ -708,7 +708,7 @@ function spawnMutation(options: {
       }
     }
     // 带上最终生效的源：后续注解（如 [dsh-too-old]）读元数据必须与安装同源，
-    // 否则换过源之后会去另一个源查，查不到就静默漏报
+    // 否则换过源之后会去另一个源查，查不到就漏报
     return activeRegistry === undefined ? result : { ...result, registry: activeRegistry }
   })()
 }
@@ -854,7 +854,7 @@ async function annotateDshTooOld(result: InstallResult, options: {
   // 全局 npm 装的是本机 CLI 工具，不进 profile，没有宿主版本要求
   if ((options.globalNpm ?? []).length > 0) return result
   // 用安装**实际**使用的源读元数据：换源重试后候选表首位可能并不是真正生效的那个，
-  // 用错源会读不到包而静默漏报；私有源/镜像里同样能读到包声明的 engines
+  // 用错源会读不到包而漏报；私有源/镜像里同样能读到包声明的 engines
   const line = await dshTooOldMarker(options.target, { registry: result.registry ?? options.registries?.[0] })
   if (line === null) return result
   if (options.task && options.task.status !== 'cancelled') pushLine(options.task, line)
@@ -888,7 +888,7 @@ export async function runPluginMutation(options: {
   task?: InstallTask
   /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
   displayTarget?: string
-  /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目（缺失时仍需重启） */
+  /** 运行中 loader：安装成功后热加载新条目、卸载成功后停用旧条目（缺失时仍需重启） */
   loader?: LoaderHandle
   /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
   globalNpm?: string[]
@@ -897,7 +897,7 @@ export async function runPluginMutation(options: {
   /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：见 startPluginMutation 同名说明 */
   installSpec?: string
 }): Promise<InstallResult> {
-  // operation 日志只在运行期存在（宿主结束后可能清掉），先开抓取，退出后按路径读作兜底
+  // operation 日志只在运行期存在（宿主结束后可能清掉），先开抓取，退出后按路径读取作为后备
   const profileDir = profileDirectory(options.profile)
   const logTap = createOperationLogTap(profileDir)
   let result = await spawnMutation(options)

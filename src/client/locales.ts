@@ -257,14 +257,14 @@ export const zh = {
   requestTimeout: '请求超时：无法访问 GitHub 或网络不稳定，请稍后重试',
   confirmCancel: '取消',
   doneBtn: '完成',
-  // 结果视图兜底：仅当「刷新解决不了」时（热挂载失败 / 非 dsh 插件 / 更新）才出现单个「立即重启」；
+  // 结果视图补充：仅当「刷新解决不了」时（热加载失败 / 非 dsh 插件 / 更新）才出现单个「立即重启」；
   // 关闭弹窗即视为「稍后」，不再单独给「稍后重启」按钮
   restartNow: '立即重启',
   restarting: '正在重启…',
   restartHint: '重启会中断正在进行的安装/卸载任务，其进度将丢失。部分插件（如插件市场、顶层 bundle）需重启后才会生效。',
   // 桌面端宿主归应用壳管、插件重启不了它：点「立即重启」时改提示用户退出重开
   toastRestartDesktop: '桌面端的宿主由应用管理，请在应用菜单（或托盘）选择退出后重新打开，重启后生效',
-  // 装完即生效：插件已热挂进运行中 loader，结果弹窗关闭时自动刷新页面（无需用户点按钮）
+  // 装完即生效：插件已热加载进运行中 loader，结果弹窗关闭时自动刷新页面（无需用户点按钮）
   reloadHint: '插件已加载，关闭本窗口后会自动刷新页面生效。',
   toastInstalledLive: '安装成功，已立即生效',
   toastInstalledReload: '安装成功，正在自动刷新页面…',
@@ -311,7 +311,7 @@ export const zh = {
   // 非插件侧失败（未知原因）改为引导到插件中心仓库排查
   failHubIssueHint: '此失败已被判定为环境或插件中心自身问题（非插件作者问题），带着错误日志到插件中心仓库一键提交 Issue',
   failHubIssueBig: '反馈给插件中心排查',
-  // 未知失败兜底：不归到插件作者，引导到插件中心仓库排查
+  // 未知失败补充：不归到插件作者，引导到插件中心仓库排查
   failUnclassifiedHint: '{action}失败，原因未能自动识别。这通常不是插件自身的问题（可能与本机环境或插件中心有关），请将错误信息反馈给插件中心，由维护者排查。',
   // 插件中心自身状态类消息（插件未安装 / 不在此处卸载 / 已在队列中）：已安装列表与实读快照不同步，非插件问题，不引导提 Issue
   failHubStateHint: '插件列表状态已过期或与本地不一致：这次{action}的目标可能已经在列表里了（要升级请点「更新」），也可能已经不在已安装列表中，或已在队列中。这不是插件本身的问题 —— 请刷新页面后重试。',
@@ -491,8 +491,8 @@ export const zh = {
   update: '可更新',
   updateAvailable: '有更新',
   updateAvailableHint: '检测到更新：有版本号的仓库比对版本号，无版本号的仓库比对仓库最近更新时间',
-  // 冷却期未到：新版本发布未满 24 小时，此时安装会被 pnpm 静默回退（或直接拒绝），
-  // 给出确切可重试时刻，而不是让徽标静默消失、让用户以为已经是最新
+  // 冷却期未到：新版本发布未满 24 小时，此时安装会被 pnpm 不提示地回退（或直接拒绝），
+  // 给出确切可重试时刻，而不是让徽标悄悄消失、让用户以为已经是最新
   updatePending: '暂缓到 {time} 后可更新',
   updatePendingHint: '新版本发布还不满 24 小时，pnpm 暂时不让安装；到时间后再更新即可',
   hubUpdateHint: '检测到 DSH Plugin Hub 新版本，点击查看更新内容并更新',
@@ -509,7 +509,7 @@ export const zh = {
   hubVersionStatePending: '暂缓提示',
   close: '关闭',
   // 暂缓提示：远端确有新版本，但发布未满 24 小时（pnpm 发布冷却期），与「已是最新」严格区分
-  hubPendingDesc: '最新版已发布，但发布尚未满 24 小时：此时更新会被 pnpm 静默回退到旧版本，因此暂不提示。稍后这里会自动出现更新入口。',
+  hubPendingDesc: '最新版已发布，但发布尚未满 24 小时：此时更新会被 pnpm 不提示地回退到旧版本，因此暂不提示。稍后这里会自动出现更新入口。',
   // 头部「关注我们」弹窗：平台介绍（内容由 Worker /about Markdown 推送，非写死）
   followUs: '关注我们',
   aboutTitle: '关注我们',
@@ -700,7 +700,7 @@ export const en = {
   settingsDiagFail: 'Unreachable',
   // 系统诊断通道列表：一键全检 + 每通道一行，点击重测
   diagNpm: 'npm registry',
-  // 诊断 npm 行：未配置镜像时显示的兜底文案（探测仍打官方源）
+  // 诊断 npm 行：未配置镜像时显示的备用文案（探测仍打官方源）
   diagNpmUnset: 'Unset (follow local npm config)',
   diagGithub: 'GitHub',
   diagCatalog: 'Catalog site',
@@ -771,14 +771,14 @@ export const en = {
   requestTimeout: 'Request timed out: GitHub may be unreachable or the network is unstable — try again later',
   confirmCancel: 'Cancel',
   doneBtn: 'Done',
-  // 结果视图兜底：仅刷新解决不了时（热挂载失败 / 非 dsh 插件 / 更新）才给单个「立即重启」；
+  // 结果视图补充：仅刷新解决不了时（热加载失败 / 非 dsh 插件 / 更新）才给单个「立即重启」；
   // 关闭弹窗即视为「稍后」
   restartNow: 'Restart now',
   restarting: 'Restarting…',
   restartHint: 'Restarting interrupts any in-progress install / uninstall task — its progress will be lost. Some plugins (such as plugin markets / top-level bundles) only take effect after a restart.',
   // 桌面端：宿主由应用壳托管，插件重启不了它 —— 提示用户退出后重开
   toastRestartDesktop: 'In the desktop app the host is managed by the app: quit from the app menu (or tray) and open it again — the change takes effect after that restart',
-  // 免重启即生效：安装已热挂载进运行中 loader；关闭弹窗时页面自动刷新（不给手动刷新按钮）
+  // 免重启即生效：安装已热加载进运行中 loader；关闭弹窗时页面自动刷新（不给手动刷新按钮）
   reloadHint: 'The plugin is loaded — closing this window will refresh the page automatically.',
   toastInstalledLive: 'Installed — active now',
   toastInstalledReload: 'Installed — refreshing the page automatically…',
@@ -823,7 +823,7 @@ export const en = {
   // 非插件侧失败（未分类）改为投递到插件中心仓库分诊
   failHubIssueHint: 'This failure was classified as an environment or Plugin Hub issue (not a plugin-author issue). Open a pre-filled issue on the Plugin Hub repo with this error log.',
   failHubIssueBig: 'Report to the Plugin Hub for triage',
-  // 未知失败兜底：不投插件作者，改投插件中心仓库分诊
+  // 未知失败补充：不投插件作者，改投插件中心仓库分诊
   failUnclassifiedHint: 'The {action} failed and the cause could not be identified automatically. This is usually not the plugin itself (it may relate to your local environment or the Plugin Hub). Please report the error to the Plugin Hub so the maintainers can triage it.',
   // 插件中心自身的状态守卫消息（未安装 / 不在此处卸载 / 已在队列中 / 已安装）：已装列表与实读快照不同步 —— 不是插件问题，不引导提 Issue
   failHubStateHint: 'The plugin list is out of date or out of sync: the target of this {action} may already be in the list (use "Update" to upgrade), may no longer be in the installed list, or may already be queued. This is not a plugin problem — refresh the page and retry.',

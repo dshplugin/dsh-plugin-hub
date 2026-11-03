@@ -18,7 +18,7 @@ export declare function hasSubstantiveOutput(output: string): boolean;
 /**
  * 运行期抓取：宿主的 operation 日志只在命令运行期间存在，结束后可能被清理，
  * 退出后再按路径读往往已经拿不到。这里在安装过程中轮询 profile 下最新的
- * `.plugin-manager/logs/<operation>/pnpm.log`，用抓到的内容兜底。
+ * `.plugin-manager/logs/<operation>/pnpm.log`，用抓到的内容补全。
  * 只认本次运行产生的新文件（mtime 晚于启动基线），避免复述上一次安装的日志。
  */
 export declare function createOperationLogTap(profileDir: string): {

@@ -126,7 +126,7 @@ function InstalledRow({ item, t, langKey, canReveal, revealLabel, pendingRestart
             ? h('span', { className: styles.updateBadge, title: t('updatePendingHint') }, t('updatePending', { time: clockTime(item.pendingUntil) }))
             : null,
       ),
-      // 右上角 Star / Fork：与插件市场列表同一口径，装之前看过的热度在已安装里也能对照。
+      // 右上角 Star / Fork：与插件市场列表同一规则，装之前看过的热度在已安装里也能对照。
       // 自定义安装没有目录元数据（plugin === null），没有可展示的统计
       item.plugin
         ? h('div', { className: styles.rowStats },

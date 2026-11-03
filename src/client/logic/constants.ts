@@ -33,7 +33,7 @@ declare const __PLUGIN_VERSION__: string
 /**
  * 插件当前版本号，供头部标题展示「DSH Plugin Hub v0.1.1」。
  * tsdown 构建时用 define 把 __PLUGIN_VERSION__ 替换成 package.json 的版本号；
- * node --test 直接 import 本模块时该标识符不存在，typeof 守卫兜底为空串。
+ * node --test 直接 import 本模块时该标识符不存在，typeof 守卫缺省为空串。
  */
 export const PLUGIN_VERSION: string =
   typeof __PLUGIN_VERSION__ === 'string' ? __PLUGIN_VERSION__ : ''

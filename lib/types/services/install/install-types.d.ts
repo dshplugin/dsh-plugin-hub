@@ -34,14 +34,14 @@ export interface InstallTask {
     status: 'pending' | 'running' | 'done' | 'failed' | 'cancelled';
     timedOut: boolean;
     exitCode: number | null;
-    /** 0-100 估算进度：解析 pnpm 的 `Progress: resolved…` 输出，阶段行兜底 */
+    /** 0-100 估算进度：解析 pnpm 的 `Progress: resolved…` 输出；没有进度行时按阶段行估算 */
     progress: number;
     /** 输出行最新在前（消费方展示尾部）。 */
     lines: string[];
-    /** 完成后是否仍需宿主重启才生效：仅「热挂载失败 / 非 dsh 插件 / 更新（ESM 缓存取不到新代码）/
-     *  无 loader」等刷新解决不了的兜底场景为 true（弹窗给「立即重启」）；其余一律 false。 */
+    /** 完成后是否仍需宿主重启才生效：仅「热加载失败 / 非 dsh 插件 / 更新（ESM 缓存取不到新代码）/
+     *  无 loader」等刷新解决不了的例外场景为 true（弹窗给「立即重启」）；其余一律 false。 */
     needsRestart: boolean;
-    /** 完成结果是否只需刷新页面即生效（插件已热挂进运行中 loader，仅剩客户端 UI 待页面重新加载，
+    /** 完成结果是否只需刷新页面即生效（插件已热加载进运行中 loader，仅剩客户端 UI 待页面重新加载，
      *  网页端与桌面端一致）：true 时关闭结果弹窗即自动刷新页面，不给手动刷新按钮。 */
     needsReload?: boolean;
     /** 自更新成功、但该 profile 的 dsh.profile.bundles 已不含 dsh-plugin：重启后市场不会出现 */
@@ -75,7 +75,7 @@ export interface QueueItem {
         installChannel?: 'npm';
         /** npm 源候选（首选在前）：传输层失败时按顺序换源重试 */
         registries?: string[];
-        /** 精确安装 spec（Hub 自我更新钉版本） */
+        /** 精确安装 spec（Hub 自我更新时锁定版本） */
         installSpec?: string;
     };
 }

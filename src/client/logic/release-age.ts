@@ -3,7 +3,7 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 发布冷却期的时间判定（纯函数）：pnpm 会静默回退发布还不满 24 小时的版本，
+ * 发布冷却期的时间判定（纯函数）：pnpm 会不提示地回退发布还不满 24 小时的版本，
  * 故发布太新的版本不该提示更新。Hub 自身更新与插件更新共用同一规则。
  */
 import type { HubUpdateInfo, HubUpdateState, HubUpdateVersion } from '../types.ts'
@@ -74,7 +74,7 @@ export interface UpdateDecision {
  * 更新命令执行的是 `pkg@latest`，所以「目录里标的版本」不是最终能装上的版本：
  * 作者可能只打了 GitHub release 没发 npm —— 此时提示会变成永远点不掉的循环。
  * 任一信息缺失（查不到发布信息 / 没有已装版本记录）返回 offered，交回调用方原有判定：
- * 宁可提示，也不因为一次查询失败把真实更新吃掉。
+ * 宁可提示，也不因为一次查询失败漏掉真实更新。
  */
 export function updateDecision(
   release: { version: string; publishedAt: string } | null,

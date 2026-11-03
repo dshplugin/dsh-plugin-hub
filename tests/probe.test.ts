@@ -121,7 +121,7 @@ test('systemProxy: 读到的代理必须是 http://host:port 形态（读不到�
 
 /**
  * 假的 curl：模拟 Windows Schannel「取不到吊销信息」——带降级参数仍失败，
- * 只有显式 --ssl-no-revoke 才通。用来验证二级兜底真的会重跑一次。
+ * 只有显式 --ssl-no-revoke 才通。用来验证二级重试真的会重跑一次。
  */
 const FAKE_CURL = `#!/bin/sh
 for a in "$@"; do
@@ -156,10 +156,10 @@ async function withFakeCurl(fn: () => Promise<void>): Promise<void> {
   }
 }
 
-test('curlProbe: 降级后仍被吊销检查拦死时，再用 --ssl-no-revoke 兜底一次', async () => {
+test('curlProbe: 降级后仍被吊销检查拦死时，再用 --ssl-no-revoke 再试一次', async () => {
   await withFakeCurl(async () => {
     const r = await probeUrl('https://github.com/', '', 5000)
-    // 首次（--ssl-revoke-best-effort）失败 → 二级兜底重跑后取到 200，判为可达而非 [network]
+    // 首次（--ssl-revoke-best-effort）失败 → 二级重试后取到 200，判为可达而非 [network]
     assert.equal(r.ok, true)
     assert.equal(r.status, 200)
     assert.equal(r.reason, null)

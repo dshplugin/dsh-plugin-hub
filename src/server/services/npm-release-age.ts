@@ -4,7 +4,7 @@
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
  * npm 包最新版本的发布时间查询：为「已安装插件是否有更新」提供发布冷却期依据。
- * pnpm 对发布不满 24h（dsh profile minimumReleaseAge=1440）的版本会静默回退到旧版本，
+ * pnpm 对发布不满 24h（dsh profile minimumReleaseAge=1440）的版本会不提示地回退到旧版本，
  * 因此发布还不满 24 小时的版本不该提示更新（否则用户点了也装不上）。
  * 结果按包名内存缓存，同一次会话内不重复请求；失败/超时/响应过大一律返回 null，绝不抛错、绝不阻塞。
  */
@@ -17,13 +17,13 @@ export interface NpmRelease {
   publishedAt: string
 }
 
-/** 最新版 + 可钉住的安装版本：安装钉住后者，pnpm 才不会回退到旧版本。 */
+/** 最新版 + 可锁定的安装版本：安装锁定后者，pnpm 才不会回退到旧版本。 */
 export interface NpmReleaseWithInstallable extends NpmRelease {
-  /** 已过发布冷却期的最高稳定版；时间表缺失或没有满足项时为 null（调用方退回不钉版本）。 */
+  /** 已过发布冷却期的最高稳定版；时间表缺失或没有满足项时为 null（调用方退回不锁定版本）。 */
   installable: NpmRelease | null
 }
 
-/** pnpm profile 默认 minimumReleaseAge=1440 分钟；+30 分钟缓冲与客户端 release-age 判定同口径。 */
+/** pnpm profile 默认 minimumReleaseAge=1440 分钟；+30 分钟缓冲与客户端 release-age 判定同一套规则。 */
 export const MIN_RELEASE_AGE_MS = 24 * 60 * 60 * 1000 + 30 * 60 * 1000
 
 /** 请求体包名数量上限：只为已安装插件按需查询，几十个足矣，封顶防滥用。 */
@@ -54,7 +54,7 @@ export function latestReleaseOf(packument: unknown): NpmRelease | null {
 }
 
 /**
- * 已过发布冷却期的最高稳定版本：安装钉住它，pnpm 不会回退到旧版本。
+ * 已过发布冷却期的最高稳定版本：安装锁定它，pnpm 不会回退到旧版本。
  * 只看纯 x.y.z（预发布版不参与，避免把用户带到不兼容预览版）；时间表缺失或无满足项返回 null。
  */
 export function installableReleaseOf(packument: unknown, now = Date.now()): NpmRelease | null {
@@ -119,7 +119,7 @@ function getJson(url: string, timeoutMs: number): Promise<string | null> {
   })
 }
 
-/** 拉取一个包的完整 packument 正文；配了代理时复用与安装/目录同一套代理口径（curl 子进程注入 proxy env）。 */
+/** 拉取一个包的完整 packument 正文；配了代理时复用与安装/目录同一套代理规则（curl 子进程注入 proxy env）。 */
 async function fetchPackument(url: string, proxy: string, timeoutMs: number): Promise<string | null> {
   if (proxy !== '') {
     const r = await fetchViaCurl(url, proxy, timeoutMs)
@@ -128,7 +128,7 @@ async function fetchPackument(url: string, proxy: string, timeoutMs: number): Pr
   return getJson(url, timeoutMs)
 }
 
-/** 查询一个包的最新版本、发布时间与可钉住的安装版本（成功结果按源缓存 10 分钟）；registry 为空回退官方源，失败返回 null。 */
+/** 查询一个包的最新版本、发布时间与可锁定的安装版本（成功结果按源缓存 10 分钟）；registry 为空回退官方源，失败返回 null。 */
 export async function lookupReleaseAge(
   packageName: string,
   registry: string,

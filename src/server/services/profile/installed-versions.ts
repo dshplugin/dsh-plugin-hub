@@ -79,7 +79,7 @@ export function recordInstalledVersion(profile: string, repo: string, version: s
 export function recordResolvedNpmPackage(profile: string, repo: string, npmPackage: string): void {
   const table = readInstalledVersions(profile)
   const key = repo.toLowerCase()
-  // 显式写全字段：这一步发生在安装开始时，版本还不知道 —— 但落盘记录必须是完整形状，
+  // 显式写全字段：这一步发生在安装开始时，版本还不知道 —— 但写入磁盘记录必须是完整形状，
   // 否则只带 npmPackage 的残缺记录会在客户端版本比较时崩掉整块界面
   table[key] = {
     version: table[key]?.version ?? '',
@@ -101,7 +101,7 @@ function writeVersions(profile: string, table: InstalledVersionTable): void {
   const file = versionsFilePath(profile)
   mkdirSync(dirname(file), { recursive: true })
   // 先写临时文件再原子替换：直接覆盖时进程被杀/磁盘满会留下截断的 JSON，
-  // 下次读取整份账本都会失效（更新检测静默停摆），而用户看不到任何报错
+  // 下次读取整份账本都会失效（更新检测随之失效），而用户看不到任何报错
   const tmp = `${file}.tmp`
   writeFileSync(tmp, JSON.stringify(table, null, 2) + '\n', 'utf8')
   renameSync(tmp, file)

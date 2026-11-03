@@ -77,7 +77,7 @@ export function githubTarget(repo: string, ref?: string | null): string | null {
  * 非命令输入原样返回。兼容「直接粘贴完整命令」（防用户输错）：--profile 必填且只有长选项
  * （官方 CLI 无 -p 简写，省略即报错），支持 `--profile=<name>` 等号形式，命令大小写不敏感。
  * update = 更新已安装目标到最新；remove 不在此列（卸载走 /uninstall 路由，按已装包名直卸）。
- * 与客户端 CustomInstallView 口径一致。
+ * 与客户端 CustomInstallView 规则一致。
  */
 const DSH_PLUGIN_CMD_RE = /^dsh\s+plugin\s+--profile(?:\s+|=)\S+\s+(add|update)\s+(.+)$/i
 
@@ -90,7 +90,7 @@ export function installTargetOf(value: string): string {
 /**
  * npm 全局安装命令（官方 README 的 `npm install -g <pkgs>`，如 dsh-tui 的安装命令）——
  * 提取 -g 之后的包列表。支持 `npm install|i` 与 `-g|--global`；任一包名非法（或格式
- * 不匹配）返回 null，由调用方按「不支持的目标」处理。与客户端 CustomInstallView 同口径。
+ * 不匹配）返回 null，由调用方按「不支持的目标」处理。与客户端 CustomInstallView 同一套规则。
  */
 const NPM_GLOBAL_CMD_RE = /^npm\s+(?:install|i)\s+(?:-g|--global)\s+(.+)$/i
 

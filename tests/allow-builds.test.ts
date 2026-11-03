@@ -11,7 +11,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { addAllowBuildsKey } from '../src/server/services/profile/profile.ts'
 
-/** 在临时 DSH_HOME 的 desktop profile 下写入口径文件，调用 addAllowBuildsKey 后回读。 */
+/** 在临时 DSH_HOME 的 desktop profile 下写入规则文件，调用 addAllowBuildsKey 后回读。 */
 function writeAndRead(content: string, key: string): string {
   const home = mkdtempSync(join(tmpdir(), 'dsh-allow-builds-'))
   const dir = join(home, 'profiles', 'desktop')

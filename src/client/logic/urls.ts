@@ -228,7 +228,7 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
  * 错误摘要，供插件中心维护者分诊 —— 不再把环境问题/插件中心自身问题误投给插件作者。
  */
 export type HubIssueVariant =
-  /** 缺省：安装器主动把失败送到插件中心分诊（未分类兜底） */
+  /** 缺省：安装器主动把失败送到插件中心分诊（未分类时的默认去向） */
   | 'triage'
   /** 从判定由插件中心自己产出的分支（插件打包问题 / allowBuilds 拦截）的次要入口提交：用户怀疑是误报 */
   | 'misjudge'
@@ -249,7 +249,7 @@ export function hubIssueUrl(
   const zhWord = actionWordZh(action)
   const repo = pluginRepo && pluginRepo.trim() !== '' ? pluginRepo.trim() : 'unknown'
   const title = variant === 'misjudge'
-    // 标题就点明「可能是误判」，维护者一眼能区分它和未分类兜底
+    // 标题就点明「可能是误判」，维护者一眼能区分它和未分类时的默认去向
     ? `[dsh-plugin-hub] possible misjudgment: ${repo}`
     : `[dsh-plugin-hub] ${reasonTitleOf(kind, action)}: ${repo}`
   const code = coreErrorCode(message)
@@ -264,7 +264,7 @@ export function hubIssueUrl(
       ...(variant === 'misjudge'
         // 这些分支的判据由插件中心自己产出、或掺了我们的动作（自动放行 allowBuilds）——
         // 一旦我们自己误报，用户就被送去作者仓库、我们永远收不到反馈。
-        // 正文写清它来自哪条分支、判据是谁给的，维护者才不会把它当成未分类兜底。
+        // 正文写清它来自哪条分支、判据是谁给的，维护者才不会把它当成未分类时的默认去向。
         ? [
           '- Filed from: a branch that normally routes to the plugin repo — filed here because that verdict may be our own misjudgment.',
           '- Source of that verdict: produced by dsh-plugin-hub\'s own check or its auto-allow retry, not by plain pnpm output.',

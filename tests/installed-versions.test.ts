@@ -60,7 +60,7 @@ test('写入是原子的：不留临时文件，内容完整可读', () => {
     const file = versionsFilePath('web')
     // 先写 tmp 再 rename：成功后不能残留 .tmp，否则下次 rename 前的半成品可能被误读
     assert.equal(existsSync(`${file}.tmp`), false)
-    // 文件本身必须是完整 JSON（截断会让整份账本失效、更新检测静默停摆）
+    // 文件本身必须是完整 JSON（截断会让整份账本失效、更新检测随之失效）
     const parsed = JSON.parse(readFileSync(file, 'utf8')) as Record<string, { version?: string }>
     assert.equal(parsed['owner/repo']?.version, '1.2.3')
   })

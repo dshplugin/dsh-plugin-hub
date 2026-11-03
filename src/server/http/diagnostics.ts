@@ -14,7 +14,7 @@ import { gitLsRemote, probeUrl, systemProxy } from '../services/probe.ts'
 import { appendLog } from '../services/log.ts'
 import { readJsonBody, requireTrustedPost, sendJson, type WebRoute, type WebServerService } from './shared.ts'
 
-/** 本机实际生效的 npm registry：诊断与安装同口径 —— 设置里留空时读用户 npm 配置
+/** 本机实际生效的 npm registry：诊断与安装同一套规则 —— 设置里留空时读用户 npm 配置
  *  （含 profile 目录的 .npmrc），而不是硬探官方源，避免「能装但诊断说源不通」。
  *  读不到（npm 缺失/超时/输出异常）时回退官方源。 */
 function configuredNpmRegistry(profile: string): string {
@@ -75,7 +75,7 @@ export function registerDiagnosticsRoutes(webServer: WebServerService, profile: 
         }
         const settings = loadSettings(profile)
         // npm 通道：设置里配置了镜像源就探测该镜像（安装通道吃同一个 registry）；
-        // 未配置（空串）时探测本机 npm 配置里实际生效的源 —— 与安装同口径。
+        // 未配置（空串）时探测本机 npm 配置里实际生效的源 —— 与安装同一套规则。
         const registry = settings.npmRegistry.replace(/\/+$/, '') || configuredNpmRegistry(profile)
         // 连通性自检打各通道的轻量资源：npm 源拉包元数据、GitHub 行探小仓库、
         // 目录站按 Range 取 1KB（探市场真实下载的 plugins.zh.json，但不整份下载）。
@@ -91,7 +91,7 @@ export function registerDiagnosticsRoutes(webServer: WebServerService, profile: 
           { key: 'catalog', url: 'https://api.dsh-plugin.org/plugins.zh.json', display: '', cmd: 'curl -r 0-1023 https://api.dsh-plugin.org/plugins.zh.json', range: '0-1023' },
         ]
         // 配置了 HTTP 代理：追加一行代理诊断 —— 用该代理打 github.com（安装通道真实访问的地址），
-        // 验证「代理能不能把请求带出去」。与安装同口径：curl 子进程注入该代理 env。
+        // 验证「代理能不能把请求带出去」。与安装同一套规则：curl 子进程注入该代理 env。
         // 设置里未配置代理时不显示该行（跟随系统代理/直连，无「代理本身」可验证）。
         if (settings.proxy !== '') {
           allChecks.push({ key: 'proxy', url: 'https://github.com', display: settings.proxy, cmd: `curl -s -o /dev/null -x ${settings.proxy} https://github.com`, proxy: settings.proxy })
@@ -114,7 +114,7 @@ export function registerDiagnosticsRoutes(webServer: WebServerService, profile: 
         const results: Array<{ key: string; ok: boolean }> = []
         for (const c of checks) {
           send({ type: 'probe', key: c.key, cmd: c.cmd, display: c.display })
-          // git 行走真实克隆握手（gitLsRemote），其余走 curl 探测，两路都带超时兜底
+          // git 行走真实克隆握手（gitLsRemote），其余走 curl 探测，两路都带超时保护
           const r = c.git
             ? await gitLsRemote(c.url, c.proxy ?? effectiveProxy, 6000)
             : await probe(c.url, c.proxy, c.range)

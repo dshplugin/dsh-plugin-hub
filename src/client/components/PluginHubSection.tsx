@@ -76,10 +76,10 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   const [confirmPlugin, setConfirmPlugin] = useState<HubPlugin | null>(null)
   /** 弹窗动作是否为「更新」：已安装插件点「更新」→ 走同一条 add 命令原位覆盖重装，文案区分安装/更新 */
   const [confirmIsUpdate, setConfirmIsUpdate] = useState(false)
-  /** 安装要钉住的精确版本：自我更新提示的版本、新安装的已过冷却期版本都要钉住，
+  /** 安装要锁定的精确版本：自我更新提示的版本、新安装的已过冷却期版本都要锁定，
    *  否则 @latest 会被 pnpm 带回冷却期内的旧版。 */
   const [confirmPinVersion, setConfirmPinVersion] = useState<string | null>(null)
-  /** 冷却期查询的在途序号：只采用最后一次弹窗的查询结果，避免切换插件后旧结果覆盖 */
+  /** 冷却期查询的进行中序号：只采用最后一次弹窗的查询结果，避免切换插件后旧结果覆盖 */
   const installPinSeq = useRef(0)
   /** 命令行安装确认弹窗：记录待安装的裸目标（npm 包名）——
    *  与应用商店同一套确认/进度/结果弹窗，提供时 plugin 传 null 走 customTarget 模式 */
@@ -106,12 +106,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   /** 安装/卸载完成后的结果视图：停留弹窗内，点「完成」关闭 */
   const [installDone, setInstallDone] = useState(false)
   const [uninstallDone, setUninstallDone] = useState(false)
-  /** 结果视图是否给「立即重启」：服务端任务终态带出。仅刷新解决不了的兜底场景
-   *  （热挂载失败 / 非 dsh 插件 / 更新）为 true；其余（热挂载成功、卸载已即时停用）为 false，
+  /** 结果视图是否给「立即重启」：服务端任务终态带出。仅刷新解决不了的例外场景
+   *  （热加载失败 / 非 dsh 插件 / 更新）为 true；其余（热加载成功、卸载已即时停用）为 false，
    *  结果视图只给「完成」，关闭时自动刷新页面生效 */
   const [installNeedsRestart, setInstallNeedsRestart] = useState(false)
   const [uninstallNeedsRestart, setUninstallNeedsRestart] = useState(false)
-  /** 结果视图是否显示「关闭后自动刷新」说明：插件已热挂进运行中 loader（安装）、或卸载后
+  /** 结果视图是否显示「关闭后自动刷新」说明：插件已热加载进运行中 loader（安装）、或卸载后
    *  插件面板仍残留在当前页面（卸载）。关闭弹窗即整页刷新，不给手动刷新按钮。 */
   const [installNeedsReload, setInstallNeedsReload] = useState(false)
   /** 市场自更新成功、但 profile 的 bundle 列表里已不含 dsh-plugin：结果页提示重新勾选 */
@@ -135,7 +135,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     return () => { alive = false }
   }, [])
 
-  // 样式自愈：宿主重启/热更可能移除 <style> 标签而模块缓存未失效（factory 不重跑、CSS 不回来）。
+  // 样式自动恢复：宿主重启/热更可能移除 <style> 标签而模块缓存未失效（factory 不重跑、CSS 不回来）。
   // 挂载与每次切换视图时比对全局 CSS 清单，把缺失的样式补注入回去 —— 用户无需再手动点击恢复。
   useEffect(() => { ensurePluginCss() }, [view])
 
@@ -156,7 +156,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       setInstallNeedsReload(reload)
       setInstallBundleDeselected(bundleDeselected === true)
       if (viaModal) setInstallDone(true)
-      // 弹窗外的后台安装：给结果 toast；需要页面重载时（热挂载的客户端 UI）读完后自动刷新
+      // 弹窗外的后台安装：给结果 toast；需要页面重载时（热加载的客户端 UI）读完后自动刷新
       else setToast({
         id: Date.now(),
         kind: reload ? 'installedReload' : needsRestart ? 'done' : 'installedLive',
@@ -276,7 +276,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     return () => window.clearTimeout(timer)
   }, [toast])
 
-  /** 复制文本到剪贴板，返回是否成功（Clipboard API + 隐藏 textarea 兜底）。 */
+  /** 复制文本到剪贴板，返回是否成功（Clipboard API + 隐藏 textarea 作为后备）。 */
   const doCopy = async (text: string): Promise<boolean> => {
     try {
       await navigator.clipboard.writeText(text)
@@ -300,7 +300,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }
   }
 
-  /** 命令行安装目标是否已安装（与服务端 already 判定同口径）：GitHub 地址按仓库身份匹配
+  /** 命令行安装目标是否已安装（与服务端 already 判定同一套规则）：GitHub 地址按仓库身份匹配
    *  （归一化后比对已装项的 repo/spec），npm 包名按依赖 key 直查。命中 → 弹窗转「更新」语义
    *  （mode=update 放行覆盖重装），避免重复点击撞 409 报错。 */
   const customTargetInstalled = (raw: string): boolean => {
@@ -334,8 +334,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     setConfirmPlugin(null)
   }
 
-  /** 新安装先查「已过 pnpm 发布冷却期」的版本：命令条与执行都钉住它，
-   *  否则 pnpm 会把发布未满 24h 的最新版静默回退成很旧的版本。查不到则不钉，由服务端兜底解析。 */
+  /** 新安装先查「已过 pnpm 发布冷却期」的版本：命令条与执行都锁定它，
+   *  否则 pnpm 会把发布未满 24h 的最新版不提示地回退成很旧的版本。查不到则不锁定，由服务端再解析一次。 */
   const resolveInstallPin = (p: HubPlugin) => {
     // 目录下发了官方安装命令的条目（CLI-only / 人工干预）只展示该命令，追加版本会改坏它
     if (p.install?.command !== undefined && p.install.command !== '') return
@@ -365,7 +365,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   }
 
   /** 「立即重启」：POST 同源 /restart，宿主进程自杀重启；随后轮询服务恢复后整页刷新。
-   *  只在刷新解决不了的兜底场景（热挂载失败 / 非 dsh 插件 / 更新）出现。
+   *  只在刷新解决不了的例外场景（热加载失败 / 非 dsh 插件 / 更新）出现。
    *  桌面端宿主归应用壳管（服务端回 `desktop: true` 且不重启）：不轮询，改提示退出重开。 */
   const requestRestart = async () => {
     if (restarting) return
@@ -380,7 +380,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       /* 服务已终止，无需处理 */
     }
     if (desktop) {
-      // 宿主不会重启，轮询等不到新服务：直接给出正确口径
+      // 宿主不会重启，轮询等不到新服务：直接给出正确规则
       setRestarting(false)
       setToast({ id: Date.now(), kind: 'restartDesktop' })
       return
@@ -409,7 +409,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   }
 
   const { total, installedName, installedVersion, hasUpdate } = catalog
-  // 统计数字：官网 /api/stats.json 优先；拉取失败时用已加载列表兜底，避免展示 undefined。
+  // 统计数字：官网 /api/stats.json 优先；拉取失败时改用已加载列表，避免展示 undefined。
   const statsTotal = catalog.stats?.total ?? total
   const statsVerified = catalog.stats?.verified ?? 0
 
@@ -472,12 +472,12 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
             setInstallDone(false)
             setConfirmIsUpdate(update)
             setConfirmPinVersion(null)
-            // 本次弹窗重新开始：作废上一次仍在途的冷却期查询
+            // 本次弹窗重新开始：作废上一次还没返回的冷却期查询
             ++installPinSeq.current
             // 与卸载一致：重置弹窗关联任务，避免新弹窗误匹配到进行中的任务而禁用安装按钮
             queue.clearModalTask()
             setConfirmPlugin(p)
-            // 更新走 @latest 语义（客户端已按冷却期筛选），只有新安装需要钉住冷却期内可用的版本
+            // 更新走 @latest 语义（客户端已按冷却期筛选），只有新安装需要锁定冷却期内可用的版本
             if (!update) resolveInstallPin(p)
           },
           onUninstall: (p) => {
@@ -511,7 +511,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
               setInstallDone(false)
               setConfirmIsUpdate(true)
               setConfirmPinVersion(null)
-              // 更新不钉版本：作废可能仍在途的新安装冷却期查询
+              // 更新不锁定版本：作废可能还没返回的新安装冷却期查询
               ++installPinSeq.current
               queue.clearModalTask()
               setConfirmPlugin(item.plugin)
@@ -589,9 +589,9 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
         if (hubEntry) {
           setInstallDone(false)
           setConfirmIsUpdate(true)
-          // 钉住本次提示的版本：最新版可能仍在冷却期内，@latest 会被 pnpm 拒绝
+          // 锁定本次提示的版本：最新版可能仍在冷却期内，@latest 会被 pnpm 拒绝
           setConfirmPinVersion(catalog.hubUpdateTarget?.version ?? null)
-          // 作废可能仍在途的新安装冷却期查询，避免它覆盖本次钉住的版本
+          // 作废可能还没返回的新安装冷却期查询，避免它覆盖本次锁定的版本
           ++installPinSeq.current
           queue.clearModalTask()
           setConfirmPlugin(hubEntry)
@@ -600,7 +600,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
     }),
     // 「关注我们」弹窗：GitHub 图标后按钮点击打开 —— 平台介绍 + 用户反馈群二维码，
     // 内容由 dsh-update Worker 的 /about 接口以 Markdown 形式推送，作者随时可改，非写死。
-    // Worker 未推送（info 为 null）时弹窗仍能打开并展示兜底文案，不影响其他功能。
+    // Worker 未推送（info 为 null）时弹窗仍能打开并展示备用文案，不影响其他功能。
     showAbout && h(AboutModal, {
       info: catalog.hubAboutInfo ?? null,
       lang,
@@ -701,7 +701,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       needsRestart: installNeedsRestart,
       needsReload: installNeedsReload,
       bundleDeselected: installBundleDeselected,
-      // 结果弹窗关闭即生效：安装热挂载的插件要页面重载才渲染客户端 UI → 自动刷新，无需用户点按钮
+      // 结果弹窗关闭即生效：安装热加载的插件要页面重载才渲染客户端 UI → 自动刷新，无需用户点按钮
       onClose: () => {
         const reload = installDone && installNeedsReload
         setConfirmPlugin(null)
@@ -711,7 +711,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onCopy: () => copyCommand(confirmPlugin, confirmPinVersion ?? undefined),
       onInstall: () => queue.installNow(confirmPlugin, {
         update: confirmIsUpdate,
-        // 新安装钉住已过冷却期的版本：查询尚未回来时为空，服务端会自行解析
+        // 新安装锁定已过冷却期的版本：查询尚未回来时为空，服务端会自行解析
         pinVersion: confirmPinVersion ?? undefined,
       }),
       // 重启：结果视图「立即重启」也会中断进行中的任务 → 先弹重启确认弹窗
@@ -856,7 +856,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       onRunDiagnostics: openDiagnostics,
       onClose: () => setErrorMsg(null),
     }),
-    // 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出（兜底场景），单个「立即重启」，关闭即视为稍后
+    // 待重启确认弹窗：已安装列表行内「重启」按钮点击后弹出（例外场景），单个「立即重启」，关闭即视为稍后
     showRestartConfirm && h(RestartConfirmModal, {
       t,
       restarting,

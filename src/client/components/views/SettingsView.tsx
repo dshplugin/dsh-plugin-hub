@@ -176,7 +176,7 @@ export function SettingsView({ t, settings, update, reset, env, onCopy, openSect
         className: `${styles.controlDropdown} ${dropdownStyles.dropdownFill}`,
       }),
     }),
-    // 自动换源：只在公共源之间切换；自定义/内网源不降级，避免私有包名泄露
+    // 自动换源：只在公共源之间切换；自定义/内网源不换源，避免私有包名泄露
     h(SettingRow, {
       title: t('settingsRegistryFallback'),
       desc: t('settingsRegistryFallbackDesc'),

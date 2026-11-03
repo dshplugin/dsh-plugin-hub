@@ -10,7 +10,7 @@ import type { HubPlugin, LocaleId } from '../types.ts'
 import { normalize } from '../logic/normalize.ts'
 
 // 目录/统计数据经服务端 /catalog 代理路由获取（curl 子进程注入设置里的代理），
-// 与 npm / git 安装通道同一代理口径 —— 浏览器不直连 api.dsh-plugin.org。
+// 与 npm / git 安装通道同一代理规则 —— 浏览器不直连 api.dsh-plugin.org。
 const PROXY_BASE = '/dsh-plugin-hub/catalog'
 // refresh=1：跳过服务端 1 小时缓存直接回源（失败仍回退旧缓存），供「强制刷新」使用
 const PLUGINS_URL = (lang: LocaleId, refresh: boolean) => `${PROXY_BASE}?lang=${lang}${refresh ? '&refresh=1' : ''}`

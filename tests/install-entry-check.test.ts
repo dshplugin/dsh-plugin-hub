@@ -5,7 +5,7 @@
  *
  * 「安装超时后复核是否其实已装成功」依赖 verifyInstalledEntry 的判定：
  * 目标包能在 profile 依赖里定位、且声明分发的入口文件真实存在 → 视为装上。
- * 这里用临时 DSH_HOME 造一个 profile 固化该判定，防止这条恢复路径随重构悄悄失效。
+ * 这里用临时 DSH_HOME 造一个 profile 固化该判定，防止这条恢复路径随重构失效。
  *
  * Run with the Node built-in test runner: `npm test`.
  */

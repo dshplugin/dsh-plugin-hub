@@ -39,7 +39,7 @@ export declare function cancelTask(id: number): boolean;
  */
 export declare function desktopCliBootstrap(entry: string): string | null;
 /**
- * 传给 CLI 的安装目标：钉住版本优先（Hub 自我更新提示的是已过发布冷却期的版本），
+ * 传给 CLI 的安装目标：锁定版本优先（Hub 自我更新提示的是已过发布冷却期的版本），
  * 其次 npm 的 add/update 都显式 `@latest`；git 源、全局安装、已带版本/tag 的 spec 保持原样。
  */
 export declare function npmInstallTargetOf(target: string, opts: {
@@ -62,7 +62,7 @@ export declare function startPluginMutation(options: {
     globalNpm?: string[];
     /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
     displayTarget?: string;
-    /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目，两类操作都尽量立即生效
+    /** 运行中 loader：安装成功后热加载新条目、卸载成功后停用旧条目，两类操作都尽量立即生效
      *  （缺失时安装/卸载仍需重启） */
     loader?: LoaderHandle;
     /** 入队前已尝试的安装方式：失败提 Issue 时如实展示；实际执行的命令由 spawn 时追加 */
@@ -72,10 +72,10 @@ export declare function startPluginMutation(options: {
     /** 自定义安装入口渠道（NPM 包卡片）：任务输出行与系统日志据此溯源「从哪个入口发起」；
      *  目录插件安装不传 */
     installChannel?: 'npm';
-    /** npm 源候选（首选在前）：传输层失败时按顺序换源重试，空/单个表示不降级 */
+    /** npm 源候选（首选在前）：传输层失败时按顺序换源重试，空/单个表示不换源 */
     registries?: string[];
     /** 精确安装 spec（如 `dsh-plugin@2.0.5`）：Hub 自我更新提示的是已过发布冷却期的版本，
-     *  必须钉住安装，不能再用 @latest 被带回冷却期内的最新版 */
+     *  必须锁定安装，不能再用 @latest 被带回冷却期内的最新版 */
     installSpec?: string;
 }): InstallTask;
 /**
@@ -117,7 +117,7 @@ export declare function runPluginMutation(options: {
     task?: InstallTask;
     /** 待重启行的展示目标（owner/repo）：卸载时用于把 npm 包名映射回仓库名 */
     displayTarget?: string;
-    /** 运行中 loader：安装成功后热挂新条目、卸载成功后停用旧条目（缺失时仍需重启） */
+    /** 运行中 loader：安装成功后热加载新条目、卸载成功后停用旧条目（缺失时仍需重启） */
     loader?: LoaderHandle;
     /** 全局 npm 安装（官方 `npm install -g <pkgs>`）：非空时执行全局安装，不进任何 profile、无需宿主重启 */
     globalNpm?: string[];

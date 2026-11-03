@@ -10,7 +10,7 @@ import { spawnSync } from 'node:child_process'
 export const GIT_MISSING_DETAIL = '[git-missing] the git CLI was not found on this machine (install git and add it to the PATH, then retry)'
 
 /** 命令存在性探测：which/where 找 PATH 里的命令。
- *  探测自身异常（which/where 不可用等）返回 true，不拦截安装，交给装后校验兜底。 */
+ *  探测自身异常（which/where 不可用等）返回 true，不拦截安装，交给装后校验处理。 */
 export function commandOnPath(cmd: string, env?: NodeJS.ProcessEnv): boolean {
   try {
     const probe = process.platform === 'win32' ? 'where' : 'which'

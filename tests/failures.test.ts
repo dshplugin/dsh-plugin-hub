@@ -216,7 +216,7 @@ test('classifyFailure: virtual store location mismatch is an environment issue, 
   assert.equal(classifyFailure('[ERR_PNPM_UNEXPECTED_VIRTUAL_STORE] Unexpected virtual store location\ndsh: pnpm failed in profile directory C:\\Users\\zijin\\.dsh-desktop\\profiles\\web'), 'pnpmStore')
   // 裸 Unexpected virtual store location（无 ERR_ 前缀）也要能归到 pnpmStore
   assert.equal(classifyFailure('Unexpected virtual store location: the modules directory is linked to a different virtual store'), 'pnpmStore')
-  // 验证该错误码不落入「插件侧失败」兜底
+  // 验证该错误码不落入「插件侧失败」归类
   assert.equal(classifyFailure('[ERR_PNPM_UNEXPECTED_VIRTUAL_STORE] Unexpected virtual store location'), 'pnpmStore')
 })
 
@@ -227,7 +227,7 @@ test('classifyFailure: pnpm supply-chain policy blocks are environment issues, n
   // untrusted origin —— 依赖来源未受本机 pnpm 信任
   assert.equal(classifyFailure('untrusted origin\ndsh: pnpm failed in profile directory /Users/xxx/.dsh/profiles/web'), 'pnpmPolicy')
   assert.equal(classifyFailure('ERR_PNPM_UNTRUSTED_ORIGIN untrusted origin for @scope/pkg'), 'pnpmPolicy')
-  // 这两类都必须优先于「构建脚本被白名单拦截 / Command failed / 兜底 repo」
+  // 这两类都必须优先于「构建脚本被白名单拦截 / Command failed / repo 默认归类」
   assert.equal(classifyFailure('ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION ... Command failed: pnpm add'), 'pnpmPolicy')
 })
 
@@ -253,7 +253,7 @@ test('classifyFailure: pnpm workspace-root check is an environment issue, not a 
   )
   // 只带说明句（无错误码）也要能归到 pnpmWorkspace
   assert.equal(classifyFailure('Running this command will add the dependency to the workspace root, which might not be what you want'), 'pnpmWorkspace')
-  // 不落入「插件侧失败」兜底
+  // 不落入「插件侧失败」归类
   assert.equal(classifyFailure('ERR_PNPM_ADDING_TO_ROOT'), 'pnpmWorkspace')
 })
 
@@ -265,7 +265,7 @@ test('classifyFailure: a stale pnpm patch entry on the machine is an environment
     'dsh: pnpm failed in profile directory /home/zhongsy/.dsh/profiles/web',
   ].join('\n')
   assert.equal(classifyFailure(msg), 'pnpmUnusedPatch')
-  // 不能被 repo 兜底吞掉，否则会误引导用户去插件仓库提 Issue
+  // 不能被 repo 默认归类吞掉，否则会误引导用户去插件仓库提 Issue
   assert.notEqual(classifyFailure(msg), 'pluginPrepare')
   // 只带说明句（无错误码）也要能归到 pnpmUnusedPatch，且优先于「Command failed」的插件侧判定
   assert.equal(classifyFailure('The following patches were not used: dsh-plugin@1.4.2\nCommand failed: pnpm add'), 'pnpmUnusedPatch')
@@ -356,7 +356,7 @@ test('classifyFailure: a write access denial inside the profile is an environmen
 })
 
 test('classifyFailure: a file system that cannot accept writes is an environment issue, not a plugin issue', () => {
-  // 在 pnpm 落盘阶段报错：磁盘写不进去时任何插件都装不上，不能落 repo 兜底引导用户去插件仓库提 Issue
+  // 在 pnpm 写入磁盘阶段报错：磁盘写不进去时任何插件都装不上，不能按 repo 默认归类引导用户去插件仓库提 Issue
   assert.equal(classifyFailure('Error: ENOSPC: no space left on device, write'), 'fsUnavailable')
   assert.equal(classifyFailure('npm ERR! code ENOSPC\nnpm ERR! syscall write'), 'fsUnavailable')
   assert.equal(classifyFailure('Error: EROFS: read-only file system, mkdir ...'), 'fsUnavailable')
@@ -383,7 +383,7 @@ test('classifyFailure: hub state-guard messages are hubState, not plugin-side', 
   assert.equal(classifyFailure('plugin is not installed'), 'hubState')
   assert.equal(classifyFailure('plugin cannot be uninstalled here'), 'hubState')
   assert.equal(classifyFailure('already queued: some-plugin'), 'hubState')
-  // 不能被误判成插件侧（会去提作者 Issue），也不是未知兜底
+  // 不能被误判成插件侧（会去提作者 Issue），也不是未知原因
   assert.notEqual(classifyFailure('plugin is not installed'), 'pluginPrepare')
   assert.notEqual(classifyFailure('plugin is not installed'), 'hub')
 })
@@ -409,7 +409,7 @@ test('classifyFailure: our own timeout marker is a timeout, not an unknown failu
   ].join('\n')
   assert.equal(classifyFailure(msg), 'timeout')
   assert.notEqual(classifyFailure(msg), 'hub')
-  // 日志里真有 pnpm 报错时以真实报错为准（超时归类只是兜底）
+  // 日志里真有 pnpm 报错时以真实报错为准（超时归类只是备选判断）
   assert.equal(classifyFailure('[ERR_PNPM_FETCH_404] GET https://registry.npmjs.org/x: Not Found - 404\n[timed out]'), 'pnpmMissingDep')
   // 超时后复核「其实已装成功」时打的说明行不是失败信号
   assert.notEqual(classifyFailure('[timeout] the install had already completed — treating it as a success'), 'timeout')
@@ -466,7 +466,7 @@ test('classifyFailure: a dependency missing from the registry is an environment 
 
 test('classifyFailure: a version missing from the install registry is an environment issue, not a plugin issue', () => {
   // 实际安装沿用本机 ~/.npmrc 的源；镜像滞后于官方时
-  // 就会出现「解析挑到新版本 → 安装源里没有」—— 与插件作者无关，不能落 repo 兜底推给作者仓库
+  // 就会出现「解析挑到新版本 → 安装源里没有」—— 与插件作者无关，不能按 repo 默认归类推给作者仓库
   const msg = [
     '[ERR_PNPM_NO_MATCHING_VERSION] No matching version found for @caob23/dsh-browser-control@1.0.10',
     'while fetching it from https://registry.npmmirror.com/',
@@ -566,12 +566,12 @@ test('classifyFailure: registry tarball download failure is a network/registry i
   assert.equal(classifyFailure(msg), 'network')
   // 只有 TypeError: fetch failed（pnpm 各版本输出形态不同）也要能归到 network
   assert.equal(classifyFailure('TypeError: fetch failed\ndsh: pnpm failed in profile directory /Users/x/.dsh/profiles/web'), 'network')
-  // 不能被 repo 兜底吞掉，否则会误引导用户去插件仓库提 Issue
+  // 不能被 repo 默认归类吞掉，否则会误引导用户去插件仓库提 Issue
   assert.notEqual(classifyFailure(msg), 'pluginPrepare')
 })
 
 test('classifyFailure: generic "network error while fetching" without the tarball markers stays hub', () => {
-  // 不加面过宽的词：只有描述性文本时仍按未知原因兜底（防止误伤真实插件侧报错）
+  // 不加面过宽的词：只有描述性文本时仍按未知原因归类（防止误伤真实插件侧报错）
   assert.equal(classifyFailure('network error while fetching'), 'hub')
 })
 
@@ -589,7 +589,7 @@ test('classifyFailure: the host-spawn marker is its own cause', () => {
 })
 
 test('actionOfRecord / action words: a removal is never described as an install', () => {
-  // 老记录只有 kind，按 kind 兜底；更新记录的 kind 仍是 install，靠 action 区分
+  // 老记录只有 kind，按 kind 归类；更新记录的 kind 仍是 install，靠 action 区分
   assert.equal(actionOfRecord({ kind: 'uninstall' }), 'uninstall')
   assert.equal(actionOfRecord({ kind: 'install' }), 'install')
   assert.equal(actionOfRecord({ kind: 'install', action: 'update' }), 'update')

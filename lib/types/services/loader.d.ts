@@ -1,5 +1,5 @@
 /**
- * 运行中 loader 的最小接口：卸载即时停用 / 安装即时热挂载用。
+ * 运行中 loader 的最小接口：卸载即时停用 / 安装即时热加载用。
  * 对应官方 `ctx.loader`（cordis-plugin-loader 的 Loader 服务）的读取、新建与移除面。
  * 移除方式：对匹配条目 live-disable（`entry.update({ disabled: true })`），
  * 而不是 `loader.remove(id)` —— disable 走 Entry.update 的 disabled 分支，不触发
@@ -28,7 +28,7 @@ export interface LoaderHandle {
         id?: string;
         name: string;
     }): Promise<string>;
-    /** 按 id 解析条目：热挂载后确认 fiber 真的起来了（import 失败时条目在、但 fiber 为空）。 */
+    /** 按 id 解析条目：热加载后确认 fiber 真的起来了（import 失败时条目在、但 fiber 为空）。 */
     resolve(id: string): {
         id: string;
         options?: {
@@ -59,7 +59,7 @@ export declare function isEntryLoaded(loader: LoaderHandle | undefined, name: st
  *  - `{ ok: true, live: false }`：宿主从未加载过它（磁盘已干净），无需刷新/重启；
  *  - `{ ok: true, live: true }`：曾在 loader 中存活且已 live-disable —— 服务端即时卸载；
  *    带客户端 UI 的插件面板要页面刷新才摘除（由调用方按 `hadClientUi` 决定 needsReload）；
- *  - `{ ok: false, live: true }`：disable 失败 / 超时，需宿主重启兜底清理。
+ *  - `{ ok: false, live: true }`：disable 失败 / 超时，需宿主重启后清理。
  * 宿主关键包（@deepseek-ai/* 与本插件自身）一律跳过。
  */
 export declare function removeLoadedEntry(loader: LoaderHandle, name: string): Promise<{
@@ -67,7 +67,7 @@ export declare function removeLoadedEntry(loader: LoaderHandle, name: string): P
     live: boolean;
 }>;
 /**
- * 安装成功后把新插件热挂进运行中 loader（等价 profile bundle patch 的
+ * 安装成功后把新插件热加载进运行中 loader（等价 profile bundle patch 的
  * `- insert: - name: <pkg>` 行），让插件无需重启宿主即可生效。
  * 做法：在 Loader 根组新建条目并启动 —— Loader.write() 为空实现，不写盘；
  * 重启后由 profile 的 bundles 清单重新挂载，不会重复。
@@ -78,7 +78,7 @@ export declare function removeLoadedEntry(loader: LoaderHandle, name: string): P
 export declare function mountLoadedEntry(loader: LoaderHandle, name: string): Promise<boolean>;
 /**
  * 已安装包是否带客户端 UI（package.json 的 `dsh.client` 声明）：client-modules 据它把
- * 客户端 bundle 注入宿主页面。带 UI 的插件热挂载后需要页面重新加载才会渲染，
+ * 客户端 bundle 注入宿主页面。带 UI 的插件热加载后需要页面重新加载才会渲染，
  * 网页端与桌面端一致 —— `__DSH_BOOT__` 注入清单由宿主服务端按请求现场拼装，
  * 壳不缓存，所以桌面端刷新页面同样能拿到新清单，无需重开 App。
  */
