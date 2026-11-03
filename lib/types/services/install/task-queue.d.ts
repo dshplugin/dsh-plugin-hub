@@ -48,6 +48,9 @@ export declare function npmInstallTargetOf(target: string, opts: {
     pinned?: string;
     add?: boolean;
 }): string;
+/** 重复卸载：目标已不在 profile 依赖里，pnpm 报「没有这个依赖」。
+ *  结果与卸载成功等价 —— 按失败上报会弹出错误并自动提一条不存在的 Issue。 */
+export declare function isAlreadyRemoved(action: 'add' | 'remove' | 'update', output: string): boolean;
 /**
  * 插件变更入队并返回其任务。任务严格串行：队列 worker 只在上一个结束后才启动下一个。
  * 完成前可通过 `getTask(id)` / `activeTask()` 查看进度。

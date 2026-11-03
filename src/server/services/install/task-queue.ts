@@ -231,6 +231,13 @@ export function npmInstallTargetOf(target: string, opts: { update: boolean; glob
   return `${target}@latest`
 }
 
+/** 重复卸载：目标已不在 profile 依赖里，pnpm 报「没有这个依赖」。
+ *  结果与卸载成功等价 —— 按失败上报会弹出错误并自动提一条不存在的 Issue。 */
+export function isAlreadyRemoved(action: 'add' | 'remove' | 'update', output: string): boolean {
+  if (action !== 'remove') return false
+  return /ERR_PNPM_CANNOT_REMOVE_MISSING_DEPS|no such dependency found/i.test(output)
+}
+
 function stopChild(child: ReturnType<typeof spawn>): void {
   if (process.platform === 'win32' && child.pid !== undefined) {
     const killer = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], { stdio: 'ignore' })
@@ -651,6 +658,13 @@ function spawnMutation(options: {
         result = { ...result, timedOut: false, exitCode: 0, error: null }
         if (task) pushLine(task, '[timeout] the install had already completed — treating it as a success')
       }
+    }
+    // 重复卸载：依赖已经不在 profile 里，pnpm 拒绝移除并报「没有这个依赖」。
+    // 与卸载成功同义（用户要的结果已达成），按成功收尾，避免误报失败、误提 Issue。
+    if (!result.timedOut && task?.status !== 'cancelled'
+      && isAlreadyRemoved(action, `${result.stderr}\n${result.stdout}`)) {
+      result = { ...result, exitCode: 0, error: null }
+      if (task) pushLine(task, '[already removed] the package is no longer in the profile — treating it as uninstalled')
     }
     // 统一终态后处理：exitCode/status/needsRestart 以最后一次尝试为准
     if (task) {

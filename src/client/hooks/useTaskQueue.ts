@@ -624,6 +624,13 @@ export function useTaskQueue(opts: TaskQueueOptions) {
       })
       const data = await res.json() as { ok?: boolean; task?: number; error?: string }
       if (!data.ok || typeof data.task !== 'number') {
+        // 依赖已经不在了（列表还没刷新时重复点击）：按已卸载收尾，刷新列表，不弹失败
+        if (res.status === 400 && data.error === 'plugin is not installed') {
+          refreshInstalled()
+          void clearInstalledVersion(repo)
+          onUninstallDone(false, repo, false, false)
+          return
+        }
         onError(data.error || `HTTP ${res.status}`, repo, 'uninstall')
         return
       }

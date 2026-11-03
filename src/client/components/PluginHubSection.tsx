@@ -193,8 +193,8 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
       // 失败自动写入通知记录：任务在后台结束时没人盯着也能留痕。
       // 存原始 repo（可能只是裸包名）而非反查结果 —— 反查只服务于提 Issue，
       // 通知中心的展示反查由 NotificationsModal 做、查不到会回退显示原始值，
-      // 若这里就丢掉原始值，通知里会连名字都看不到；action 区分「安装失败/更新失败」
-      setNotifications(addFailure({ kind, action: update ? 'update' : 'install', repo: repo ?? '', message, command, attempts }))
+      // 若这里就丢掉原始值，通知里会连名字都看不到；action 按任务类型区分「安装/更新/卸载失败」
+      setNotifications(addFailure({ kind, action: update ? 'update' : kind === 'uninstall' ? 'uninstall' : 'install', repo: repo ?? '', message, command, attempts }))
     },
     installPlugin: confirmPlugin,
     installCustomTarget: confirmCustomTarget,

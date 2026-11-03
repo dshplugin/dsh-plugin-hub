@@ -8,7 +8,16 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf, profileFromArgv } from '../src/server/services/profile/profile.ts'
-import { npmInstallTargetOf } from '../src/server/services/install/task-queue.ts'
+import { isAlreadyRemoved, npmInstallTargetOf } from '../src/server/services/install/task-queue.ts'
+
+test('isAlreadyRemoved: 只有卸载遇到「依赖不存在」才算已完成', () => {
+  const log = "[ERR_PNPM_CANNOT_REMOVE_MISSING_DEPS] Cannot remove 'dsh-context': no such dependency found"
+  assert.equal(isAlreadyRemoved('remove', log), true)
+  // 同一个报错出现在安装/更新上不能当成成功（那说明装的目标本身有问题）
+  assert.equal(isAlreadyRemoved('add', log), false)
+  assert.equal(isAlreadyRemoved('update', log), false)
+  assert.equal(isAlreadyRemoved('remove', 'ERR_PNPM_FETCH_404 GET https://registry.npmjs.org/x'), false)
+})
 
 test('githubTarget: emits an explicit HTTPS Git URL', () => {
   assert.equal(githubTarget('GanyuanRan/Aegis'), 'git+https://github.com/GanyuanRan/Aegis.git')
