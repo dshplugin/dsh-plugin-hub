@@ -35,9 +35,11 @@ export function pluginDetailUrl(plugin: HubPlugin, langPath: string): string {
 /**
  * 失败弹窗里仓库地址的跳转目标：官网详情页（含插件收录信息），
  * 与 issue 正文的 Catalog 链接同一形式（单级 /plugins/{repo}）。
+ * 官网静态导出只生成全小写路径，GitHub 仓库名大小写不敏感，这里统一转小写，
+ * 否则 HuaGuoXingKong/dsh-prompt-rewriter 这类仓库的链接会落到 404。
  */
 export function pluginSiteUrl(repo: string): string {
-  return siteUrl(`plugins/${repo}`)
+  return siteUrl(`plugins/${repo.toLowerCase()}`)
 }
 
 /** 错误原因标题（对外英文）：点明问题出在哪一侧，便于 issue 列表分流；
