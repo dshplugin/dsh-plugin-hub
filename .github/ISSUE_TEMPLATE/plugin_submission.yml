@@ -1,0 +1,87 @@
+name: Plugin submission
+description: Submit a plugin for the DSH plugin catalog
+title: "[Plugin submission] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Three things must be true before the scanner can index a plugin:
+
+        1. The GitHub repository has the `dsh-plugin` topic. New repositories are
+           discovered by topic only.
+        2. The category below is one of the existing categories. The scanner
+           rejects free-form category names.
+        3. `repository` in package.json points at this same owner/repo. If it
+           points somewhere else, the npm package cannot be bound to the entry
+           and the plugin stays GitHub-install-only (not in the in-app market).
+
+        GitHub-only installs are still indexed on the website. The in-app market
+        only ships verified npm installs.
+  - type: input
+    id: repo
+    attributes:
+      label: Repository
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: input
+    id: value
+    attributes:
+      label: One-line value
+      description: What problem does it solve after install?
+      placeholder: Adds a sidebar badge that shows ...
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Must be one of the existing categories
+      options:
+        - UI & Experience (interface)
+        - Sessions & Messages (session)
+        - Memory & Context (memory)
+        - Tools & Capabilities (tools)
+        - Skills & Agents (agent)
+        - Workflow & Automation (workflow)
+        - Integrations & Connections (integration)
+        - Models & Reasoning (model)
+        - Development & Operations (dev)
+        - Data & Knowledge (knowledge)
+        - Entertainment (fun)
+    validations:
+      required: true
+  - type: input
+    id: install
+    attributes:
+      label: Install command
+      description: A command you actually ran and that succeeded
+      placeholder: dsh plugin --profile web add dsh-xxx
+    validations:
+      required: true
+  - type: input
+    id: npm
+    attributes:
+      label: npm package
+      description: Published package name, or "none" if not published yet
+      placeholder: dsh-xxx or none
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+      placeholder: MIT / Apache-2.0 / AGPL-3.0
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Self-check
+      options:
+        - label: The repository has the dsh-plugin topic.
+          required: true
+        - label: The install command succeeds locally and the DSH version requirement is met.
+          required: true
+        - label: repository in package.json matches this owner/repo.
+          required: true
