@@ -25,6 +25,12 @@ export type ProbeFailReason = 'tlsRevocation';
 export declare function curlTlsArgs(): string[];
 /** 本机 curl 太老、不认识 --ssl-revoke-best-effort（curl < 7.70）：退出码 2 + stderr 指向该参数。 */
 export declare function curlRevokeFlagUnsupported(code: number | null, stderr: string): boolean;
+/**
+ * 本机 curl 未编入 zlib：连 --compressed 这个选项都不认识，参数解析阶段即以退出码 2
+ * 结束（stderr 形如 `curl: option --compressed: the installed libcurl version doesn't
+ * support this`）。必须整组去掉压缩协商后重跑，否则目录拉取每次都失败、市场 502。
+ */
+export declare function curlCompressedUnsupported(code: number | null, stderr: string): boolean;
 /** stderr 是否指向 Schannel 取不到证书吊销信息（据此归因为环境 TLS 问题，而非网络不通）。 */
 export declare function tlsRevocationBlocked(stderr: string): boolean;
 /**

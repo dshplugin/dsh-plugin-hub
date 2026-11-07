@@ -16,7 +16,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { delimiter, join } from 'node:path'
-import { curlRevokeFlagUnsupported, curlTlsArgs, gitLsRemote, parseWinProxyServer, probeUrl, systemProxy, tlsRevocationBlocked } from '../src/server/services/probe.ts'
+import { curlCompressedUnsupported, curlRevokeFlagUnsupported, curlTlsArgs, fetchViaCurl, gitLsRemote, parseWinProxyServer, probeUrl, systemProxy, tlsRevocationBlocked } from '../src/server/services/probe.ts'
 
 const ONLINE = process.env.DSH_HUB_TEST_ONLINE === '1'
 
@@ -52,6 +52,19 @@ test('curlRevokeFlagUnsupported: 只认「退出码 2 + stderr 指向该参数�
   assert.equal(curlRevokeFlagUnsupported(35, unsupported), false)
   assert.equal(curlRevokeFlagUnsupported(2, 'curl: (2) Failed to initialize.'), false)
   assert.equal(curlRevokeFlagUnsupported(null, unsupported), false)
+})
+
+test('curlCompressedUnsupported: 只认「退出码 2 + stderr 指向 --compressed 不被支持」', () => {
+  // Windows 上未编入 zlib 的 curl 原始报错
+  const unsupported = "curl: option --compressed: the installed libcurl version doesn't support this"
+  assert.equal(curlCompressedUnsupported(2, unsupported), true)
+  assert.equal(curlCompressedUnsupported(2, 'curl: option --compressed: is unknown'), true)
+  // 其它退出码 / 与该参数无关的报错：不触发去掉压缩协商重跑
+  assert.equal(curlCompressedUnsupported(35, unsupported), false)
+  assert.equal(curlCompressedUnsupported(2, 'curl: (2) Failed to initialize.'), false)
+  // 普通连接失败里恰好含 compressed 字样也不能误判
+  assert.equal(curlCompressedUnsupported(7, 'Failed to connect to compressed.example.com port 443'), false)
+  assert.equal(curlCompressedUnsupported(null, unsupported), false)
 })
 
 test('tlsRevocationBlocked: 认得出 Schannel 取不到吊销信息的握手失败，不误伤其它报错', () => {
@@ -137,21 +150,24 @@ echo "curl: (35) schannel: next InitializeSecurityContext failed: CRYPT_E_NO_REV
 exit 35
 `
 
-/** 把假的 curl 放到 PATH 最前面跑一段断言，结束后恢复 PATH（Windows 分支需要）。 */
-async function withFakeCurl(fn: () => Promise<void>): Promise<void> {
+/**
+ * 把假的 curl 放到 PATH 最前面跑一段断言，结束后恢复 PATH。
+ * 默认按 Windows 分支跑（覆盖 TLS 参数降级）；platform 传 null 则保持当前平台。
+ */
+async function withFakeCurl(fn: () => Promise<void>, script: string = FAKE_CURL, platform: string | null = 'win32'): Promise<void> {
   const dir = mkdtempSync(join(tmpdir(), 'dsh-fake-curl-'))
   const bin = join(dir, 'curl')
-  writeFileSync(bin, FAKE_CURL, { mode: 0o755 })
+  writeFileSync(bin, script, { mode: 0o755 })
   const originalPath = process.env.PATH
   const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform')
-  Object.defineProperty(process, 'platform', { value: 'win32', configurable: true })
+  if (platform !== null) Object.defineProperty(process, 'platform', { value: platform, configurable: true })
   process.env.PATH = `${dir}${delimiter}${originalPath ?? ''}`
   try {
     await fn()
   } finally {
     if (originalPath === undefined) delete process.env.PATH
     else process.env.PATH = originalPath
-    if (originalPlatform !== undefined) Object.defineProperty(process, 'platform', originalPlatform)
+    if (platform !== null && originalPlatform !== undefined) Object.defineProperty(process, 'platform', originalPlatform)
     rmSync(dir, { recursive: true, force: true })
   }
 }
@@ -164,4 +180,50 @@ test('curlProbe: 降级后仍被吊销检查拦死时，再用 --ssl-no-revoke �
     assert.equal(r.status, 200)
     assert.equal(r.reason, null)
   })
+})
+
+/**
+ * 假的 curl：模拟未编入 zlib 的 Windows curl —— 遇到 --compressed 直接在参数解析
+ * 阶段退出码 2；去掉压缩协商后才返回正文。
+ */
+const FAKE_CURL_NO_ZLIB = `#!/bin/sh
+for a in "$@"; do
+  if [ "$a" = "--compressed" ]; then
+    echo "curl: option --compressed: the installed libcurl version doesn't support this" >&2
+    exit 2
+  fi
+done
+printf '{"ok":true}'
+exit 0
+`
+
+test('fetchViaCurl: 本机 curl 不支持 --compressed 时去掉压缩协商重跑，目录不再 502', async () => {
+  await withFakeCurl(async () => {
+    const r = await fetchViaCurl('https://api.dsh-plugin.org/plugins.zh.json', '', 5000)
+    assert.equal(r.ok, true)
+    assert.equal(r.body, '{"ok":true}')
+    assert.equal(r.detail, null)
+  }, FAKE_CURL_NO_ZLIB)
+})
+
+/** 假的 curl：首轮真实网络失败，但极老的版本连 --http1.1 也不认识。 */
+const FAKE_CURL_OLD_HTTP1 = `#!/bin/sh
+for a in "$@"; do
+  if [ "$a" = "--http1.1" ]; then
+    echo "curl: option --http1.1: is unknown" >&2
+    exit 2
+  fi
+done
+echo "curl: (7) Failed to connect to api.dsh-plugin.org port 443" >&2
+exit 7
+`
+
+test('fetchViaCurl: 重试参数 --http1.1 不被支持时，保留首轮的真实失败线索', async () => {
+  await withFakeCurl(async () => {
+    const r = await fetchViaCurl('https://api.dsh-plugin.org/plugins.zh.json', '', 5000)
+    assert.equal(r.ok, false)
+    // 不能把「--http1.1 不认识」当成最终原因，否则用户按错误方向排查
+    assert.match(r.detail ?? '', /^curl exit 7:/)
+    assert.doesNotMatch(r.detail ?? '', /http1\.1/)
+  }, FAKE_CURL_OLD_HTTP1)
 })
