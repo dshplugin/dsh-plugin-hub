@@ -34,6 +34,13 @@ function repositoryUrlOf(pkg: NpmSearchPackage): string {
   return String(pkg.links?.repository ?? '')
 }
 
+/** registry 路径：指定版本时取该版本的 manifest，否则取 latest。 */
+export function npmMetadataPath(packageName: string, version = ''): string {
+  const normalized = version.trim().replace(/^v/i, '')
+  const encoded = encodeURIComponent(packageName)
+  return normalized === '' ? `${encoded}/latest` : `${encoded}/${encodeURIComponent(normalized)}`
+}
+
 export function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string): boolean {
   if (githubRepoOf(repositoryUrlOf(pkg))?.toLowerCase() !== repo.toLowerCase()) return false
   const keywords = Array.isArray(pkg.keywords) ? pkg.keywords : []
@@ -46,10 +53,10 @@ export function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string)
  * 校验包名对应的 npm 包确实属于该仓库且声明为 DSH 插件：取 registry 上的 `latest`
  * 元数据比对 repository 与插件标记。网络异常、超时、非 200 一律返回 false，不阻塞调用方。
  */
-export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = '', proxy = ''): Promise<boolean> {
+export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = '', proxy = '', version = ''): Promise<boolean> {
   if (packageName === '' || repo === '') return Promise.resolve(false)
   const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
-  const url = `${base}/${encodeURIComponent(packageName)}/latest`
+  const url = `${base}/${npmMetadataPath(packageName, version)}`
   return new Promise((resolve) => {
     const req = get(url, { timeout: REQUEST_TIMEOUT_MS }, (res) => {
       if (res.statusCode !== 200) {
