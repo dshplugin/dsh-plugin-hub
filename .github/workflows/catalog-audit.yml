@@ -1,0 +1,57 @@
+name: Catalog audit (advisory)
+
+# Read-only, advisory, manual. Samples npm-backed catalog entries, runs the
+# pinned ENTRY static checker on each downloaded tarball, and uploads the
+# report as artifacts. Not a required check: no schedule, no comments, no
+# commits, and no writes outside this run's own artifact storage.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'How many npm-backed catalog entries to sample (1-50)'
+        required: false
+        default: '20'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: advisory ENTRY sample
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the catalog repo
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      # The script always exits 0 and records per-package failures as not_run,
+      # so this step stays informational either way.
+      - name: Run the catalog audit
+        continue-on-error: true
+        env:
+          AUDIT_LIMIT: ${{ inputs.limit }}
+        run: node scripts/audit-catalog.mjs --limit "${AUDIT_LIMIT:-20}" --out audit-out
+
+      - name: Publish the summary to the run page
+        if: always()
+        run: |
+          if [ -f audit-out/step-summary.md ]; then
+            cat audit-out/step-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-audit
+          path: |
+            audit-out/audit-report.json
+            audit-out/step-summary.md
+          if-no-files-found: warn
+          retention-days: 30
