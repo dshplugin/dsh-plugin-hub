@@ -50,8 +50,8 @@ export function isDshPackageMetadataForRepo(pkg: NpmSearchPackage, repo: string)
 }
 
 /**
- * 校验包名对应的 npm 包确实属于该仓库且声明为 DSH 插件：取 registry 上的 `latest`
- * 元数据比对 repository 与插件标记。网络异常、超时、非 200 一律返回 false，不阻塞调用方。
+ * 校验包名对应的 npm 包确实属于该仓库且声明为 DSH 插件：取 registry 上指定版本（缺省 `latest`）
+ * 的元数据比对 repository 与插件标记。网络异常、超时、非 200 一律返回 false，不阻塞调用方。
  */
 export function isDshNpmPackageForRepo(packageName: string, repo: string, registry = '', proxy = '', version = ''): Promise<boolean> {
   if (packageName === '' || repo === '') return Promise.resolve(false)
