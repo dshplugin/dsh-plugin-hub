@@ -138,7 +138,7 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
           // 命中则记录 repo → 包名映射，客户端据此把依赖 key 匹配回仓库、列表立即显示「已安装」。
           const catalogRepo = source === 'catalog' ? githubRepoOf(displayRepo) : null
           if (catalogRepo !== null) {
-            const catalogTargetIsDsh = await isDshNpmPackageForRepo(rawRepo, catalogRepo, settings.npmRegistry, effectiveProxy)
+            const catalogTargetIsDsh = await isDshNpmPackageForRepo(rawRepo, catalogRepo, settings.npmRegistry, effectiveProxy, pinVersion)
             if (catalogTargetIsDsh) recordResolvedNpmPackage(profile, catalogRepo, rawRepo)
           }
           // 命令行安装（目录外）受「启用 NPM 安装」开关控制；目录插件安装走目录白名单，不受开关影响。
