@@ -313,9 +313,10 @@ export function classifyFailure(message: string): FailureKind {
   // 原生模块需要本机编译，缺编译器/构建工具属于用户环境，不是插件的 prepare 失败。
   // 必须排在 pluginPrepare 之前：这类日志同样带 ELIFECYCLE，否则会被推给作者。
   if (/Unable to detect compiler type|gyp ERR!|Could not find any Visual Studio|No Xcode or CLT version detected|xcode-select|python(?:3)? is (?:not set|not found)|Could not find Python|\bmake: not found\b|\bgcc: not found\b|\bg\+\+: not found\b|\bMSB\d{4}\b/i.test(message)) return 'buildToolchainMissing'
-  // 构建脚本真的跑挂了才算插件问题。Command failed 区分大小写：只匹配 pnpm 的包装，
-  // 不匹配宿主那句小写 dsh: plugin command failed
-  if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|prepare-guard/i.test(message) || /Command failed/.test(message)) return 'pluginPrepare'
+  // 构建脚本真的跑挂了才算插件问题。必须带正向证据：`Command failed` 只是外层进程包装，
+  // 单凭它不能说明 prepare 失败（Electron 内置 pnpm 崩溃时日志里往往只剩这一句，
+  // 会把无关作者当成分发缺陷）。无证据的包装层失败交给 hub 分诊。
+  if (/ERR_PNPM_PREPARE_PACKAGE|ELIFECYCLE|prepare-guard|prepare script failed|Failed to prepare/i.test(message)) return 'pluginPrepare'
   // 安装器自身产生的状态类消息（未安装 / 不在此处卸载 / 已在队列中 / 已安装）：这几句由本服务的
   // 守卫发出，不是 CLI 输出、也不是插件问题，而是插件中心的已安装列表与实读快照不同步。
   // 单独归类，让前端给「刷新后重试」这类可行动提示，而不是当作未知失败引导去提 Issue。

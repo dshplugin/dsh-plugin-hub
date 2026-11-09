@@ -351,8 +351,8 @@ test('classifyFailure: a write access denial inside the profile is an environmen
   assert.equal(classifyFailure('EPERM: operation not permitted, rename ...'), 'accessDenied')
   assert.equal(classifyFailure('EACCES: permission denied, unlink ...'), 'accessDenied')
   assert.equal(classifyFailure('Error: Access is denied. (os error 5)'), 'accessDenied')
-  // 不能被后续分支抢走：普通安装失败仍归插件侧（避免新分支过宽）
-  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
+  // 不能被后续分支抢走：没有 prepare 证据的外层包装归 hub 分诊，不推给作者
+  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'hub')
 })
 
 test('classifyFailure: a file system that cannot accept writes is an environment issue, not a plugin issue', () => {
@@ -368,8 +368,8 @@ test('classifyFailure: a file system that cannot accept writes is an environment
   assert.notEqual(classifyFailure('Error: ENOSPC: no space left on device, write'), 'pluginPrepare')
   // 磁盘满时 pnpm 日志尾部常混着超时/重试特征，不能被 network 抢走
   assert.notEqual(classifyFailure('Error: ENOSPC: no space left on device\nETIMEDOUT'), 'network')
-  // 不能被后续分支抢走：普通安装失败仍归插件侧（避免新分支过宽）
-  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
+  // 不能被后续分支抢走：没有 prepare 证据的外层包装归 hub 分诊，不推给作者
+  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'hub')
 })
 
 test('classifyFailure: the browser "Failed to fetch" on the host request is an environment issue, not a plugin issue', () => {
@@ -511,12 +511,16 @@ test('classifyFailure: a dangling local (link:) dependency in the profile is an 
   assert.equal(classifyFailure('Could not install from "/tmp/gone-plugin" as it does not exist'), 'pnpmLinkedDirMissing')
 })
 
-test('classifyFailure: the host tail alone (lowercase `command failed`) is not a prepare failure', () => {
-  // 宿主尾部提示是小写的 `dsh: plugin command failed`，只是「这条命令失败了」的通用说明，
-  // 不算构建脚本失败
+test('classifyFailure: an opaque process wrapper is hub triage, not a prepare failure (#685)', () => {
+  // 宿主/Electron 只回显外层包装、没带回 pnpm 原文时，不能把宿主的崩溃算到插件作者头上
+  const wrapper = 'dsh: plugin command failed; diagnostics: C:\\Users\\u\\.dsh\\profiles\\desktop\\.plugin-manager\\logs\\operation-x\\pnpm.log\n'
+    + '[exit 3758096392]\n[pnpm log] DSH did not echo pnpm output — recovered the operation log from disk\n'
+    + 'Command failed with exit code 3758096392: "E:\\deepseek\\DeepSeek Harness.exe" --expose-internals "pnpm.mjs" add "dsh-vision-router@0.4.2"'
+  assert.equal(classifyFailure(wrapper), 'hub')
+  // 宿主尾部的小写提示同样只是通用说明，不算构建脚本失败
   assert.equal(classifyFailure('something unexpected\ndsh: plugin command failed; diagnostics: /tmp/pnpm.log'), 'hub')
-  // pnpm 真正包出来的 `Command failed: …`（大写 C）仍按 prepare 失败处理
-  assert.equal(classifyFailure('Command failed: pnpm add some-plugin'), 'pluginPrepare')
+  // 有正向 prepare 证据才归插件侧：包名 + 失败原因都要能对上
+  assert.equal(classifyFailure(wrapper + '\nERR_PNPM_PREPARE_PACKAGE dsh-vision-router@0.4.2: Failed to prepare'), 'pluginPrepare')
 })
 
 test('missingRegistryPackageOf extracts the 404 package name (scoped too), null otherwise', () => {
