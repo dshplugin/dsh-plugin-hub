@@ -20,7 +20,7 @@ import { cleanLine, estimateProgress } from '../profile/progress.ts'
 import type { LoaderHandle } from '../loader.ts'
 import { hasClientUi, isDshPlugin, mountLoadedEntry, removeLoadedEntry } from '../loader.ts'
 import { addPendingRestart, clearPendingRestart } from '../profile/pending-restart.ts'
-import { addAllowBuildsKey, bundleIncludes, githubRepoOf, parseAllowBuildsKey, profileDirectory, validPackageName } from '../profile/profile.ts'
+import { addAllowBuildsKey, bundleIncludes, githubRepoOf, parseAllowBuildsKey, profileDirectory, sanitizeAllowBuilds, validPackageName } from '../profile/profile.ts'
 import { appendLog } from '../log.ts'
 import { commandOnPath, gitMissingDetail } from './preflight.ts'
 import { isTransportFailure, registryHost } from './registry-fallback.ts'
@@ -939,6 +939,12 @@ export async function runPluginMutation(options: {
   // operation 日志只在运行期存在（宿主结束后可能清掉），先开抓取，退出后按路径读取作为后备
   const profileDir = profileDirectory(options.profile)
   const logTap = createOperationLogTap(profileDir)
+  // 装前修掉 allowBuilds 里的非版本 spec（`pkg@https://…` / `pkg@file:…`）：pnpm v11 在依赖
+  // 解析前就会抛 ERR_PNPM_INVALID_VERSION_UNION，该 profile 里之后任何安装都会失败（#730）。
+  // 这一步失败不影响主流程 —— 真有问题仍由 pnpm 的报错决定怎么提示。
+  if (options.action !== 'remove' && (options.globalNpm ?? []).length === 0) {
+    try { sanitizeAllowBuilds(options.profile) } catch { /* 读不到/写不进就按原样继续 */ }
+  }
   let result = await spawnMutation(options)
   // allowBuilds 放行 / 装后入口校验都是 profile 专属（pnpm 装进 profile 的场景）；
   // 全局 npm 安装直接走 npm，无 pnpm allowBuilds 拦截、也不进 profile，跳过这两类恢复

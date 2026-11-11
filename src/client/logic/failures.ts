@@ -148,7 +148,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileLocalBuild' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
+export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileLocalBuild' | 'profileBadAllowBuilds' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
 
 /** 失败动作规则：标题、上报正文与提示文案按安装/更新/卸载取词，不写死「安装」。 */
 export type FailureAction = 'install' | 'update' | 'uninstall'
@@ -286,6 +286,10 @@ export function classifyFailure(message: string): FailureKind {
   // 名单全是本地 file:/link: 依赖时，失败只能来自 profile 自身的包重校验：归本机状态，
   // 不能记到本次插件头上。必须在 pnpmIgnoredBuild 之前，否则会被它先按插件侧接走
   if (localBuildScriptsOnly(message)) return 'profileLocalBuild'
+  // profile 的 allowBuilds 里有 pnpm 解析不了的 spec（`pkg@https://…` / `pkg@file:…`）：
+  // pnpm v11 在依赖解析之前就把每条规则当成「包名@精确版本」解析并抛错，该 profile 里
+  // 之后任何安装都会失败 —— 与本次要装的插件无关（#730）
+  if (/ERR_PNPM_INVALID_VERSION_UNION|Invalid versions union/i.test(message)) return 'profileBadAllowBuilds'
   // 构建脚本被 allowBuilds 拦截。必须在 network 之前判：日志尾部混重试残留的连接失败特征
   if (/ERR_PNPM_IGNORED_BUILDS|Ignored build scripts:|ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED/i.test(message)) return 'pnpmIgnoredBuild'
   // npm 源拒绝了访问（401/403）：私有源要登录凭据，或当前网络/IP 不被源允许。

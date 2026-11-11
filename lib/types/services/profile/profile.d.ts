@@ -33,6 +33,18 @@ export declare function validPackageName(name: string): boolean;
  */
 export declare function parseAllowBuildsKey(output: string): string | null;
 /**
+ * `allowBuilds` 的 key 必须是 `包名@精确版本`。pnpm v11 在真正安装前会把每条规则解析成
+ * 「包名 + 精确版本」，遇到 URL/git/file spec（`pkg@https://…`、`pkg@file:…`）直接抛
+ * `ERR_PNPM_INVALID_VERSION_UNION` —— 该 profile 里之后**任何**安装都会失败（#730）。
+ * 非 semver 的 spec 一律降级为裸包名（pnpm 按包名匹配所有版本）。
+ */
+export declare function safeAllowBuildsKey(key: string): string;
+/**
+ * 安装前修复**已有** `allowBuilds` 里的非法 key。pnpm 的报错发生在依赖解析之前，
+ * 走不到 `addAllowBuildsKey` 的失败恢复路径，只能主动清理。返回是否改写了文件。
+ */
+export declare function sanitizeAllowBuilds(profile: string): boolean;
+/**
  * 向 profile 的 pnpm-workspace.yaml 追加一条 `allowBuilds` 记录：与已有条目合并，
  * 其余 yaml 保持不变；重写时丢弃损坏的占位条目（pnpm 安装失败的 bug 会写入
  * 字面量 `set this to true or false`）。

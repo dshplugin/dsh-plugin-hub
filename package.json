@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin",
-  "version": "2.3.8",
+  "version": "2.3.9",
   "description": "A community plugin marketplace for DeepSeek Harness, built to the official plugin spec — browse, search and install 6000+ hand-verified npm plugins out of 23000+ indexed, without leaving the app. · DeepSeek Harness 社区插件市场（遵循官方开发规范）：收录 23000+ 社区插件，其中 6000+ 已发布 npm 包、可一键安装，每日更新。",
   "type": "module",
   "main": "lib/index.js",

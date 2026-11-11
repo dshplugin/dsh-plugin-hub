@@ -9,7 +9,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { addAllowBuildsKey } from '../src/server/services/profile/profile.ts'
+import { addAllowBuildsKey, sanitizeAllowBuilds } from '../src/server/services/profile/profile.ts'
 
 /** 在临时 DSH_HOME 的 desktop profile 下写入规则文件，调用 addAllowBuildsKey 后回读。 */
 function writeAndRead(content: string, key: string): string {
@@ -71,4 +71,38 @@ test('addAllowBuildsKey: 文件不存在时新建', () => {
   const out = writeAndRead('', 'a@1.0.0')
   assert.equal(countKeys(out), 1)
   assert.match(out, /a@1\.0\.0: true/)
+})
+
+test('addAllowBuildsKey: URL / file 形态的 spec 降级为裸包名（否则 pnpm 全盘失败）', () => {
+  // `pkg@https://…` 会被 pnpm v11 当「版本联合」解析并抛 ERR_PNPM_INVALID_VERSION_UNION，
+  // 该 profile 之后装任何插件都失败（#730）——写回时必须降级成裸包名
+  const out = writeAndRead('', 'dsh-purge@https://codeload.github.com/x/y/tar.gz/abc')
+  assert.match(out, /^ {2}dsh-purge: true$/m)
+  assert.ok(!out.includes('https'), out)
+  const local = writeAndRead('', 'dsh-purge@file:../../vendor/dsh-purge')
+  assert.match(local, /^ {2}dsh-purge: true$/m)
+})
+
+test('sanitizeAllowBuilds: 清理已有非法 key，且可重复执行', () => {
+  const home = mkdtempSync(join(tmpdir(), 'dsh-allow-builds-'))
+  const dir = join(home, 'profiles', 'desktop')
+  mkdirSync(dir, { recursive: true })
+  const file = join(dir, 'pnpm-workspace.yaml')
+  writeFileSync(file, 'packages:\n  - "."\nallowBuilds:\n  dsh-purge@https: true\n  a@1.0.0: true\n  b@file:../b: false\n')
+  const previous = process.env.DSH_HOME
+  process.env.DSH_HOME = home
+  try {
+    assert.equal(sanitizeAllowBuilds('desktop'), true)
+    const out = readFileSync(file, 'utf8')
+    assert.equal(countKeys(out), 1)
+    assert.match(out, /^ {2}dsh-purge: true$/m)
+    assert.match(out, /^ {2}a@1\.0\.0: true$/m)
+    assert.match(out, /^ {2}b: false$/m)
+    assert.match(out, /^ {2}- "\."$/m)
+    // 再跑一次：已经合法，不该再写盘
+    assert.equal(sanitizeAllowBuilds('desktop'), false)
+  } finally {
+    if (previous === undefined) delete process.env.DSH_HOME
+    else process.env.DSH_HOME = previous
+  }
 })

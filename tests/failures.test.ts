@@ -957,3 +957,17 @@ test('a blocked build script of a local file:/link: package belongs to the profi
   // 真实依赖（registry 包）仍按原样归到插件侧
   assert.equal(classifyFailure('[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: node-pty@1.1.0'), 'pnpmIgnoredBuild')
 })
+
+test('an unparsable allowBuilds spec belongs to the profile, not the hub backlog', () => {
+  // pnpm v11 在依赖解析前就把 allowBuilds 每条规则当「包名@精确版本」解析；
+  // 写成 URL 的条目会让该 profile 里任何安装都报同一个错（#730）——必须归本机状态，
+  // 否则又会变成一条「未分类、引导用户去仓库提 Issue」的记录
+  assert.equal(
+    classifyFailure('[ERR_PNPM_INVALID_VERSION_UNION] Invalid versions union. Found: "dsh-purge@https". Use exact versions only.'),
+    'profileBadAllowBuilds',
+  )
+  assert.equal(
+    classifyFailure('dsh: plugin command failed; error code: ERR_PNPM_INVALID_VERSION_UNION'),
+    'profileBadAllowBuilds',
+  )
+})

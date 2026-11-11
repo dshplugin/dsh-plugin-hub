@@ -153,6 +153,76 @@ function quoteYamlKey(key: string): string {
   return key
 }
 
+/** `allowBuilds` 段：header 行（可带行内数组值）+ 其后任意缩进条目行。 */
+const ALLOW_BLOCK_RE = /^[ \t]*allowBuilds:[^\r\n]*(?:(?:\r?\n)[ \t]{2,}[^\r\n]*)*/gm
+
+function unquoteYamlKey(key: string): string {
+  const quoted = key.length >= 2 && ((key[0] === "'" && key[key.length - 1] === "'") || (key[0] === '"' && key[key.length - 1] === '"'))
+  return quoted ? key.slice(1, -1) : key
+}
+
+/** 读出 yaml 里所有 `allowBuilds` 段的条目（key → 值，缺省 true）。 */
+function readAllowBuilds(yaml: string): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const match of Array.from(yaml.matchAll(ALLOW_BLOCK_RE))) {
+    const [header, ...rest] = match[0].split(/\r?\n/)
+    for (const line of rest) {
+      const m = /^[ \t]+(\S.*?)\s*:\s*(true|false)?\s*$/.exec(line)
+      if (m === null || m[1] === '') continue
+      map.set(unquoteYamlKey(m[1]), m[2] ?? 'true')
+    }
+    // 行内数组写法：allowBuilds: ["a@1.0.0", 'b@2'] —— 保留已有条目，别丢
+    const inline = /^[ \t]*allowBuilds:\s*\[(.*)\]\s*$/.exec(header)
+    if (inline !== null) {
+      for (const raw of inline[1].split(',')) {
+        const k = raw.trim().replace(/^['"]|['"]$/g, '')
+        if (k !== '') map.set(k, 'true')
+      }
+    }
+  }
+  return map
+}
+
+/** 把所有 `allowBuilds` 段合并写成一段规范化块，其余 yaml 原样保留；无该段时追加。 */
+function writeAllowBuilds(yaml: string, map: Map<string, string>): string {
+  const eol = /\r\n/.test(yaml) ? '\r\n' : '\n'
+  const block = Array.from(map).map(([k, v]) => `  ${quoteYamlKey(k)}: ${v}`).join(eol)
+  const blockText = `allowBuilds:${eol}${block}${eol}`
+  let seen = 0
+  const next = yaml.replace(ALLOW_BLOCK_RE, () => (seen++ === 0 ? blockText : ''))
+  return seen === 0 ? `${yaml.replace(/\r?\n?$/, eol)}${blockText}` : next
+}
+
+/**
+ * `allowBuilds` 的 key 必须是 `包名@精确版本`。pnpm v11 在真正安装前会把每条规则解析成
+ * 「包名 + 精确版本」，遇到 URL/git/file spec（`pkg@https://…`、`pkg@file:…`）直接抛
+ * `ERR_PNPM_INVALID_VERSION_UNION` —— 该 profile 里之后**任何**安装都会失败（#730）。
+ * 非 semver 的 spec 一律降级为裸包名（pnpm 按包名匹配所有版本）。
+ */
+export function safeAllowBuildsKey(key: string): string {
+  const at = key.startsWith('@') ? key.indexOf('@', 1) : key.indexOf('@')
+  if (at <= 0) return key
+  const spec = key.slice(at + 1)
+  return /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(spec) ? key : key.slice(0, at)
+}
+
+/**
+ * 安装前修复**已有** `allowBuilds` 里的非法 key。pnpm 的报错发生在依赖解析之前，
+ * 走不到 `addAllowBuildsKey` 的失败恢复路径，只能主动清理。返回是否改写了文件。
+ */
+export function sanitizeAllowBuilds(profile: string): boolean {
+  const file = join(profileDirectory(profile), 'pnpm-workspace.yaml')
+  let yaml = ''
+  try { yaml = readFileSync(file, 'utf8') } catch { return false }
+  if (Array.from(yaml.matchAll(ALLOW_BLOCK_RE)).length === 0) return false
+  const before = readAllowBuilds(yaml)
+  const after = new Map<string, string>()
+  for (const [k, v] of before) after.set(safeAllowBuildsKey(k), v)
+  if (after.size === before.size && Array.from(after).every(([k, v]) => before.get(k) === v)) return false
+  writeFileSync(file, writeAllowBuilds(yaml, after))
+  return true
+}
+
 /**
  * 向 profile 的 pnpm-workspace.yaml 追加一条 `allowBuilds` 记录：与已有条目合并，
  * 其余 yaml 保持不变；重写时丢弃损坏的占位条目（pnpm 安装失败的 bug 会写入
@@ -167,35 +237,7 @@ export function addAllowBuildsKey(profile: string, key: string): void {
   const file = join(profileDirectory(profile), 'pnpm-workspace.yaml')
   let yaml = ''
   try { yaml = readFileSync(file, 'utf8') } catch { /* 文件不存在，下方创建 */ }
-  const eol = /\r\n/.test(yaml) ? '\r\n' : '\n'
-  // header 行（可选行内值）+ 其后任意缩进条目行；行内写法没有后续缩进行也能匹配
-  const blockRe = /^[ \t]*allowBuilds:[^\r\n]*(?:(?:\r?\n)[ \t]{2,}[^\r\n]*)*/gm
-  const map = new Map<string, string>()
-  for (const match of Array.from(yaml.matchAll(blockRe))) {
-    const [header, ...rest] = match[0].split(/\r?\n/)
-    for (const line of rest) {
-      const m = /^[ \t]+(\S.*?)\s*:\s*(true|false)?\s*$/.exec(line)
-      if (m === null || m[1] === '') continue
-      let k = m[1]
-      if (k.length >= 2 && ((k[0] === "'" && k[k.length - 1] === "'") || (k[0] === '"' && k[k.length - 1] === '"'))) {
-        k = k.slice(1, -1)
-      }
-      map.set(k, m[2] ?? 'true')
-    }
-    // 行内数组写法：allowBuilds: ["a@1.0.0", 'b@2'] —— 保留已有条目，别丢
-    const inline = /^[ \t]*allowBuilds:\s*\[(.*)\]\s*$/.exec(header)
-    if (inline !== null) {
-      for (const raw of inline[1].split(',')) {
-        const k = raw.trim().replace(/^['"]|['"]$/g, '')
-        if (k !== '') map.set(k, 'true')
-      }
-    }
-  }
-  map.set(key, 'true')
-  const block = Array.from(map).map(([k, v]) => `  ${quoteYamlKey(k)}: ${v}`).join(eol)
-  const blockText = `allowBuilds:${eol}${block}${eol}`
-  let seen = 0
-  let next = yaml.replace(blockRe, () => (seen++ === 0 ? blockText : ''))
-  if (seen === 0) next = `${yaml.replace(/\r?\n?$/, eol)}${blockText}`
-  writeFileSync(file, next)
+  const map = readAllowBuilds(yaml)
+  map.set(safeAllowBuildsKey(key), 'true')
+  writeFileSync(file, writeAllowBuilds(yaml, map))
 }

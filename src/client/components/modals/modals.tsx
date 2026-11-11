@@ -472,6 +472,11 @@ export function ErrorModal({ message, repo, action, command, attempts, t, env, o
               // 被拦的构建脚本属于 profile 里已有的 file:/link: 本地插件，不是本次装的插件：
               // pnpm 每次 add 都重校验整棵树，该 profile 内的安装都会失败 —— 给定位/移除指引，不引导提 Issue
               ? h('div', { className: styles.failPrepareHint }, t('failProfileLocalBuildHint'))
+              : failureKind === 'profileBadAllowBuilds'
+              // allowBuilds 里有 pnpm 解析不了的 spec（`pkg@https://…` / `pkg@file:…`）：pnpm v11 在
+              // 依赖解析前就把每条规则当「包名@精确版本」校验并中止，该 profile 内的安装都会失败 ——
+              // 给删除/改正指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failProfileBadAllowBuildsHint'))
               : failureKind === 'profileState'
               // profile 的 pnpm 元数据与本机不一致（lockfile 过期 / packageManager 版本不符 /
               // 补丁未生效）：pnpm 在真正装插件之前就中止，该 profile 内的安装都会失败 ——

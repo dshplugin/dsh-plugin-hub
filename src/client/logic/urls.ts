@@ -52,6 +52,7 @@ function reasonTitleOf(kind: FailureKind, action: FailureAction): string {
     case 'profileState': return `the user profile's pnpm metadata does not match the local pnpm for this ${word}`
     case 'profileYamlCorrupted': return 'the user profile has a corrupted YAML config (duplicated mapping key)'
     case 'profileLocalBuild': return 'a local (file:/link:) plugin already in the user profile has a failing build script'
+    case 'profileBadAllowBuilds': return 'the user profile has an allowBuilds entry that pnpm cannot parse'
     case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmMissing': return 'pnpm command not found on the user machine'
     case 'pnpmStore': return 'pnpm store version mismatch on the user machine'
@@ -118,6 +119,8 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
         ? 'the local certificate chain is not trusted by Node/pnpm (corporate SSL inspection, antivirus web shield, or a local MITM proxy) — local environment issue'
       : kind === 'profileLocalBuild'
         ? 'no plugin-side cause found — pnpm rejects a build script of a local (file:/link:) package that already exists in the user profile, so every install into that profile fails the same way (local environment issue)'
+      : kind === 'profileBadAllowBuilds'
+        ? 'no plugin-side cause found — the allowBuilds list in the user profile\'s pnpm-workspace.yaml contains a spec pnpm cannot parse (a URL, git or file path where an exact version is required), so pnpm aborts every install into that profile before resolving the plugin (local environment issue)'
       : kind === 'localEnv'
         ? 'no evidence of a plugin-side cause; the log shows local-environment signals (system error codes, certificates/proxy, or a broken local config), so this is reported for triage of the classifier only'
       : kind === 'dshTooOld'
