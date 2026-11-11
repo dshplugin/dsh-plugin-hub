@@ -6,7 +6,7 @@ node_modules/
 .env
 .env.*
 coverage/
-# 内部资料：Issue 回复模板，仅存本地，禁止提交
+# 本地文件（仅存本机，不入库）
 docs/GitHub Issue 回复模板.md
 # 构建产物：/lib（server 编译输出）、/client（tsdown 打包输出）每次构建整目录重建，
 # 排除后 IDE 索引（尊重 .gitignore）不再反复重扫它们。已跟踪的产物不受影响

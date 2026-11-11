@@ -7,11 +7,14 @@ DSH Plugin Hub 是 DeepSeek Harness 的插件市场（cordis 插件）。本目�
 
 ```
 docs/
-├── README.md        本入口：目录导览、阅读顺序、开发建议
-├── reference.md     官方机制与开发规范（开发前必读）
-├── architecture.md  插件架构
-├── development.md   构建 / 测试 / 发布
-└── assets/          素材（logo、截图）
+├── README.md           本入口：目录导览、阅读顺序、开发建议
+├── reference.md        官方机制与开发规范（开发前必读）
+├── architecture.md     插件架构
+├── development.md      构建 / 测试 / 发布
+├── release-process.md  发版流程
+├── releases/           各版本发布说明
+├── screenshots/        官网截图（README「官网一览」引用）
+└── assets/             素材（logo）
 ```
 
 ## 目录导览
@@ -21,6 +24,7 @@ docs/
 | [reference.md](reference.md) | **开发前必读**：官方机制速查（loader / client-modules / profile）、问题排查顺序、已知结论与踩坑记录 | 写代码前必读；遇到问题先查这里 |
 | [architecture.md](architecture.md) | 插件整体架构：server / client 职责划分、安装与重启流程 | 想了解系统全貌时 |
 | [development.md](development.md) | 构建、测试、发布、日常开发循环 | 动手开发时 |
+| [releases/](releases/) | 每个版本的发布说明（新增、修复、升级提示） | 查某版改了什么时 |
 
 ## 阅读顺序
 
@@ -39,7 +43,7 @@ DeepSeek Harness 是开源仓库（MIT）。强烈建议把官方源码克隆到
 - 本地克隆示例（浅克隆即可）：
 
   ```sh
-  git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git bbzc-suite/dsh-harness-official
+  git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git dsh-harness-official
   ```
 
 为什么建议本地克隆：
@@ -53,17 +57,13 @@ DeepSeek Harness 是开源仓库（MIT）。强烈建议把官方源码克隆到
 遇到问题的排查顺序（与 reference.md 第 0 节一致，不允许跳步）：
 
 1. 官方文档站
-2. 本地克隆的官方源码（`bbzc-suite/dsh-harness-official`）
-3. 本机全局安装源码（`/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/`，与运行版本一致）
+2. 本地克隆的官方源码（`dsh-harness-official/`）
+3. 本机全局安装源码（`$(npm root -g)/@deepseek-ai/dsh/`，与运行版本一致）
 4. 运行时实况（`__DSH_BOOT__` 图、`--dump-config`、宿主日志）
 5. 最小实验验证（结论必须回填 reference.md）
 
-## 素材（`assets/`）
+## 素材
 
-> README 中展示的截图全部来自本目录 `docs/screenshots/`（随本仓库提交维护，新增/替换直接更新该目录即可，
-> 无需再走官网 CDN）；`assets/` 仅保留 logo 与历史素材。
-
-- `logo.svg`：项目标识。
-- `screenshot-hub-main.png`：插件市场主界面截图（历史素材；README 主图现引用 `dsh-plugin-hub-home-en.png`（英文）/ `dsh-plugin-hub-home-zh.png`（中文））。
-- `screenshot-install-uninstall.png`：可视化安装/卸载过程截图（历史素材；README 功能一览现引用 `dsh-plugin-hub-install-en/zh-v1.2.1.png`、`dsh-plugin-hub-uninstall-en/zh-v1.2.1.png`、`dsh-plugin-hub-update-en/zh-v1.2.1.png`）。
-- `screenshot-notifications.png`：可视化消息通知截图（历史素材；README 现引用 `dsh-plugin-hub-notifications-en.png`（英文）/ `dsh-plugin-hub-notifications-zh.png`（中文））。
+- `assets/logo.svg`：项目标识。
+- `screenshots/`：官网首页与分类页截图，README 的「官网一览」直接引用这两个文件。
+- 插件内界面截图（市场、已安装、设置、通知中心等）随版本发布，引用 `https://api.dsh-plugin.org/images/releases/<version>/`，不提交到本仓库，避免仓库里堆积过期版本的图。

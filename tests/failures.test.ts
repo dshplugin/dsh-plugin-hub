@@ -262,7 +262,7 @@ test('classifyFailure: a stale pnpm patch entry on the machine is an environment
   // pnpm 发现补丁没被用上即中止整次安装 —— 任何插件都装不进来
   const msg = [
     '[ERR_PNPM_UNUSED_PATCH] The following patches were not used: dsh-plugin@1.4.2',
-    'dsh: pnpm failed in profile directory /home/zhongsy/.dsh/profiles/web',
+    'dsh: pnpm failed in profile directory /home/u/.dsh/profiles/web',
   ].join('\n')
   assert.equal(classifyFailure(msg), 'pnpmUnusedPatch')
   // 不能被 repo 默认归类吞掉，否则会误引导用户去插件仓库提 Issue

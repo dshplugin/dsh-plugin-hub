@@ -6,7 +6,7 @@
 
 # DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
 
-**The community hub and directory for DeepSeek Harness (DSH) plugins: 20,000+ plugins indexed on the site, including 5,000+ published to npm that install in one click from the Plugin Hub (all hand-verified). Updated daily — browse, search, download and install by category, free and fully sourced.**
+**The community hub and directory for DeepSeek Harness (DSH) plugins: 23,000+ plugins indexed on the site, including 6,000+ published to npm that install in one click from the Plugin Hub (all hand-verified). Updated daily — browse, search, download and install by category, free and fully sourced.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -26,17 +26,17 @@
 
 ## What is DSH Plugin Hub
 
-DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. This is an independent community project, not affiliated with DeepSeek Harness.
+DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an open-source plugin built to the official plugin development spec. Installed under **Settings → Plugin Hub**, it lets you browse, search and install community plugins without leaving the app. It works in both the official web version (`dsh web`) and the official desktop app. This is an independent community project, not affiliated with DeepSeek Harness.
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-market-en.png?v=2.3.4" alt="DSH Plugin Hub plugin market UI" width="840">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-market-en.png?v=2.3.8" alt="DSH Plugin Hub plugin market UI" width="840">
 </p>
 
 ## Plugin Hub Features
 
 **One-click everything · fully visualized**
 
-- **One-click install** — click and done: a serial background queue with live progress in the dialog, cancellable anytime; most plugins take effect on page refresh, no restart needed
+- **One-click install** — click and done: a serial background queue with live progress in the dialog, cancellable anytime; changes take effect right away, with only the hub itself and top-level bundles asking for a restart
 - **One-click upgrade** — new versions are detected automatically; the card turns into "Update" and overwrite-installs in one click
 - **One-click uninstall** — fully visualized with live progress; changes take effect immediately
 - **Full trace** — every install / upgrade / uninstall, success or failure, is recorded in the notification center for later review
@@ -48,46 +48,46 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 **Rich catalog · human-curated**
 
-- Indexes **20,000+** community plugins on the site, **5,000+** of which ship an npm package and install in one click from the Plugin Hub; curated daily by [dsh-plugin.org](https://dsh-plugin.org), with every installable entry hand-verified
+- Indexes **23,000+** community plugins on the site, **6,000+** of which ship an npm package and install in one click from the Plugin Hub; curated daily by [dsh-plugin.org](https://dsh-plugin.org), with every installable entry hand-verified
 - Covers UI & experience, sessions & messages, memory & context, tooling and more — browse by category or search straight to it
-- Every plugin shows its verification status (verified), star / fork ratings, version and last-update time — fully sourced
+- Only verified plugins are listed; every card shows star / fork ratings, version and last-update time — fully sourced
 
 **Bilingual · easy to filter**
 
 - The UI follows your system language by default and switches manually anytime from the top-right; copy and plugin data switch together
-- Sort by popularity / newest / earliest indexed, with bilingual descriptions and capability tags at a glance
-- Filter by installed / not installed and search across names, descriptions and tags
+- Sort by stars / forks / last updated / newest indexed (click to flip the direction), with bilingual descriptions and capability tags at a glance
+- Search across names, descriptions and capability tags to land on the right plugin
 
 **Always in sync · lightweight & private**
 
 - Same data source as the website; the catalog updates automatically, no manual upgrade needed
-- Browser-side only, no host dependencies, no telemetry, no data collection
+- Ships its own host-side service: catalog proxy, install queue, settings and logs all run locally — no telemetry, no data collection
 
 ## Feature Highlights
 
 **Installed plugins · Custom install**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-installed-en.png?v=2.3.4" alt="Installed plugins" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-custom-install-en.png?v=2.3.4" alt="Custom install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-installed-en.png?v=2.3.8" alt="Installed plugins" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-custom-install-en.png?v=2.3.8" alt="Custom install" width="400">
 </p>
 
-Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-Finder per row · Installs a plugin outside the catalog by npm package name or an npm / pnpm install command; GitHub-source and git installs are no longer offered
+Manages every installed plugin with search, source filters and sorting, plus update / uninstall and reveal-in-file-manager per row · Installs a plugin outside the catalog by npm package name or an npm / pnpm install command; GitHub-source and git installs are no longer offered
 
 **Settings · System logs**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-settings-en.png?v=2.3.4" alt="Settings" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-system-logs-en.png?v=2.3.4" alt="System logs" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-settings-en.png?v=2.3.8" alt="Settings" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-system-logs-en.png?v=2.3.8" alt="System logs" width="400">
 </p>
 
-Centralizes update checks, npm mirror, proxy channel, trust toggles, diagnostics and log location · Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer
+Centralizes update checks, npm mirror with automatic fallback, HTTP proxy, the npm-install switch, diagnostics and log location · Records install / uninstall / settings / diagnostics trails, filterable by category and level, with a built-in viewer
 
 **Confirm install · Confirm uninstall**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-install-confirm-en.png?v=2.3.4" alt="Confirm install" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-uninstall-confirm-en.png?v=2.3.4" alt="Confirm uninstall" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-install-confirm-en.png?v=2.3.8" alt="Confirm install" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-uninstall-confirm-en.png?v=2.3.8" alt="Confirm uninstall" width="400">
 </p>
 
 Shows the plugin, its source repo and the command before anything runs; the install starts only after confirmation · Shows what will be removed and its source; nothing is removed until the user confirms
@@ -95,15 +95,15 @@ Shows the plugin, its source repo and the command before anything runs; the inst
 **Confirm update · Notifications**
 
 <p align="center">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-update-confirm-en.png?v=2.3.4" alt="Confirm update" width="400">
-  <img src="https://api.dsh-plugin.org/images/releases/2-3-4/dsh-plugin-hub-notifications-en.png?v=2.3.4" alt="Notifications" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-update-confirm-en.png?v=2.3.8" alt="Confirm update" width="400">
+  <img src="https://api.dsh-plugin.org/images/releases/2-3-8/dsh-plugin-hub-notifications-en.png?v=2.3.8" alt="Notifications" width="400">
 </p>
 
 Pops up when a newer version is found; confirming overwrite-installs in place to the latest release · Gathers install / remove / update history, live task progress and pending-restart reminders in one place
 
 ## Website Overview
 
-The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugin.org) and stays in sync with the site; on the website you can also see plugin details, ratings and links back to their GitHub sources.
+The hub's catalog is curated and published by [dsh-plugin.org](https://dsh-plugin.org) and stays in sync with the site; on the website you can also see plugin details, install commands and links back to their GitHub sources.
 
 **Homepage · Browse by category**
 
@@ -116,7 +116,7 @@ Same data source as the hub — human-verified, updated daily · Browse every in
 
 ## Why DSH Plugin Hub
 
-The DSH Plugin Hub lists **5,000+** npm-installable DeepSeek Harness plugins (out of **20,000+** indexed on the site), all hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
+The DSH Plugin Hub lists **6,000+** npm-installable DeepSeek Harness plugins (out of **23,000+** indexed on the site), all hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
 
 ### Always Fresh
 
@@ -124,11 +124,18 @@ Newly released DSH plugins are indexed as soon as possible; descriptions, catego
 
 ### Human-Verified
 
-Every DSH plugin is manually checked by a professional team — install commands, compatibility status (verified / unconfirmed) and target DSH version (dshTarget) are verified one by one, with capability categories labeled. Quality is guaranteed.
+Every DSH plugin is manually checked by a professional team — install commands, compatibility and target DSH version (dshTarget) are verified one by one, with capability categories labeled. Only entries that pass verification are listed.
 
 ### Fully Sourced
 
 Every DSH plugin links back to its GitHub source repository with stars, forks and last-update time; data is compiled from the DeepSeek Harness official site, official architecture docs and official repos — everything is traceable.
+
+## Requirements
+
+- **DeepSeek Harness**: the official web version (`dsh web`) or the official desktop app — the hub lives under **Settings → Plugin Hub**
+- **Node.js >= 22.6**: declared in the package's `engines`; both the host and the command-line `dsh` must satisfy it
+- **pnpm**: `dsh` uses pnpm to manage profile plugins, and installs are blocked without it — run `npm install -g pnpm` first
+- **A reachable npm registry**: follows your local npm config by default; if it is unreachable, switch the mirror, enable automatic fallback, or set an HTTP proxy under **Settings → Plugin Hub → Update Settings**
 
 ## Install DSH Plugin Hub
 
@@ -138,7 +145,7 @@ Install from npm:
 dsh plugin --profile web add dsh-plugin
 ```
 
-The plugin is published to the npm registry as `dsh-plugin` — one command installs and it just works, no build step required.
+The plugin is published to the npm registry as `dsh-plugin` — one command installs and it just works, no build step required. This command targets the official web version (web profile); in the official desktop app, install straight from **Settings → Plugin Hub** — the desktop profile is managed exclusively by the app, so the command-line `dsh` cannot write to it.
 
 > **npm installs only**: source and git installs depend on each repository's own build scripts, which are written inconsistently and fail often (git packages are routinely rejected by pnpm's build gate), and the resulting behaviour varies — so they are no longer offered. The browser bundle ships with the package, so an npm install needs no build step; restart `dsh web` and open Settings → Plugin Hub.
 
@@ -169,23 +176,60 @@ dsh plugin --profile web remove dsh-plugin
 dsh plugin --profile web add dsh-plugin
 ```
 
-> Restart `dsh web` after updating for the changes to take effect.
+> Restart `dsh web` after updating for the changes to take effect. In the desktop app, update from the in-app Plugin Hub (the desktop profile is app-managed, so the CLI steps above do not apply).
 
 > **Marketplace missing after an update/reinstall?** If you unchecked `dsh-plugin` under Settings → Plugins, the profile's `dsh.profile.bundles` no longer lists it — the dependency stays in `node_modules` but is not composed, so the marketplace will not appear after a restart. Re-check `dsh-plugin` under Settings → Plugins, or add `"dsh-plugin"` back to `dsh.profile.bundles` in `~/.dsh/profiles/<profile>/package.json`, then restart the host.
 
+## Uninstall DSH Plugin Hub
+
+On the web version:
+
+```bash
+dsh plugin --profile web remove dsh-plugin
+```
+
+In the desktop app: disable or remove `dsh-plugin` under **Settings → Plugins** (the desktop profile is managed exclusively by the app, so the CLI does not apply).
+
+Uninstalling only removes the hub itself and leaves your other plugins untouched; afterwards restart `dsh web`, or quit and reopen the desktop app.
+
 ## Getting Started: browse & install in DeepSeek Harness
 
-Restart `dsh web` after installing, then open **Settings → Plugin Hub** to browse and install plugins. The catalog is same-source and in sync with [dsh-plugin.org](https://dsh-plugin.org).
+On the web version, restart `dsh web` after installing; in the desktop app, quit and reopen the app. Then open **Settings → Plugin Hub** to browse and install plugins. The catalog is same-source and in sync with [dsh-plugin.org](https://dsh-plugin.org).
+
+## Troubleshooting
+
+- **Hub missing, or gone after an update**: most likely `dsh-plugin` was unchecked under Settings → Plugins — re-check it (see "Marketplace missing after an update/reinstall?" above)
+- **Cannot reach the registry / installs time out**: switch the npm mirror, enable "Switch mirrors on failure", or set an HTTP proxy under **Settings → Plugin Hub → Update Settings**; System Diagnostics checks npm registry, GitHub and the catalog site in one click
+- **"Your npm is too old"**: npm crashing while resolving dependencies is a known npm bug — upgrade and retry with `npm install -g npm@latest`
+- **"pnpm is missing"**: run `npm install -g pnpm`, make sure it is on your PATH, then retry
+- **Installed but not active**: the hub itself and top-level bundles need a host restart — use "Restart now" on the web version, or quit from the app menu (or tray) and reopen the desktop app
+- **Need more detail**: **Settings → Plugin Hub → System Logs** filters by category and level and exports the full log; attach it to an issue to speed up diagnosis
 
 ## Submit your DSH plugin
 
 Publish your plugin to GitHub and add the `dsh-plugin` topic — it will be discovered and indexed automatically. Requirements and the submission flow are on the [Submit a Plugin](https://dsh-plugin.org/submit) page.
 
+## Development
+
+This repository holds the full source and can be built, tested and debugged locally:
+
+```bash
+npm ci
+npm run check    # typecheck + test + build
+npm run reload   # restart the local host and load the new client bundle
+```
+
+Development requires Node.js >= 22.6 (`npm test` relies on native type stripping). See [docs/architecture.md](docs/architecture.md) for the layering and directory structure, [docs/development.md](docs/development.md) for the day-to-day workflow and release steps, and [CONTRIBUTING.md](CONTRIBUTING.md) for commit and PR conventions.
+
 ## Contributing
 
 - **Add your plugin**: tag it with the `dsh-plugin` topic to be auto-discovered — start on the [Submit a Plugin](https://dsh-plugin.org/submit) page
 - **Fix data / suggest features**: open an [Issue](https://github.com/dshplugin/dsh-plugin-hub/issues)
-- **Contribute code**: fork the repo and send a Pull Request
+- **Contribute code**: fork the repo and send a Pull Request — read [CONTRIBUTING.md](CONTRIBUTING.md) first
+- **Security issues**: do not open a public issue — report privately per [SECURITY.md](SECURITY.md)
+- **Changelog**: per-release changes live in [docs/releases](docs/releases) and on GitHub [Releases](https://github.com/dshplugin/dsh-plugin-hub/releases)
+
+This project follows our [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Related
 

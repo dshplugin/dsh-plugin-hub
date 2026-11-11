@@ -12,12 +12,12 @@
 2. **官方源码仓库**：<https://github.com/deepseek-ai/deepseek-harness>
    —— `packages/` 下每个包的真实实现与 README；`docs/event-producer-consumer.md` 是事件映射总表。
    **建议克隆到本地（浅克隆即可，只读不改），配合文档站边学习边开发**：
-   `git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git bbzc-suite/dsh-harness-official`
+   `git clone --depth 1 https://github.com/deepseek-ai/deepseek-harness.git dsh-harness-official`
    （详见 [docs/README.md](./README.md)）。
-3. **本机全局安装源码**（与当前运行的 dsh 版本一致，离线可查）：
-   - dsh 主程序：`/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/`
-   - loader：`/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/lib/index.js`
-   - client-modules：`/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-modules/lib/index.js`
+3. **本机全局安装源码**（与当前运行的 dsh 版本一致，离线可查；路径以 `npm root -g` 为准）：
+   - dsh 主程序：`$(npm root -g)/@deepseek-ai/dsh/lib/`
+   - loader：`$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/lib/index.js`
+   - client-modules：`$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-modules/lib/index.js`
 4. **运行时实况**：`dsh --profile web --dump-config`（打印实际启动的配置树）、`curl http://127.0.0.1:7923/`（看 `__DSH_BOOT__` 图）、`lsof -ti tcp:7923`（找宿主进程）。
 5. **实验验证**：只有前三步都查过仍无答案时，才允许用最小实验验证；结论必须回填到本文档"已知结论"一节。
 
@@ -142,10 +142,10 @@ curl -s http://127.0.0.1:7923/ | grep -o 'DSH_BOOT__ = .*'
 # 实际启动的配置树
 dsh --profile web --dump-config
 
-# 全局安装（与运行版本一致，离线查源码）
-/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/
-/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/lib/index.js
-/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-modules/lib/index.js
+# 全局安装（与运行版本一致，离线查源码；路径以 npm root -g 为准）
+$(npm root -g)/@deepseek-ai/dsh/lib/
+$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis-plugin-loader/lib/index.js
+$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-modules/lib/index.js
 
 # profile 目录（宿主命脉，调试只读）
 ~/.dsh/profiles/web/{cordis.yml,package.json,cordis.patch.yml,pnpm-workspace.yaml,.dsh-market/}
