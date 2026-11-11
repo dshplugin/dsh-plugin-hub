@@ -105,6 +105,16 @@ export declare function verifyInstalledEntry(profile: string, target: string): {
  */
 export declare function hostSpawnMarker(invocation: Invocation, error: unknown): string | null;
 /**
+ * 失败输出只剩外层包装时的诊断标记（导出供单测覆盖字段）。内容先后即上报正文里的优先级：
+ * 退出方式 → 实际生效的 registry → 实际 spawn 的命令与目录 → profile 位置。
+ * registry 用主机名展示，避免把带凭据的私有源地址写进公开 Issue。
+ */
+export declare function sparseFailureMarker(result: InstallResult, options: {
+    action: 'add' | 'remove' | 'update';
+    profile: string;
+    registries?: string[];
+}): string;
+/**
  * 执行插件变更，带一条恢复路径：当 `add` 因 pnpm 的 allowBuilds 限制拦下构建脚本而失败 ——
  * 或是 git 源包自己的 `prepare`（`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`，key 取自打印的
  * key@url 提示），或是某依赖的原生构建（`ERR_PNPM_IGNORED_BUILDS`，key = 列出的 name@version）——

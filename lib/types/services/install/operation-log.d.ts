@@ -16,6 +16,13 @@ export declare function backfillOperationLog(output: string, profileDir?: string
  */
 export declare function hasSubstantiveOutput(output: string): boolean;
 /**
+ * 失败输出里除包装噪声外没有任何可排查内容：只剩本队列标记，和
+ * `Command failed with exit code N: pnpm add …` 这类外层包装（#6118 的形态 ——
+ * pnpm 以 1 退出、operation 日志里只有这一行）。此时上报正文只会写出「安装失败」，
+ * 作者与维护者都无从判断，调用方据此补一条带启动参数的诊断标记。
+ */
+export declare function lacksDiagnosticContent(output: string): boolean;
+/**
  * 运行期抓取：宿主的 operation 日志只在命令运行期间存在，结束后可能被清理，
  * 退出后再按路径读往往已经拿不到。这里在安装过程中轮询 profile 下最新的
  * `.plugin-manager/logs/<operation>/pnpm.log`，用抓到的内容补全。

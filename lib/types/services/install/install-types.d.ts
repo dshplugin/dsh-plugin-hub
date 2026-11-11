@@ -14,6 +14,13 @@ export interface InstallResult {
     stderr: string;
     /** 实际执行安装用的 npm 源（换源重试后是最终那一个）：后续读元数据的注解要跟它同源 */
     registry?: string;
+    /** 最后一次 spawn 的实际启动参数：失败且无任何输出时，上报里要靠它说明「到底跑了什么、在哪个目录」 */
+    spawn?: {
+        file: string;
+        args: string[];
+        cwd: string;
+        shell: boolean;
+    };
 }
 export interface InstallTask {
     id: number;
