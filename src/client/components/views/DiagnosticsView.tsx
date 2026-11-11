@@ -21,6 +21,7 @@ function formatEnv(env: EnvInfo): string {
     `DSH ${env.dshVersion ?? 'unknown'}`,
     `Node ${env.nodeVersion}`,
     `${env.platform} ${env.arch} (${env.release})`,
+    env.npmRegistry ? `npm registry ${env.npmRegistry}` : '',
     `Profile ${env.profile}`,
     env.dshHome ? `Home ${env.dshHome}` : '',
   ].filter(Boolean).join('\n')

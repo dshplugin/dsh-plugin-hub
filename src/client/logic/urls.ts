@@ -188,6 +188,8 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
           // 这类环境问题，作者一眼就能对号入座；探测不到如实写 unknown
           `- pnpm: ${env.pnpmVersion ? `v${env.pnpmVersion}` : 'unknown'}`,
           `- npm: ${env.npmVersion ? `v${env.npmVersion}` : 'unknown'}`,
+          // 安装实际使用的源：网络/私有镜像类失败的第一嫌疑，作者据此判断是否「源不对/源不通」
+          `- npm registry: ${env.npmRegistry ? `\`${env.npmRegistry}\`` : 'unknown'}`,
           `- git: ${env.gitVersion ? `v${env.gitVersion}` : 'unknown'}`,
           `- OS: ${env.platform} ${env.arch} (${env.release})`,
           `- Profile: \`${env.profile}\``,
@@ -290,6 +292,8 @@ export function hubIssueUrl(
           `- Node: ${env.nodeVersion}`,
           `- pnpm: ${env.pnpmVersion ? `v${env.pnpmVersion}` : 'unknown'}`,
           `- npm: ${env.npmVersion ? `v${env.npmVersion}` : 'unknown'}`,
+          // 安装实际使用的源：网络/私有镜像类失败的第一嫌疑，作者据此判断是否「源不对/源不通」
+          `- npm registry: ${env.npmRegistry ? `\`${env.npmRegistry}\`` : 'unknown'}`,
           `- git: ${env.gitVersion ? `v${env.gitVersion}` : 'unknown'}`,
           `- OS: ${env.platform} ${env.arch} (${env.release})`,
           `- Profile: \`${env.profile}\``,

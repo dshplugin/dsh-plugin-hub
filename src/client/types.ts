@@ -95,6 +95,8 @@ export interface EnvInfo {
   npmVersion: string | null
   /** 本机 git 版本（git --version 首行；缺失返回 null） */
   gitVersion: string | null
+  /** 安装实际会用的 npm 源（设置镜像 → 本机 npm 配置 → 官方）：失败上报要带上它 */
+  npmRegistry?: string | null
   platform: string
   arch: string
   release: string

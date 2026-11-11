@@ -15,7 +15,7 @@ import type { InstallResult, InstallTask, Invocation, QueueItem } from './instal
 import { CAPTURE_LIMIT_BYTES, MAX_TASKS, MAX_TASK_LINES } from './install-types.ts'
 import { npmTooLowMarker } from './npm-check.ts'
 import { registryMissingMarker } from './registry-check.ts'
-import { backfillOperationLog, createOperationLogTap, hasSubstantiveOutput, operationLogPathOf } from './operation-log.ts'
+import { backfillOperationLog, createOperationLogTap, lacksDiagnosticContent, operationLogPathOf } from './operation-log.ts'
 import { cleanLine, estimateProgress } from '../profile/progress.ts'
 import type { LoaderHandle } from '../loader.ts'
 import { hasClientUi, isDshPlugin, mountLoadedEntry, removeLoadedEntry } from '../loader.ts'
@@ -536,6 +536,7 @@ function spawnMutation(options: {
         error: marker === null ? detail : `${detail}\n${marker}`,
         stdout,
         stderr,
+        spawn: { file: invocation.file, args: attemptArgs, cwd: invocation.cwd, shell: invocation.useShell },
       })
       return
     }
@@ -556,7 +557,8 @@ function spawnMutation(options: {
       if (exitWatch !== undefined) clearTimeout(exitWatch)
       if (forceSettle !== undefined) clearTimeout(forceSettle)
       if (task) runningChildren.delete(task.id)
-      resolveOnce(result)
+      // 附带本次实际启动参数：输出为空时，上报里至少能说明「跑了什么、在哪个目录」
+      resolveOnce({ ...result, spawn: { file: invocation.file, args: attemptArgs, cwd: invocation.cwd, shell: invocation.useShell } })
     }
 
     timer = setTimeout(() => {
@@ -887,6 +889,29 @@ export function hostSpawnMarker(invocation: Invocation, error: unknown): string 
 }
 
 /**
+ * 失败输出只剩外层包装时的诊断标记（导出供单测覆盖字段）。内容先后即上报正文里的优先级：
+ * 退出方式 → 实际生效的 registry → 实际 spawn 的命令与目录 → profile 位置。
+ * registry 用主机名展示，避免把带凭据的私有源地址写进公开 Issue。
+ */
+export function sparseFailureMarker(result: InstallResult, options: {
+  action: 'add' | 'remove' | 'update'
+  profile: string
+  registries?: string[]
+}): string {
+  const verb = options.action === 'remove' ? 'uninstall' : options.action === 'update' ? 'update' : 'install'
+  const outcome = result.timedOut ? 'timed out' : `exited with code ${result.exitCode ?? '?'}`
+  const registry = result.registry ?? options.registries?.[0] ?? 'unknown'
+  const spawn = result.spawn
+  return [
+    `[no-output] the ${verb} command ${outcome} and printed nothing but its wrapper line`,
+    `registry: ${registryHost(registry)}`,
+    spawn === undefined ? '' : `spawn: ${spawn.file} ${spawn.args.join(' ')} (cwd ${spawn.cwd}, shell ${spawn.shell})`,
+    `profile: ${profileDirectory(options.profile)}`,
+    'no pnpm log under .plugin-manager/logs — attach hub.log when reporting',
+  ].filter((part) => part !== '').join(' | ')
+}
+
+/**
  * 执行插件变更，带一条恢复路径：当 `add` 因 pnpm 的 allowBuilds 限制拦下构建脚本而失败 ——
  * 或是 git 源包自己的 `prepare`（`ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`，key 取自打印的
  * key@url 提示），或是某依赖的原生构建（`ERR_PNPM_IGNORED_BUILDS`，key = 列出的 name@version）——
@@ -988,14 +1013,16 @@ export async function runPluginMutation(options: {
       if (operationLogPathOf(output) !== null) {
         // 诊断路径在、日志却取不到：留一行证据，否则下一次同类上报又只剩宿主那句摘要、看不出根因
         pushLine(options.task, '[pnpm log] the host-reported diagnostics log could not be read from disk (missing, empty, or unreadable)')
-      } else if (!hasSubstantiveOutput(output)) {
-        // 宿主连 diagnostics 路径都没回显：显式留痕，避免上报正文只剩一个退出码
-        const what = result.timedOut
-          ? 'printed nothing before the timeout'
-          : `exited with code ${result.exitCode ?? '?'} without printing anything`
-        pushLine(options.task, `[no-output] the dsh CLI ${what}, and no pnpm log was written under .plugin-manager/logs — attach ~/.dsh/profiles/${options.profile}/hub.log when reporting this`)
       }
     }
+  }
+  // 失败但输出里只剩外层包装（`Command failed with exit code 1: pnpm add …`）时，上报正文会退化成
+  // 一句「安装失败」：既看不出跑了什么，也看不出连的是哪个源（#6118 的形态）。补一条诊断标记，
+  // 把实际启动参数、profile 目录与生效的 registry 带进日志和上报正文。
+  if ((result.exitCode !== 0 || result.timedOut) && lacksDiagnosticContent(`${result.stderr}\n${result.stdout}`)) {
+    const line = sparseFailureMarker(result, options)
+    if (options.task && options.task.status !== 'cancelled') pushLine(options.task, line)
+    result = { ...result, stderr: `${result.stderr}\n${line}` }
   }
   // profile 里的 YAML 配置（pnpm-workspace.yaml / pnpm-lock.yaml）解析失败 → 追加 [profile-yaml]
   // 标记，前端给「修本机文件」的步骤，不引导向插件仓库提 Issue

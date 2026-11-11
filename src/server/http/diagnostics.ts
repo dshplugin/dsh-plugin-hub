@@ -10,6 +10,7 @@ import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { loadSettings } from '../services/settings.ts'
 import { hostDshVersion, toolVersion } from '../services/host-version.ts'
+import { normalizeRegistry } from '../services/install/registry-fallback.ts'
 import { gitLsRemote, probeUrl, systemProxy } from '../services/probe.ts'
 import { appendLog } from '../services/log.ts'
 import { readJsonBody, requireTrustedPost, sendJson, type WebRoute, type WebServerService } from './shared.ts'
@@ -39,12 +40,16 @@ function configuredNpmRegistry(profile: string): string {
 
 /** 宿主环境快照：提交 bug 时随 issue 附上，便于作者复现（前端 /env 端点返回）。 */
 export function hostEnv(profile: string): Record<string, string | null> {
+  const settings = loadSettings(profile)
   return {
     dshVersion: hostDshVersion(),
     nodeVersion: process.version,
     pnpmVersion: toolVersion('pnpm', ['--version']),
     npmVersion: toolVersion('npm', ['--version']),
     gitVersion: toolVersion('git', ['--version']),
+    // 安装实际会用的 npm 源（设置里的镜像 → 本机 npm 配置 → 官方）：装不上时第一嫌疑就是它，
+    // 上报正文带上它，作者不必再猜「用户到底连的哪个源」（#6118 就卡在这里）
+    npmRegistry: normalizeRegistry(settings.npmRegistry) || configuredNpmRegistry(profile),
     platform: process.platform,
     arch: process.arch,
     release: release(),

@@ -14,7 +14,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { backfillOperationLog, hasSubstantiveOutput, operationLogPathOf } from '../src/server/services/install/operation-log.ts'
+import { backfillOperationLog, hasSubstantiveOutput, lacksDiagnosticContent, operationLogPathOf } from '../src/server/services/install/operation-log.ts'
 import { classifyFailure } from '../src/client/logic/failures.ts'
 
 /** 造一个 DSH 的 operation 日志目录结构，返回 pnpm.log 的绝对路径。 */
@@ -125,4 +125,16 @@ test('hasSubstantiveOutput: only our own markers means the host printed nothing'
   // 宿主的任何真实输出都算有内容（哪怕只是一行摘要）
   assert.equal(hasSubstantiveOutput('dsh: plugin command failed; diagnostics: C:\\x\\pnpm.log'), true)
   assert.equal(hasSubstantiveOutput('[exit 1]\nERR_PNPM_FETCH_404 GET https://registry.npmjs.org/x'), true)
+})
+
+test('lacksDiagnosticContent: 只有外层包装行也算「没有可排查内容」', () => {
+  // #6118：pnpm 以 1 退出，operation 日志只回捞到这一行包装 —— 上报正文无从判断
+  const recovered = 'Command failed with exit code 1: pnpm add "billion-context@latest"'
+  assert.equal(lacksDiagnosticContent(recovered), true)
+  assert.equal(lacksDiagnosticContent(`[exit 1] (no output captured)\n${recovered}`), true)
+  assert.equal(lacksDiagnosticContent('[pnpm log] DSH did not echo pnpm output — recovered the operation log from disk'), true)
+  assert.equal(lacksDiagnosticContent(''), true)
+  // 任何真正的 pnpm/宿主原因都不算「空」
+  assert.equal(lacksDiagnosticContent('ERR_PNPM_FETCH_404 GET https://registry.npmjs.org/x'), false)
+  assert.equal(lacksDiagnosticContent('dsh: plugin command failed; diagnostics: C:\\x\\pnpm.log'), false)
 })

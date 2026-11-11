@@ -8,7 +8,30 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { githubRepoOf, githubTarget, globalNpmPackagesOf, installTargetOf, profileFromArgv } from '../src/server/services/profile/profile.ts'
-import { isAlreadyRemoved, npmInstallTargetOf } from '../src/server/services/install/task-queue.ts'
+import { isAlreadyRemoved, npmInstallTargetOf, sparseFailureMarker } from '../src/server/services/install/task-queue.ts'
+import type { InstallResult } from '../src/server/services/install/install-types.ts'
+
+test('sparseFailureMarker: 空输出失败也带出 registry、实际命令与 profile 目录', () => {
+  // #6118 的形态：pnpm 以 1 退出、日志只有外层包装行 —— 上报里必须留下可排查的线索
+  const result: InstallResult = {
+    exitCode: 1,
+    timedOut: false,
+    error: null,
+    stdout: '',
+    stderr: 'Command failed with exit code 1: pnpm add "billion-context@latest"',
+    registry: 'https://registry.npmmirror.com',
+    spawn: { file: 'node', args: ['/app/cli.js', 'plugin', '--profile', 'desktop-017', 'add', 'billion-context@latest'], cwd: '/home/u/.dsh/profiles/desktop-017', shell: false },
+  }
+  const line = sparseFailureMarker(result, { action: 'add', profile: 'desktop-017' })
+  assert.ok(line.startsWith('[no-output]'), line)
+  assert.ok(line.includes('registry: registry.npmmirror.com'), line)
+  assert.ok(line.includes('plugin --profile desktop-017 add billion-context@latest'), line)
+  assert.ok(line.includes('profiles/desktop-017'), line)
+  // 私有源的凭据不能进公开 Issue：只展示主机名
+  const privateSrc = sparseFailureMarker({ ...result, registry: 'https://user:token@npm.internal.example' }, { action: 'add', profile: 'web' })
+  assert.ok(!privateSrc.includes('token'), privateSrc)
+  assert.ok(privateSrc.includes('registry: npm.internal.example'), privateSrc)
+})
 
 test('isAlreadyRemoved: 只有卸载遇到「依赖不存在」才算已完成', () => {
   const log = "[ERR_PNPM_CANNOT_REMOVE_MISSING_DEPS] Cannot remove 'dsh-context': no such dependency found"

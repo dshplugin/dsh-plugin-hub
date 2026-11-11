@@ -78,3 +78,17 @@ test('hubIssueUrl: an unclassified install keeps "install failed (cause unclassi
   assert.ok(title.includes('install failed (cause unclassified)'), title)
   assert.ok(body.includes('Auto-classified cause: install failed (cause unclassified)'), body)
 })
+
+test('pluginIssueUrl: the environment section carries the npm registry in use', () => {
+  // 网络/源不通类失败靠这一行分诊（#6118：报告里没有源地址，作者只能猜）
+  const env = {
+    dshVersion: '0.2.1-rc.5', nodeVersion: 'v24.22.1', pnpmVersion: null, npmVersion: 'v10.8.2', gitVersion: null,
+    npmRegistry: 'https://registry.npmmirror.com', platform: 'win32', arch: 'x64', release: '10.0.26100',
+    profile: 'desktop-017', dshHome: 'C:\\Users\\u\\.dsh',
+  }
+  const { body } = decodeTargets(pluginIssueUrl('a/b', 'boom', env, 'dsh plugin --profile desktop-017 add a'))
+  assert.ok(body.includes('- npm registry: `https://registry.npmmirror.com`'), body)
+  // 取不到时如实写 unknown，不编造
+  const { body: noRegistry } = decodeTargets(pluginIssueUrl('a/b', 'boom', { ...env, npmRegistry: null }))
+  assert.ok(noRegistry.includes('- npm registry: unknown'), noRegistry)
+})
