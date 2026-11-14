@@ -73,14 +73,26 @@ test('addAllowBuildsKey: 文件不存在时新建', () => {
   assert.match(out, /a@1\.0\.0: true/)
 })
 
-test('addAllowBuildsKey: URL / file 形态的 spec 降级为裸包名（否则 pnpm 全盘失败）', () => {
-  // `pkg@https://…` 会被 pnpm v11 当「版本联合」解析并抛 ERR_PNPM_INVALID_VERSION_UNION，
-  // 该 profile 之后装任何插件都失败（#730）——写回时必须降级成裸包名
-  const out = writeAndRead('', 'dsh-purge@https://codeload.github.com/x/y/tar.gz/abc')
-  assert.match(out, /^ {2}dsh-purge: true$/m)
-  assert.ok(!out.includes('https'), out)
+test('addAllowBuildsKey: git tarball 地址归一为 repo key，而不是降级成裸包名（#771）', () => {
+  // 裸包名匹配不上 git-hosted 依赖，降级会让「自动放行并重试」永远无效；
+  // 但 tarball 地址本身会被 pnpm 当版本联合解析（#730），所以归一成 git+<repo>.git
+  const github = writeAndRead('', 'dsh-purge@https://codeload.github.com/x/y/tar.gz/abc')
+  assert.match(github, /^ {2}dsh-purge@git\+https:\/\/github\.com\/x\/y\.git: true$/m)
+  const gitlab = writeAndRead('', 'pkg@https://gitlab.com/g/sub/repo/-/archive/v1/repo-v1.tar.gz')
+  assert.match(gitlab, /^ {2}pkg@git\+https:\/\/gitlab\.com\/g\/sub\/repo\.git: true$/m)
+  const bitbucket = writeAndRead('', 'pkg@https://bitbucket.org/o/r/get/abc.tar.gz')
+  assert.match(bitbucket, /^ {2}pkg@git\+https:\/\/bitbucket\.org\/o\/r\.git: true$/m)
+  // 已经是 git+ 形态的 key 原样保留
+  const keep = writeAndRead('', 'pkg@git+ssh://git@example.com/o/r.git')
+  assert.match(keep, /^ {2}pkg@git\+ssh:\/\/git@example\.com\/o\/r\.git: true$/m)
+})
+
+test('addAllowBuildsKey: 无法识别的 spec 仍降级为裸包名（否则 pnpm 全盘失败）', () => {
+  // `pkg@file:…` / 任意 tarball 无法映射成 git repo key，只能按包名放行（#730）
   const local = writeAndRead('', 'dsh-purge@file:../../vendor/dsh-purge')
   assert.match(local, /^ {2}dsh-purge: true$/m)
+  const exact = writeAndRead('', 'node-pty@1.1.0')
+  assert.match(exact, /^ {2}node-pty@1\.1\.0: true$/m)
 })
 
 test('sanitizeAllowBuilds: 清理已有非法 key，且可重复执行', () => {

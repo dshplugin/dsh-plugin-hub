@@ -193,17 +193,47 @@ function writeAllowBuilds(yaml: string, map: Map<string, string>): string {
   return seen === 0 ? `${yaml.replace(/\r?\n?$/, eol)}${blockText}` : next
 }
 
+/** 精确版本（含 prerelease / build 元数据）：pnpm 的版本联合解析只接受这种形态。 */
+const EXACT_VERSION_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/
+
 /**
- * `allowBuilds` 的 key 必须是 `包名@精确版本`。pnpm v11 在真正安装前会把每条规则解析成
+ * `allowBuilds` 的 key 必须是 pnpm 能认的形式。pnpm v11 在真正安装前会把每条规则解析成
  * 「包名 + 精确版本」，遇到 URL/git/file spec（`pkg@https://…`、`pkg@file:…`）直接抛
  * `ERR_PNPM_INVALID_VERSION_UNION` —— 该 profile 里之后**任何**安装都会失败（#730）。
- * 非 semver 的 spec 一律降级为裸包名（pnpm 按包名匹配所有版本）。
+ *
+ * 但 git 安装的包不能降级成裸包名：pnpm 对 git-hosted 依赖按 dep path 匹配（tarball URL
+ * 或 `git+<repo>`），裸包名一条都匹配不上，降级等于把唯一可用的 key 换成唯一不可用的 key，
+ * 于是「自动放行并重试」永远无效，且该 profile 此后每次安装都卡在同一个
+ * `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`（#771）。git 形态统一归一为 repo key
+ * （`pkg@git+https://host/owner/repo.git`），它走 pnpm 的 gitRepos 规则、不参与版本联合解析，
+ * 所以不会重新打开 #730。真正无法识别的 spec 仍沿用裸包名。
  */
 export function safeAllowBuildsKey(key: string): string {
   const at = key.startsWith('@') ? key.indexOf('@', 1) : key.indexOf('@')
   if (at <= 0) return key
+  const name = key.slice(0, at)
   const spec = key.slice(at + 1)
-  return /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(spec) ? key : key.slice(0, at)
+  if (EXACT_VERSION_RE.test(spec)) return key
+  const repo = gitRepoKeyOf(spec)
+  return repo === null ? name : `${name}@${repo}`
+}
+
+/**
+ * git-hosted spec → pnpm 认的 repo key。pnpm 报错里打印的是实际 fetch 的 tarball 地址
+ * （codeload / bitbucket get / GitLab `-/archive`），直接写回会被当版本解析；
+ * 归一成 `git+<repo>.git` 后 pnpm 走 gitRepos 规则匹配。认不出则返回 null。
+ */
+function gitRepoKeyOf(spec: string): string | null {
+  if (spec.startsWith('git+')) return spec
+  const github = /^https:\/\/codeload\.github\.com\/([^/]+)\/([^/]+)\/tar\.gz\//.exec(spec)
+  if (github !== null) return `git+https://github.com/${github[1]}/${github[2]}.git`
+  const bitbucket = /^https:\/\/bitbucket\.org\/([^/]+)\/([^/]+)\/get\//.exec(spec)
+  if (bitbucket !== null) return `git+https://bitbucket.org/${bitbucket[1]}/${bitbucket[2]}.git`
+  // GitLab / Gitea 等：https://host/owner/repo/-/archive/<ref>/...
+  const generic = /^https:\/\/([^/]+)\/(.+?)\/-\/archive\/[^/]+\//.exec(spec)
+  if (generic !== null) return `git+https://${generic[1]}/${generic[2]}.git`
+  if (/^https?:\/\/.+\.git(?:#.*)?$/.test(spec)) return `git+${spec}`
+  return null
 }
 
 /**
