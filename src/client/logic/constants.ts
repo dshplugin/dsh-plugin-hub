@@ -45,40 +45,40 @@ export const CATEGORY_ORDER = [
 
 /** 分类标签按界面语言取词；未知 key 原样返回。 */
 export function categoryLabel(
-  map: Record<string, { zh: string; en: string }>,
+  map: Record<string, Record<LocaleId, string>>,
   key: string,
   lang: LocaleId,
 ): string {
   return map[key]?.[lang] ?? key
 }
 
-export const CATEGORY_LABELS: Record<string, { zh: string; en: string }> = {
-  interface: { zh: '界面与体验', en: 'UI & Experience' },
-  session: { zh: '会话与消息', en: 'Sessions & Messages' },
-  memory: { zh: '记忆与上下文', en: 'Memory & Context' },
-  tools: { zh: '工具与能力', en: 'Tools & Capabilities' },
-  agent: { zh: '技能与智能体', en: 'Skills & Agents' },
-  workflow: { zh: '工作流与自动化', en: 'Workflow & Automation' },
-  integration: { zh: '集成与连接', en: 'Integrations & Connections' },
-  model: { zh: '模型与推理', en: 'Models & Reasoning' },
-  dev: { zh: '开发与运维', en: 'Development & Operations' },
-  knowledge: { zh: '数据与知识', en: 'Data & Knowledge' },
-  fun: { zh: '娱乐', en: 'Entertainment' },
+export const CATEGORY_LABELS: Record<string, Record<LocaleId, string>> = {
+  interface: { zh: '界面与体验', en: 'UI & Experience', pt: 'Interface e experiência' },
+  session: { zh: '会话与消息', en: 'Sessions & Messages', pt: 'Sessões e mensagens' },
+  memory: { zh: '记忆与上下文', en: 'Memory & Context', pt: 'Memória e contexto' },
+  tools: { zh: '工具与能力', en: 'Tools & Capabilities', pt: 'Ferramentas e capacidades' },
+  agent: { zh: '技能与智能体', en: 'Skills & Agents', pt: 'Skills e agentes' },
+  workflow: { zh: '工作流与自动化', en: 'Workflow & Automation', pt: 'Fluxos de trabalho e automação' },
+  integration: { zh: '集成与连接', en: 'Integrations & Connections', pt: 'Integrações e conexões' },
+  model: { zh: '模型与推理', en: 'Models & Reasoning', pt: 'Modelos e raciocínio' },
+  dev: { zh: '开发与运维', en: 'Development & Operations', pt: 'Desenvolvimento e operações' },
+  knowledge: { zh: '数据与知识', en: 'Data & Knowledge', pt: 'Dados e conhecimento' },
+  fun: { zh: '娱乐', en: 'Entertainment', pt: 'Entretenimento' },
 }
 
 /** 分类 Tab 的紧凑标签（英文模式空间受限时使用）。 */
-export const CATEGORY_SHORT_LABELS: Record<string, { zh: string; en: string }> = {
-  interface: { zh: '界面体验', en: 'UI Exp' },
-  session: { zh: '会话消息', en: 'Sessions' },
-  memory: { zh: '记忆上下文', en: 'Memory' },
-  tools: { zh: '工具能力', en: 'Tools' },
-  agent: { zh: '技能智能体', en: 'Agents' },
-  workflow: { zh: '工作流', en: 'Workflow' },
-  integration: { zh: '集成连接', en: 'Integrations' },
-  model: { zh: '模型推理', en: 'Models' },
-  dev: { zh: '开发运维', en: 'Dev' },
-  knowledge: { zh: '数据知识', en: 'Knowledge' },
-  fun: { zh: '娱乐', en: 'Fun' },
+export const CATEGORY_SHORT_LABELS: Record<string, Record<LocaleId, string>> = {
+  interface: { zh: '界面体验', en: 'UI Exp', pt: 'Interface' },
+  session: { zh: '会话消息', en: 'Sessions', pt: 'Sessões' },
+  memory: { zh: '记忆上下文', en: 'Memory', pt: 'Memória' },
+  tools: { zh: '工具能力', en: 'Tools', pt: 'Ferramentas' },
+  agent: { zh: '技能智能体', en: 'Agents', pt: 'Agentes' },
+  workflow: { zh: '工作流', en: 'Workflow', pt: 'Fluxos' },
+  integration: { zh: '集成连接', en: 'Integrations', pt: 'Integrações' },
+  model: { zh: '模型推理', en: 'Models', pt: 'Modelos' },
+  dev: { zh: '开发运维', en: 'Dev', pt: 'Dev' },
+  knowledge: { zh: '数据知识', en: 'Knowledge', pt: 'Dados' },
+  fun: { zh: '娱乐', en: 'Fun', pt: 'Diversão' },
 }
 
 export const SORTS = ['sortStars', 'sortForks', 'sortUpdated', 'sortNewest'] as const

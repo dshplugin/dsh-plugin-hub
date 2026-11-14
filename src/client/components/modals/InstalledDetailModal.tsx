@@ -14,14 +14,14 @@ import type { LocaleId, Translate } from '../../types.ts'
 import type { InstalledItem } from '../../logic/installed.ts'
 import { CATEGORY_LABELS, categoryLabel } from '../../logic/constants.ts'
 import { pluginDetailUrl } from '../../logic/urls.ts'
-import { clockTime, fmtStars } from '../../logic/format.ts'
+import { clockTime, fmtStars, intlLocaleOf } from '../../logic/format.ts'
 import { CloseIcon, CopyIcon, FolderIcon, LinkIcon } from '../ui/icons.tsx'
 
 /** ISO 安装时间 → 本地可读；非法值返回 null（行内不显示）。 */
 function fmtDate(iso: string | null, lang: LocaleId): string | null {
   if (!iso) return null
   const d = new Date(iso)
-  return Number.isNaN(d.getTime()) ? null : d.toLocaleString(lang === 'en' ? 'en-US' : 'zh-CN')
+  return Number.isNaN(d.getTime()) ? null : d.toLocaleString(intlLocaleOf(lang))
 }
 
 export function InstalledDetailModal({ item, t, lang, langPath, onClose, onUpdate, onUninstall, onCopyPath, onReveal }: {

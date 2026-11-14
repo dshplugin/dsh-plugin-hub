@@ -14,6 +14,7 @@ import styles from '../../styles/Modal.module.css'
 import type { HubAboutInfo } from '../../types.ts'
 import type { LocaleId, Translate } from '../../types.ts'
 import { renderMarkdown } from '../../logic/renderMarkdown.ts'
+import { intlLocaleOf } from '../../logic/format.ts'
 import { CloseIcon } from '../ui/icons.tsx'
 
 /**
@@ -41,9 +42,9 @@ export function AboutModal({ info, lang, t, onClose }: {
     ? typeof info.content === 'string'
       ? info.content
       : info.content && typeof info.content === 'object'
-        ? lang === 'en'
-          ? (info.content.en ?? info.content.zh ?? '')
-          : (info.content.zh ?? info.content.en ?? '')
+        ? lang === 'zh'
+          ? (info.content.zh ?? info.content.en ?? '')
+          : (info.content.en ?? info.content.zh ?? '')
         : ''
     : ''
   // 每次打开弹窗（组件重新挂载）生成一个时间戳，用于二维码破缓存；
@@ -55,7 +56,7 @@ export function AboutModal({ info, lang, t, onClose }: {
   if (info?.updatedAt) {
     const d = new Date(info.updatedAt)
     if (!Number.isNaN(d.getTime())) {
-      updated = d.toLocaleString(lang === 'en' ? 'en-US' : 'zh-CN')
+      updated = d.toLocaleString(intlLocaleOf(lang))
     }
   }
 

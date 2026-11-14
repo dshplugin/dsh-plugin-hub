@@ -422,6 +422,7 @@ export function PluginHubSection({ t: _hostT, locale }: SectionProps) {
   return h('div', { className: styles.root },
     h(CatalogHeader, {
       t,
+      langKey,
       langPath,
       statsTotal,
       statsVerified,

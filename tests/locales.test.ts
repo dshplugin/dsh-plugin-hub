@@ -7,30 +7,47 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { en, zh } from '../src/client/locales.ts'
+import { en, pt, zh } from '../src/client/locales.ts'
 
-test('locales: zh / en 的键集合完全一致', () => {
+/** 全部字典，键为语言标记；以 zh（键的来源）为准逐份比对。 */
+const DICTS = { zh, en, pt } as const
+const LOCALES = Object.keys(DICTS) as (keyof typeof DICTS)[]
+
+test('locales: zh / en / pt 的键集合完全一致', () => {
   const zhKeys = Object.keys(zh).sort()
-  const enKeys = Object.keys(en).sort()
-  const missingInEn = zhKeys.filter((k) => !(k in en))
-  const missingInZh = enKeys.filter((k) => !(k in zh))
-  assert.deepEqual(missingInEn, [], '这些键缺少英文文案')
-  assert.deepEqual(missingInZh, [], '这些键缺少中文文案')
+  for (const locale of LOCALES) {
+    if (locale === 'zh') continue
+    const keys = Object.keys(DICTS[locale]).sort()
+    const missing = zhKeys.filter((k) => !(k in DICTS[locale]))
+    const extra = keys.filter((k) => !(k in zh))
+    assert.deepEqual(missing, [], `这些键缺少 ${locale} 文案`)
+    assert.deepEqual(extra, [], `这些键不属于 ${locale}`)
+  }
 })
 
 test('locales: 每种失败类型的标题与原因成对存在', () => {
-  for (const dict of [zh, en]) {
+  for (const locale of LOCALES) {
+    const dict = DICTS[locale]
     for (const key of Object.keys(dict)) {
       if (!key.startsWith('failKind_')) continue
       const kind = key.slice('failKind_'.length)
-      assert.ok(`failReason_${kind}` in dict, `缺少 failReason_${kind}`)
+      assert.ok(`failReason_${kind}` in dict, `${locale} 缺少 failReason_${kind}`)
     }
     for (const key of Object.keys(dict)) {
       if (!key.startsWith('failReason_')) continue
       const kind = key.slice('failReason_'.length)
-      assert.ok(`failKind_${kind}` in dict, `缺少 failKind_${kind}`)
+      assert.ok(`failKind_${kind}` in dict, `${locale} 缺少 failKind_${kind}`)
     }
   }
+})
+
+test('locales: 非中文界面语言的新字典里不应残留汉字', () => {
+  // 防止机翻时漏掉一段：pt 文案里出现汉字，说明那一句根本没翻译
+  const cjk = /[\u4e00-\u9fff]/
+  const leaked = Object.entries(pt)
+    .filter(([, value]) => cjk.test(value))
+    .map(([key]) => key)
+  assert.deepEqual(leaked, [], '这些 pt 文案仍含汉字')
 })
 
 test('locales: failKind 的每个后缀都是真实存在的失败类型', () => {

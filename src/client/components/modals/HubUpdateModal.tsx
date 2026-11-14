@@ -19,6 +19,7 @@ import styles from '../../styles/Modal.module.css'
 import type { HubUpdateInfo, HubUpdateState } from '../../types.ts'
 import type { LocaleId, Translate } from '../../types.ts'
 import { renderMarkdown } from '../../logic/renderMarkdown.ts'
+import { intlLocaleOf } from '../../logic/format.ts'
 import { CloseIcon } from '../ui/icons.tsx'
 
 export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed, onClose }: {
@@ -48,9 +49,9 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
   const notesRaw = typeof info.notes === 'string'
     ? info.notes
     : info.notes && typeof info.notes === 'object'
-      ? lang === 'en'
-        ? (info.notes.en ?? info.notes.zh ?? '')
-        : (info.notes.zh ?? info.notes.en ?? '')
+      ? lang === 'zh'
+        ? (info.notes.zh ?? info.notes.en ?? '')
+        : (info.notes.en ?? info.notes.zh ?? '')
       : ''
   // 记录开头的 H1 只是重复「DSH Plugin Hub vX」，版本已在顶部展示过；去掉后正文直接进入内容。
   // 去掉后若没有正文（记录只有标题），保底仍显示原文，避免空盒子
@@ -64,7 +65,7 @@ export function HubUpdateModal({ info, state, currentVersion, lang, t, onProceed
   if (info.publishedAt) {
     const d = new Date(info.publishedAt)
     if (!Number.isNaN(d.getTime())) {
-      published = d.toLocaleString(lang === 'en' ? 'en-US' : 'zh-CN')
+      published = d.toLocaleString(intlLocaleOf(lang))
     }
   }
 
