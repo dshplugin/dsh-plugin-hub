@@ -3,7 +3,8 @@
  * Website: https://dsh-plugin.org
  * GitHub: https://github.com/dshplugin/dsh-plugin-hub
  *
- * 插件中心设置板块的 zh/en 字典。
+ * 插件中心设置板块的 zh/en/pt 字典。
+ * pt 为巴西葡萄牙语（pt-BR 语言包），键集合与 zh/en 一一对应，由 tests/locales.test.ts 校验。
  */
 export const zh = {
   nav: '插件市场',

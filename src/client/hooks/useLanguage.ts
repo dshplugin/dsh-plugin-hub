@@ -5,7 +5,7 @@
  *
  * 板块的语言状态：Hub 与宿主（系统）locale 共用 —— 头部语言开关通过 setLocale 写入
  * 宿主语言偏好，让宿主界面（左侧菜单、设置弹窗）与 Hub 面板一起切换、不会各说各话。
- * 对外暴露本地化字典查询 `t()`、zh/en 语言标记与 /zh/ URL 路径前缀。
+ * 对外暴露本地化字典查询 `t()`、zh/en/pt 语言标记与 /zh/ URL 路径前缀。
  */
 import { useEffect, useState } from 'react'
 import type { LocaleId, SectionProps } from '../types.ts'
@@ -13,7 +13,7 @@ import { en, pt, zh } from '../locales.ts'
 import { langPathOf } from '../logic/urls.ts'
 import { dictKeyOf, nextLocaleOf } from '../logic/locale-key.ts'
 
-/** Dictionaries this plugin ships, keyed by locale id. */
+/** 本插件自带的字典，按语言标记索引。 */
 const DICTS: Record<LocaleId, Record<string, string>> = { en, zh, pt }
 
 export function useLanguage(locale: SectionProps['locale']) {
@@ -23,9 +23,8 @@ export function useLanguage(locale: SectionProps['locale']) {
   const [, setRev] = useState(0)
   useEffect(() => locale.subscribe(() => setRev((r) => r + 1)), [locale])
   const lang: LocaleId = locale.getSnapshot().active
-  // Only the locales this plugin ships have a dictionary. Any other host locale
-  // (ja, de, ru…) falls back to English — falling back to zh showed Chinese to
-  // every user whose language had no dictionary.
+  // 只有本插件自带字典的语言能取到文案：宿主跑在日语、德语等没有字典的语言时
+  // 一律回退英文 —— 回退到 zh 会让所有非中文用户看到中文界面。
   const langKey: LocaleId = dictKeyOf(lang)
   // dsh-plugin.org 的 zh 页面挂在 /zh/ 前缀下，en 在根路径。
   const langPath = langPathOf(lang)

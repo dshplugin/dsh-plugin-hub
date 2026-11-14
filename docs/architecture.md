@@ -151,9 +151,9 @@ Windows 下有 Schannel 证书吊销失败的兜底重试。`/env` 另行给出�
 ## 浏览器端（`src/client/`）
 
 ```
-index.tsx                    入口：apply() → locale 注册 + slots 注册（settings.section）
+index.tsx                    入口：apply() → locale 注册（含 pt 语言定义）+ slots 注册（settings.section）
 types.ts                     客户端共享类型（零依赖）
-locales.ts                   zh/en 文案字典
+locales.ts                   zh/en/pt 文案字典
 components/
   PluginHubSection.tsx       根组件：把数据管线、任务队列、反馈状态接在一起
   views/                     六个一级视图

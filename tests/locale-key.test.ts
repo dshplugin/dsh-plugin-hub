@@ -6,7 +6,14 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SHIPPED_LOCALES, dictKeyOf, nextLocaleOf } from '../src/client/logic/locale-key.ts'
+import { PT_LANGUAGE, SHIPPED_LOCALES, dictKeyOf, nextLocaleOf } from '../src/client/logic/locale-key.ts'
+
+test('locale-key: pt 语言定义符合宿主 addLanguage 的约束（BCP 47 id + 英文回退）', () => {
+  assert.match(PT_LANGUAGE.id, /^[A-Za-z0-9][A-Za-z0-9-]*$/)
+  assert.notEqual(PT_LANGUAGE.label.trim(), '')
+  // addLanguage 要求 fallback 已注册且链路终止于 en
+  assert.equal(PT_LANGUAGE.fallback, 'en')
+})
 
 test('locale-key: 自带字典的语言原样返回', () => {
   for (const locale of SHIPPED_LOCALES) {
@@ -19,8 +26,16 @@ test('locale-key: 没有字典的宿主语言回退到英文，不是中文', ()
     assert.equal(dictKeyOf(locale), 'en', `${locale} 应回退到 en`)
   }
   // 宿主传来的未知 id 也不能抛错
-  assert.equal(dictKeyOf('pt-BR'), 'en')
   assert.equal(dictKeyOf(''), 'en')
+})
+
+test('locale-key: 带区域的语言包按主语言子标签归位', () => {
+  // 语言包注册的 id 可能带区域（pt-BR / zh-CN / en-US），不能因此被当成「没有字典」
+  assert.equal(dictKeyOf('pt-BR'), 'pt')
+  assert.equal(dictKeyOf('pt_BR'), 'pt')
+  assert.equal(dictKeyOf('zh-CN'), 'zh')
+  assert.equal(dictKeyOf('en-US'), 'en')
+  assert.equal(dictKeyOf('PT'), 'pt')
 })
 
 test('locale-key: 切换开关在自带字典的语言之间循环', () => {

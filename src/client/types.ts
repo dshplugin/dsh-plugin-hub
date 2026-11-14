@@ -18,7 +18,9 @@ export type Translate = (key: string, params?: Record<string, string | number>) 
 
 /** 本插件用到的 locale 服务子集。 */
 export interface LocaleService {
-  register(namespace: string, dicts: { zh: Record<string, string>; en: Record<string, string>; pt: Record<string, string> }): unknown
+  register(namespace: string, dicts: { zh: Record<string, string>; en: Record<string, string>; pt?: Record<string, string> }): unknown
+  /** 把非内置语言加进宿主语言目录（内置只有 zh / en）；返回移除该定义的 disposer。 */
+  addLanguage(input: { id: string; label: string; fallback: string }): () => void
   bind(namespace: string): (key: string, params?: Record<string, string | number>) => string
   getSnapshot(): { active: LocaleId }
   subscribe(fn: () => void): () => void
