@@ -5,7 +5,14 @@
  *
  * 目录列表与卡片共用的展示格式化函数。
  */
-import type { Translate } from '../types.ts'
+import type { LocaleId, Translate } from '../types.ts'
+
+/** Intl locale for absolute dates: each shipped UI language uses its own region defaults. */
+export function intlLocaleOf(lang: LocaleId): string {
+  if (lang === 'zh') return 'zh-CN'
+  if (lang === 'pt') return 'pt-BR'
+  return 'en-US'
+}
 
 /** 星数/分支数的紧凑展示：<1k 原样；千级 1.2k；十万级取整。 */
 export function fmtStars(count?: number): string {

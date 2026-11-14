@@ -8,7 +8,7 @@
  */
 import { createElement as h } from 'react'
 import type { HubClientContext } from './types.ts'
-import { en, zh } from './locales.ts'
+import { en, pt, zh } from './locales.ts'
 import { PluginHubSection } from './components/PluginHubSection.tsx'
 import './styles/tokens.module.css'
 
@@ -18,7 +18,7 @@ export const name = NS
 export const inject = ['slots', 'locale']
 
 export function apply(ctx: HubClientContext): void {
-  ctx.effect(() => ctx.locale.register(NS, { zh, en }), `${NS}: dictionaries`)
+  ctx.effect(() => ctx.locale.register(NS, { zh, en, pt }), `${NS}: dictionaries`)
   const t = ctx.locale.bind(NS)
   ctx.slots.inject('settings.section', () => ctx.slots.register({
     name: 'settings.section',

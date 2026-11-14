@@ -63,10 +63,11 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
             return raw === 'npm' ? 'npm' : undefined
           })()
           const settings = loadSettings(profile)
-          // 界面语言（客户端随请求携带）：错误消息按用户当前语言提示（中文界面给中文，英文界面给英文）
-          const lang = typeof body === 'object' && body !== null && (body as { lang?: unknown }).lang === 'en'
-            ? 'en'
-            : 'zh'
+          // 界面语言（客户端随请求携带）：错误消息按用户当前语言提示。
+          // 服务端只有中文/英文两套文案，除 zh 以外的语言（en、pt…）一律给英文。
+          const lang = typeof body === 'object' && body !== null && (body as { lang?: unknown }).lang === 'zh'
+            ? 'zh'
+            : 'en'
           // 代理规则与诊断/安装通道一致：设置里的代理 → 系统代理 → 环境变量 → 直连。
           const effectiveProxy = settings.proxy !== ''
             ? settings.proxy

@@ -7,7 +7,7 @@
  * 而不会连带拉入组件或样式。
  */
 
-export type LocaleId = 'zh' | 'en'
+export type LocaleId = 'zh' | 'en' | 'pt'
 
 /** 自定义安装入口渠道：仅 NPM 包。
  *  客户端提交时显式上报，服务端落日志/报错提示据此溯源「从哪个入口发起」。 */
@@ -18,7 +18,7 @@ export type Translate = (key: string, params?: Record<string, string | number>) 
 
 /** 本插件用到的 locale 服务子集。 */
 export interface LocaleService {
-  register(namespace: string, dicts: { zh: Record<string, string>; en: Record<string, string> }): unknown
+  register(namespace: string, dicts: { zh: Record<string, string>; en: Record<string, string>; pt: Record<string, string> }): unknown
   bind(namespace: string): (key: string, params?: Record<string, string | number>) => string
   getSnapshot(): { active: LocaleId }
   subscribe(fn: () => void): () => void
