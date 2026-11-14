@@ -7,13 +7,18 @@
  */
 import { createElement as h, Fragment } from 'react'
 import styles from '../../styles/Header.module.css'
-import type { Translate } from '../../types.ts'
+import type { LocaleId, Translate } from '../../types.ts'
 import { GITHUB_URL, PLUGIN_VERSION } from '../../logic/constants.ts'
 import { siteUrl } from '../../logic/urls.ts'
+import { nextLocaleOf } from '../../logic/locale-key.ts'
 import { GitHubIcon, LogoIcon } from '../ui/icons.tsx'
 
-export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggleLang, hubUpdate, onVersionClick, onAboutClick }: {
+/** 语言开关上的「要切到的语言」标签：每个自带字典的语言显示的是下一站。 */
+const LANG_LABEL: Record<LocaleId, string> = { en: 'EN', zh: '中文', pt: 'PT' }
+
+export function CatalogHeader({ t, langKey, langPath, statsTotal, statsVerified, onToggleLang, hubUpdate, onVersionClick, onAboutClick }: {
   t: Translate
+  langKey: LocaleId
   langPath: string
   statsTotal: number
   statsVerified: number
@@ -63,7 +68,7 @@ export function CatalogHeader({ t, langPath, statsTotal, statsVerified, onToggle
             onClick: onToggleLang,
             title: t('toggleLangHint'),
             'aria-label': t('toggleLangHint'),
-          }, langPath === 'zh/' ? 'EN' : '中文'),
+          }, LANG_LABEL[nextLocaleOf(langKey)]),
           // 「关注我们」：点击打开平台介绍 + 用户反馈群二维码弹窗
           h('button', {
             className: styles.aboutBtn,
