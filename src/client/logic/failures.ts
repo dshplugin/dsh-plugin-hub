@@ -148,7 +148,7 @@ export function removeNotification(id: number): NotificationRecord[] {
   return next
 }
 
-export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileLocalBuild' | 'profileBadAllowBuilds' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
+export type FailureKind = 'npmTooOld' | 'nodeEngine' | 'dshMissing' | 'gitMissing' | 'pnpmMissing' | 'pnpmBroken' | 'npmMissing' | 'pnpmStore' | 'pnpmModulesMismatch' | 'profileYamlCorrupted' | 'profileLocalBuild' | 'profileBadAllowBuilds' | 'profileState' | 'pnpmWorkspace' | 'originRejected' | 'pnpmPolicy' | 'pnpmUnusedPatch' | 'pnpmMissingDep' | 'pluginMissingDep' | 'registryVersionStale' | 'registryAuth' | 'profileExclusive' | 'pnpmLinkedDirMissing' | 'fileLocked' | 'accessDenied' | 'fsUnavailable' | 'buildToolchainMissing' | 'pnpmIgnoredBuild' | 'pluginPrepare' | 'hostIncompatible' | 'tlsTrust' | 'network' | 'hostCliSpawn' | 'hubState' | 'profileBundleMissing' | 'timeout' | 'profileLock' | 'dshTooOld' | 'localEnv' | 'hub'
 
 /** 失败动作规则：标题、上报正文与提示文案按安装/更新/卸载取词，不写死「安装」。 */
 export type FailureAction = 'install' | 'update' | 'uninstall'
@@ -226,6 +226,19 @@ export function pnpmPolicyHintParams(message: string): Record<string, string> {
 }
 
 /**
+ * 本服务注入的「结论型」诊断标记。它们描述的是已经查明的原因，比日志里残留的形状更权威；
+ * 出现时不允许 pnpmBroken 用 `Cannot find module …pnpm…` 抢判。
+ * 注意不要收进 `[install-channel]` / `[hub-install]` 这类每单必打的流程标记，
+ * 否则会把 pnpmBroken 永久屏蔽（#806/#810 的日志里都带 `[install-channel]`）。
+ */
+const OWN_DIAGNOSTIC_MARKER_RE =
+  /\[(?:npm-too-low|pnpm-missing|git-missing|npm-missing|dsh-missing|dsh-too-old|packaging|registry-missing|registry-mirror-lag|profile-yaml|network|request-timeout|timed out|host-spawn|hub-uninstall)\]/
+
+function hasOwnDiagnosticMarker(message: string): boolean {
+  return OWN_DIAGNOSTIC_MARKER_RE.test(message)
+}
+
+/**
  * 失败归类：把安装输出归到具体成因，供弹窗文案与是否引导提 Issue 使用。
  * 分界是「本机环境问题」（装任何插件都会同样失败 → 不引导提 Issue）与「插件分发问题」
  * （只影响这个插件 → 才引导提 Issue）。各分支判定顺序有依赖，见函数内注释。
@@ -245,6 +258,13 @@ export function classifyFailure(message: string): FailureKind {
   if (/ERR_PNPM_UNSUPPORTED_ENGINE|ERR_PNPM_INVALID_NODE_VERSION|\bEBADENGINE\b/i.test(message)) return 'nodeEngine'
   // 本机缺 pnpm。必须在 dshMissing 之前 —— 后者的裸「command not found」会吞掉 pnpm 缺失
   if (/\[pnpm-missing\]|pnpm not found|pnpm: command not found|spawn pnpm ENOENT|'pnpm' 不是内部或外部命令|"pnpm" 不是内部或外部命令|pnpm['"]?\s*is not recognized/i.test(message)) return 'pnpmMissing'
+  // pnpm 命令在、但入口模块缺失：全局 pnpm 安装损坏（store 链接目录被清空），或宿主内置的 pnpm
+  // 运行时没打进这次发行包。日志形态是 Node 的 `Cannot find module '…\pnpm\bin\pnpm.mjs'`，
+  // 还没进到依赖解析 —— 装任何插件都会同样失败，属本机环境，不能兜底成 unclassified（#806/#810）。
+  // 但本服务注入的诊断标记比这条日志形状更权威（例如装后校验的 [packaging]），
+  // 同时出现时跳过这里，交给后面的标记分支判定
+  if (!hasOwnDiagnosticMarker(message)
+      && /Cannot find module [^\n]*[\\/]pnpm(?:[\\/][^\n]*)?\.(?:c|m)?js\b|ERR_MODULE_NOT_FOUND[^\n]*[\\/]pnpm/i.test(message)) return 'pnpmBroken'
   // 本机缺 git。必须在 dshMissing 之前，原因同上（裸「is not recognized」会吞掉 git 缺失）
   if (/\[git-missing\]|spawn git ENOENT|'git' 不是内部或外部命令|"git" 不是内部或外部命令|git['"]?\s*is not recognized|git: command not found/i.test(message)) return 'gitMissing'
   // 本机缺 npm。必须在 dshMissing 之前，原因同上

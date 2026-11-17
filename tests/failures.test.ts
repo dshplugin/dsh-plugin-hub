@@ -152,6 +152,19 @@ test('classifyFailure: dsh command missing on the machine is an environment issu
   assert.equal(classifyFailure("Command failed: dsh plugin add github:owner/repo\n'dsh' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'dshMissing')
 })
 
+test('classifyFailure: missing pnpm entry module is a broken local pnpm, not an unknown hub failure', () => {
+  // #810：宿主内置的 pnpm 运行时没打进去（DSH 0.2.2-rc.3，pnpm: unknown）
+  assert.equal(classifyFailure("Error: Cannot find module 'C:\\Users\\jeffe\\AppData\\Local\\Programs\\DeepSeek Harness\\resources\\runtime\\primary-runtime\\dependencies\\pnpm\\bin\\pnpm.mjs'\nCommand failed with exit code 1: \"C:\\Program Files\\DeepSeek Harness\\DeepSeek Harness.exe\" --expose-internals \"C:\\Program Files\\DeepSeek Harness\\resources\\runtime\\primary-runtime\\dependencies\\pnpm\\bin\\pnpm.mjs\" add \"dsh-ops@0.5.5\""), 'pnpmBroken')
+  // #806：用户全局 pnpm 9.15.0 的 store 链接目录被清空，入口 pnpm.cjs 缺失
+  assert.equal(classifyFailure("Error: Cannot find module 'C:\\Users\\Avada\\AppData\\Local\\pnpm\\store\\v11\\links\\@\\pnpm\\9.15.0\\b8d9dde4\\node_modules\\pnpm\\bin\\pnpm.cjs'"), 'pnpmBroken')
+  // 不是 pnpm 自身的模块缺失时，仍按未分类交给插件中心分诊
+  assert.equal(classifyFailure("Error: Cannot find module 'left-pad'"), 'hub')
+  // 本服务注入的结论标记优先：装后校验失败不能被同屏残留的 pnpm 路径改判
+  assert.equal(classifyFailure("[packaging] entry file missing\nError: Cannot find module 'C:\\x\\node_modules\\pnpm\\bin\\pnpm.cjs'"), 'pluginPrepare')
+  // 每单必打的流程标记不参与抢判，否则 pnpmBroken 会被永久屏蔽
+  assert.equal(classifyFailure("[install-channel] npm\nError: Cannot find module 'C:\\x\\node_modules\\pnpm\\bin\\pnpm.cjs'"), 'pnpmBroken')
+})
+
 test('classifyFailure: missing git executable is an environment issue, not a plugin issue', () => {
   // Windows cmd (Chinese)
   assert.equal(classifyFailure("'git' \u4e0d\u662f\u5185\u90e8\u6216\u5916\u90e8\u547d\u4ee4\uff0c\u4e5f\u4e0d\u662f\u53ef\u8fd0\u884c\u7684\u7a0b\u5e8f\u3002"), 'gitMissing')

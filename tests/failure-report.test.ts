@@ -92,3 +92,15 @@ test('pluginIssueUrl: the environment section carries the npm registry in use', 
   const { body: noRegistry } = decodeTargets(pluginIssueUrl('a/b', 'boom', { ...env, npmRegistry: null }))
   assert.ok(noRegistry.includes('- npm registry: unknown'), noRegistry)
 })
+
+test('issue links: a broken local pnpm is reported as an environment issue, not plugin-side', () => {
+  // #806：全局 pnpm 的 store 链接被清空，入口 pnpm.cjs 缺失（#810 是宿主内置 pnpm.mjs 缺失）
+  const brokenPnpm = "Error: Cannot find module 'C:\\Users\\Avada\\AppData\\Local\\pnpm\\store\\v11\\links\\@\\pnpm\\9.15.0\\b8d9dde4\\node_modules\\pnpm\\bin\\pnpm.cjs'"
+  const plugin = decodeTargets(pluginIssueUrl('stuarthu/dsh-chrome', brokenPnpm, null, 'dsh plugin --profile web add dsh-chrome@0.1.3'))
+  assert.ok(plugin.title.includes('broken pnpm installation'), plugin.title)
+  assert.ok(plugin.body.includes('no plugin-side cause found'), plugin.body)
+  assert.ok(!plugin.body.includes('plugin-side install failure'), plugin.body)
+  const hub = decodeTargets(hubIssueUrl('stuarthu/dsh-chrome', brokenPnpm, null, undefined, undefined, 'triage'))
+  assert.ok(hub.title.includes('broken pnpm installation'), hub.title)
+  assert.ok(hub.body.includes('Auto-classified cause: broken pnpm installation'), hub.body)
+})

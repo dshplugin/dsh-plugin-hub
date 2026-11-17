@@ -436,6 +436,10 @@ export function ErrorModal({ message, repo, action, command, attempts, t, env, o
               : failureKind === 'pnpmMissing'
               // 本机缺 pnpm，不是插件问题
               ? h('div', { className: styles.failPrepareHint }, t('failPnpmMissingHint'))
+              : failureKind === 'pnpmBroken'
+              // pnpm 命令在但入口模块缺失（全局安装损坏 / 宿主内置 pnpm 没打全）：
+              // 装任何插件都会同样失败，给修复指引，不引导提 Issue
+              ? h('div', { className: styles.failPrepareHint }, t('failPnpmBrokenHint'))
               : failureKind === 'npmMissing'
               // 本机缺 npm，不是插件问题
               ? h('div', { className: styles.failPrepareHint }, t('failNpmMissingHint'))

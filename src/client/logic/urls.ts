@@ -55,6 +55,7 @@ function reasonTitleOf(kind: FailureKind, action: FailureAction): string {
     case 'profileBadAllowBuilds': return 'the user profile has an allowBuilds entry that pnpm cannot parse'
     case 'dshMissing': return 'dsh command not found on the user machine'
     case 'pnpmMissing': return 'pnpm command not found on the user machine'
+    case 'pnpmBroken': return 'broken pnpm installation on the user machine (entry module missing)'
     case 'pnpmStore': return 'pnpm store version mismatch on the user machine'
     case 'pnpmModulesMismatch': return 'the profile modules directory was built with a different pnpm config on the user machine'
     case 'pnpmWorkspace': return `pnpm workspace-root check blocked the ${word} on the user machine`
@@ -121,6 +122,8 @@ export function pluginIssueUrl(repo: string, message: string, env?: EnvInfo | nu
         ? 'no plugin-side cause found — pnpm rejects a build script of a local (file:/link:) package that already exists in the user profile, so every install into that profile fails the same way (local environment issue)'
       : kind === 'profileBadAllowBuilds'
         ? 'no plugin-side cause found — the allowBuilds list in the user profile\'s pnpm-workspace.yaml contains a spec pnpm cannot parse (a URL, git or file path where an exact version is required), so pnpm aborts every install into that profile before resolving the plugin (local environment issue)'
+      : kind === 'pnpmBroken'
+        ? 'no plugin-side cause found — the pnpm command exists on the user machine but its entry module is missing (corrupted global pnpm install, or an incomplete host-bundled pnpm runtime), so every install fails the same way (local environment issue)'
       : kind === 'localEnv'
         ? 'no evidence of a plugin-side cause; the log shows local-environment signals (system error codes, certificates/proxy, or a broken local config), so this is reported for triage of the classifier only'
       : kind === 'dshTooOld'

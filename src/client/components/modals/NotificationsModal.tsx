@@ -291,6 +291,11 @@ export function NotificationsModal({ records, tasks, pendingRestarts, t, env, on
                       // 本机缺 pnpm，不是插件问题 —— 给安装指引，不引导提 Issue
                       return h('div', { className: styles.failPrepareHint }, t('failPnpmMissingHint'))
                     }
+                    if (kind === 'pnpmBroken') {
+                      // pnpm 命令在但入口模块缺失（全局安装损坏 / 宿主内置 pnpm 没打全）：
+                      // 装任何插件都会同样失败，给修复指引，不引导提 Issue
+                      return h('div', { className: styles.failPrepareHint }, t('failPnpmBrokenHint'))
+                    }
                     if (kind === 'npmMissing') {
                       // 全局 npm 安装通道 spawn 的 npm 找不到：本机 npm 未安装或不在 PATH ——
                       // 给安装指引，不引导提 Issue
