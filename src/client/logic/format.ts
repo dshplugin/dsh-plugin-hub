@@ -10,7 +10,6 @@ import type { LocaleId, Translate } from '../types.ts'
 /** 绝对时间（安装时间、发布时间）用的 Intl locale：每种自带字典的界面语言用自己的区域习惯。 */
 export function intlLocaleOf(lang: LocaleId): string {
   if (lang === 'zh') return 'zh-CN'
-  if (lang === 'pt') return 'pt-BR'
   return 'en-US'
 }
 

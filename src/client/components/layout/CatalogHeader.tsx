@@ -14,7 +14,7 @@ import { nextLocaleOf } from '../../logic/locale-key.ts'
 import { GitHubIcon, LogoIcon } from '../ui/icons.tsx'
 
 /** 语言开关上的「要切到的语言」标签：每个自带字典的语言显示的是下一站。 */
-const LANG_LABEL: Record<LocaleId, string> = { en: 'EN', zh: '中文', pt: 'PT' }
+const LANG_LABEL: Record<LocaleId, string> = { en: 'EN', zh: '中文' }
 
 export function CatalogHeader({ t, langKey, langPath, statsTotal, statsVerified, onToggleLang, hubUpdate, onVersionClick, onAboutClick }: {
   t: Translate

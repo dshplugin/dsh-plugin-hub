@@ -7,13 +7,13 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { en, pt, zh } from '../src/client/locales.ts'
+import { en, zh } from '../src/client/locales.ts'
 
 /** 全部字典，键为语言标记；以 zh（键的来源）为准逐份比对。 */
-const DICTS = { zh, en, pt } as const
+const DICTS = { zh, en } as const
 const LOCALES = Object.keys(DICTS) as (keyof typeof DICTS)[]
 
-test('locales: zh / en / pt 的键集合完全一致', () => {
+test('locales: zh / en 的键集合完全一致', () => {
   const zhKeys = Object.keys(zh).sort()
   for (const locale of LOCALES) {
     if (locale === 'zh') continue
@@ -41,13 +41,13 @@ test('locales: 每种失败类型的标题与原因成对存在', () => {
   }
 })
 
-test('locales: 非中文界面语言的新字典里不应残留汉字', () => {
-  // 防止机翻时漏掉一段：pt 文案里出现汉字，说明那一句根本没翻译
+test('locales: 英文文案里不应残留汉字', () => {
+  // 防止复制中文段落时漏翻：英文文案里出现汉字，说明那一句根本没翻译
   const cjk = /[\u4e00-\u9fff]/
-  const leaked = Object.entries(pt)
+  const leaked = Object.entries(en)
     .filter(([, value]) => cjk.test(value))
     .map(([key]) => key)
-  assert.deepEqual(leaked, [], '这些 pt 文案仍含汉字')
+  assert.deepEqual(leaked, [], '这些英文文案仍含汉字')
 })
 
 test('locales: failKind 的每个后缀都是真实存在的失败类型', () => {

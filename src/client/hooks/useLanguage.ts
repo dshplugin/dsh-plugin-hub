@@ -5,16 +5,16 @@
  *
  * 板块的语言状态：Hub 与宿主（系统）locale 共用 —— 头部语言开关通过 setLocale 写入
  * 宿主语言偏好，让宿主界面（左侧菜单、设置弹窗）与 Hub 面板一起切换、不会各说各话。
- * 对外暴露本地化字典查询 `t()`、zh/en/pt 语言标记与 /zh/ URL 路径前缀。
+ * 对外暴露本地化字典查询 `t()`、zh/en 语言标记与 /zh/ URL 路径前缀。
  */
 import { useEffect, useState } from 'react'
 import type { LocaleId, SectionProps } from '../types.ts'
-import { en, pt, zh } from '../locales.ts'
+import { en, zh } from '../locales.ts'
 import { langPathOf } from '../logic/urls.ts'
 import { dictKeyOf, nextLocaleOf } from '../logic/locale-key.ts'
 
 /** 本插件自带的字典，按语言标记索引。 */
-const DICTS: Record<LocaleId, Record<string, string>> = { en, zh, pt }
+const DICTS: Record<LocaleId, Record<string, string>> = { en, zh }
 
 export function useLanguage(locale: SectionProps['locale']) {
   // 界面语言 = 宿主（系统）语言：右上角按钮切换时直接写入宿主 locale 偏好，

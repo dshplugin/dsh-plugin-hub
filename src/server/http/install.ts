@@ -64,7 +64,7 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
           })()
           const settings = loadSettings(profile)
           // 界面语言（客户端随请求携带）：错误消息按用户当前语言提示。
-          // 服务端只有中文/英文两套文案，除 zh 以外的语言（en、pt…）一律给英文。
+          // 服务端只有中文/英文两套文案，除 zh 以外的语言一律给英文。
           const lang = typeof body === 'object' && body !== null && (body as { lang?: unknown }).lang === 'zh'
             ? 'zh'
             : 'en'

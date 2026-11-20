@@ -117,7 +117,7 @@ export function registerCatalogRoutes(webServer: WebServerService, profile: stri
           ? settings.proxy
           : (systemProxy() ?? process.env.HTTPS_PROXY ?? process.env.https_proxy ?? '')
         const isStats = url.searchParams.get('stats') === '1'
-        // 目录语言：只有中文目录和英文目录两份。除 zh 以外的界面语言（en、pt…）
+        // 目录语言：只有中文目录和英文目录两份。除 zh 以外的界面语言（en 等）
         // 都取英文目录，避免非中文用户拿到中文插件描述。
         const lang = url.searchParams.get('lang') === 'zh' ? 'zh' : 'en'
         const target = isStats
