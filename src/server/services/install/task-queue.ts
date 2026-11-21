@@ -9,7 +9,7 @@
  */
 import { spawn, spawnSync } from 'node:child_process'
 import { requiredDistributionFiles, resolveBundlePatchFiles, type PackageManifest } from './package-entry.ts'
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import type { InstallResult, InstallTask, Invocation, QueueItem } from './install-types.ts'
 import { CAPTURE_LIMIT_BYTES, MAX_TASKS, MAX_TASK_LINES } from './install-types.ts'
@@ -444,6 +444,11 @@ function spawnMutation(options: {
     && (process.versions as Record<string, string | undefined>).electron !== undefined) {
     pushLine(task, '[desktop-cli-fallback] running inside Electron but no desktop CLI bootstrap was found — falling back to dsh on PATH (a desktop-managed profile will be rejected)')
   }
+  // Windows 编辑器写的 UTF-8 BOM 会让宿主 CLI 在解析依赖清单阶段就抛 SyntaxError（#856 / #873）。
+  // 安装前原地去掉，用户不必手动重存文件。
+  if (!isGlobalNpm && stripBomFromProfileManifest(profile) && task && task.status !== 'cancelled') {
+    pushLine(task, '[bom-stripped] removed a UTF-8 BOM from the profile package.json before install')
+  }
   // 安装/更新 npm 包都显式 @latest：pnpm add <pkg>（无版本）对已存在的精确 spec 是幂等的，
   // 会原样留用旧版本（更新不生效，普通安装也可能装回不支持当前宿主的旧包）。
   // update 动作同样执行 `add <target>@latest`，CLI 动词原样传递 add，不与官方 update 动词分叉。
@@ -729,6 +734,32 @@ function spawnMutation(options: {
   })()
 }
 
+/** 读 JSON 文件并容忍 UTF-8 BOM：Windows 编辑器（记事本、PowerShell 重定向）会给 JSON
+ *  加 BOM，而 `JSON.parse` 直接抛 `Unexpected token '\uFEFF'`。BOM 不在 JSON 规范内，
+ *  去掉不改变语义。 */
+function parseJsonFile<T>(file: string): T {
+  return JSON.parse(readFileSync(file, 'utf8').replace(/^\uFEFF/, '')) as T
+}
+
+/**
+ * 安装前把 profile 的 package.json 里的 UTF-8 BOM 去掉（原地重写，幂等）。
+ * BOM 留在文件里时，宿主 CLI 在解析依赖清单阶段就会抛
+ * `SyntaxError: Unexpected token '\uFEFF'` —— 还没开始装就已经失败，且报错看不出是谁的问题
+ * （见 #856 / #873）。返回是否真的改写过文件。
+ */
+export function stripBomFromProfileManifest(profile: string): boolean {
+  const file = join(profileDirectory(profile), 'package.json')
+  try {
+    const raw = readFileSync(file, 'utf8')
+    if (!raw.startsWith('\uFEFF')) return false
+    writeFileSync(file, raw.slice(1), 'utf8')
+    return true
+  } catch {
+    // 文件不存在或不可写：不属于本函数职责，交给后续安装流程报错
+    return false
+  }
+}
+
 /**
  * 安装成功后从 profile 的 `node_modules/<pkg>/package.json` 读**实际**版本；
  * 定位不到包名或读不到返回 null。客户端拿它写版本账本 —— 目录里的版本可能滞后。
@@ -737,7 +768,7 @@ export function installedVersionOf(profile: string, target: string): string | nu
   const profileDir = profileDirectory(profile)
   let deps: Record<string, string> = {}
   try {
-    const pkg = JSON.parse(readFileSync(join(profileDir, 'package.json'), 'utf8')) as { dependencies?: Record<string, string> }
+    const pkg = parseJsonFile<{ dependencies?: Record<string, string> }>(join(profileDir, 'package.json'))
     deps = pkg.dependencies ?? {}
   } catch {
     return null
@@ -748,7 +779,7 @@ export function installedVersionOf(profile: string, target: string): string | nu
     : deps[target] !== undefined ? target : Object.keys(deps).find((k) => deps[k] === target)
   if (!name) return null
   try {
-    const meta = JSON.parse(readFileSync(join(profileDir, 'node_modules', name, 'package.json'), 'utf8')) as { version?: unknown }
+    const meta = parseJsonFile<{ version?: unknown }>(join(profileDir, 'node_modules', name, 'package.json'))
     return typeof meta.version === 'string' && meta.version !== '' ? meta.version : null
   } catch {
     return null
@@ -766,7 +797,7 @@ export function installedVersionOf(profile: string, target: string): string | nu
 export function verifyInstalledEntry(profile: string, target: string): { name: string | null; missing: string | null } {
   let profilePkg: Record<string, unknown> | null = null
   try {
-    profilePkg = JSON.parse(readFileSync(join(profileDirectory(profile), 'package.json'), 'utf8')) as Record<string, unknown>
+    profilePkg = parseJsonFile<Record<string, unknown>>(join(profileDirectory(profile), 'package.json'))
   } catch {
     return { name: null, missing: null }
   }

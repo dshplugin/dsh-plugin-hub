@@ -82,6 +82,13 @@ export declare function startPluginMutation(options: {
     installSpec?: string;
 }): InstallTask;
 /**
+ * 安装前把 profile 的 package.json 里的 UTF-8 BOM 去掉（原地重写，幂等）。
+ * BOM 留在文件里时，宿主 CLI 在解析依赖清单阶段就会抛
+ * `SyntaxError: Unexpected token '\uFEFF'` —— 还没开始装就已经失败，且报错看不出是谁的问题
+ * （见 #856 / #873）。返回是否真的改写过文件。
+ */
+export declare function stripBomFromProfileManifest(profile: string): boolean;
+/**
  * 安装成功后从 profile 的 `node_modules/<pkg>/package.json` 读**实际**版本；
  * 定位不到包名或读不到返回 null。客户端拿它写版本账本 —— 目录里的版本可能滞后。
  */
