@@ -26,6 +26,16 @@ test('OutputDecoder: GBK output (Chinese Windows) is decoded back to readable te
   assert.equal(d.push(gbk), '安装失败')
 })
 
+test('OutputDecoder: a GBK char split across chunks still decodes to readable text', () => {
+  const d = new OutputDecoder()
+  // GBK 编码的「安装」= B0 B2 D7 B0；首字节止于第一个 chunk 尾，
+  // 不得把两段各留成一个替换字符
+  const gbk = Buffer.from([0xb0, 0xb2, 0xd7, 0xb0])
+  const first = d.push(gbk.subarray(0, 1))
+  const second = d.push(gbk.subarray(1))
+  assert.equal(first + second, '安装')
+})
+
 test('OutputDecoder: plain ASCII stays ASCII', () => {
   const d = new OutputDecoder()
   assert.equal(d.push(Buffer.from('ERR_PNPM_FETCH_404\n')), 'ERR_PNPM_FETCH_404\n')
