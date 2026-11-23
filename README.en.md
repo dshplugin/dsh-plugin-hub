@@ -6,7 +6,7 @@
 
 # DSH Plugin Hub - Download & Install DeepSeek Harness Plugins
 
-**The community hub and directory for DeepSeek Harness (DSH) plugins: 23,000+ plugins indexed on the site, including 6,000+ published to npm that install in one click from the Plugin Hub (all hand-verified). Updated daily — browse, search, download and install by category, free and fully sourced.**
+**The community hub and directory for DeepSeek Harness (DSH) plugins: 27,000+ plugins indexed on the site, including 7,000+ published to npm that install in one click from the Plugin Hub (all hand-verified). Updated daily — browse, search, download and install by category, free and fully sourced.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -48,7 +48,7 @@ DSH Plugin Hub is a **community plugin marketplace for DeepSeek Harness**: an op
 
 **Rich catalog · human-curated**
 
-- Indexes **23,000+** community plugins on the site, **6,000+** of which ship an npm package and install in one click from the Plugin Hub; curated daily by [dsh-plugin.org](https://dsh-plugin.org), with every installable entry hand-verified
+- Indexes **27,000+** community plugins on the site, **7,000+** of which ship an npm package and install in one click from the Plugin Hub; curated daily by [dsh-plugin.org](https://dsh-plugin.org), with every installable entry hand-verified
 - Covers UI & experience, sessions & messages, memory & context, tooling and more — browse by category or search straight to it
 - Only verified plugins are listed; every card shows star / fork ratings, version and last-update time — fully sourced
 
@@ -116,7 +116,7 @@ Same data source as the hub — human-verified, updated daily · Browse every in
 
 ## Why DSH Plugin Hub
 
-The DSH Plugin Hub lists **6,000+** npm-installable DeepSeek Harness plugins (out of **23,000+** indexed on the site), all hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
+The DSH Plugin Hub lists **7,000+** npm-installable DeepSeek Harness plugins (out of **27,000+** indexed on the site), all hand-verified — updated daily, browse, search, download and install for free by category, fully sourced.
 
 ### Always Fresh
 

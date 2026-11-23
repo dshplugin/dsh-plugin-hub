@@ -6,7 +6,7 @@
 
 # DSH Plugin 插件市场 - DeepSeek Harness Plugin (DSH) 下载与安装 · 插件大全
 
-**DeepSeek Harness Plugin（DSH）插件市场与插件大全：主站收录 23,000+ 个插件，其中 6,000+ 个已发布 NPM 包、可在插件市场一键安装（均已人工精选验证）。每日更新，免费浏览、搜索并按分类发现、下载与安装 DSH 插件，来源可溯。**
+**DeepSeek Harness Plugin（DSH）插件市场与插件大全：主站收录 27,000+ 个插件，其中 7,000+ 个已发布 NPM 包、可在插件市场一键安装（均已人工精选验证）。每日更新，免费浏览、搜索并按分类发现、下载与安装 DSH 插件，来源可溯。**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![npm](https://img.shields.io/npm/v/dsh-plugin.svg?style=flat-square)](https://www.npmjs.com/package/dsh-plugin)
@@ -48,7 +48,7 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 **资源丰富 · 人工精选**
 
-- 主站收录 **23,000+** 个社区插件，其中 **6,000+** 个已发布 NPM 包、可在插件市场一键安装；目录由 [dsh-plugin.org](https://dsh-plugin.org) 每日收录，可安装条目均经人工审核
+- 主站收录 **27,000+** 个社区插件，其中 **7,000+** 个已发布 NPM 包、可在插件市场一键安装；目录由 [dsh-plugin.org](https://dsh-plugin.org) 每日收录，可安装条目均经人工审核
 - 涵盖界面与体验、会话与消息、记忆与上下文、工具能力等分类，按分类浏览、搜索直达
 - 市场只展示核验通过（verified）的插件，卡片标注 Star / Fork 评分、版本号与最近更新时间，来源可溯
 
@@ -116,7 +116,7 @@ DSH Plugin Hub 是 **DeepSeek Harness 社区插件市场**：一个遵循官方�
 
 ## 为什么选择 DSH Plugin Hub
 
-DSH Plugin 插件市场收录 **6,000+** 个可一键安装的 NPM 插件（主站共收录 **23,000+** 个 DSH 插件），均已人工精选验证，每日更新，免费按分类浏览、搜索、下载与安装，来源可溯。
+DSH Plugin 插件市场收录 **7,000+** 个可一键安装的 NPM 插件（主站共收录 **27,000+** 个 DSH 插件），均已人工精选验证，每日更新，免费按分类浏览、搜索、下载与安装，来源可溯。
 
 ### 及时更新
 
