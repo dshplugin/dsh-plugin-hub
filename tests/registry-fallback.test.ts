@@ -6,7 +6,7 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { isPublicRegistry, isTransportFailure, normalizeRegistry, registryCandidates, registryHost } from '../src/server/services/install/registry-fallback.ts'
+import { isPublicRegistry, isTransportFailure, normalizeRegistry, registryCandidates, registryHost, registryProtocol } from '../src/server/services/install/registry-fallback.ts'
 
 const OFFICIAL = 'https://registry.npmjs.org'
 const NPMMIRROR = 'https://registry.npmmirror.com'
@@ -88,4 +88,15 @@ test('isTransportFailure: 证书链不被信任时不换源（换哪个镜像都
 test('registryHost: 只取主机名用于日志', () => {
   assert.equal(registryHost('https://registry.npmmirror.com/'), 'registry.npmmirror.com')
   assert.equal(registryHost('not a url'), 'not a url')
+})
+
+test('registryProtocol: 只认 http / https，缺协议与其它协议返回 null', () => {
+  assert.equal(registryProtocol('https://registry.npmjs.org'), 'https')
+  assert.equal(registryProtocol('https://registry.npmmirror.com/'), 'https')
+  // 自建 / 内网源常见 http，也要认（此前会被 node:https 直接抛 Protocol 错误）
+  assert.equal(registryProtocol('http://registry.npmmirror.com'), 'http')
+  assert.equal(registryProtocol('http://192.168.1.10:4873'), 'http')
+  assert.equal(registryProtocol('registry.npmjs.org'), null)
+  assert.equal(registryProtocol('ftp://example.com/npm'), null)
+  assert.equal(registryProtocol(''), null)
 })

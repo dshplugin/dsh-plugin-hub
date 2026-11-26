@@ -9,9 +9,11 @@
  * 这是通用机制，不针对任何具体插件：只要作者发布了 repository 指向该
  * GitHub 仓库的 npm 包（scope 名与 GitHub 用户名是否一致无所谓），就能命中。
  */
-import { get } from 'node:https'
+import { get as httpGet } from 'node:http'
+import { get as httpsGet } from 'node:https'
 import { githubRepoOf } from '../profile/profile.ts'
 import { finalUrl } from '../probe.ts'
+import { registryProtocol } from './registry-fallback.ts'
 
 /** 单次 registry 查询超时（ms）：慢网络下失败返回 false，不阻塞安装流程。 */
 const REQUEST_TIMEOUT_MS = 8000
@@ -57,6 +59,11 @@ export function isDshNpmPackageForRepo(packageName: string, repo: string, regist
   if (packageName === '' || repo === '') return Promise.resolve(false)
   const base = registry === '' ? 'https://registry.npmjs.org' : registry.replace(/\/+$/, '')
   const url = `${base}/${npmMetadataPath(packageName, version)}`
+  // registry 允许 http（自建 / 内网源常见），按协议选 http / https 模块；
+  // 协议非法时不发请求，避免 node:https 抛 `Protocol "http:" not supported`（#930）。
+  const protocol = registryProtocol(url)
+  if (protocol === null) return Promise.resolve(false)
+  const get = protocol === 'http' ? httpGet : httpsGet
   return new Promise((resolve) => {
     const req = get(url, { timeout: REQUEST_TIMEOUT_MS }, (res) => {
       if (res.statusCode !== 200) {

@@ -1,5 +1,11 @@
 /** 去掉尾部斜杠，避免同一源因写法不同被当成两个候选。 */
 export declare function normalizeRegistry(value: string): string;
+/**
+ * registry 地址的协议：只接受 http / https。
+ * 缺协议（`registry.npmjs.org`）或其它协议（ftp: 等）返回 null —— 调用方据此给出
+ * 可读错误，而不是让 node:https 抛 `Protocol "http:" not supported`（见 #930）。
+ */
+export declare function registryProtocol(value: string): 'http' | 'https' | null;
 /** 是否属于允许自动切换的公共源白名单。 */
 export declare function isPublicRegistry(value: string): boolean;
 /**

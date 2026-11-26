@@ -11,7 +11,7 @@ import { recordResolvedNpmPackage } from '../services/profile/installed-versions
 import { isDshNpmPackageForRepo } from '../services/install/npm-resolve.ts'
 import { probeUrl, systemProxy } from '../services/probe.ts'
 import { loadSettings, type HubSettings } from '../services/settings.ts'
-import { registryCandidates, registryHost, userNpmRegistry } from '../services/install/registry-fallback.ts'
+import { registryCandidates, registryHost, registryProtocol, userNpmRegistry } from '../services/install/registry-fallback.ts'
 import { lookupReleaseAge } from '../services/npm-release-age.ts'
 import { profileDirectory } from '../services/profile/profile.ts'
 import { readInstalled } from './catalog.ts'
@@ -162,6 +162,16 @@ export function registerInstallRoutes(webServer: WebServerService, profile: stri
           // 全部不通则 400 拦下并打 [network] 标记，客户端据此提示网络问题，而非插件问题。
           let ordered = registries
           if (already === null) {
+            // 源地址必须带 http(s) 协议：缺协议或其它协议时直接给出可读错误，
+            // 而不是让后续请求抛出 `Protocol "http:" not supported` 这类底层报错。
+            const invalidRegistry = registries.find((r) => registryProtocol(r) === null)
+            if (invalidRegistry !== undefined) {
+              const error = lang === 'zh'
+                ? `[registry] 安装已中止：npm 源地址无效（${invalidRegistry}）。请在「设置 → NPM 源」中填写以 http:// 或 https:// 开头的完整地址，例如 https://registry.npmjs.org。`
+                : `[registry] install aborted: invalid npm registry URL (${invalidRegistry}). Set a full URL starting with http:// or https:// in Settings → npm registry, for example https://registry.npmjs.org.`
+              sendJson(response, 400, { error, attempts })
+              return
+            }
             const tried: string[] = []
             let chosen: string | null = null
             for (const candidate of registries) {

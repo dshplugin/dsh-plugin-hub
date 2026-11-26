@@ -8,9 +8,11 @@
  * 因此发布还不满 24 小时的版本不该提示更新（否则用户点了也装不上）。
  * 结果按包名内存缓存，同一次会话内不重复请求；失败/超时/响应过大一律返回 null，绝不抛错、绝不阻塞。
  */
+import { get as httpGet } from 'node:http'
 import { get as httpsGet } from 'node:https'
 import { validPackageName } from './profile/profile.ts'
 import { fetchViaCurl } from './probe.ts'
+import { registryProtocol } from './install/registry-fallback.ts'
 
 export interface NpmRelease {
   version: string
@@ -95,12 +97,15 @@ export function parseReleaseAgeRequest(body: unknown): string[] | null {
   return [...names]
 }
 
-/** node:https 直连 GET，仅接受 200；超时/超限/网络失败返回 null。 */
+/** 按协议直连 GET（registry 允许 http），仅接受 200；协议非法/超时/超限/网络失败返回 null。 */
 function getJson(url: string, timeoutMs: number): Promise<string | null> {
+  const protocol = registryProtocol(url)
+  if (protocol === null) return Promise.resolve(null)
+  const get = protocol === 'http' ? httpGet : httpsGet
   return new Promise((resolve) => {
     let done = false
     const finish = (value: string | null) => { if (!done) { done = true; resolve(value) } }
-    const req = httpsGet(url, { timeout: timeoutMs, headers: { accept: 'application/json' } }, (res) => {
+    const req = get(url, { timeout: timeoutMs, headers: { accept: 'application/json' } }, (res) => {
       if (res.statusCode !== 200) { res.resume(); finish(null); return }
       const declared = Number(res.headers['content-length'])
       if (Number.isFinite(declared) && declared > MAX_PACKUMENT_BYTES) { res.destroy(); finish(null); return }
